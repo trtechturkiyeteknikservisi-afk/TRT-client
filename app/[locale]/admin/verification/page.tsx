@@ -29,6 +29,8 @@ const VerificationAdmin = () => {
     const tHeader = useTranslations('Admin');
     const [leads, setLeads] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
     const [showSettings, setShowSettings] = useState(false);
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const [settings, setSettings] = useState({
@@ -39,24 +41,29 @@ const VerificationAdmin = () => {
     const [uploading, setUploading] = useState(false);
 
     useEffect(() => {
-        fetchLeads();
+        fetchLeads(currentPage);
         fetchSettings();
-    }, []);
+    }, [currentPage]);
 
-    const fetchLeads = async () => {
+    const fetchLeads = async (page: number) => {
+        setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get(API_BASE, { 
+            const res = await axios.get(`${API_BASE}?page=${page}&limit=10`, { 
                 headers: { Authorization: `Bearer ${token}` } 
             });
-            setLeads(res.data as any[]);
+            const { data, totalPages } = res.data as any;
+            setLeads(data);
+            setTotalPages(totalPages);
         } catch (err) {
             console.error('Error fetching leads:', err);
         } finally {
             setLoading(false);
         }
     };
-
+// ... rest of the functions (handleDelete, handleSaveSettings, etc.) stay the same
+// I will only replace the body of the component below in the next chunk if needed or replace the whole file content carefully.
+// Re-adding the functions to avoid breaking the file
     const fetchSettings = async () => {
         try {
             const token = localStorage.getItem('token');
@@ -367,6 +374,31 @@ const VerificationAdmin = () => {
                         </tbody>
                     </table>
                 </div>
+
+                {/* Pagination UI */}
+                {totalPages > 1 && (
+                    <div className="px-8 py-6 bg-muted/20 border-t border-border/30 flex items-center justify-between">
+                        <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+                            {t('page')} {currentPage} / {totalPages}
+                        </p>
+                        <div className="flex items-center gap-2">
+                            <button 
+                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                disabled={currentPage === 1 || loading}
+                                className="px-4 py-2 rounded-xl bg-card border border-border/50 text-xs font-black uppercase tracking-widest hover:bg-muted transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                            >
+                                {t('prev')}
+                            </button>
+                            <button 
+                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                disabled={currentPage === totalPages || loading}
+                                className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-black uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-primary/20"
+                            >
+                                {t('next')}
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

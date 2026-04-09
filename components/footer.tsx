@@ -38,7 +38,7 @@ export function Footer() {
         { name: t('merchants'), href: '#', soon: true },
         { name: t('track_shipment'), href: '#', soon: true },
         { name: t('faqs'), href: '#faqs' },
-        { name: t('sitemap'), href: '/sitemap.xml' },
+        // { name: t('sitemap'), href: '/sitemap.xml' },
       ],
     },
   ];
@@ -59,7 +59,7 @@ export function Footer() {
             <p className="text-lg text-muted-foreground leading-relaxed font-semibold">
               {t('description')}
             </p>
-            <div className="flex gap-4">
+            {/* <div className="flex gap-4">
               {socialLinks.map((social) => (
                 <a
                   key={social.label}
@@ -70,7 +70,7 @@ export function Footer() {
                   <social.icon size={22} />
                 </a>
               ))}
-            </div>
+            </div> */}
           </div>
 
           {footerLinks.map((column) => (

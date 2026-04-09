@@ -258,8 +258,10 @@
     "save": "Değişiklikleri Kaydet",
     "saved": "Başarıyla kaydedildi",
     "password_mismatch": "Şifreler uyuşmuyor",
+    "back_to_site": "Siteye Dön",
     "admin_fallback": "Yönetici",
     "admin_role": "Süper Yönetici",
+    "employee_role": "Personel",
     "toggle_theme": "Karanlık Mod",
     "new_password": "Yeni Şifre",
     "confirm_password": "Şifreyi Onayla",
@@ -284,7 +286,18 @@
     "status_active": "Aktif",
     "status_inactive": "Pasif",
     "pause_banner": "Afişi Duraklat",
-    "activate_banner": "Afişi Etkinleştir"
+    "activate_banner": "Afişi Etkinleştir",
+    "support_contact": "Destek İletişim Bilgileri",
+    "whatsapp_label": "WhatsApp Numarası (Linkler için)",
+    "support_phone_label": "Destek Telefonu (Görünüm)",
+    "support_email_label": "Destek E-postası",
+    "news_bar_management": "Haber Çubuğu Yönetimi",
+    "news_items_label": "Haber Öğeleri",
+    "add_news": "Haber Ekle +",
+    "news_placeholder": "Haber içeriğini buraya girin...",
+    "no_news_items": "Bu dil için haber öğesi eklenmedi.",
+    "account_settings": "Hesap Ayarları",
+    "username_label": "Kullanıcı Adı"
   },
   "VerificationAdmin": {
     "desc": "Resmi belge taleplerini ve aday müşteri otomasyonunu yönetin",
@@ -312,7 +325,10 @@
     "upload_success": "Dosya yüklendi ve yol güncellendi!",
     "delete_error": "Aday silinirken hata oluştu",
     "save_error": "Ayarlar kaydedilirken hata oluştu",
-    "upload_error": "Dosya yüklenirken hata oluştu"
+    "upload_error": "Dosya yüklenirken hata oluştu",
+    "page": "Sayfa",
+    "next": "Sonraki",
+    "prev": "Önceki"
   },
   "RepairProcess": {
     "title": "Cihazınız Arızalı mı?",
@@ -340,12 +356,15 @@
   },
   "Trust": {
     "badge_label": "TRT Güvencesi",
-    "expert_team": "Alanında Uzman Teknik Ekip",
+    "expert_team": "Sertifikalı ve Eğitimli Uzman Ekip",
     "expert_team_desc": "Tüm teknisyenlerimiz profesyonel eğitim almış, deneyimli ve sertifikalı uzmanlardan oluşmaktadır. Yılların verdiği tecrübe ile cihazlarınızı güvenle onarıyoruz.",
     "warranty": "3 Ay Servis Garantisi",
     "warranty_desc": "Yapılan onarım işlemleri 3 ay garanti kapsamındadır. Garanti süresi boyunca ücretsiz kontrol sağlanır.",
     "secure_process": "Güvenli İşlem ve Şeffaflık",
-    "secure_process_desc": "Cihazınız incelenmeden ödeme yapmazsınız. Onayınız olmadan işlem yapılmaz."
+    "secure_process_desc": "Cihazınız incelenmeden ödeme yapmazsınız. Onayınız olmadan işlem yapılmaz.",
+    "since_2002": "2002'den beri hizmetinizdeyiz",
+    "experience_25": "25 yılı aşkın tecrübe",
+    "no_payment": "İnceleme öncesi ödeme alınmaz. Onayınız olmadan işlem yapılmaz."
   },
   "Verification": {
     "title": "Resmi Belgenizi Alın",

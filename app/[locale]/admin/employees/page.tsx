@@ -21,6 +21,8 @@ const PERMISSIONS = [
   { id: 'MANAGE_USERS', label: 'Manage Employees' },
 ];
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
 export default function EmployeesPage() {
   const t = useTranslations('Admin');
   
@@ -44,7 +46,7 @@ export default function EmployeesPage() {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch('/api/users', {
+      const res = await fetch(`${API_BASE}/users`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -96,7 +98,7 @@ export default function EmployeesPage() {
     setFormLoading(true);
 
     try {
-      const url = editingId ? `/api/users/${editingId}` : '/api/users';
+      const url = editingId ? `${API_BASE}/users/${editingId}` : `${API_BASE}/users`;
       const method = editingId ? 'PUT' : 'POST';
       
       const body: any = {
@@ -139,7 +141,7 @@ export default function EmployeesPage() {
     if (!confirm('Are you sure you want to delete this employee?')) return;
 
     try {
-      const res = await fetch(`/api/users/${id}`, {
+      const res = await fetch(`${API_BASE}/users/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

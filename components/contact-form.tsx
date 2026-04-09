@@ -34,26 +34,42 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false }:
   useEffect(() => {
     // Auto-detect city via IP
     const autoDetectCity = async () => {
-      try {
-        const res = await axios.get<{ city?: string }>('https://ip-api.com/json/');
-        if (res.data && res.data.city) {
-          const city = res.data.city;
-          const lowerCity = city.toLowerCase();
-          let cityValue = '';
-          if (lowerCity.includes('bursa')) cityValue = 'Bursa';
-          else if (lowerCity.includes('istanbul')) cityValue = 'Istanbul';
-          else if (lowerCity.includes('ankara')) cityValue = 'Ankara';
-          else if (lowerCity.includes('izmir')) cityValue = 'Izmir';
-          else if (lowerCity.includes('antalya')) cityValue = 'Antalya';
+      const services = [
+        'https://ip-api.com/json/',
+        'https://ipapi.co/json/',
+        'https://api.ipify.org?format=json' // Only IP, but useful for other tools
+      ];
+
+      for (const service of services) {
+        try {
+          const res = await axios.get(service);
+          let detectedCity = '';
           
-          if (cityValue) {
-            setFormData(prev => ({ ...prev, city: cityValue }));
-          } else {
-            setFormData(prev => ({ ...prev, city: 'Other', address: city }));
+          if (service.includes('ip-api') && res.data?.city) {
+            detectedCity = res.data.city;
+          } else if (service.includes('ipapi.co') && res.data?.city) {
+            detectedCity = res.data.city;
           }
+
+          if (detectedCity) {
+            const lowerCity = detectedCity.toLowerCase();
+            let cityValue = '';
+            if (lowerCity.includes('bursa')) cityValue = 'Bursa';
+            else if (lowerCity.includes('istanbul')) cityValue = 'Istanbul';
+            else if (lowerCity.includes('ankara')) cityValue = 'Ankara';
+            else if (lowerCity.includes('izmir')) cityValue = 'Izmir';
+            else if (lowerCity.includes('antalya')) cityValue = 'Antalya';
+            
+            if (cityValue) {
+              setFormData(prev => ({ ...prev, city: cityValue }));
+            } else {
+              setFormData(prev => ({ ...prev, city: 'Other', address: detectedCity }));
+            }
+            break; // النجاح في الحصول على المدينة، توقف عن المحاولة
+          }
+        } catch (error) {
+          console.warn(`City detection failed for ${service}, trying next...`);
         }
-      } catch (error) {
-        console.error("Auto city detection failed", error);
       }
     };
     autoDetectCity();

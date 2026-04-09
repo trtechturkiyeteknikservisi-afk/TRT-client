@@ -139,18 +139,27 @@ export function Header() {
 
             {/* Language Switcher */}
             <div className="flex items-center bg-muted/50 rounded-xl p-1 border border-border">
-              {['en', 'ar', 'tr'].map((l) => (
+              {[
+                { code: 'en', flag: 'gb' },
+                { code: 'ar', flag: 'sa' },
+                { code: 'tr', flag: 'tr' }
+              ].map((l) => (
                 <button
-                  key={l}
-                  onClick={() => handleLanguageChange(l)}
+                  key={l.code}
+                  onClick={() => handleLanguageChange(l.code)}
                   className={cn(
-                    "px-2.5 py-1 rounded-lg text-xs font-bold transition-all uppercase whitespace-nowrap",
-                    locale === l 
-                      ? "bg-background text-primary shadow-sm" 
+                    "px-2 py-1 rounded-lg text-[10px] font-extrabold transition-all uppercase whitespace-nowrap flex items-center gap-1.5",
+                    locale === l.code 
+                      ? "bg-background text-primary shadow-sm ring-1 ring-border/50" 
                       : "text-muted-foreground hover:bg-muted"
                   )}
                 >
-                  {l}
+                  <img 
+                    src={`https://flagcdn.com/w40/${l.flag}.png`} 
+                    alt={l.code}
+                    className="w-4 h-4 rounded-full object-cover border border-border/50 shadow-sm"
+                  />
+                  <span>{l.code}</span>
                 </button>
               ))}
             </div>

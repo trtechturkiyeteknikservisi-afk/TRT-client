@@ -155,13 +155,13 @@ export default function SettingsPage() {
                     <div className="w-10 h-10 bg-green-500/10 text-green-600 rounded-xl flex items-center justify-center">
                         <MessageCircle size={20} />
                     </div>
-                    <h3 className="text-lg font-black tracking-tight uppercase">Support Contact</h3>
+                    <h3 className="text-lg font-black tracking-tight uppercase">{t('support_contact')}</h3>
                </div>
 
                <div className="space-y-4">
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-1">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 mb-1 block">WhatsApp Number (Links)</label>
+                          <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 mb-1 block">{t('whatsapp_label')}</label>
                           <div className="relative">
                               <MessageCircle className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
                               <input
@@ -174,7 +174,7 @@ export default function SettingsPage() {
                       </div>
 
                       <div className="space-y-1">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 mb-1 block">Support Phone (Display)</label>
+                          <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 mb-1 block">{t('support_phone_label')}</label>
                           <div className="relative">
                               <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
                               <input
@@ -187,7 +187,7 @@ export default function SettingsPage() {
                       </div>
 
                       <div className="space-y-1 md:col-span-2">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 mb-1 block">Support Email</label>
+                          <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 mb-1 block">{t('support_email_label')}</label>
                           <div className="relative">
                               <Save className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
                               <input
@@ -201,43 +201,72 @@ export default function SettingsPage() {
                   </div>
 
                   {/* News Bar Management */}
-                  <div className="pt-6 border-t space-y-4">
-                      <div className="flex items-center space-x-2 text-primary">
-                          <Settings size={16} />
-                          <h4 className="text-xs font-black uppercase tracking-widest">News Bar Content</h4>
-                      </div>
-                      <div className="grid grid-cols-1 gap-4">
-                          <div className="space-y-1">
-                              <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 mb-1 block">News Bar (Arabic)</label>
-                              <input
-                                value={settingsForm.news_bar_ar}
-                                onChange={(e) => setSettingsForm((prev) => ({ ...prev, news_bar_ar: e.target.value }))}
-                                placeholder="قريباً.. خدمة طلب المصلح للمنزل"
-                                className="w-full px-4 py-3 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
-                                dir="rtl"
-                              />
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div className="space-y-1">
-                                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 mb-1 block">News Bar (English)</label>
-                                  <input
-                                    value={settingsForm.news_bar_en}
-                                    onChange={(e) => setSettingsForm((prev) => ({ ...prev, news_bar_en: e.target.value }))}
-                                    placeholder="Coming soon... Pick up & Drop off service"
-                                    className="w-full px-4 py-3 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
-                                  />
-                              </div>
-                              <div className="space-y-1">
-                                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 mb-1 block">News Bar (Turkish)</label>
-                                  <input
-                                    value={settingsForm.news_bar_tr}
-                                    onChange={(e) => setSettingsForm((prev) => ({ ...prev, news_bar_tr: e.target.value }))}
-                                    placeholder="Yakında... Kapıdan kapıya servis"
-                                    className="w-full px-4 py-3 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
-                                  />
-                              </div>
+                  <div className="pt-6 border-t space-y-6">
+                      <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2 text-primary">
+                              <Settings size={16} />
+                              <h4 className="text-xs font-black uppercase tracking-widest">{t('news_bar_management')}</h4>
                           </div>
                       </div>
+
+                      {['ar', 'en', 'tr'].map((lang) => (
+                          <div key={lang} className="space-y-3 p-4 bg-muted/30 rounded-2xl border border-border/50">
+                              <div className="flex items-center justify-between mb-2">
+                                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                                      {t('news_items_label')} ({lang.toUpperCase()})
+                                  </label>
+                                  <button
+                                      type="button"
+                                      onClick={() => {
+                                          const key = `news_bar_${lang}` as keyof typeof settingsForm;
+                                          const current = String(settingsForm[key] || '');
+                                          setSettingsForm(prev => ({ 
+                                              ...prev, 
+                                              [key]: current ? current + '\nNew Item' : 'New Item' 
+                                          }));
+                                      }}
+                                      className="text-[10px] font-black uppercase bg-primary/10 text-primary px-3 py-1.5 rounded-lg hover:bg-primary/20 transition-colors"
+                                  >
+                                      {t('add_news')}
+                                  </button>
+                              </div>
+                              
+                              <div className="space-y-2">
+                                  {(String(settingsForm[`news_bar_${lang}` as keyof typeof settingsForm] || '')).split('\n').filter(i => i.trim() || i === '').map((item, idx, arr) => (
+                                      <div key={idx} className="flex items-center gap-2">
+                                          <div className="flex-1 relative">
+                                              <input
+                                                  value={item}
+                                                  onChange={(e) => {
+                                                      const key = `news_bar_${lang}` as keyof typeof settingsForm;
+                                                      const newArr = [...arr];
+                                                      newArr[idx] = e.target.value;
+                                                      setSettingsForm(prev => ({ ...prev, [key]: newArr.join('\n') }));
+                                                  }}
+                                                  placeholder={t('news_placeholder')}
+                                                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                                                  dir={lang === 'ar' ? 'rtl' : 'ltr'}
+                                              />
+                                          </div>
+                                          <button
+                                              type="button"
+                                              onClick={() => {
+                                                  const key = `news_bar_${lang}` as keyof typeof settingsForm;
+                                                  const newArr = arr.filter((_, i) => i !== idx);
+                                                  setSettingsForm(prev => ({ ...prev, [key]: newArr.join('\n') }));
+                                              }}
+                                              className="p-2.5 text-red-500 hover:bg-red-500/10 rounded-xl transition-colors"
+                                          >
+                                              <Save size={14} className="rotate-45" /> {/* Use as close icon */}
+                                          </button>
+                                      </div>
+                                  ))}
+                                  {(String(settingsForm[`news_bar_${lang}` as keyof typeof settingsForm] || '')).split('\n').filter(i => i.trim()).length === 0 && (
+                                      <p className="text-[10px] text-muted-foreground italic text-center py-2">{t('no_news_items')}</p>
+                                  )}
+                              </div>
+                          </div>
+                      ))}
                   </div>
                </div>
           </div>
@@ -247,12 +276,12 @@ export default function SettingsPage() {
                     <div className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
                         <Lock size={20} />
                     </div>
-                    <h3 className="text-lg font-black tracking-tight uppercase">{t('menu_settings')}</h3>
+                    <h3 className="text-lg font-black tracking-tight uppercase">{t('account_settings')}</h3>
                </div>
 
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1 md:col-span-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 mb-1 block">Username</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 mb-1 block">{t('username_label')}</label>
                         <div className="relative">
                             <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
                             <input

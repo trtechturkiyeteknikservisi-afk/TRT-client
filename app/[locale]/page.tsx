@@ -44,9 +44,9 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       <div className="bg-muted/30">
         <Portfolio />
       </div>
+      <Contact />
       <Reviews />
       <FAQ />
-      <Contact />
       <Footer />
     </main>
   );

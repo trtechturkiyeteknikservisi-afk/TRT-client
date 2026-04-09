@@ -49,24 +49,47 @@ export default function PortfolioPage() {
     const token = localStorage.getItem('token');
     setActionLoading(true);
     try {
-      const formData = new FormData();
-      formData.append('title_en', uploadForm.title_en);
-      formData.append('title_tr', uploadForm.title_tr);
-      formData.append('title_ar', uploadForm.title_ar);
-      formData.append('description_en', uploadForm.description_en);
-      formData.append('description_tr', uploadForm.description_tr);
-      formData.append('description_ar', uploadForm.description_ar);
-      formData.append('type', uploadForm.type);
-      
+      let finalUrl = uploadForm.url;
+
+      // 1. Upload file if selected
       if (selectedFile) {
-        formData.append('file', selectedFile);
-      } else if (uploadForm.url) {
-        formData.append('url', uploadForm.url);
+        const formData = new FormData();
+        formData.append('image', selectedFile);
+        const uploadRes = await axios.post(`${API_BASE}/upload`, formData, {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        finalUrl = (uploadRes.data as any).url;
       }
 
-      await axios.post(`${API_BASE}/content/portfolio`, formData, {
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
+      if (!finalUrl) {
+        alert('Please provide a file or a direct URL');
+        setActionLoading(false);
+        return;
+      }
+
+      // 2. Prepare JSON data
+      const payload = {
+        title_en: uploadForm.title_en,
+        title_tr: uploadForm.title_tr,
+        title_ar: uploadForm.title_ar,
+        description_en: uploadForm.description_en,
+        description_tr: uploadForm.description_tr,
+        description_ar: uploadForm.description_ar,
+        type: uploadForm.type,
+        url: finalUrl
+      };
+
+      // 3. Post to portfolio endpoint
+      await axios.post(`${API_BASE}/content/portfolio`, payload, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
+
       setUploadForm({ 
         title_en: '', title_tr: '', title_ar: '',
         description_en: '', description_tr: '', description_ar: '',
@@ -76,6 +99,7 @@ export default function PortfolioPage() {
       fetchData();
     } catch (err) {
       console.error('Error uploading to portfolio', err);
+      alert('Failed to save work. Please check the console for details.');
     } finally {
       setActionLoading(false);
     }

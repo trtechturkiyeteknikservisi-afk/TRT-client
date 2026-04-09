@@ -44,6 +44,8 @@ export function NewsBar() {
 
   if (!isVisible) return null;
 
+  const newsItems = news.split('\n').filter(item => item.trim());
+
   return (
     <div className="bg-primary text-primary-foreground py-2.5 overflow-hidden relative border-b border-white/10 shadow-lg z-[200]">
       {/* Glossy Overlay */}
@@ -64,22 +66,41 @@ export function NewsBar() {
             initial={{ x: "100%" }}
             animate={{ x: "-100%" }}
             transition={{
-              duration: 25,
+              duration: 20, // أسرع لتناسب الجوال والشاشات المختلفة
               repeat: Infinity,
               ease: "linear",
             }}
             className="whitespace-nowrap flex items-center gap-20"
           >
-            <span className="text-xs sm:text-sm font-bold uppercase tracking-wide">
-              {news}
-            </span>
-            {/* Duplicate for seamless scroll */}
-            <span className="text-xs sm:text-sm font-bold uppercase tracking-wide">
-              {news}
-            </span>
-            <span className="text-xs sm:text-sm font-bold uppercase tracking-wide">
-              {news}
-            </span>
+            {/* عرض قائمة الأخبار */}
+            {newsItems.map((item, idx) => (
+              <React.Fragment key={idx}>
+                <span className="text-xs sm:text-sm font-bold uppercase tracking-wide flex items-center gap-3">
+                  {item}
+                  {newsItems.length > 1 && (
+                    <span className="relative flex h-2 w-2 items-center justify-center">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                    </span>
+                  )}
+                </span>
+              </React.Fragment>
+            ))}
+            
+            {/* التكرار لضمان حركة مستمرة سلسة */}
+            {newsItems.map((item, idx) => (
+              <React.Fragment key={`rep-${idx}`}>
+                <span className="text-xs sm:text-sm font-bold uppercase tracking-wide flex items-center gap-3">
+                  {item}
+                  {newsItems.length > 1 && (
+                    <span className="relative flex h-2 w-2 items-center justify-center">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                    </span>
+                  )}
+                </span>
+              </React.Fragment>
+            ))}
           </motion.div>
         </div>
       </div>

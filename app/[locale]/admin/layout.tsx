@@ -74,13 +74,12 @@ export default function AdminLayout({
     return user?.permissions?.includes(item.permission);
   });
 
-  // Fallback for safety during development
-  if (menuItems.length === 0 && !pathname.includes('/login')) {
-    menuItems.push(...rawMenuItems.slice(0, 3));
-  }
-
   if (canManageUsers) {
-    menuItems.splice(1, 0, { id: 'employees', href: '/admin/employees', name: t('menu_employees') || 'Employees', icon: UserIcon, permission: 'MANAGE_USERS' } as any);
+    const employeesItem = { id: 'employees', href: '/admin/employees', name: t('menu_employees') || 'Employees', icon: UserIcon, permission: 'MANAGE_USERS' };
+    // Add employees item after analytics (index 1) if not already exists in filtered list
+    if (!menuItems.find(m => m.id === 'employees')) {
+      menuItems.splice(1, 0, employeesItem as any);
+    }
   }
 
   // Helper to determine if a menu item is active
@@ -147,19 +146,30 @@ export default function AdminLayout({
             </button>
           </div>
           
-          <div className="mt-6 relative group">
-            <select
-              value={locale}
-              onChange={(e) => handleLocaleChange(e.target.value)}
-              className="w-full pl-3 pr-8 py-2 rounded-xl border border-border/50 bg-muted/30 outline-none focus:border-primary transition-all font-black text-[10px] uppercase tracking-widest cursor-pointer appearance-none"
-            >
-              <option value="tr">TR</option>
-              <option value="en">EN</option>
-              <option value="ar">AR</option>
-            </select>
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground group-hover:text-primary transition-colors">
-              <Settings size={12} className="animate-spin-slow" />
-            </div>
+          <div className="mt-6 flex items-center justify-center bg-muted/30 rounded-xl p-1 border border-border/50 overflow-hidden">
+            {[
+              { code: 'en', flag: 'gb' },
+              { code: 'ar', flag: 'sa' },
+              { code: 'tr', flag: 'tr' }
+            ].map((l) => (
+              <button
+                key={l.code}
+                onClick={() => handleLocaleChange(l.code)}
+                className={cn(
+                  "flex-1 px-2 py-1.5 rounded-lg text-[10px] font-black transition-all uppercase whitespace-nowrap flex items-center justify-center gap-1.5",
+                  locale === l.code 
+                    ? "bg-card text-primary shadow-sm ring-1 ring-border/50" 
+                    : "text-muted-foreground hover:bg-muted/50"
+                )}
+              >
+                <img 
+                  src={`https://flagcdn.com/w40/${l.flag}.png`} 
+                  alt={l.code}
+                  className="w-3.5 h-3.5 rounded-full object-cover border border-border/50 shadow-sm"
+                />
+                <span>{l.code}</span>
+              </button>
+            ))}
           </div>
         </div>
         
@@ -196,6 +206,16 @@ export default function AdminLayout({
               </Link>
              );
           })}
+
+          <div className="pt-4 mt-4 border-t border-border/10">
+            <Link
+              href="/"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-black text-[11px] text-primary bg-primary/5 hover:bg-primary hover:text-white transition-all duration-300 uppercase tracking-widest group shadow-sm border border-primary/10"
+            >
+              <LogOut className={cn("w-4 h-4 transition-transform group-hover:-translate-x-1", locale === 'ar' ? 'rotate-180 group-hover:translate-x-1' : '')} />
+              <span>{t('back_to_site')}</span>
+            </Link>
+          </div>
         </nav>
 
         <div className="p-5 border-t border-border/30 bg-muted/5 space-y-3">
@@ -205,7 +225,9 @@ export default function AdminLayout({
             </div>
             <div className="flex-grow overflow-hidden">
               <p className="text-xs font-black truncate uppercase tracking-tight">{user?.username || t('admin_fallback')}</p>
-              <p className="text-[9px] font-bold text-primary uppercase tracking-[0.1em]">{t('admin_role')}</p>
+              <p className="text-[9px] font-bold text-primary uppercase tracking-[0.1em]">
+                {user?.role === 'admin' ? t('admin_role') : (t('employee_role') || 'Staff')}
+              </p>
             </div>
           </div>
           

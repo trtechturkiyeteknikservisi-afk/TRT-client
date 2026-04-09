@@ -94,7 +94,7 @@ export function Contact() {
             </div>
 
             {/* Quick Contact Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="grid grid-cols-2  gap-1 md:gap-6">
               {[
                 { 
                   icon: Phone, 
@@ -109,7 +109,7 @@ export function Contact() {
                   label: t('whatsapp_label'), 
                   value: t('whatsapp_cta'), 
                   color: 'green-500',
-                  link: `https://wa.me/${settings.whatsapp}`,
+                  link: `https://wa.me/${settings.whatsapp.replace(/\D/g, '')}`,
                   isWa: true
                 },
                 { 

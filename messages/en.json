@@ -258,8 +258,10 @@
     "save": "Save Changes",
     "saved": "Saved successfully",
     "password_mismatch": "Passwords do not match",
+    "back_to_site": "Back to Site",
     "admin_fallback": "Admin",
     "admin_role": "Super Administrator",
+    "employee_role": "Employee",
     "toggle_theme": "Toggle Dark Mode",
     "new_password": "New Password",
     "confirm_password": "Confirm Password",
@@ -284,7 +286,18 @@
     "status_active": "Active",
     "status_inactive": "Inactive",
     "pause_banner": "Pause Banner",
-    "activate_banner": "Activate Banner"
+    "activate_banner": "Activate Banner",
+    "support_contact": "Support Contact Info",
+    "whatsapp_label": "WhatsApp Number (Links)",
+    "support_phone_label": "Support Phone (Display)",
+    "support_email_label": "Support Email",
+    "news_bar_management": "News Bar Management",
+    "news_items_label": "News Items",
+    "add_news": "Add News +",
+    "news_placeholder": "Enter news content here...",
+    "no_news_items": "No news items added for this language.",
+    "account_settings": "Account Settings",
+    "username_label": "Username"
   },
   "VerificationAdmin": {
     "desc": "Manage official document requests and lead automation",
@@ -311,7 +324,10 @@
     "upload_success": "File uploaded and path updated!",
     "delete_error": "Error deleting lead",
     "save_error": "Error saving settings",
-    "upload_error": "Error uploading file"
+    "upload_error": "Error uploading file",
+    "page": "Page",
+    "next": "Next",
+    "prev": "Prev"
   },
   "RepairProcess": {
     "title": "Is Your Device Faulty?",
@@ -339,12 +355,15 @@
   },
   "Trust": {
     "badge_label": "TRT Guarantee",
-    "expert_team": "Expert Technical Team",
-    "expert_team_desc": "All our technicians are professionally trained, experienced, and certified experts. We repair your devices safely with years of experience.",
+    "expert_team": "Certified & Trained Expert Team",
+    "expert_team_desc": "All our technicians consist of professionally trained, experienced and certified experts. We repair your devices with confidence with the experience of years.",
     "warranty": "3 Months Warranty",
     "warranty_desc": "Repairs are covered by a 3-month warranty. Free inspection is provided during the warranty period.",
     "secure_process": "Secure Operations",
-    "secure_process_desc": "You do not pay before your device is inspected. No action is taken without your approval."
+    "secure_process_desc": "You do not pay before your device is inspected. No action is taken without your approval.",
+    "since_2002": "At your service since 2002",
+    "experience_25": "Over 25 years of experience",
+    "no_payment": "No payment before inspection. No action without your approval."
   },
   "Verification": {
     "title": "Get Your Official Document",

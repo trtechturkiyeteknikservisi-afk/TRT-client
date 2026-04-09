@@ -9,6 +9,7 @@ import { StickyContact } from "@/components/sticky-contact";
 import { NewsBar } from "@/components/news-bar";
 import { TopTrustBar } from "@/components/top-trust-bar";
 import { HideOnAdmin } from "@/components/hide-on-admin";
+import { ScrollToTop } from "@/components/scroll-to-top";
 
 const almarai = Almarai({
   subsets: ["arabic"],
@@ -99,9 +100,10 @@ export default async function RootLayout(props: {
             </HideOnAdmin>
             {children}
             <HideOnAdmin>
+              <ScrollToTop />
               <StickyContact />
               <a
-                href={`https://wa.me/${whatsappNumber}`}
+                href={`https://wa.me/${whatsappNumber.replace(/\D/g, '')}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="WhatsApp"
