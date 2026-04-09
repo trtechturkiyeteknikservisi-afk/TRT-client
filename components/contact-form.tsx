@@ -43,12 +43,13 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false }:
       for (const service of services) {
         try {
           const res = await axios.get(service);
+          const data = res.data as any;
           let detectedCity = '';
           
-          if (service.includes('ip-api') && res.data?.city) {
-            detectedCity = res.data.city;
-          } else if (service.includes('ipapi.co') && res.data?.city) {
-            detectedCity = res.data.city;
+          if (service.includes('ip-api') && data?.city) {
+            detectedCity = data.city;
+          } else if (service.includes('ipapi.co') && data?.city) {
+            detectedCity = data.city;
           }
 
           if (detectedCity) {
