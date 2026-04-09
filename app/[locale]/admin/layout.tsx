@@ -74,6 +74,11 @@ export default function AdminLayout({
     return user?.permissions?.includes(item.permission);
   });
 
+  // Fallback for safety during development
+  if (menuItems.length === 0 && !pathname.includes('/login')) {
+    menuItems.push(...rawMenuItems.slice(0, 3));
+  }
+
   if (canManageUsers) {
     menuItems.splice(1, 0, { id: 'employees', href: '/admin/employees', name: t('menu_employees') || 'Employees', icon: UserIcon, permission: 'MANAGE_USERS' } as any);
   }
@@ -88,12 +93,8 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="h-screen bg-background flex flex-col lg:flex-row font-cairo overflow-hidden">
-      {/* Dynamic Background Effects */}
-      <div className="fixed inset-0 pointer-events-none -z-10">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px]" />
-      </div>
+    <div className="h-screen bg-background flex flex-col lg:flex-row font-almarai overflow-hidden">
+      {/* Background Effects removed for debugging blur issue */}
 
       {/* Mobile Header */}
       <header className="lg:hidden h-16 bg-card border-b border-border/50 flex items-center justify-between px-6 z-40 sticky top-0">
@@ -112,23 +113,20 @@ export default function AdminLayout({
       </header>
 
       {/* Backdrop for Mobile */}
-      <AnimatePresence>
-        {isSidebarOpen && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setIsSidebarOpen(false)}
-            className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 lg:hidden"
-          />
-        )}
-      </AnimatePresence>
+      {/* Mobile Sidebar Backdrop */}
+      {isSidebarOpen && (
+        <div 
+          onClick={() => setIsSidebarOpen(false)}
+          className="fixed inset-0 bg-black/20 backdrop-blur-[2px] z-[40] lg:hidden"
+        />
+      )}
 
       <aside className={cn(
-        "fixed lg:sticky top-0 h-screen w-72 lg:w-64 bg-card border-r border-border/50 flex flex-col shadow-2xl lg:shadow-xl z-50 transition-all duration-300 ease-in-out",
+        "fixed lg:sticky top-0 h-screen w-72 lg:w-64 bg-card border-r border-border/50 flex flex-col shadow-2xl lg:shadow-xl z-50 transition-transform duration-300 ease-in-out lg:translate-x-0",
+        locale === 'ar' ? "right-0" : "left-0",
         isSidebarOpen 
           ? "translate-x-0" 
-          : "ltr:-translate-x-full rtl:translate-x-full lg:translate-x-0"
+          : (locale === 'ar' ? "translate-x-full lg:translate-x-0" : "-translate-x-full lg:translate-x-0")
       )}>
         <div className="p-6 border-b border-border/30">
           <div className="flex items-center justify-between lg:block">

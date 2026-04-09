@@ -3,6 +3,8 @@
 @plugin "tailwindcss-animate";
 
 @custom-variant dark (&:where(.dark, .dark *));
+@custom-variant ltr (&:where([dir="ltr"], [dir="ltr"] *));
+@custom-variant rtl (&:where([dir="rtl"], [dir="rtl"] *));
 
 :root {
   --background: 0 0% 100%;
