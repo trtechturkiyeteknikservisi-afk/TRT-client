@@ -12,6 +12,12 @@ import { useRouter } from '@/i18n/routing';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
+interface PolicyData {
+  policy_en?: string;
+  policy_tr?: string;
+  policy_ar?: string;
+}
+
 export default function PolicyTermsPage() {
   const t = useTranslations('Admin');
   const [loading, setLoading] = useState(true);
@@ -28,7 +34,7 @@ export default function PolicyTermsPage() {
     setLoading(true);
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.get(`${API_BASE}/settings`, {
+      const response = await axios.get<PolicyData>(`${API_BASE}/settings`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setPolicies({
