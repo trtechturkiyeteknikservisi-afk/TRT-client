@@ -23,7 +23,7 @@ export function NewsBar() {
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
         const response = await axios.get(`${API_URL}/settings`);
-        const data = response.data;
+        const data = response.data as any;
         
         // Get localized news
         const newsKey = `news_bar_${locale}`;

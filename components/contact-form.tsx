@@ -183,7 +183,7 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false }:
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&format=json&addressdetails=1&limit=5&countrycodes=tr`
       );
       if (Array.isArray(response.data)) {
-        setSuggestions(response.data);
+        setSuggestions(response.data as any[]);
         setShowSuggestions(true);
       }
     } catch (err) {

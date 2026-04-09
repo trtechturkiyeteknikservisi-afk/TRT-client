@@ -45,7 +45,7 @@ export default async function RootLayout(props: {
         next: { revalidate: 0 } 
     });
     if (res.ok) {
-      const settings = await res.json();
+      const settings = (await res.json()) as any;
       whatsappNumber = settings.whatsapp || whatsappNumber;
     }
   } catch (error) {
