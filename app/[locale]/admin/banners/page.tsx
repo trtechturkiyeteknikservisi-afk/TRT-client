@@ -15,6 +15,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 const PREDEFINED_LINKS = [
   { label: 'Smartphones Repair', value: '/services/phone' },
   { label: 'Laptops Repair', value: '/services/laptop' },
+  { label: 'Tablets Repair', value: '/services/tablet' },
   { label: 'Robot Vacuums', value: '/services/robot' },
   { label: 'Luxury Watch', value: '/services/watch' },
   { label: 'Portfolio', value: '/portfolio' },
@@ -28,6 +29,7 @@ export default function BannersPage() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [bannerForm, setBannerForm] = useState({ 
     title_en: '', title_tr: '', title_ar: '',
     description_en: '', description_tr: '', description_ar: '',
@@ -58,7 +60,7 @@ export default function BannersPage() {
     }
   };
 
-  const createBanner = async (event: React.FormEvent) => {
+  const saveBanner = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!bannerForm.image) {
       alert('Please upload an image first');
@@ -67,9 +69,15 @@ export default function BannersPage() {
     const token = localStorage.getItem('token');
     setActionLoading(true);
     try {
-      await axios.post(`${API_BASE}/banners`, bannerForm, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      if (editingId) {
+        await axios.put(`${API_BASE}/banners/${editingId}`, bannerForm, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      } else {
+        await axios.post(`${API_BASE}/banners`, bannerForm, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
       setBannerForm({ 
         title_en: '', title_tr: '', title_ar: '',
         description_en: '', description_tr: '', description_ar: '',
@@ -78,12 +86,26 @@ export default function BannersPage() {
         image: '', 
         active: true 
       });
+      setEditingId(null);
       fetchData();
     } catch (err) {
-      console.error('Error creating banner', err);
+      console.error('Error saving banner', err);
     } finally {
       setActionLoading(false);
     }
+  };
+
+  const handleEdit = (banner: any) => {
+    setBannerForm({
+        title_en: banner.title_en || '', title_tr: banner.title_tr || '', title_ar: banner.title_ar || '',
+        description_en: banner.description_en || '', description_tr: banner.description_tr || '', description_ar: banner.description_ar || '',
+        cta_en: banner.cta_en || '', cta_tr: banner.cta_tr || '', cta_ar: banner.cta_ar || '',
+        link: banner.link || PREDEFINED_LINKS[0].value, 
+        image: banner.image || '', 
+        active: banner.active
+    });
+    setEditingId(banner.id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const toggleActive = async (banner: any) => {
@@ -157,12 +179,12 @@ export default function BannersPage() {
       <div className="bg-card border rounded-2xl p-8 shadow-sm">
         <div className="flex items-center space-x-3 mb-8">
             <div className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
-                <Plus size={20} strokeWidth={3} />
+                {editingId ? <Edit2 size={20} strokeWidth={3} /> : <Plus size={20} strokeWidth={3} />}
             </div>
-            <h3 className="text-2xl font-black tracking-tight uppercase">{t('add_banner') || 'Create New Banner'}</h3>
+            <h3 className="text-2xl font-black tracking-tight uppercase">{editingId ? 'Edit Banner' : (t('add_banner') || 'Create New Banner')}</h3>
         </div>
         
-        <form onSubmit={createBanner} className="space-y-8">
+        <form onSubmit={saveBanner} className="space-y-8">
           {/* Multi-language inputs */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* English */}
@@ -315,13 +337,34 @@ export default function BannersPage() {
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={actionLoading || !bannerForm.image}
-            className="w-full px-6 py-4 rounded-xl bg-primary text-primary-foreground font-black text-sm shadow-xl shadow-primary/30 hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:grayscale uppercase tracking-widest"
-          >
-            {actionLoading ? t('loading') : t('add_banner') || 'Save and Add Banner'}
-          </button>
+          <div className="flex gap-4">
+            {editingId && (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingId(null);
+                  setBannerForm({
+                    title_en: '', title_tr: '', title_ar: '',
+                    description_en: '', description_tr: '', description_ar: '',
+                    cta_en: '', cta_tr: '', cta_ar: '',
+                    link: PREDEFINED_LINKS[0].value, 
+                    image: '', 
+                    active: true 
+                  });
+                }}
+                className="w-1/3 px-6 py-4 rounded-xl bg-muted text-muted-foreground font-black text-sm hover:bg-muted/80 transition-all uppercase tracking-widest border border-dashed"
+              >
+                Cancel Edit
+              </button>
+            )}
+            <button
+              type="submit"
+              disabled={actionLoading || !bannerForm.image}
+              className={cn("px-6 py-4 rounded-xl text-primary-foreground font-black text-sm shadow-xl shadow-primary/30 hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:grayscale uppercase tracking-widest", editingId ? "w-2/3 bg-blue-600" : "w-full bg-primary")}
+            >
+              {actionLoading ? t('loading') : (editingId ? 'Update Banner' : (t('add_banner') || 'Save and Add Banner'))}
+            </button>
+          </div>
         </form>
       </div>
 
@@ -394,6 +437,13 @@ export default function BannersPage() {
                             </div>
 
                             <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => handleEdit(item)}
+                                    disabled={actionLoading}
+                                    className="p-3 rounded-xl bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all shadow-sm active:scale-90"
+                                >
+                                    <Edit2 size={18} strokeWidth={2.5} />
+                                </button>
                                 <button
                                     onClick={() => toggleActive(item)}
                                     disabled={actionLoading}
