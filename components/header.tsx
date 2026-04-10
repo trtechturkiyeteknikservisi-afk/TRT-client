@@ -56,11 +56,12 @@ export function Header() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-4">
           <div className="flex items-center">
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 group-hover:rotate-12 transition-transform">
-                <span className="text-primary-foreground font-black text-xl">T</span>
-              </div>
-              <span className="text-2xl font-black tracking-tighter text-foreground">{t('company_name')}</span>
+            <Link href="/" className="flex items-center">
+              <img 
+                src={theme === 'dark' ? '/night-logo.png' : '/day-logo.png'} 
+                alt={t('company_name')} 
+                className="h-10 w-auto object-contain transition-all hover:scale-105"
+              />
             </Link>
           </div>
 

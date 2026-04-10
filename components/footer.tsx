@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from '@/i18n/routing';
 import { Globe, MessageCircle, Share2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useTheme } from 'next-themes';
 
 const socialLinks = [
   { icon: Globe, href: '#', label: 'Website' },
@@ -13,6 +14,11 @@ const socialLinks = [
 
 export function Footer() {
   const t = useTranslations('Footer');
+  const { theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
   const footerLinks = [
     {
       title: t('services'),
@@ -50,11 +56,14 @@ export function Footer() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-24">
           <div className="space-y-10">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-xl shadow-primary/30 group-hover:rotate-12 transition-transform">
-                <span className="text-primary-foreground font-black text-2xl">T</span>
-              </div>
-              <span className="text-3xl font-black tracking-tighter text-foreground uppercase tracking-widest">TRT <span className="text-primary">Service</span></span>
+            <Link href="/" className="flex items-center">
+              {mounted && (
+                <img 
+                  src={theme === 'dark' ? '/night-logo.png' : '/day-logo.png'} 
+                  alt="TRT Service" 
+                  className="h-12 w-auto object-contain transition-all hover:scale-105"
+                />
+              )}
             </Link>
             <p className="text-lg text-muted-foreground leading-relaxed font-semibold">
               {t('description')}
