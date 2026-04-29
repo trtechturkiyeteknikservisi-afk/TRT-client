@@ -45,7 +45,7 @@ const VerificationPage = () => {
             try {
                 const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/settings`);
                 const key = `policy_${locale}`;
-                setTermsContent(response.data[key] || '');
+                setTermsContent((response.data as any)[key] || '');
             } catch (err) {
                 console.error('Error fetching terms:', err);
             } finally {
