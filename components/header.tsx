@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
-import { Sun, Moon, X, Menu, ChevronDown, Smartphone, Laptop, Watch, Zap, TabletIcon as Tablet } from 'lucide-react';
+import { Sun, Moon, X, Menu, ChevronDown, Smartphone, Laptop, Watch, Zap, Headphones, TabletIcon as Tablet } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
@@ -25,10 +25,12 @@ export function Header() {
     { name: t('robot_repair'), href: '/services/robot', icon: Zap },
     { name: t('watch_repair'), href: '/services/watch', icon: Watch },
     { name: t('tablet_repair'), href: '/services/tablet', icon: Tablet },
+    { name: t('headphones_repair'), href: '/services/kulaklik', icon: Headphones },
   ];
 
   const navigation = [
     { name: t('home'), href: '/' },
+    { name: t('about_us'), href: '/about-us' },
     { 
       name: t('services'), 
       href: '#services', 
@@ -54,8 +56,8 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between gap-4">
-          <div className="flex items-center">
+        <div className="flex min-h-[4rem] items-center justify-between gap-4 py-2 md:py-0">
+          <div className="flex items-center flex-shrink-0">
             <Link href="/" className="flex items-center">
               <img 
                 src={theme === 'dark' ? '/night-logo.png' : '/day-logo.png'} 
@@ -66,7 +68,7 @@ export function Header() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center flex-wrap justify-center lg:gap-8 gap-x-4 gap-y-1 py-1">
             {navigation.map((item) => (
               item.isDropdown ? (
                 <div 
@@ -76,7 +78,7 @@ export function Header() {
                   onMouseLeave={() => setIsServicesOpen(false)}
                 >
                   <button
-                    className="flex items-center gap-1 text-sm font-semibold text-muted-foreground transition-all hover:text-primary active:scale-95"
+                    className="flex items-center gap-1 lg:text-[13px] text-[10px] font-semibold text-muted-foreground transition-all hover:text-primary active:scale-95"
                   >
                     <span>{item.name}</span>
                     <ChevronDown size={14} className={cn("transition-transform duration-200", isServicesOpen && "rotate-180")} />
@@ -114,7 +116,7 @@ export function Header() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="flex items-center gap-1 text-sm font-semibold text-muted-foreground transition-all hover:text-primary relative group"
+                  className="flex items-center gap-1 lg:text-[13px] text-[10px] font-semibold text-muted-foreground transition-all hover:text-primary relative group"
                 >
                   {item.name}
                   {item.soon && (
@@ -128,7 +130,7 @@ export function Header() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             {/* Theme Toggle */}
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -141,15 +143,15 @@ export function Header() {
             {/* Language Switcher */}
             <div className="flex items-center bg-muted/50 rounded-xl p-1 border border-border">
               {[
-                { code: 'en', flag: 'gb' },
-                { code: 'ar', flag: 'sa' },
-                { code: 'tr', flag: 'tr' }
+                { code: 'en', label: 'En', flag: 'gb' },
+                { code: 'ar', label: 'AR', flag: 'sa' },
+                { code: 'tr', label: 'TR', flag: 'tr' }
               ].map((l) => (
                 <button
                   key={l.code}
                   onClick={() => handleLanguageChange(l.code)}
                   className={cn(
-                    "px-2 py-1 rounded-lg text-[10px] font-extrabold transition-all uppercase whitespace-nowrap flex items-center gap-1.5",
+                    "px-3 py-1.5 rounded-lg text-[11px] font-extrabold transition-all whitespace-nowrap flex items-center gap-2",
                     locale === l.code 
                       ? "bg-background text-primary shadow-sm ring-1 ring-border/50" 
                       : "text-muted-foreground hover:bg-muted"
@@ -157,10 +159,10 @@ export function Header() {
                 >
                   <img 
                     src={`https://flagcdn.com/w40/${l.flag}.png`} 
-                    alt={l.code}
+                    alt=""
                     className="w-4 h-4 rounded-full object-cover border border-border/50 shadow-sm"
                   />
-                  <span>{l.code}</span>
+                  <span>{l.label}</span>
                 </button>
               ))}
             </div>

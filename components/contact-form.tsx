@@ -10,9 +10,10 @@ import { useTranslations } from 'next-intl';
 interface ContactFormProps {
   initialServiceType?: string;
   isSidebar?: boolean;
+  isHeroMini?: boolean;
 }
 
-export function ContactForm({ initialServiceType = 'phone', isSidebar = false }: ContactFormProps) {
+export function ContactForm({ initialServiceType = 'phone', isSidebar = false, isHeroMini = false }: ContactFormProps) {
   const t = useTranslations('Contact');
   const [formData, setFormData] = useState({
     name: '',
@@ -30,14 +31,18 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false }:
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Auto-detect city via IP
+    setMounted(true);
+    
+    // Auto-detect city via IP - Only on client after mount
     const autoDetectCity = async () => {
       const services = [
+        'https://ipinfo.io/json',
         'https://ip-api.com/json/',
         'https://ipapi.co/json/',
-        'https://api.ipify.org?format=json' // Only IP, but useful for other tools
+        'https://api.ipify.org?format=json' 
       ];
 
       for (const service of services) {
@@ -49,6 +54,8 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false }:
           if (service.includes('ip-api') && data?.city) {
             detectedCity = data.city;
           } else if (service.includes('ipapi.co') && data?.city) {
+            detectedCity = data.city;
+          } else if (service.includes('ipinfo') && data?.city) {
             detectedCity = data.city;
           }
 
@@ -66,13 +73,14 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false }:
             } else {
               setFormData(prev => ({ ...prev, city: 'Other', address: detectedCity }));
             }
-            break; // النجاح في الحصول على المدينة، توقف عن المحاولة
+            break; 
           }
         } catch (error) {
           console.warn(`City detection failed for ${service}, trying next...`);
         }
       }
     };
+    
     autoDetectCity();
   }, []);
 
@@ -160,12 +168,20 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false }:
             else if (lowerCity.includes('izmir')) cityValue = 'Izmir';
             else if (lowerCity.includes('antalya')) cityValue = 'Antalya';
 
-            const fullAddress = [houseNumber, road, neighbourhood].filter(Boolean).join(', ');
+            const fullAddress = [
+              houseNumber, 
+              road, 
+              neighbourhood, 
+              addr.suburb, 
+              addr.district, 
+              detectedCity, 
+              addr.province
+            ].filter((val, index, self) => val && self.indexOf(val) === index).join(', ');
             
             setFormData(prev => ({
               ...prev,
               city: cityValue,
-              address: fullAddress || (detectedCity !== cityValue ? detectedCity : '')
+              address: fullAddress
             }));
           }
         } catch (error) {
@@ -180,9 +196,9 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false }:
         await fallbackToIP();
       },
       {
-        enableHighAccuracy: false,
-        timeout: 6000,
-        maximumAge: 60000
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0
       }
     );
   };
@@ -237,6 +253,20 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false }:
     setShowSuggestions(false);
   };
 
+  if (!mounted) return (
+    <div className={cn(
+      "bg-card/40 backdrop-blur-xl p-8 rounded-[2.5rem] border animate-pulse",
+      isHeroMini && "p-6 rounded-[1.5rem]"
+    )}>
+      <div className="h-8 bg-muted rounded w-1/2 mb-6" />
+      <div className="space-y-4">
+        <div className="h-12 bg-muted rounded" />
+        <div className="h-12 bg-muted rounded" />
+        <div className="h-12 bg-muted rounded" />
+      </div>
+    </div>
+  );
+
   return (
     <div className="relative group">
       <div className={cn(
@@ -246,7 +276,8 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false }:
       
       <div className={cn(
         "bg-card/80 backdrop-blur-xl p-8 md:p-10 rounded-[2.5rem] border shadow-2xl overflow-hidden relative",
-        isSidebar && "p-6 md:p-8 rounded-[2rem]"
+        isSidebar && "p-6 md:p-8 rounded-[2rem]",
+        isHeroMini && "p-5 md:p-6 rounded-[1.5rem] bg-background/40 border-white/10"
       )}>
         
         {/* Form Progress Indicator */}
@@ -254,8 +285,8 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false }:
             <div className="h-full bg-primary transition-all duration-500" style={{ width: formData.name ? '33%' : (formData.phone ? '66%' : '10%') }} />
         </div>
 
-        <div className="mb-10 text-center sm:text-left">
-          <h3 className={cn("text-2xl font-black tracking-tight", isSidebar && "text-xl")}>{t('send_message')}</h3>
+        <div className={cn("mb-10 text-center sm:text-left", isHeroMini && "mb-6")}>
+          <h3 className={cn("text-2xl font-black tracking-tight", (isSidebar || isHeroMini) && "text-xl")}>{t('send_message')}</h3>
           <p className="text-sm text-muted-foreground font-medium mt-1">
             {t('contact_subtitle')}
           </p>
@@ -263,7 +294,7 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false }:
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Name & Phone Row */}
-          <div className={cn("grid grid-cols-1 gap-6", !isSidebar && "sm:grid-cols-2")}>
+          <div className={cn("grid grid-cols-1 gap-6", (!isSidebar && !isHeroMini) && "sm:grid-cols-2", isHeroMini && "gap-3")}>
             <div className="space-y-2">
               <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">{t('full_name')}</label>
               <input
@@ -271,7 +302,10 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false }:
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full h-14 px-5 rounded-2xl border bg-background/50 focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-300 font-bold placeholder:font-medium"
+                className={cn(
+                  "w-full h-14 px-5 rounded-2xl border bg-background/50 focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-300 font-bold placeholder:font-medium",
+                  isHeroMini && "h-11 px-4 rounded-xl text-sm"
+                )}
                 placeholder={t('name_placeholder')}
               />
             </div>
@@ -282,7 +316,10 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false }:
                 required
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full h-14 px-5 rounded-2xl border bg-background/50 focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-300 font-bold"
+                className={cn(
+                  "w-full h-14 px-5 rounded-2xl border bg-background/50 focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-300 font-bold",
+                  isHeroMini && "h-11 px-4 rounded-xl text-sm"
+                )}
                 placeholder="+90"
                 dir="ltr"
               />
@@ -290,14 +327,17 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false }:
           </div>
 
           {/* City & Service Row */}
-          <div className={cn("grid grid-cols-1 gap-6", !isSidebar && "sm:grid-cols-2")}>
+          <div className={cn("grid grid-cols-1 gap-6", (!isSidebar && !isHeroMini) && "sm:grid-cols-2", isHeroMini && "gap-3")}>
             <div className="space-y-2">
               <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">{t('city')}</label>
               <select
                 required
                 value={formData.city}
                 onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                className="w-full h-14 px-5 rounded-2xl border bg-background/50 focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-300 font-bold appearance-none cursor-pointer"
+                className={cn(
+                  "w-full h-14 px-5 rounded-2xl border bg-background/50 focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-300 font-bold appearance-none cursor-pointer",
+                  isHeroMini && "h-11 px-4 rounded-xl text-sm"
+                )}
               >
                 <option value="" disabled>{t('city_placeholder')}</option>
                 <option value="Bursa">{t('city_bursa')}</option>
@@ -311,14 +351,17 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false }:
 
             <div className="space-y-2">
               <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">{t('service_type')}</label>
-              {isSidebar ? (
+              {isSidebar || isHeroMini ? (
                 <input
                     type="text"
                     required
                     value={formData.deviceModel}
                     onChange={(e) => setFormData({ ...formData, deviceModel: e.target.value })}
-                    className="w-full h-14 px-5 rounded-2xl border bg-background/50 focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-300 font-bold placeholder:font-medium"
-                    placeholder="e.g. iPhone 15, MacBook Pro"
+                    className={cn(
+                      "w-full h-14 px-5 rounded-2xl border bg-background/50 focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-300 font-bold placeholder:font-medium",
+                      isHeroMini && "h-11 px-4 rounded-xl text-sm"
+                    )}
+                    placeholder="e.g. iPhone 15"
                 />
               ) : (
                 <select
@@ -361,7 +404,10 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false }:
                 value={formData.address}
                 onChange={(e) => handleAddressChange(e.target.value)}
                 onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-                className="w-full h-14 px-5 rounded-2xl border bg-background/50 focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-300 font-bold placeholder:font-medium"
+                className={cn(
+                  "w-full h-14 px-5 rounded-2xl border bg-background/50 focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-300 font-bold placeholder:font-medium",
+                  isHeroMini && "h-11 px-4 rounded-xl text-sm"
+                )}
                 placeholder={t('address_placeholder')}
               />
               
@@ -395,7 +441,7 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false }:
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className={cn("space-y-2", isHeroMini && "hidden")}>
             <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">{t('your_message')}</label>
             <textarea
               rows={4}
@@ -406,9 +452,9 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false }:
             />
           </div>
 
-          <div className="flex items-start gap-3 p-4 bg-primary/5 rounded-2xl border border-primary/10 mb-2">
-            <ShieldCheck className="text-primary mt-1 shrink-0" size={20} />
-            <p className="text-[13px] font-bold text-foreground leading-relaxed">
+          <div className={cn("flex items-start gap-3 p-4 bg-primary/5 rounded-2xl border border-primary/10 mb-2", isHeroMini && "p-3 rounded-xl")}>
+            <ShieldCheck className="text-primary mt-1 shrink-0" size={isHeroMini ? 16 : 20} />
+            <p className={cn("text-[13px] font-bold text-foreground leading-relaxed", isHeroMini && "text-[11px]")}>
               {t('form_note')}
             </p>
           </div>
@@ -416,19 +462,22 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false }:
           <button
             type="submit"
             disabled={loading}
-            className="group relative w-full h-16 bg-primary text-primary-foreground rounded-2xl font-black text-sm uppercase tracking-[0.2em] flex items-center justify-center gap-3 overflow-hidden shadow-xl shadow-primary/30 transition-all active:scale-95 disabled:opacity-50"
+            className={cn(
+              "group relative w-full h-16 bg-primary text-primary-foreground rounded-2xl font-black text-sm uppercase tracking-[0.2em] flex items-center justify-center gap-3 overflow-hidden shadow-xl shadow-primary/30 transition-all active:scale-95 disabled:opacity-50",
+              isHeroMini && "h-12 rounded-xl text-xs"
+            )}
           >
             <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
             
             {loading ? (
               <div className="flex items-center gap-2">
-                <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                <div className={cn("w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin", isHeroMini && "w-4 h-4")} />
                 <span>{t('sending')}</span>
               </div>
             ) : (
               <>
                 <span className="relative z-10">{t('send_message')}</span>
-                <Send size={20} className="relative z-10 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                <Send size={isHeroMini ? 16 : 20} className="relative z-10 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
               </>
             )}
           </button>

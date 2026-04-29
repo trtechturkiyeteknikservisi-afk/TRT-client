@@ -34,24 +34,8 @@ export default async function RootLayout(props: {
 }) {
   const { locale } = await props.params;
   setRequestLocale(locale);
-  const { children } = props;
   const messages = await getMessages();
-
-  // Fetch WhatsApp number from settings
-  let whatsappNumber = "905302094094";
-  try {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-    const res = await fetch(`${API_URL}/settings`, { 
-        cache: 'no-store',
-        next: { revalidate: 0 } 
-    });
-    if (res.ok) {
-      const settings = (await res.json()) as any;
-      whatsappNumber = settings.whatsapp || whatsappNumber;
-    }
-  } catch (error) {
-    console.error("Failed to fetch settings for layout", error);
-  }
+  const { children } = props;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -102,15 +86,6 @@ export default async function RootLayout(props: {
             <HideOnAdmin>
               <ScrollToTop />
               <StickyContact />
-              <a
-                href={`https://wa.me/${whatsappNumber.replace(/\D/g, '')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="WhatsApp"
-                className="fixed bottom-6 right-6 z-[200] w-14 h-14 rounded-2xl bg-green-500 text-white shadow-2xl shadow-green-500/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
-              >
-                <MessageCircle size={26} />
-              </a>
             </HideOnAdmin>
           </ThemeProvider>
         </NextIntlClientProvider>

@@ -1,63 +1,104 @@
 'use client';
 
 import React from 'react';
-import { Mail, MessageSquare } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
+
+import { 
+  InstagramIcon, 
+  FacebookIcon, 
+  YoutubeIcon, 
+  TiktokIcon, 
+  SnapchatIcon, 
+  TelegramIcon, 
+  WhatsappIcon 
+} from './social-icons';
 
 export function StickyContact() {
   const t = useTranslations('Contact');
   const pathname = usePathname();
-  const isArabic = pathname?.startsWith('/ar');
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [whatsappNumber, setWhatsappNumber] = React.useState("905302094094");
 
-  // We only show this on the main customer-facing pages, not on admin pages
+  React.useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+        const res = await fetch(`${API_URL}/settings`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.whatsapp) setWhatsappNumber(data.whatsapp);
+        }
+      } catch (err) {
+        console.error("Failed to fetch settings in StickyContact", err);
+      }
+    };
+    fetchSettings();
+  }, []);
+
   if (pathname?.includes('/admin')) return null;
 
-  const scrollToContact = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const contactSection = document.getElementById('contact');
-    if (contactSection) {
-      contactSection.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      // If we're not on the home page, redirect to home page with #contact anchor
-      window.location.href = `/${isArabic ? 'ar' : pathname.split('/')[1] || 'en'}#contact`;
-    }
-  };
+  const socialLinks = [
+    { icon: WhatsappIcon, href: `https://wa.me/${whatsappNumber.replace(/\D/g, '')}`, color: 'bg-[#25D366]' },
+    { icon: InstagramIcon, href: 'https://www.instagram.com/trtservis?igsh=MXcxZ25rNjNydjYxZQ%3D%3D&utm_source=qr', color: 'bg-[#E1306C]' },
+    { icon: TiktokIcon, href: 'https://www.tiktok.com/@trtservis', color: 'bg-[#000000]', isTiktok: true },
+    { icon: FacebookIcon, href: 'https://www.facebook.com/share/185YU5woZA/?mibextid=wwXIfr', color: 'bg-[#1877F2]' },
+    { icon: YoutubeIcon, href: 'https://youtube.com/@trtservis?si=kb9K3XN-LX4NX-du', color: 'bg-[#FF0000]' },
+    { icon: TelegramIcon, href: 'https://t.me/trtservis', color: 'bg-[#0088cc]' },
+    { icon: SnapchatIcon, href: 'https://snapchat.com/t/pL3vgBfZ', color: 'bg-[#FFFC00]', iconColor: 'text-black' },
+  ];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -100 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: 1, duration: 0.8, type: 'spring' }}
-      className="fixed top-1/2 -translate-y-1/2 z-[100] left-0"
-    >
-      <a
-        href="#contact"
-        onClick={scrollToContact}
-        className="group relative flex flex-col items-center bg-primary text-primary-foreground py-4 px-3 sm:px-2  transition-all duration-500 rounded-r-[2rem] border-y border-r border-white/20 hover:pl-6 hover:translate-x-2"
+    <div className="fixed bottom-8 right-8 z-[100] flex flex-col-reverse items-center gap-4">
+      {/* Main Toggle Button */}
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={() => setIsOpen(!isOpen)}
+        className={cn(
+          "w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-500",
+          isOpen ? "bg-red-500 text-white rotate-90" : "bg-primary text-primary-foreground"
+        )}
       >
-        {/* Glowing background effect */}
-        <div className="absolute  bg-primary/20 rounded-inherit -z-10   transition-all duration-700" />
-        
-        <div className="flex flex-col items-center gap-6">
-          {/* Pulsing Icon */}
-          <div className="relative">
-            <MessageSquare size={26} className="group-hover:scale-110 transition-transform duration-300" />
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 border-2 border-primary rounded-full animate-pulse" />
-          </div>
-          
-          {/* Vertical Text - Always Visible */}
-          <span className="[writing-mode:vertical-lr] rotate-180 text-sm sm:text-base font-black uppercase tracking-[0.2em] whitespace-nowrap  transition-opacity">
-            {t('sticky_contact_cta')}
-          </span>
-        </div>
+        <AnimatePresence mode="wait">
+          {isOpen ? (
+            <motion.div key="close" initial={{ opacity: 0, rotate: -90 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0, rotate: 90 }}>
+              <X size={28} strokeWidth={2.5} />
+            </motion.div>
+          ) : (
+            <motion.div key="open" initial={{ opacity: 0, rotate: 90 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0, rotate: -90 }}>
+              <Plus size={28} strokeWidth={2.5} className="animate-pulse" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.button>
 
-        {/* Shine effect on hover */}
-        <div className="absolute overflow-hidden rounded-inherit pointer-events-none">
-            <div className="absolute top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:left-[150%] transition-all duration-1000 ease-in-out" />
-        </div>
-      </a>
-    </motion.div>
+      {/* Social Media Icons Vertical List */}
+      <div className="flex flex-col-reverse items-center gap-3">
+        <AnimatePresence>
+          {isOpen && socialLinks.map((social, idx) => (
+            <motion.a
+              key={idx}
+              href={social.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              initial={{ opacity: 0, y: 20, scale: 0.5 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.5 }}
+              transition={{ delay: idx * 0.05, type: 'spring', stiffness: 260, damping: 20 }}
+              className={cn(
+                "w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform",
+                social.color
+              )}
+            >
+              <social.icon size={20} className={social.iconColor || "text-white"} />
+            </motion.a>
+          ))}
+        </AnimatePresence>
+      </div>
+    </div>
   );
 }

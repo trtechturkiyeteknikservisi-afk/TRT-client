@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Smartphone, Laptop, Watch, Zap, ArrowRight, TabletIcon as Tablet } from 'lucide-react';
+import { Smartphone, Laptop, Watch, Zap, ArrowRight, TabletIcon as Tablet, Headphones } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -47,6 +47,13 @@ export function Services() {
       icon: Tablet,
       color: 'bg-emerald-500/10 text-emerald-600',
       link: '/services/tablet'
+    },
+    {
+      title: t('headphones'),
+      description: t('headphones_desc'),
+      icon: Headphones,
+      color: 'bg-indigo-500/10 text-indigo-600',
+      link: '/services/kulaklik'
     }
   ];
 
@@ -74,7 +81,7 @@ export function Services() {
           </motion.div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((service, index) => (
             <motion.div
               key={service.title}
@@ -82,13 +89,13 @@ export function Services() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="group relative bg-card/50 backdrop-blur-xl p-10 rounded-[3rem] border-2 border-border/50 transition-all hover:border-primary hover:bg-card hover:shadow-[0_40px_80px_-15px_rgba(255,0,0,0.15)] flex flex-col h-full overflow-hidden"
+              className="group relative bg-card/50 backdrop-blur-xl p-10 rounded-[2rem] border-2 border-border/50 transition-all hover:border-primary hover:bg-card hover:shadow-[0_40px_80px_-15px_rgba(255,0,0,0.15)] flex flex-col h-full overflow-hidden"
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[5rem] -z-10 transition-colors group-hover:bg-primary/10" />
               <div className="inline-flex p-5 rounded-3xl mb-10 w-fit transition-all duration-500 group-hover:bg-primary group-hover:text-primary-foreground bg-muted text-foreground ring-1 ring-border/50">
                 {service.icon && <service.icon size={36} strokeWidth={2.5} />}
               </div>
-              <h3 className="text-2xl md:text-3xl font-black mb-4 text-foreground tracking-tight uppercase">{service.title}</h3>
+              <h3 className="text-2xl md:text-2xl font-black mb-4 text-foreground tracking-tight uppercase">{service.title}</h3>
               <p className="text-lg text-muted-foreground mb-10 font-semibold leading-relaxed flex-grow">
                 {service.description}
               </p>

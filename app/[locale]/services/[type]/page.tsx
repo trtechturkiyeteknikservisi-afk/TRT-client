@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Link } from '@/i18n/routing';
-import { Smartphone, Laptop, Watch, Zap, CheckCircle2, ShieldCheck, Clock, Award, TabletIcon as Tablet } from 'lucide-react';
+import { Smartphone, Laptop, Watch, Zap, CheckCircle2, ShieldCheck, Clock, Award, TabletIcon as Tablet, Headphones } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { TrustBadges } from "@/components/trust-badges";
 import { ContactForm } from "@/components/contact-form";
@@ -32,6 +32,10 @@ const serviceAssets: Record<string, any> = {
   tablet: {
     icon: Tablet,
     image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=2070&auto=format&fit=crop',
+  },
+  kulaklik: {
+    icon: Headphones,
+    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=2070&auto=format&fit=crop',
   }
 };
 
@@ -42,7 +46,7 @@ export default function ServicePage() {
   const assets = serviceAssets[type] || serviceAssets.phone;
 
   // Type-safe translation access
-  const serviceKey = type as 'phone' | 'laptop' | 'robot' | 'watch' | 'tablet';
+  const serviceKey = (type === 'kulaklik' ? 'headphones' : type) as 'phone' | 'laptop' | 'robot' | 'watch' | 'tablet' | 'headphones';
   const features = t.raw(`${serviceKey}.features`) as string[];
 
   return (

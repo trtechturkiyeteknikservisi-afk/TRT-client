@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import axios from 'axios';
 
 import { useTranslations, useLocale } from 'next-intl';
+import { ContactForm } from './contact-form';
 
 export function Hero() {
   const t = useTranslations('Hero');
@@ -71,10 +72,11 @@ export function Hero() {
 
   return (
     <section className="relative h-[95vh] w-full overflow-hidden bg-background">
+      {/* Dynamic Backgrounds */}
       <AnimatePresence mode="wait">
         {banners[current] && (
           <motion.div
-            key={current}
+            key={`bg-${current}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -94,53 +96,47 @@ export function Hero() {
               )} />
               <div className="absolute inset-0 bg-black/20" />
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-            <div className="relative container mx-auto px-4 h-full flex items-center">
-              <div className={cn(
-                "max-w-4xl space-y-10", 
-                isRTL ? "text-right mr-0 ml-auto border-r-4 border-primary pr-8" : "text-left mr-auto ml-0 border-l-4 border-primary pl-8"
-              )}>
-                <motion.div
-                  initial={{ x: isRTL ? 50 : -50, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.2, duration: 0.8 }}
-                  className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-xl"
-                >
+      <div className="relative container mx-auto px-4 h-full flex flex-col lg:flex-row items-center lg:justify-between gap-16 lg:gap-24 pt-32 lg:pt-0">
+        {/* Animated Content Section */}
+        <div className="w-full lg:flex-1 relative h-full flex items-center">
+          <AnimatePresence mode="wait">
+            {banners[current] && (
+              <motion.div
+                key={`content-${current}`}
+                initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: isRTL ? -20 : 20 }}
+                transition={{ duration: 0.5 }}
+                className={cn(
+                  "w-full space-y-6 md:space-y-10", 
+                  isRTL ? "text-right lg:border-r-4 border-primary lg:pr-10" : "text-left lg:border-l-4 border-primary lg:pl-10"
+                )}
+              >
+                <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-xl">
                   <div className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                   </div>
                   <span className="text-xs font-black uppercase tracking-[0.3em] text-primary">{t('badge')}</span>
-                </motion.div>
+                </div>
 
-                <motion.h1
-                  initial={{ y: 50, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.4, duration: 0.8 }}
-                  className="text-6xl md:text-9xl font-black tracking-tighter leading-[0.85] text-foreground uppercase"
-                >
+                <h1 className="text-2xl sm:text-3xl md:text-6xl lg:text-7xl font-black tracking-tighter leading-[0.85] text-foreground uppercase">
                   {(banners[current]?.title || '').split(' ').map((word, i) => (
                     <span key={i} className={cn("block", i === 1 ? "text-primary italic" : "text-foreground")}>
                       {word}
                     </span>
                   ))}
-                </motion.h1>
+                </h1>
 
-                <motion.p
-                  initial={{ y: 30, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.6, duration: 0.8 }}
-                  className="text-lg md:text-2xl text-muted-foreground font-semibold max-w-xl leading-relaxed"
-                >
+                <p className="text-lg md:text-2xl text-muted-foreground font-semibold max-w-xl leading-relaxed">
                   {banners[current]?.description}
-                </motion.p>
+                </p>
 
-                <motion.div
-                  initial={{ y: 30, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.8, duration: 0.8 }}
-                  className={cn("flex flex-col sm:flex-row gap-6 pt-4", isRTL && "sm:flex-row-reverse")}
-                >
+                <div className={cn("flex flex-col sm:flex-row gap-6 pt-4", isRTL && "sm:flex-row-reverse")}>
                   <Link
                     href={banners[current]?.link || '#'}
                     className="inline-flex items-center justify-center gap-3 bg-primary text-primary-foreground px-6 py-4 md:px-12 md:py-6 rounded-2xl font-black text-base md:text-xl hover:bg-primary/95 transition-all hover:scale-105 shadow-3xl shadow-primary/40 active:scale-95 group uppercase tracking-widest"
@@ -155,14 +151,9 @@ export function Hero() {
                   >
                     <span>{t('our_works')}</span>
                   </Link>
-                </motion.div>
+                </div>
 
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 1, duration: 0.8 }}
-                  className={cn("flex flex-col sm:flex-row gap-4 sm:gap-8 pt-4 text-white/90", isRTL && "sm:flex-row-reverse")}
-                >
+                <div className={cn("flex flex-col sm:flex-row gap-4 sm:gap-8 pt-4 text-white/90", isRTL && "sm:flex-row-reverse")}>
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="text-primary shrink-0" size={20} />
                     <span className="font-semibold">{t('trust_since')}</span>
@@ -171,24 +162,25 @@ export function Hero() {
                     <CheckCircle2 className="text-primary shrink-0" size={20} />
                     <span className="font-semibold">{t('trust_experience')}</span>
                   </div>
-                </motion.div>
+                </div>
 
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1.2, duration: 0.8 }}
-                  className={cn("mt-6 p-4 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 flex items-start gap-3 max-w-xl", isRTL && "flex-row-reverse text-right")}
-                >
+                <div className={cn("mt-6 p-4 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 flex items-start gap-3 max-w-xl", isRTL && "flex-row-reverse text-right")}>
                   < ShieldCheck className="text-primary shrink-0 mt-0.5" size={20} />
                   <p className="text-sm font-bold text-white/80 leading-relaxed">
                     {tContact('form_note')}
                   </p>
-                </motion.div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Static Hero Mini Contact Form */}
+        <div className="hidden lg:block w-full lg:w-[540px] relative z-20">
+          <div className="absolute -inset-4 bg-primary/20 blur-3xl rounded-full -z-10 animate-pulse" />
+          <ContactForm isHeroMini={true} />
+        </div>
+      </div>
 
       <div className={cn("absolute bottom-8 flex flex-col gap-4", isRTL ? "left-8" : "right-8")}>
         {banners.map((_, index) => (

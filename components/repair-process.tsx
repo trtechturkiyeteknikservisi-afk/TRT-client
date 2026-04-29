@@ -43,7 +43,7 @@ export function RepairProcess() {
     if (isPlaying) {
       interval = setInterval(() => {
         setActiveStep((prev) => (prev + 1) % steps.length);
-      }, 5000);
+      }, 2000);
     }
     return () => clearInterval(interval);
   }, [isPlaying, steps.length]);

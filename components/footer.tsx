@@ -2,14 +2,27 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from '@/i18n/routing';
-import { Globe, MessageCircle, Share2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useTheme } from 'next-themes';
+import { cn } from '@/lib/utils';
+import { 
+  InstagramIcon, 
+  FacebookIcon, 
+  YoutubeIcon, 
+  TiktokIcon, 
+  SnapchatIcon, 
+  TelegramIcon, 
+  WhatsappIcon 
+} from './social-icons';
 
 const socialLinks = [
-  { icon: Globe, href: '#', label: 'Website' },
-  { icon: MessageCircle, href: '#', label: 'WhatsApp' },
-  { icon: Share2, href: '#', label: 'Social' },
+  { icon: WhatsappIcon, href: 'https://wa.me/905302094094', label: 'WhatsApp', color: 'hover:bg-[#25D366]' },
+  { icon: InstagramIcon, href: 'https://www.instagram.com/trtservis?igsh=MXcxZ25rNjNydjYxZQ%3D%3D&utm_source=qr', label: 'Instagram', color: 'hover:bg-[#E1306C]' },
+  { icon: TiktokIcon, href: 'https://www.tiktok.com/@trtservis', label: 'TikTok', color: 'hover:bg-black' },
+  { icon: FacebookIcon, href: 'https://www.facebook.com/share/185YU5woZA/?mibextid=wwXIfr', label: 'Facebook', color: 'hover:bg-[#1877F2]' },
+  { icon: YoutubeIcon, href: 'https://youtube.com/@trtservis?si=kb9K3XN-LX4NX-du', label: 'YouTube', color: 'hover:bg-[#FF0000]' },
+  { icon: TelegramIcon, href: 'https://t.me/trtservis', label: 'Telegram', color: 'hover:bg-[#0088cc]' },
+  { icon: SnapchatIcon, href: 'https://snapchat.com/t/pL3vgBfZ', label: 'Snapchat', color: 'hover:bg-[#FFFC00] hover:text-black' },
 ];
 
 export function Footer() {
@@ -28,11 +41,13 @@ export function Footer() {
         { name: t('tablet_repair'), href: '/services/tablet' },
         { name: t('robot_repair'), href: '/services/robot' },
         { name: t('watch_repair'), href: '/services/watch' },
+        { name: t('headphones_repair'), href: '/services/kulaklik' },
       ],
     },
     {
       title: t('company'),
       links: [
+        { name: t('about_us'), href: '/about-us' },
         { name: t('works'), href: '/portfolio' },
         { name: t('blog'), href: '/blog' },
         { name: t('contact'), href: '#contact' },
@@ -68,18 +83,23 @@ export function Footer() {
             <p className="text-lg text-muted-foreground leading-relaxed font-semibold">
               {t('description')}
             </p>
-            {/* <div className="flex gap-4">
+            <div className="flex flex-wrap gap-3">
               {socialLinks.map((social) => (
                 <a
                   key={social.label}
                   href={social.href}
-                  className="p-4 rounded-[1.25rem] bg-muted/50 text-muted-foreground hover:bg-primary hover:text-primary-foreground hover:-translate-y-1 transition-all duration-300 ring-1 ring-border/50 shadow-sm"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    "p-3 rounded-xl bg-muted/50 text-muted-foreground transition-all duration-300 ring-1 ring-border/50 shadow-sm hover:text-white hover:-translate-y-1",
+                    social.color
+                  )}
                   aria-label={social.label}
                 >
-                  <social.icon size={22} />
+                  <social.icon size={20} />
                 </a>
               ))}
-            </div> */}
+            </div>
           </div>
 
           {footerLinks.map((column) => (

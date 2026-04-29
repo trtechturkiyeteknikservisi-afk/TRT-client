@@ -15,7 +15,9 @@
     "tablet_repair": "Tablet Onarımı",
     "merchants": "Bayiler",
     "track_shipment": "Kargo Takibi",
-    "coming_soon": "Yakında"
+    "coming_soon": "Yakında",
+    "about_us": "Hakkımızda",
+    "headphones_repair": "Kulaklık Onarımı"
   },
   "Footer": {
     "description": "Türkiye'deki tüm elektronik cihazlarınız için birinci sınıf teknik servis. Kaliteli parçalar ve garanti ile uzman onarımlar.",
@@ -32,10 +34,12 @@
     "support": "Destek",
     "faqs": "Sıkça Sorulan Sorular",
     "sitemap": "Site Haritası",
-    "merchants": "Bayiler",
-    "track_shipment": "Kargo Takibi",
+    "merchants": "Kurumsal",
     "coming_soon": "Yakında",
-    "copyright": "© {year} TRT Teknik Servis. Tüm hakları saklıdır."
+    "about_us": "Hakkımızda",
+    "headphones_repair": "Kulaklık Onarımı",
+    "track_shipment": "Kargo Takibi",
+    "copyright": "© {year} TR TECH. Tüm hakları saklıdır."
   },
   "Home": {
     "stat_customers": "Mutlu Müşteri",
@@ -71,22 +75,24 @@
     "laptop_desc": "Donanım yükseltmeleri ve anakart onarımı.",
     "robot": "Robot Süpürge",
     "robot_desc": "Motor onarımı ve sensör kalibrasyonu.",
-    "watch": "Lüks Saat",
+    "watch": "akıllı  Saat",
     "watch_desc": "Mekanik onarım ve batarya değişimi.",
     "tablet": "Tablet ve iPad",
     "tablet_desc": "Ekran, şarj soketi ve batarya onarımı.",
+    "headphones": "Kulaklık",
+    "headphones_desc": "AirPods ve tüm kulaklıklar için onarım.",
     "view_service": "Hizmeti Gör"
   },
   "ServiceDetails": {
     "phone": {
       "title": "Profesyonel Telefon Tamiri",
       "description": "Apple, Samsung, Huawei ve daha fazlası dahil olmak üzere tüm büyük akıllı telefon markalarını onarıyoruz. Ekran çatlaklarından anakart sorunlarına kadar her şeyi hallediyoruz.",
-      "features": ["Ekran Değişimi", "Batarya Değişimi", "Şarj Soketi Tamiri", "Sıvı Teması Onarımı", "Yazılım Sorunları", "Kamera Tamiri"]
+      "features": ["Ekran Değişimi", "Batarya Değişimi", "Şarj Soketi Onarımı", "Mikrofon / Hoparlör Onarımı", "Anakart Onarımı", "Sıvı Teması Onarımı", "Mmc & İşlemci Onarımı"]
     },
     "laptop": {
       "title": "Uzman Dizüstü & PC Tamiri",
       "description": "Teknisyenlerimiz, tüm dizüstü bilgisayar markaları ve özel PC'ler için donanım yükseltmeleri, ekran değiştirmeleri ve performans ayarı konularında uzmanlaşmıştır.",
-      "features": ["Klavye Değişimi", "SSD/RAM Yükseltmeleri", "Anakart Tamiri", "Ekran Değişimi", "Isınma Çözümleri", "Veri Kurtarma"]
+      "features": ["Klavye Değişimi", "SSD/RAM Yükseltmeleri", "Anakart Tamiri", "Ekran Değişimi", "Isınma Çözümleri"]
     },
     "robot": {
       "title": "Robot Süpürge Teknik Servisi",
@@ -101,7 +107,12 @@
     "tablet": {
       "title": "Profesyonel Tablet ve iPad Tamiri",
       "description": "iPad, Samsung Galaxy Tab ve Microsoft Surface dahil tüm tablet markaları için uzman onarım. Ekran çatlaklarından donanım sorunlarına kadar.",
-      "features": ["Ekran Değişimi", "Batarya Değişimi", "Şarj Soketi Tamiri", "Yazılım Sorunları", "Dokunmatik Tamiri", "Anakart Tamiri"]
+      "features": ["Ekran Değişimi", "Batarya Değişimi", "Şarj Soketi Tamiri", "Yazılım Sorunları", "Dokunmatik Tamiri", "Anakart Tamiri", "Kamera Onarımı", "Ses Problemleri", "Sıvı Teması Onarımı"]
+    },
+    "headphones": {
+      "title": "Kulaklık ve AirPods Onarımı",
+      "description": "AirPods, kulaklıklar ve tüm premium ses ekipmanları için uzman onarım. Şarj sorunlarını, ses problemlerini ve fiziksel hasarları onarıyoruz.",
+      "features": ["AirPods Batarya", "Şarj Kutusu Onarımı", "Hoparlör Değişimi", "Bağlantı Sorunları", "Temizlik ve Restorasyon", "Kafa Bandı Onarımı"]
     },
     "features_title": "Hizmet Özellikleri",
     "guaranteed": "Garantili",
@@ -142,7 +153,7 @@
     "whatsapp_cta": "Sohbet Başlat",
     "email_label": "E-posta",
     "location_label": "Konum",
-    "location_value": "Nilüfer, Bursa, Türkiye",
+    "location_value": "ULU MAH. KIBRIS ŞEHİTLERİ CAD. DANACIOGLU APT NO: 73A OSMANGAZİ/ BURSA",
     "full_name": "Ad Soyad",
     "phone_number": "Telefon Numarası",
     "city": "Şehir",
@@ -159,6 +170,7 @@
     "service_robot": "Robot Süpürge Onarımı",
     "service_watch": "Saat Onarımı",
     "service_tablet": "Tablet Onarımı",
+    "service_headphones": "Kulaklık Onarımı",
     "your_message": "Mesajınız",
     "message_placeholder": "Size nasıl yardımcı olabiliriz?",
     "name_placeholder": "Adınızı soyadınızı girin",
@@ -358,8 +370,8 @@
     "badge_label": "TRT Güvencesi",
     "expert_team": "Sertifikalı ve Eğitimli Uzman Ekip",
     "expert_team_desc": "Tüm teknisyenlerimiz profesyonel eğitim almış, deneyimli ve sertifikalı uzmanlardan oluşmaktadır. Yılların verdiği tecrübe ile cihazlarınızı güvenle onarıyoruz.",
-    "warranty": "3 Ay Servis Garantisi",
-    "warranty_desc": "Yapılan onarım işlemleri 3 ay garanti kapsamındadır. Garanti süresi boyunca ücretsiz kontrol sağlanır.",
+    "warranty": "6ay Servis Garantisi",
+    "warranty_desc": "Yapılan onarım işlemleri 6ay garanti kapsamındadır. Garanti süresi boyunca ücretsiz kontrol sağlanır.",
     "secure_process": "Güvenli İşlem ve Şeffaflık",
     "secure_process_desc": "Cihazınız incelenmeden ödeme yapmazsınız. Onayınız olmadan işlem yapılmaz.",
     "since_2002": "2002'den beri hizmetinizdeyiz",
@@ -369,15 +381,35 @@
   "Verification": {
     "title": "Resmi Belgenizi Alın",
     "subtitle": "Mühürlü belgenizi e-posta yoluyla almak için lütfen aşağıdaki bilgileri doğru bir şekilde doldurun",
+    "terms_step_title": "Lütfen önce politika ve şartları okuyun, ardından belgeyi almak için kabul edin ve devam edin",
+    "terms_step_button": "Kabul Et ve Devam Et",
+    "terms_content_title": "Şartlar ve Koşullar",
+    "terms_item_1": "Girilen tüm veriler doğru kabul edilir ve kullanıcının kişisel sorumluluğundadır.",
+    "terms_item_2": "E-posta (Gmail) ve kayıtlı WhatsApp numarası sadece resmi belgeyi göndermek için kullanılacaktır.",
+    "terms_item_3": "Uluslararası standartlara göre en yüksek düzeyde veri koruma ve gizliliğe bağlıyız.",
+    "terms_item_4": "Kullanıcı, verileri manipüle etmeye veya sahte bilgi girmeye yetkili değildir.",
+    "terms_item_5": "Gönderilen belge sadece amacına uygun olarak geçerli sayılır.",
+    "terms_item_6": "Bu bildirimi kabul ederek, talebinizle ilgili olarak sizinle iletişime geçme hakkını bize vermiş olursunuz.",
     "form_name": "Ad Soyad",
     "form_whatsapp": "WhatsApp Numarası",
     "form_phone": "Telefon Numarası",
     "form_email": "E-posta Adresi (Gmail)",
     "form_terms": "Şartlar ve koşulları ve geçerli tüm politikaları kabul ediyorum",
     "form_submit": "Gönder ve Belgeyi Al",
+    "privacy_note": "Gönder düğmesine tıklayarak, önceden okunan gizlilik politikasını ve kullanım şartlarını otomatik olarak kabul etmiş olursunuz.",
     "success_title": "Başarıyla Gönderildi!",
     "success_desc": "Resmi mühürlü belge e-posta adresinize başarıyla gönderildi. Lütfen gelen kutunuzu veya Spam klasörünüzü kontrol edin.",
     "error_title": "Üzgünüz, bir hata oluştu",
     "error_desc": "Lütfen tekrar deneyin veya doğrudan teknik destekle iletişime geçin."
+  },
+  "AboutUs": {
+    "title": "Hakkımızda",
+    "subtitle": "Teknik Serviste 20+ Yıllık Mükemmellik",
+    "content1": "TR TECH, 2002 yılında kurulan, Türkiye'nin önde gelen teknik servis firmalarından biridir. Geniş bir elektronik cihaz yelpazesi için kapsamlı ve profesyonel onarım çözümleri sunmaktan gurur duyuyoruz.",
+    "content2": "Ekibimiz uzman ve sertifikalı mühendis ve teknisyenlerden oluşmaktadır. Müşterilerimiz için en iyi sonuçları sağlamak için en son araçları ve teknikleri kullanıyoruz. Sloganımız her zaman Kalite, Güvenilirlik ve Hızdır.",
+    "mission_title": "Misyonumuz",
+    "mission_desc": "Müşteri memnuniyetini tam olarak sağlamak için orijinal parçalarla, adil fiyatlarla en üst düzeyde teknik servis sunmak.",
+    "vision_title": "Vizyonumuz",
+    "vision_desc": "Türkiye'de ve ötesinde teknik onarım konusunda öncü ve güvenilir bir merkez olmak."
   }
 }

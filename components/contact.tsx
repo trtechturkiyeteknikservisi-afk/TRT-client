@@ -14,8 +14,8 @@ export function Contact() {
   const t = useTranslations('Contact');
   const [settings, setSettings] = useState({
     whatsapp: '905302094094',
-    support_phone: '+90 530 209 40 94',
-    support_email: 'elektroteknikticaret@hotmail.com'
+    support_phone: '+90 0850 840 15 05',
+    support_email: 'trtech@trtservis.com'
   });
 
   React.useEffect(() => {
@@ -28,7 +28,7 @@ export function Contact() {
           setSettings({
             whatsapp: data.whatsapp || '905302094094',
             support_phone: data.support_phone || '+90 530 209 40 94',
-            support_email: data.support_email || 'elektroteknikticaret@hotmail.com'
+            support_email: data.support_email || 'trtech@trtservis.com'
           });
         }
       } catch (error) {
