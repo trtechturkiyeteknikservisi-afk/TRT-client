@@ -75,8 +75,7 @@ export function QuickContactBar() {
             
             <div className="p-2.5 bg-emerald-500/10 rounded-2xl scale-110 transition-transform duration-500 flex items-center justify-center">
               <img src="/whats.png" alt="WhatsApp" className="w-12 h-12 object-contain drop-shadow-md scale-110" />
-            </div>
-            
+            </div>         
             <div className="flex flex-col">
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500/60 mb-1">{t('whatsapp_label')}</span>
               <span className="text-xl md:text-3xl font-black tracking-tighter text-emerald-500">{settings.whatsapp}</span>
