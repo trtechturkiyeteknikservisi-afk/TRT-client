@@ -61,7 +61,8 @@ export function Hero() {
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
         const res = await axios.get(`${API_URL}/settings`);
-        if (res.data && res.data.whatsapp) setWhatsappNumber(res.data.whatsapp);
+        const data = res.data as any;
+        if (data && data.whatsapp) setWhatsappNumber(data.whatsapp);
       } catch (error) {
         console.error('Failed to fetch settings:', error);
       }
