@@ -79,24 +79,27 @@ export function StickyContact() {
       {/* Social Media Icons Vertical List */}
       <div className="flex flex-col-reverse items-center gap-3">
         <AnimatePresence>
-          {isOpen && socialLinks.map((social, idx) => (
-            <motion.a
-              key={idx}
-              href={social.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              initial={{ opacity: 0, y: 20, scale: 0.5 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.5 }}
-              transition={{ delay: idx * 0.05, type: 'spring', stiffness: 260, damping: 20 }}
-              className={cn(
-                "w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform",
-                social.color
-              )}
-            >
-              {typeof social.icon === 'function' ? <social.icon /> : <social.icon size={20} className={social.iconColor || "text-white"} />}
-            </motion.a>
-          ))}
+          {isOpen && socialLinks.map((social, idx) => {
+            const Icon = social.icon as any;
+            return (
+              <motion.a
+                key={idx}
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                initial={{ opacity: 0, y: 20, scale: 0.5 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 20, scale: 0.5 }}
+                transition={{ delay: idx * 0.05, type: 'spring', stiffness: 260, damping: 20 }}
+                className={cn(
+                  "w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform",
+                  social.color
+                )}
+              >
+                <Icon size={20} className={social.iconColor || "text-white"} />
+              </motion.a>
+            );
+          })}
         </AnimatePresence>
       </div>
     </div>

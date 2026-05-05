@@ -127,45 +127,48 @@ export function Contact() {
                   color: 'orange-500',
                   link: '#' 
                 }
-              ].map((item, idx) => (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: idx * 0.1 }}
-                  viewport={{ once: true }}
-                  className="group relative p-6 rounded-[2rem] bg-card/40 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 overflow-hidden"
-                >
-                  <div className={cn(
-                    "p-3 rounded-2xl w-fit transition-all duration-500 group-hover:scale-110 shadow-lg",
-                    item.isWa ? "bg-green-500 text-white shadow-green-500/20" : "bg-primary text-primary-foreground shadow-primary/20"
-                  )}>
-                    <item.icon size={24} strokeWidth={2.5} />
-                  </div>
-                  
-                  <div className="mt-4 space-y-1">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-70 group-hover:opacity-100 transition-opacity">
-                      {item.label}
-                    </p>
-                    {item.link !== '#' ? (
-                      <a 
-                        href={item.link} 
-                        className="text-base font-black group-hover:text-primary transition-colors block cursor-pointer"
-                        dir={item.ltr ? "ltr" : "auto"}
-                        target={item.isWa ? "_blank" : "_self"}
-                        rel={item.isWa ? "noopener noreferrer" : ""}
-                      >
-                        {item.value}
-                      </a>
-                    ) : (
-                      <p className="text-base font-black">{item.value}</p>
-                    )}
-                  </div>
-                  
-                  {/* Subtle design element */}
-                  <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-primary/5 rounded-full group-hover:scale-[3] transition-transform duration-700 -z-10" />
-                </motion.div>
-              ))}
+              ].map((item, idx) => {
+                const Icon = item.icon;
+                return (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: idx * 0.1 }}
+                    viewport={{ once: true }}
+                    className="group relative p-6 rounded-[2rem] bg-card/40 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 overflow-hidden"
+                  >
+                    <div className={cn(
+                      "p-3 rounded-2xl w-fit transition-all duration-500 group-hover:scale-110 shadow-lg",
+                      item.isWa ? "bg-green-500 text-white shadow-green-500/20" : "bg-primary text-primary-foreground shadow-primary/20"
+                    )}>
+                      <Icon size={24} strokeWidth={2.5} />
+                    </div>
+                    
+                    <div className="mt-4 space-y-1">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-70 group-hover:opacity-100 transition-opacity">
+                        {item.label}
+                      </p>
+                      {item.link !== '#' ? (
+                        <a 
+                          href={item.link} 
+                          className="text-base font-black group-hover:text-primary transition-colors block cursor-pointer"
+                          dir={item.ltr ? "ltr" : "auto"}
+                          target={item.isWa ? "_blank" : "_self"}
+                          rel={item.isWa ? "noopener noreferrer" : ""}
+                        >
+                          {item.value}
+                        </a>
+                      ) : (
+                        <p className="text-base font-black">{item.value}</p>
+                      )}
+                    </div>
+                    
+                    {/* Subtle design element */}
+                    <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-primary/5 rounded-full group-hover:scale-[3] transition-transform duration-700 -z-10" />
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
 

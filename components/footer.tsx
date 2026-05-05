@@ -84,21 +84,24 @@ export function Footer() {
               {t('description')}
             </p>
             <div className="flex flex-wrap gap-3">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={cn(
-                    "p-3 rounded-xl bg-muted/50 text-muted-foreground transition-all duration-300 ring-1 ring-border/50 shadow-sm hover:text-white hover:-translate-y-1",
-                    social.color
-                  )}
-                  aria-label={social.label}
-                >
-                  <social.icon size={20} />
-                </a>
-              ))}
+              {socialLinks.map((social) => {
+                const Icon = social.icon as any;
+                return (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn(
+                      "p-3 rounded-xl bg-muted/50 text-muted-foreground transition-all duration-300 ring-1 ring-border/50 shadow-sm hover:text-white hover:-translate-y-1",
+                      social.color
+                    )}
+                    aria-label={social.label}
+                  >
+                    <Icon size={20} />
+                  </a>
+                );
+              })}
             </div>
           </div>
 
