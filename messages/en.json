@@ -107,7 +107,7 @@
     "tablet": {
       "title": "Professional Tablet & iPad Repair",
       "description": "Expert repair for all tablet brands including iPad, Samsung Galaxy Tab, and Microsoft Surface. From cracked screens to hardware issues.",
-      "features": ["Screen Replacement", "Battery Replacement", "Charging Port Repair", "Software Troubleshooting", "Touch Digitizer Fix", "Motherboard Repair", "Camera Repair", "Audio Problems", "Water Damage Repair"]
+      "features": ["Screen Replacement", "Battery Replacement", "Charging Port Repair",  "Touch Digitizer Fix", "Motherboard Repair", "Camera Repair", "Audio Problems", "Water Damage Repair"]
     },
     "headphones": {
       "title": "Headphones & AirPods Repair",
@@ -172,10 +172,16 @@
     "service_tablet": "Tablet Repair",
     "service_headphones": "Headphones Repair",
     "your_message": "Your Message",
-    "message_placeholder": "How can we help you?",
+    "message_placeholder": "Write your message here...",
+    "address_il": "Province / City",
+    "address_ilce": "District",
+    "address_mahalle": "Neighborhood",
+    "address_sokak": "Street / Alley",
+    "address_no": "Building No",
+    "address_daire": "Door / Apt",
     "name_placeholder": "Enter your full name",
     "address": "Address",
-    "form_note": "You don't pay until your device is inspected. No action is taken without your approval.",
+    "form_note": "Your data is protected under our privacy policy.",
     "address_placeholder": "Enter your detailed address (e.g., street, neighborhood, city)",
     "detecting_location": "Detecting location...",
     "location_detected": "Location detected successfully",
@@ -375,7 +381,9 @@
     "secure_process_desc": "You do not pay before your device is inspected. No action is taken without your approval.",
     "since_2002": "At your service since 2002",
     "experience_25": "Over 25 years of experience",
-    "no_payment": "No payment before inspection. No action without your approval."
+    "no_payment": "No payment before inspection. No action without your approval.",
+    "fault_detection_chargeable": "Fault detection is chargeable",
+    "free_kurye": "Free courier within Bursa"
   },
   "Verification": {
     "title": "Get Your Official Document",

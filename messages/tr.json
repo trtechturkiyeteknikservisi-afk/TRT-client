@@ -13,8 +13,8 @@
     "robot_repair": "Robot Süpürge Onarımı",
     "watch_repair": "Saat Onarımı",
     "tablet_repair": "Tablet Onarımı",
-    "merchants": "Bayiler",
-    "track_shipment": "Kargo Takibi",
+    "merchants": "Kurumsal",
+    "track_shipment": "Cihazım  Takibi",
     "coming_soon": "Yakında",
     "about_us": "Hakkımızda",
     "headphones_repair": "Kulaklık Onarımı"
@@ -95,7 +95,7 @@
       "features": ["Klavye Değişimi", "SSD/RAM Yükseltmeleri", "Anakart Tamiri", "Ekran Değişimi", "Isınma Çözümleri"]
     },
     "robot": {
-      "title": "Robot Süpürge Teknik Servisi",
+      "title": "Robot Süpürge Onarımı",
       "description": "Xiaomi, Roborock, Viomi ve diğer popüler robot süpürge markaları için yetkili tarzda servis. Evinizin kesintisiz temiz kalmasını sağlayın.",
       "features": ["Tekerlek & Motor Tamiri", "Sensör Kalibrasyonu", "Batarya Değişimi", "Anakart Tamiri", "Derin Temizlik", "Lazer (LDS) Tamiri"]
     },
@@ -107,7 +107,7 @@
     "tablet": {
       "title": "Profesyonel Tablet ve iPad Tamiri",
       "description": "iPad, Samsung Galaxy Tab ve Microsoft Surface dahil tüm tablet markaları için uzman onarım. Ekran çatlaklarından donanım sorunlarına kadar.",
-      "features": ["Ekran Değişimi", "Batarya Değişimi", "Şarj Soketi Tamiri", "Yazılım Sorunları", "Dokunmatik Tamiri", "Anakart Tamiri", "Kamera Onarımı", "Ses Problemleri", "Sıvı Teması Onarımı"]
+      "features": ["Ekran Değişimi", "Batarya Değişimi", "Şarj Soketi Tamiri",  "Dokunmatik Tamiri", "Anakart Tamiri", "Kamera Onarımı", "Ses Problemleri", "Sıvı Teması Onarımı"]
     },
     "headphones": {
       "title": "Kulaklık ve AirPods Onarımı",
@@ -172,10 +172,15 @@
     "service_tablet": "Tablet Onarımı",
     "service_headphones": "Kulaklık Onarımı",
     "your_message": "Mesajınız",
-    "message_placeholder": "Size nasıl yardımcı olabiliriz?",
+    "message_placeholder": "Mesajınızı buraya yazın...",
     "name_placeholder": "Adınızı soyadınızı girin",
-    "address": "Adres",
-    "form_note": "Cihazınız incelenmeden ödeme yapmazsınız. Onayınız olmadan işlem yapılmaz.",
+    "address_il": "İl",
+    "address_ilce": "İlçe",
+    "address_mahalle": "Mahalle",
+    "address_sokak": "Sokak / Cadde",
+    "address_no": "Bina No",
+    "address_daire": "Daire No",
+    "form_note": "Verileriniz gizlilik politikamız kapsamında korunmaktadır.",
     "address_placeholder": "Detaylı adresinizi girin (örn: sokak, mahalle, şehir)",
     "detect_location": "Konumumu Bul",
     "detecting_location": "Konum belirleniyor...",
@@ -376,7 +381,9 @@
     "secure_process_desc": "Cihazınız incelenmeden ödeme yapmazsınız. Onayınız olmadan işlem yapılmaz.",
     "since_2002": "2002'den beri hizmetinizdeyiz",
     "experience_25": "25 yılı aşkın tecrübe",
-    "no_payment": "İnceleme öncesi ödeme alınmaz. Onayınız olmadan işlem yapılmaz."
+    "no_payment": "İnceleme öncesi ödeme alınmaz. Onayınız olmadan işlem yapılmaz.",
+    "fault_detection_chargeable": "Arıza tespit ücretlidir",
+    "free_kurye": "Bursa içi kurye ücretsiz"
   },
   "Verification": {
     "title": "Resmi Belgenizi Alın",

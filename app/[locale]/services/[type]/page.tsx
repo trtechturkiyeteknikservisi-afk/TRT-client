@@ -9,6 +9,7 @@ import { Smartphone, Laptop, Watch, Zap, CheckCircle2, ShieldCheck, Clock, Award
 import { motion } from 'framer-motion';
 import { TrustBadges } from "@/components/trust-badges";
 import { ContactForm } from "@/components/contact-form";
+import { ServiceBrands } from "@/components/service-brands";
 import axios from 'axios';
 import { useTranslations } from 'next-intl';
 
@@ -89,6 +90,7 @@ export default function ServicePage() {
       </section>
 
       <TrustBadges />
+      <ServiceBrands type={serviceKey} />
 
       <section className="py-24">
         <div className="container mx-auto px-4">
@@ -113,6 +115,8 @@ export default function ServicePage() {
                   ))}
                 </div>
               </div>
+
+
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="text-center p-6 bg-card rounded-2xl border">

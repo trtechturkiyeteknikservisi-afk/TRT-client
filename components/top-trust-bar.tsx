@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ShieldCheck, UserCheck, CheckCircle, Award } from 'lucide-react';
+import { ShieldCheck, UserCheck, CheckCircle, Award, AlertCircle, Truck } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 export function TopTrustBar() {
@@ -12,6 +12,8 @@ export function TopTrustBar() {
     { text: t('experience_25'), icon: UserCheck },
     { text: t('expert_team'), icon: Award },
     { text: t('no_payment'), icon: ShieldCheck },
+    { text: t('free_kurye'), icon: Truck },
+    { text: t('fault_detection_chargeable'), icon: AlertCircle },
   ];
 
   return (

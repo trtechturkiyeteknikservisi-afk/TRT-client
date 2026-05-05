@@ -16,6 +16,7 @@ export function Hero() {
   const locale = useLocale();
   const isRTL = locale === 'ar';
   const [current, setCurrent] = useState(0);
+  const [whatsappNumber, setWhatsappNumber] = useState("905302094094");
   const [banners, setBanners] = useState([
     {
       title: t('phone_title'),
@@ -55,6 +56,17 @@ export function Hero() {
       }
     };
     fetchBanners();
+
+    const fetchSettings = async () => {
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+        const res = await axios.get(`${API_URL}/settings`);
+        if (res.data && res.data.whatsapp) setWhatsappNumber(res.data.whatsapp);
+      } catch (error) {
+        console.error('Failed to fetch settings:', error);
+      }
+    };
+    fetchSettings();
   }, [locale]);
 
   useEffect(() => {
@@ -71,7 +83,7 @@ export function Hero() {
   }, [banners.length, current]);
 
   return (
-    <section className="relative h-[95vh] w-full overflow-hidden bg-background">
+    <section className="relative min-h-screen lg:h-[110vh] w-full overflow-hidden bg-background">
       {/* Dynamic Backgrounds */}
       <AnimatePresence mode="wait">
         {banners[current] && (
@@ -89,12 +101,12 @@ export function Hero() {
             >
               {/* Multi-layered gradient for depth */}
               <div className={cn(
-                "absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent",
+                "absolute inset-0 bg-gradient-to-t from-background via-background/5 dark:via-background/20 to-transparent",
                 isRTL 
-                  ? "bg-gradient-to-l from-background via-background/80 to-transparent" 
-                  : "bg-gradient-to-r from-background via-background/80 to-transparent"
+                  ? "bg-gradient-to-l from-background via-background/10 dark:via-background/80 to-transparent" 
+                  : "bg-gradient-to-r from-background via-background/10 dark:via-background/80 to-transparent"
               )} />
-              <div className="absolute inset-0 bg-black/20" />
+              <div className="absolute inset-0 bg-black/5 dark:bg-black/20" />
             </div>
           </motion.div>
         )}
@@ -139,7 +151,7 @@ export function Hero() {
                 <div className={cn("flex flex-col sm:flex-row gap-6 pt-4", isRTL && "sm:flex-row-reverse")}>
                   <Link
                     href={banners[current]?.link || '#'}
-                    className="inline-flex items-center justify-center gap-3 bg-primary text-primary-foreground px-6 py-4 md:px-12 md:py-6 rounded-2xl font-black text-base md:text-xl hover:bg-primary/95 transition-all hover:scale-105 shadow-3xl shadow-primary/40 active:scale-95 group uppercase tracking-widest"
+                    className="inline-flex items-center justify-center gap-3 bg-primary text-primary-foreground px-6 py-4 md:px-12 md:py-6 rounded-2xl font-black text-base md:text-xl hover:bg-primary/95 transition-all hover:scale-105 shadow-sm shadow-primary/10 dark:shadow-3xl dark:shadow-primary/40 active:scale-95 group uppercase tracking-widest"
                   >
                     <span>{banners[current]?.cta}</span>
                     <ArrowRight className={cn("w-5 h-5 md:w-6 md:h-6 transition-transform", isRTL ? "group-hover:-translate-x-2 rotate-180" : "group-hover:translate-x-2")} />
@@ -153,7 +165,7 @@ export function Hero() {
                   </Link>
                 </div>
 
-                <div className={cn("flex flex-col sm:flex-row gap-4 sm:gap-8 pt-4 text-white/90", isRTL && "sm:flex-row-reverse")}>
+                <div className={cn("flex flex-col sm:flex-row gap-4 sm:gap-8 pt-4 text-foreground/90", isRTL && "sm:flex-row-reverse")}>
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="text-primary shrink-0" size={20} />
                     <span className="font-semibold">{t('trust_since')}</span>
@@ -164,9 +176,9 @@ export function Hero() {
                   </div>
                 </div>
 
-                <div className={cn("mt-6 p-4 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 flex items-start gap-3 max-w-xl", isRTL && "flex-row-reverse text-right")}>
+                <div className={cn("mt-6 p-4 bg-foreground/5 backdrop-blur-md rounded-2xl border border-foreground/10 flex items-start gap-3 max-w-xl", isRTL && "flex-row-reverse text-right")}>
                   < ShieldCheck className="text-primary shrink-0 mt-0.5" size={20} />
-                  <p className="text-sm font-bold text-white/80 leading-relaxed">
+                  <p className="text-sm font-bold text-foreground/80 leading-relaxed">
                     {tContact('form_note')}
                   </p>
                 </div>
@@ -177,7 +189,29 @@ export function Hero() {
 
         {/* Static Hero Mini Contact Form */}
         <div className="hidden lg:block w-full lg:w-[540px] relative z-20">
-          <div className="absolute -inset-4 bg-primary/20 blur-3xl rounded-full -z-10 animate-pulse" />
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-row items-center justify-center gap-4 mb-5 bg-background/40 backdrop-blur-md p-3 rounded-2xl border border-foreground/5 lg:bg-transparent lg:backdrop-blur-none lg:border-none lg:p-0"
+          >
+            <a 
+              href={`https://wa.me/${whatsappNumber.replace(/\D/g, '')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 hover:scale-105 transition-transform"
+            >
+              <img src="/whats.png" alt="WhatsApp" className="w-6 h-6 object-contain" />
+              <span className="text-lg font-black tracking-tighter text-emerald-500" dir="ltr">{whatsappNumber}</span>
+            </a>
+            
+            <div className="w-1.5 h-1.5 rounded-full bg-foreground/10" />
+            
+            <div className="px-4 py-1.5 bg-red-500/10 border border-red-500/20 rounded-xl">
+              <span className="text-xs font-black uppercase tracking-widest text-red-600 dark:text-white">
+                {useTranslations('Trust')('free_kurye')}
+              </span>
+            </div>
+          </motion.div>
           <ContactForm isHeroMini={true} />
         </div>
       </div>

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { MapPin, Send, CheckCircle, X, ShieldCheck } from 'lucide-react';
+import { AddressSelector } from './address-selector';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -15,73 +16,40 @@ interface ContactFormProps {
 
 export function ContactForm({ initialServiceType = 'phone', isSidebar = false, isHeroMini = false }: ContactFormProps) {
   const t = useTranslations('Contact');
+  const tTrust = useTranslations('Trust');
+  const [whatsappNumber, setWhatsappNumber] = useState("905302094094");
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     email: '',
     city: '',
     address: '',
+    addressComponents: null as any,
     message: '',
     serviceType: initialServiceType,
     deviceModel: ''
   });
   
   const [loading, setLoading] = useState(false);
-  const [detectingLocation, setDetectingLocation] = useState(false);
-  const [suggestions, setSuggestions] = useState<any[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    
-    // Auto-detect city via IP - Only on client after mount
-    const autoDetectCity = async () => {
-      const services = [
-        'https://ipinfo.io/json',
-        'https://ip-api.com/json/',
-        'https://ipapi.co/json/',
-        'https://api.ipify.org?format=json' 
-      ];
 
-      for (const service of services) {
-        try {
-          const res = await axios.get(service);
-          const data = res.data as any;
-          let detectedCity = '';
-          
-          if (service.includes('ip-api') && data?.city) {
-            detectedCity = data.city;
-          } else if (service.includes('ipapi.co') && data?.city) {
-            detectedCity = data.city;
-          } else if (service.includes('ipinfo') && data?.city) {
-            detectedCity = data.city;
-          }
-
-          if (detectedCity) {
-            const lowerCity = detectedCity.toLowerCase();
-            let cityValue = '';
-            if (lowerCity.includes('bursa')) cityValue = 'Bursa';
-            else if (lowerCity.includes('istanbul')) cityValue = 'Istanbul';
-            else if (lowerCity.includes('ankara')) cityValue = 'Ankara';
-            else if (lowerCity.includes('izmir')) cityValue = 'Izmir';
-            else if (lowerCity.includes('antalya')) cityValue = 'Antalya';
-            
-            if (cityValue) {
-              setFormData(prev => ({ ...prev, city: cityValue }));
-            } else {
-              setFormData(prev => ({ ...prev, city: 'Other', address: detectedCity }));
-            }
-            break; 
-          }
-        } catch (error) {
-          console.warn(`City detection failed for ${service}, trying next...`);
+    const fetchSettings = async () => {
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+        const res = await fetch(`${API_URL}/settings`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.whatsapp) setWhatsappNumber(data.whatsapp);
         }
+      } catch (err) {
+        console.error("Failed to fetch settings in ContactForm", err);
       }
     };
-    
-    autoDetectCity();
+    fetchSettings();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -97,6 +65,7 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
         email: '',
         city: '',
         address: '',
+        addressComponents: null,
         message: '',
         serviceType: initialServiceType,
         deviceModel: ''
@@ -108,353 +77,127 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
     }
   };
 
-  const handleDetectLocation = () => {
-    if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser');
-      return;
-    }
-
-    const fallbackToIP = async () => {
-      try {
-        const res = await axios.get<{ city?: string }>('https://ipapi.co/json/');
-        if (res.data) {
-          const city = res.data.city || '';
-          const lowerCity = city.toLowerCase();
-          let cityValue = 'Other';
-          if (lowerCity.includes('bursa')) cityValue = 'Bursa';
-          else if (lowerCity.includes('istanbul')) cityValue = 'Istanbul';
-          else if (lowerCity.includes('ankara')) cityValue = 'Ankara';
-          else if (lowerCity.includes('izmir')) cityValue = 'Izmir';
-          else if (lowerCity.includes('antalya')) cityValue = 'Antalya';
-
-          setFormData(prev => ({
-            ...prev,
-            city: cityValue,
-            address: cityValue === 'Other' ? city : prev.address
-          }));
-        }
-      } catch (err) {
-        console.error('IP Fallback failed', err);
-      } finally {
-        setDetectingLocation(false);
-      }
-    };
-
-    setDetectingLocation(true);
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const { latitude, longitude } = position.coords;
-          const response = await axios.get<{ address: any }>(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
-            {
-              headers: { 'Accept-Language': 'ar,en,tr' },
-              timeout: 5000
-            }
-          );
-          
-          if (response.data && response.data.address) {
-            const addr = response.data.address;
-            const detectedCity = addr.city || addr.town || addr.village || addr.province || '';
-            const road = addr.road || '';
-            const neighbourhood = addr.neighbourhood || addr.suburb || '';
-            const houseNumber = addr.house_number || '';
-            
-            const lowerCity = detectedCity.toLowerCase();
-            let cityValue = 'Other';
-            if (lowerCity.includes('bursa')) cityValue = 'Bursa';
-            else if (lowerCity.includes('istanbul')) cityValue = 'Istanbul';
-            else if (lowerCity.includes('ankara')) cityValue = 'Ankara';
-            else if (lowerCity.includes('izmir')) cityValue = 'Izmir';
-            else if (lowerCity.includes('antalya')) cityValue = 'Antalya';
-
-            const fullAddress = [
-              houseNumber, 
-              road, 
-              neighbourhood, 
-              addr.suburb, 
-              addr.district, 
-              detectedCity, 
-              addr.province
-            ].filter((val, index, self) => val && self.indexOf(val) === index).join(', ');
-            
-            setFormData(prev => ({
-              ...prev,
-              city: cityValue,
-              address: fullAddress
-            }));
-          }
-        } catch (error) {
-          console.error('Error reverse geocoding:', error);
-          await fallbackToIP();
-        } finally {
-          setDetectingLocation(false);
-        }
-      },
-      async (error) => {
-        console.error('Error getting location:', error);
-        await fallbackToIP();
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 0
-      }
-    );
-  };
-
-  const handleAddressChange = async (val: string) => {
-    setFormData({ ...formData, address: val });
-    if (val.length < 3) {
-      setSuggestions([]);
-      setShowSuggestions(false);
-      return;
-    }
-
-    try {
-      const response = await axios.get(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&format=json&addressdetails=1&limit=5&countrycodes=tr`
-      );
-      if (Array.isArray(response.data)) {
-        setSuggestions(response.data as any[]);
-        setShowSuggestions(true);
-      }
-    } catch (err) {
-      console.error('Search failed', err);
-    }
-  };
-
-  const selectSuggestion = (s: any) => {
-    const addr = s.address;
-    const houseNumber = addr.house_number || '';
-    const road = addr.road || '';
-    const neighbourhood = addr.neighbourhood || addr.suburb || '';
-    const city = addr.city || addr.town || addr.village || '';
-    
-    const streetAddress = [houseNumber, road, neighbourhood].filter(Boolean).join(', ');
-    const fullDetail = [streetAddress, city].filter(Boolean).join(', ');
-
-    const detectedCity = addr.city || addr.town || addr.village || addr.province || '';
-    const lowerCity = detectedCity.toLowerCase();
-    
-    let cityValue = 'Other';
-    if (lowerCity.includes('bursa')) cityValue = 'Bursa';
-    else if (lowerCity.includes('istanbul')) cityValue = 'Istanbul';
-    else if (lowerCity.includes('ankara')) cityValue = 'Ankara';
-    else if (lowerCity.includes('izmir')) cityValue = 'Izmir';
-    else if (lowerCity.includes('antalya')) cityValue = 'Antalya';
-
-    setFormData({
-      ...formData,
-      city: cityValue,
-      address: fullDetail || s.display_name
-    });
-    setSuggestions([]);
-    setShowSuggestions(false);
-  };
-
   if (!mounted) return (
     <div className={cn(
-      "bg-card/40 backdrop-blur-xl p-8 rounded-[2.5rem] border animate-pulse",
-      isHeroMini && "p-6 rounded-[1.5rem]"
+      "bg-card/40 backdrop-blur-xl p-6 rounded-3xl border border-black/10 dark:border-white/10 animate-pulse",
+      isHeroMini && "p-4"
     )}>
-      <div className="h-8 bg-muted rounded w-1/2 mb-6" />
+      <div className="h-6 bg-muted rounded w-1/2 mb-4" />
       <div className="space-y-4">
-        <div className="h-12 bg-muted rounded" />
-        <div className="h-12 bg-muted rounded" />
-        <div className="h-12 bg-muted rounded" />
+        <div className="h-10 bg-muted rounded" />
+        <div className="h-10 bg-muted rounded" />
       </div>
     </div>
   );
 
+  const inputClasses = "w-full h-11 px-4 rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 focus:bg-black/10 dark:focus:bg-white/10 focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold text-sm text-foreground";
+  const textareaClasses = "w-full p-4 rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 focus:bg-black/10 dark:focus:bg-white/10 focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold text-sm text-foreground resize-none";
+
   return (
     <div className="relative group">
       <div className={cn(
-        "absolute -inset-1 bg-gradient-to-r from-primary/30 to-primary/10 rounded-[3rem] blur-xl opacity-20 group-hover:opacity-40 transition duration-1000 -z-10",
-        isSidebar && "rounded-[2rem]"
-      )} />
-      
-      <div className={cn(
-        "bg-card/80 backdrop-blur-xl p-8 md:p-10 rounded-[2.5rem] border shadow-2xl overflow-hidden relative",
-        isSidebar && "p-6 md:p-8 rounded-[2rem]",
-        isHeroMini && "p-5 md:p-6 rounded-[1.5rem] bg-background/40 border-white/10"
+        "bg-card/90 backdrop-blur-2xl p-6 md:p-8 rounded-[2rem] border border-black/10 dark:border-white/10 shadow-lg dark:shadow-2xl relative",
+        isSidebar && "p-6 rounded-[1.5rem]",
+        isHeroMini && "p-5 md:p-7 rounded-[1.5rem] bg-white/5 dark:bg-background/20"
       )}>
         
-        {/* Form Progress Indicator */}
-        <div className="absolute top-0 left-0 w-full h-1.5 bg-muted">
-            <div className="h-full bg-primary transition-all duration-500" style={{ width: formData.name ? '33%' : (formData.phone ? '66%' : '10%') }} />
+        <div className={cn("mb-6 text-center sm:text-left", isHeroMini && "mb-5 text-center")}>
+          <h3 className={cn("text-2xl font-black tracking-tight leading-none", isHeroMini && "text-xl")}>{t('send_message')}</h3>
+          {!isHeroMini && (
+            <p className="text-[13px] text-muted-foreground font-medium mt-2">
+              {t('contact_subtitle')}
+            </p>
+          )}
         </div>
 
-        <div className={cn("mb-10 text-center sm:text-left", isHeroMini && "mb-6")}>
-          <h3 className={cn("text-2xl font-black tracking-tight", (isSidebar || isHeroMini) && "text-xl")}>{t('send_message')}</h3>
-          <p className="text-sm text-muted-foreground font-medium mt-1">
-            {t('contact_subtitle')}
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name & Phone Row */}
-          <div className={cn("grid grid-cols-1 gap-6", (!isSidebar && !isHeroMini) && "sm:grid-cols-2", isHeroMini && "gap-3")}>
-            <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">{t('full_name')}</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black uppercase tracking-widest text-foreground ml-1">{t('full_name')}</label>
               <input
                 type="text"
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className={cn(
-                  "w-full h-14 px-5 rounded-2xl border bg-background/50 focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-300 font-bold placeholder:font-medium",
-                  isHeroMini && "h-11 px-4 rounded-xl text-sm"
-                )}
-                placeholder={t('name_placeholder')}
+                className={inputClasses}
+                placeholder="..."
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">{t('phone_number')}</label>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black uppercase tracking-widest text-foreground ml-1">{t('phone_number')}</label>
               <input
                 type="tel"
                 required
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className={cn(
-                  "w-full h-14 px-5 rounded-2xl border bg-background/50 focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-300 font-bold",
-                  isHeroMini && "h-11 px-4 rounded-xl text-sm"
-                )}
+                className={inputClasses}
                 placeholder="+90"
                 dir="ltr"
               />
             </div>
           </div>
 
-          {/* City & Service Row */}
-          <div className={cn("grid grid-cols-1 gap-6", (!isSidebar && !isHeroMini) && "sm:grid-cols-2", isHeroMini && "gap-3")}>
-            <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">{t('city')}</label>
-              <select
-                required
-                value={formData.city}
-                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                className={cn(
-                  "w-full h-14 px-5 rounded-2xl border bg-background/50 focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-300 font-bold appearance-none cursor-pointer",
-                  isHeroMini && "h-11 px-4 rounded-xl text-sm"
-                )}
-              >
-                <option value="" disabled>{t('city_placeholder')}</option>
-                <option value="Bursa">{t('city_bursa')}</option>
-                <option value="Istanbul">{t('city_istanbul')}</option>
-                <option value="Ankara">{t('city_ankara')}</option>
-                <option value="Izmir">{t('city_izmir')}</option>
-                <option value="Antalya">{t('city_antalya')}</option>
-                <option value="Other">{t('city_other')}</option>
-              </select>
-            </div>
+          {/* Address Section */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black uppercase tracking-widest text-foreground ml-1">
+               {t('address')}
+            </label>
+            <AddressSelector 
+              isHeroMini={isHeroMini}
+              onAddressChange={(fullAddress, components) => {
+                setFormData(prev => ({ 
+                  ...prev, 
+                  address: fullAddress,
+                  city: components.city,
+                  addressComponents: components
+                }));
+              }}
+            />
+          </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">{t('service_type')}</label>
-              {isSidebar || isHeroMini ? (
-                <input
-                    type="text"
-                    required
-                    value={formData.deviceModel}
-                    onChange={(e) => setFormData({ ...formData, deviceModel: e.target.value })}
-                    className={cn(
-                      "w-full h-14 px-5 rounded-2xl border bg-background/50 focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-300 font-bold placeholder:font-medium",
-                      isHeroMini && "h-11 px-4 rounded-xl text-sm"
-                    )}
-                    placeholder="e.g. iPhone 15"
-                />
-              ) : (
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black uppercase tracking-widest text-foreground ml-1">{t('service_type')}</label>
+            {isSidebar || isHeroMini ? (
+              <input
+                  type="text"
+                  required
+                  value={formData.deviceModel}
+                  onChange={(e) => setFormData({ ...formData, deviceModel: e.target.value })}
+                  className={inputClasses}
+                  placeholder="e.g. iPhone 15 Pro Max..."
+              />
+            ) : (
+              <div className="relative group">
                 <select
                     value={formData.serviceType}
                     onChange={(e) => setFormData({ ...formData, serviceType: e.target.value })}
-                    className="w-full h-14 px-5 rounded-2xl border bg-background/50 focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-300 font-bold appearance-none cursor-pointer"
+                    className={cn(inputClasses, "appearance-none cursor-pointer")}
                 >
-                    <option value="phone">{t('service_phone')}</option>
-                    <option value="laptop">{t('service_laptop')}</option>
-                    <option value="tablet">{t('service_tablet')}</option>
-                    <option value="robot">{t('service_robot')}</option>
-                    <option value="watch">{t('service_watch')}</option>
+                    <option value="phone" className="bg-card text-foreground">{t('service_phone')}</option>
+                    <option value="laptop" className="bg-card text-foreground">{t('service_laptop')}</option>
+                    <option value="tablet" className="bg-card text-foreground">{t('service_tablet')}</option>
+                    <option value="robot" className="bg-card text-foreground">{t('service_robot')}</option>
+                    <option value="watch" className="bg-card text-foreground">{t('service_watch')}</option>
                 </select>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
-          <div className="space-y-2 relative">
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">{t('address')}</label>
-              <button
-                type="button"
-                onClick={handleDetectLocation}
-                disabled={detectingLocation}
-                className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline flex items-center gap-1 group"
-              >
-                {detectingLocation ? (
-                  <span className="animate-pulse">{t('detecting_location')}</span>
-                ) : (
-                  <>
-                    <MapPin size={10} className="group-hover:animate-bounce" />
-                    <span>{t('detect_location')}</span>
-                  </>
-                )}
-              </button>
-            </div>
-            <div className="relative">
-              <input
-                type="text"
-                value={formData.address}
-                onChange={(e) => handleAddressChange(e.target.value)}
-                onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-                className={cn(
-                  "w-full h-14 px-5 rounded-2xl border bg-background/50 focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-300 font-bold placeholder:font-medium",
-                  isHeroMini && "h-11 px-4 rounded-xl text-sm"
-                )}
-                placeholder={t('address_placeholder')}
-              />
-              
-              {showSuggestions && suggestions.length > 0 && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setShowSuggestions(false)} />
-                  <div className="absolute z-50 w-full mt-2 bg-card/95 backdrop-blur-xl border rounded-[2rem] shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
-                    {suggestions.map((s, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => selectSuggestion(s)}
-                        className="w-full px-6 py-5 text-left hover:bg-primary/10 transition-all border-b last:border-0 group flex items-start gap-4"
-                      >
-                        <div className="p-2.5 bg-primary/10 rounded-xl text-primary mt-0.5 group-hover:scale-110 transition-transform">
-                          <MapPin size={18} />
-                        </div>
-                        <div className="flex flex-col gap-1 overflow-hidden">
-                          <span className="text-sm font-black text-foreground group-hover:text-primary transition-colors truncate">
-                            {s.address.road || s.name || s.display_name.split(',')[0]}
-                          </span>
-                          <span className="text-[10px] font-bold text-muted-foreground line-clamp-1 italic">
-                            {s.display_name.split(',').slice(1).join(',')}
-                          </span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-
-          <div className={cn("space-y-2", isHeroMini && "hidden")}>
-            <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">{t('your_message')}</label>
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black uppercase tracking-widest text-foreground ml-1">{t('your_message')}</label>
             <textarea
-              rows={4}
+              rows={isHeroMini ? 2 : 3}
               value={formData.message}
               onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-              className="w-full p-5 rounded-2xl border bg-background/50 focus:bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-300 font-bold placeholder:font-medium resize-none"
+              className={textareaClasses}
               placeholder={t('message_placeholder')}
             />
           </div>
 
-          <div className={cn("flex items-start gap-3 p-4 bg-primary/5 rounded-2xl border border-primary/10 mb-2", isHeroMini && "p-3 rounded-xl")}>
-            <ShieldCheck className="text-primary mt-1 shrink-0" size={isHeroMini ? 16 : 20} />
-            <p className={cn("text-[13px] font-bold text-foreground leading-relaxed", isHeroMini && "text-[11px]")}>
+          <div className="flex items-start gap-3 p-4 bg-primary/5 rounded-xl border border-primary/10">
+            <ShieldCheck className="text-primary mt-0.5 shrink-0" size={16} />
+            <p className="text-[11px] font-bold text-foreground/60 leading-relaxed">
               {t('form_note')}
             </p>
           </div>
@@ -462,25 +205,23 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
           <button
             type="submit"
             disabled={loading}
-            className={cn(
-              "group relative w-full h-16 bg-primary text-primary-foreground rounded-2xl font-black text-sm uppercase tracking-[0.2em] flex items-center justify-center gap-3 overflow-hidden shadow-xl shadow-primary/30 transition-all active:scale-95 disabled:opacity-50",
-              isHeroMini && "h-12 rounded-xl text-xs"
-            )}
+            className="group relative w-full h-14 bg-primary text-primary-foreground rounded-xl font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 overflow-hidden shadow-lg shadow-primary/10 dark:shadow-xl dark:shadow-primary/20 transition-all active:scale-[0.98] disabled:opacity-50 mt-2"
           >
             <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
             
             {loading ? (
               <div className="flex items-center gap-2">
-                <div className={cn("w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin", isHeroMini && "w-4 h-4")} />
+                <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                 <span>{t('sending')}</span>
               </div>
             ) : (
               <>
                 <span className="relative z-10">{t('send_message')}</span>
-                <Send size={isHeroMini ? 16 : 20} className="relative z-10 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                <Send size={16} className="relative z-10 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
               </>
             )}
           </button>
+
         </form>
       </div>
 
@@ -493,43 +234,28 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowSuccessModal(false)}
-              className="absolute inset-0 bg-background/90 backdrop-blur-md"
+              className="absolute inset-0 bg-background/80 backdrop-blur-md"
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 30 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 30 }}
-              className="relative w-full max-w-sm bg-card p-10 rounded-[3rem] border shadow-[0_30px_100px_-20px_rgba(var(--primary-rgb),0.3)] text-center space-y-8 overflow-hidden"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="relative w-full max-w-sm bg-card p-10 rounded-[2.5rem] border shadow-2xl text-center space-y-6"
             >
-              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary via-emerald-400 to-primary" />
-              
-              <div className="relative">
-                <div className="w-24 h-24 bg-primary/10 text-primary rounded-[2.5rem] flex items-center justify-center mx-auto shadow-inner relative z-10">
-                    <CheckCircle size={48} strokeWidth={2.5} />
-                </div>
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-primary/5 rounded-full blur-xl -z-0 animate-pulse" />
+              <div className="w-20 h-20 bg-primary/10 text-primary rounded-3xl flex items-center justify-center mx-auto">
+                  <CheckCircle size={40} />
               </div>
-              
-              <div className="space-y-3">
-                <h3 className="text-3xl font-black tracking-tighter leading-none">{t('success_modal_title')}</h3>
-                <p className="text-muted-foreground font-semibold leading-relaxed text-sm px-2">
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black">{t('success_modal_title')}</h3>
+                <p className="text-muted-foreground font-bold text-sm">
                   {t('success_modal_desc')}
                 </p>
               </div>
-
               <button
                 onClick={() => setShowSuccessModal(false)}
-                className="w-full h-14 bg-foreground text-background rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-foreground/90 transition-all active:scale-95 shadow-2xl"
+                className="w-full h-12 bg-foreground text-background rounded-xl font-black text-[11px] uppercase tracking-widest"
               >
                 {t('close')}
-              </button>
-
-              <button 
-                onClick={() => setShowSuccessModal(false)}
-                className="absolute top-6 right-6 p-2 text-muted-foreground hover:text-foreground transition-colors"
-                aria-label="Close"
-              >
-                <X size={24} />
               </button>
             </motion.div>
           </div>

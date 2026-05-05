@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Plus, X } from 'lucide-react';
+import { MessageCircle, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
@@ -42,7 +42,7 @@ export function StickyContact() {
   if (pathname?.includes('/admin')) return null;
 
   const socialLinks = [
-    { icon: WhatsappIcon, href: `https://wa.me/${whatsappNumber.replace(/\D/g, '')}`, color: 'bg-[#25D366]' },
+    { icon: () => <img src="/whats.png" alt="WhatsApp" className="w-7 h-7 object-contain" />, href: `https://wa.me/${whatsappNumber.replace(/\D/g, '')}`, color: 'bg-[#25D366]' },
     { icon: InstagramIcon, href: 'https://www.instagram.com/trtservis?igsh=MXcxZ25rNjNydjYxZQ%3D%3D&utm_source=qr', color: 'bg-[#E1306C]' },
     { icon: TiktokIcon, href: 'https://www.tiktok.com/@trtservis', color: 'bg-[#000000]', isTiktok: true },
     { icon: FacebookIcon, href: 'https://www.facebook.com/share/185YU5woZA/?mibextid=wwXIfr', color: 'bg-[#1877F2]' },
@@ -70,7 +70,7 @@ export function StickyContact() {
             </motion.div>
           ) : (
             <motion.div key="open" initial={{ opacity: 0, rotate: 90 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0, rotate: -90 }}>
-              <Plus size={28} strokeWidth={2.5} className="animate-pulse" />
+              <img src="/whats.png" alt="Contact" className="w-10 h-10 object-contain" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -94,7 +94,7 @@ export function StickyContact() {
                 social.color
               )}
             >
-              <social.icon size={20} className={social.iconColor || "text-white"} />
+              {typeof social.icon === 'function' ? <social.icon /> : <social.icon size={20} className={social.iconColor || "text-white"} />}
             </motion.a>
           ))}
         </AnimatePresence>

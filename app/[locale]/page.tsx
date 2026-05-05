@@ -9,6 +9,7 @@ import { Footer } from "@/components/footer";
 import { AnimatedStats } from "@/components/animated-stats";
 import { TrustBadges } from "@/components/trust-badges";
 import { RepairProcess } from "@/components/repair-process";
+import { QuickContactBar } from "@/components/quick-contact-bar";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 export function generateStaticParams() {
@@ -36,9 +37,10 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         <Hero />
       </div>
 
+      <QuickContactBar />
+      <RepairProcess />
       <TrustBadges />
       <AnimatedStats stats={stats} />
-      <RepairProcess />
 
       <Services />
       <div className="bg-muted/30">
