@@ -17,7 +17,7 @@ interface ContactFormProps {
 export function ContactForm({ initialServiceType = 'phone', isSidebar = false, isHeroMini = false }: ContactFormProps) {
   const t = useTranslations('Contact');
   const tTrust = useTranslations('Trust');
-  const [whatsappNumber, setWhatsappNumber] = useState("905302094094");
+  const [whatsappNumber, setWhatsappNumber] = useState("908508401505");
   const [formData, setFormData] = useState({
     name: '',
     phone: '',

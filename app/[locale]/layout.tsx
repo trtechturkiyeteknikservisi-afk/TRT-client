@@ -44,7 +44,7 @@ export default async function RootLayout(props: {
     "image": "https://trt-service.com/logo.png",
     "@id": "https://trt-service.com",
     "url": "https://trt-service.com",
-    "telephone": "+905302094094",
+    "telephone": "+908508401505",
     "address": {
       "@type": "PostalAddress",
       "streetAddress": "Bursa, Turkey",

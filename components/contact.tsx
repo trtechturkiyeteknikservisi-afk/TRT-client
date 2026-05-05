@@ -13,8 +13,9 @@ import { ContactForm } from './contact-form';
 export function Contact() {
   const t = useTranslations('Contact');
   const [settings, setSettings] = useState({
-    whatsapp: '905302094094',
-    support_phone: '+90 0850 840 15 05',
+    whatsapp: '908508401505',
+    complaints_whatsapp: '905067006677',
+    support_phone: '0850 840 15 05',
     support_email: 'trtech@trtservis.com'
   });
 
@@ -26,8 +27,9 @@ export function Contact() {
         if (res.data) {
           const data = res.data as any;
           setSettings({
-            whatsapp: data.whatsapp || '905302094094',
-            support_phone: data.support_phone || '+90 530 209 40 94',
+            whatsapp: data.whatsapp || '908508401505',
+            complaints_whatsapp: '905067006677',
+            support_phone: data.support_phone || '0850 840 15 05',
             support_email: data.support_email || 'trtech@trtservis.com'
           });
         }
@@ -113,6 +115,15 @@ export function Contact() {
                   isWa: true
                 },
                 { 
+                  icon: MessageCircle, 
+                  label: t('whatsapp_complaints'), 
+                  value: '0506 700 66 77', 
+                  color: 'red-500',
+                  link: `https://wa.me/905067006677`,
+                  isWa: true,
+                  isComplaints: true
+                },
+                { 
                   icon: Mail, 
                   label: t('email_label'), 
                   value: settings.support_email, 
@@ -140,6 +151,7 @@ export function Contact() {
                   >
                     <div className={cn(
                       "p-3 rounded-2xl w-fit transition-all duration-500 group-hover:scale-110 shadow-lg",
+                      item.isComplaints ? "bg-red-500 text-white shadow-red-500/20" : 
                       item.isWa ? "bg-green-500 text-white shadow-green-500/20" : "bg-primary text-primary-foreground shadow-primary/20"
                     )}>
                       <Icon size={24} strokeWidth={2.5} />

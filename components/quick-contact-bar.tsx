@@ -9,8 +9,8 @@ import { cn } from '@/lib/utils';
 export function QuickContactBar() {
   const t = useTranslations('Contact');
   const [settings, setSettings] = useState({
-    whatsapp: '905302094094',
-    phone: '+90 530 209 40 94'
+    whatsapp: '908508401505',
+    phone: '0850 840 15 05'
   });
 
   useEffect(() => {

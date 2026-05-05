@@ -167,7 +167,7 @@ export default function SettingsPage() {
                               <input
                                 value={settingsForm.whatsapp}
                                 onChange={(e) => setSettingsForm((prev) => ({ ...prev, whatsapp: e.target.value }))}
-                                placeholder="e.g., 905302094094"
+                                placeholder="e.g., 908508401505"
                                 className="w-full pl-12 pr-4 py-3 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
                               />
                           </div>
@@ -180,7 +180,7 @@ export default function SettingsPage() {
                               <input
                                 value={settingsForm.support_phone}
                                 onChange={(e) => setSettingsForm((prev) => ({ ...prev, support_phone: e.target.value }))}
-                                placeholder="e.g., +90 530 209 40 94"
+                                placeholder="e.g., 0850 840 15 05"
                                 className="w-full pl-12 pr-4 py-3 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
                               />
                           </div>

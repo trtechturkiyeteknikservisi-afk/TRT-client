@@ -21,7 +21,7 @@ export function StickyContact() {
   const t = useTranslations('Contact');
   const pathname = usePathname();
   const [isOpen, setIsOpen] = React.useState(false);
-  const [whatsappNumber, setWhatsappNumber] = React.useState("905302094094");
+  const [whatsappNumber, setWhatsappNumber] = React.useState("908508401505");
 
   React.useEffect(() => {
     const fetchSettings = async () => {

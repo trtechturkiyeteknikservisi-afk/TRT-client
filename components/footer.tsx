@@ -16,7 +16,7 @@ import {
 } from './social-icons';
 
 const socialLinks = [
-  { icon: WhatsappIcon, href: 'https://wa.me/905302094094', label: 'WhatsApp', color: 'hover:bg-[#25D366]' },
+  { icon: WhatsappIcon, href: 'https://wa.me/908508401505', label: 'WhatsApp', color: 'hover:bg-[#25D366]' },
   { icon: InstagramIcon, href: 'https://www.instagram.com/trtservis?igsh=MXcxZ25rNjNydjYxZQ%3D%3D&utm_source=qr', label: 'Instagram', color: 'hover:bg-[#E1306C]' },
   { icon: TiktokIcon, href: 'https://www.tiktok.com/@trtservis', label: 'TikTok', color: 'hover:bg-black' },
   { icon: FacebookIcon, href: 'https://www.facebook.com/share/185YU5woZA/?mibextid=wwXIfr', label: 'Facebook', color: 'hover:bg-[#1877F2]' },

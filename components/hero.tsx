@@ -16,7 +16,7 @@ export function Hero() {
   const locale = useLocale();
   const isRTL = locale === 'ar';
   const [current, setCurrent] = useState(0);
-  const [whatsappNumber, setWhatsappNumber] = useState("905302094094");
+  const [whatsappNumber, setWhatsappNumber] = useState("908508401505");
   const [banners, setBanners] = useState([
     {
       title: t('phone_title'),
