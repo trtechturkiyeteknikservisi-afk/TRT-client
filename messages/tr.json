@@ -181,6 +181,7 @@
     "address_sokak": "Sokak / Cadde",
     "address_no": "Bina No",
     "address_daire": "Daire No",
+    "address": "Adres",
     "form_note": "Verileriniz gizlilik politikamız kapsamında korunmaktadır.",
     "address_placeholder": "Detaylı adresinizi girin (örn: sokak, mahalle, şehir)",
     "detect_location": "Konumumu Bul",
@@ -192,6 +193,7 @@
     "sending": "Gönderiliyor...",
     "send_message": "Mesaj Gönder",
     "success_message": "Talebiniz başarıyla gönderildi! Sizinle en kısa sürede iletişime geçeceğiz.",
+    "kvkk_text": "KVKK Aydınlatma Metni 'ni okudum ve anladım.",
     "sticky_contact_cta": "Bize Ulaşın",
     "contact_subtitle": "2 iş saati içerisinde sizinle iletişime geçeceğiz"
   },

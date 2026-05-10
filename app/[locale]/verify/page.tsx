@@ -14,7 +14,8 @@ import {
     Loader2,
     FileCheck,
     ArrowRight,
-    Globe
+    Globe,
+    X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -31,13 +32,17 @@ const VerificationPage = () => {
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState(false);
     const [termsContent, setTermsContent] = useState('');
+    const [kvkkAccepted, setKvkkAccepted] = useState(false);
+    const [showKVKKModal, setShowKVKKModal] = useState(false);
+    const tContact = useTranslations('Contact');
+    const tPolicies = useTranslations('Policies');
     
     const [formData, setFormData] = useState({
         name: '',
         whatsapp: '',
         phone: '',
         email: '',
-        agreedToTerms: true // Always true since they agree in step 1
+        agreedToTerms: true 
     });
 
     useEffect(() => {
@@ -234,7 +239,7 @@ const VerificationPage = () => {
                                             value={formData.name}
                                             onChange={handleChange}
                                             className="w-full bg-transparent border-none text-white p-4 pr-1 focus:ring-0 outline-none placeholder:text-gray-700 text-base font-bold"
-                                            placeholder="..."
+                                            placeholder={tContact('name_placeholder')}
                                         />
                                     </div>
                                 </div>
@@ -310,6 +315,30 @@ const VerificationPage = () => {
                                     </div>
                                 </div>
 
+                                {/* KVKK Checkbox */}
+                                <div className="flex items-start gap-3 py-2 px-1">
+                                    <input 
+                                        type="checkbox" 
+                                        id="kvkk-checkbox-verify"
+                                        required
+                                        checked={kvkkAccepted}
+                                        onChange={(e) => setKvkkAccepted(e.target.checked)}
+                                        className="mt-1 h-4 w-4 rounded border-white/10 bg-white/5 text-red-600 focus:ring-red-600 cursor-pointer transition-all"
+                                    />
+                                    <label 
+                                        htmlFor="kvkk-checkbox-verify" 
+                                        className="text-[11px] font-bold text-gray-500 leading-tight cursor-pointer select-none uppercase tracking-[0.15em]"
+                                    >
+                                        <button 
+                                            type="button"
+                                            onClick={() => setShowKVKKModal(true)}
+                                            className="text-red-500 hover:underline decoration-red-500/30 underline-offset-4 text-left"
+                                        >
+                                            {tContact('kvkk_text')}
+                                        </button>
+                                    </label>
+                                </div>
+
                                 {/* Privacy Info */}
                                 <div className="flex items-start gap-4 p-5 bg-red-600/5 rounded-3xl border border-red-600/10">
                                     <div className="w-6 h-6 rounded-full bg-red-600/20 flex items-center justify-center shrink-0">
@@ -341,7 +370,7 @@ const VerificationPage = () => {
                                     </button>
                                     <button 
                                         type="submit"
-                                        disabled={loading}
+                                        disabled={loading || !kvkkAccepted}
                                         className="grow group relative bg-gradient-to-r from-red-600 to-red-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-lg py-5 rounded-2xl transition-all duration-300 shadow-2xl shadow-red-600/20 overflow-hidden"
                                     >
                                         <div className="flex items-center justify-center gap-3 relative z-10">
@@ -361,6 +390,60 @@ const VerificationPage = () => {
                         )}
                     </AnimatePresence>
                 </div>
+
+                {/* KVKK Modal */}
+                <AnimatePresence>
+                    {showKVKKModal && (
+                        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => setShowKVKKModal(false)}
+                                className="absolute inset-0 bg-black/80 backdrop-blur-md"
+                            />
+                            <motion.div
+                                initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 30, scale: 0.95 }}
+                                className="relative w-full max-w-2xl bg-[#0a0a0a] border border-white/5 rounded-[3rem] shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+                            >
+                                <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/5">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 rounded-xl bg-red-600/10 flex items-center justify-center text-red-600">
+                                            <ShieldCheck size={24} />
+                                        </div>
+                                        <h3 className="text-xl font-black uppercase tracking-tight text-white">
+                                            {tPolicies('privacy')}
+                                        </h3>
+                                    </div>
+                                    <button 
+                                        onClick={() => setShowKVKKModal(false)}
+                                        className="p-3 hover:bg-white/5 rounded-full transition-colors text-gray-500"
+                                    >
+                                        <X size={24} />
+                                    </button>
+                                </div>
+                                <div className="p-8 md:p-12 overflow-y-auto flex-1">
+                                    <div 
+                                        className="whitespace-pre-wrap leading-relaxed font-bold text-gray-400 text-sm"
+                                        dir={locale === 'ar' ? 'rtl' : 'ltr'}
+                                    >
+                                        {termsContent || tPolicies('updated_soon')}
+                                    </div>
+                                </div>
+                                <div className="p-6 md:p-8 border-t border-white/5 bg-white/5 flex justify-end gap-4">
+                                    <button 
+                                        onClick={() => { setShowKVKKModal(false); setKvkkAccepted(true); }}
+                                        className="px-8 py-4 bg-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-red-600/20"
+                                    >
+                                        {tContact('close')}
+                                    </button>
+                                </div>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
             </motion.div>
         </div>
     );

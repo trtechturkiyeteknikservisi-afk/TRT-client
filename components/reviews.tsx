@@ -11,6 +11,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
+import { KVKKCheckbox } from './kvkk-checkbox';
 
 const mockReviews = [
   { id: 1, customerName: 'Ahmet Yılmaz', rating: 5, comment: 'Excellent service! My iPhone 13 screen was replaced in 30 minutes. Highly recommended.', date: '2024-03-25' },
@@ -25,6 +26,7 @@ export function Reviews() {
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [kvkkAccepted, setKvkkAccepted] = useState(false);
   const [form, setForm] = useState({
     customerName: '',
     rating: 5,
@@ -49,11 +51,14 @@ export function Reviews() {
 
   const handleSubmitReview = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (!kvkkAccepted) return;
+
     setLoading(true);
     try {
       await axios.post('http://localhost:5000/api/content/reviews', form);
       setSubmitted(true);
       setForm({ customerName: '', rating: 5, comment: '' });
+      setKvkkAccepted(false);
     } catch (error) {
       console.error('Error submitting review', error);
     } finally {
@@ -111,41 +116,50 @@ export function Reviews() {
         </div>
 
         {showForm && (
-          <form onSubmit={handleSubmitReview} className="mb-10 bg-card border p-6 rounded-3xl grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
-            <input
-              value={form.customerName}
-              onChange={(e) => setForm((prev) => ({ ...prev, customerName: e.target.value }))}
-              required
-              placeholder={t('name_placeholder')}
-              className="px-4 py-3 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20"
-            />
-            <select
-              value={form.rating}
-              onChange={(e) => setForm((prev) => ({ ...prev, rating: Number(e.target.value) }))}
-              className="px-4 py-3 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20"
-            >
-              <option value={5}>5 Stars</option>
-              <option value={4}>4 Stars</option>
-              <option value={3}>3 Stars</option>
-              <option value={2}>2 Stars</option>
-              <option value={1}>1 Star</option>
-            </select>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-4 py-3 rounded-xl bg-primary text-primary-foreground font-bold disabled:opacity-50"
-            >
-              {loading ? t('sending') : t('submit')}
-            </button>
-            <textarea
-              value={form.comment}
-              onChange={(e) => setForm((prev) => ({ ...prev, comment: e.target.value }))}
-              placeholder={t('comment_placeholder')}
-              className="md:col-span-3 px-4 py-3 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20"
-              rows={3}
-            />
-            {submitted && <p className="md:col-span-3 text-green-600 font-bold">{t('submitted_message')}</p>}
-          </form>
+          <div className="mb-10 bg-card border p-6 rounded-3xl text-left max-w-2xl mx-auto">
+            <form onSubmit={handleSubmitReview} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input
+                  value={form.customerName}
+                  onChange={(e) => setForm((prev) => ({ ...prev, customerName: e.target.value }))}
+                  required
+                  placeholder={t('name_placeholder')}
+                  className="px-4 py-3 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20"
+                />
+                <select
+                  value={form.rating}
+                  onChange={(e) => setForm((prev) => ({ ...prev, rating: Number(e.target.value) }))}
+                  className="px-4 py-3 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20"
+                >
+                  <option value={5}>5 Stars</option>
+                  <option value={4}>4 Stars</option>
+                  <option value={3}>3 Stars</option>
+                  <option value={2}>2 Stars</option>
+                  <option value={1}>1 Star</option>
+                </select>
+              </div>
+              
+              <textarea
+                value={form.comment}
+                onChange={(e) => setForm((prev) => ({ ...prev, comment: e.target.value }))}
+                placeholder={t('comment_placeholder')}
+                className="w-full px-4 py-3 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20"
+                rows={3}
+              />
+
+              <KVKKCheckbox accepted={kvkkAccepted} onChange={setKvkkAccepted} />
+
+              <button
+                type="submit"
+                disabled={loading || !kvkkAccepted}
+                className="w-full px-4 py-4 rounded-xl bg-primary text-primary-foreground font-black uppercase tracking-widest disabled:opacity-50"
+              >
+                {loading ? t('sending') : t('submit')}
+              </button>
+
+              {submitted && <p className="text-green-600 font-bold text-center mt-2">{t('submitted_message')}</p>}
+            </form>
+          </div>
         )}
 
         {reviews.length > 4 ? (

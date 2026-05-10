@@ -89,9 +89,9 @@ export default function ServicePage() {
         </div>
       </section>
 
-      <TrustBadges />
       <ServiceBrands type={serviceKey} />
-
+      <TrustBadges />
+      
       <section className="py-24">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
@@ -115,8 +115,6 @@ export default function ServicePage() {
                   ))}
                 </div>
               </div>
-
-
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="text-center p-6 bg-card rounded-2xl border">

@@ -189,7 +189,7 @@ export function Hero() {
         </div>
 
         {/* Static Hero Mini Contact Form */}
-        <div className="hidden lg:block w-full lg:w-[540px] relative z-20">
+        <div className="block w-full lg:w-[540px] relative z-20 pb-20 lg:pb-0">
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}

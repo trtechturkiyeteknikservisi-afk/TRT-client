@@ -8,6 +8,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 
+import { KVKKCheckbox } from './kvkk-checkbox';
+
 interface ContactFormProps {
   initialServiceType?: string;
   isSidebar?: boolean;
@@ -33,6 +35,7 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [kvkkAccepted, setKvkkAccepted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -54,6 +57,8 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!kvkkAccepted) return;
+
     setLoading(true);
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
@@ -70,6 +75,7 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
         serviceType: initialServiceType,
         deviceModel: ''
       });
+      setKvkkAccepted(false);
     } catch (error) {
       console.error('Error submitting form', error);
     } finally {
@@ -121,7 +127,7 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className={inputClasses}
-                placeholder="..."
+                placeholder={t('name_placeholder')}
               />
             </div>
             <div className="space-y-1.5">
@@ -157,7 +163,7 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black uppercase tracking-widest text-foreground ml-1">{t('service_type')}</label>
+            <label className="text-[10px) font-black uppercase tracking-widest text-foreground ml-1">{t('service_type')}</label>
             {isSidebar || isHeroMini ? (
               <input
                   type="text"
@@ -195,6 +201,8 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
             />
           </div>
 
+          <KVKKCheckbox accepted={kvkkAccepted} onChange={setKvkkAccepted} />
+
           <div className="flex items-start gap-3 p-4 bg-primary/5 rounded-xl border border-primary/10">
             <ShieldCheck className="text-primary mt-0.5 shrink-0" size={16} />
             <p className="text-[11px] font-bold text-foreground/60 leading-relaxed">
@@ -204,7 +212,7 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !kvkkAccepted}
             className="group relative w-full h-14 bg-primary text-primary-foreground rounded-xl font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 overflow-hidden shadow-lg shadow-primary/10 dark:shadow-xl dark:shadow-primary/20 transition-all active:scale-[0.98] disabled:opacity-50 mt-2"
           >
             <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
