@@ -50,7 +50,8 @@ export function Footer() {
         { name: t('about_us'), href: '/about-us' },
         { name: t('works'), href: '/portfolio' },
         { name: t('blog'), href: '/blog' },
-        { name: t('contact'), href: '#contact' },
+        { name: t('policy'), href: '/policies' },
+        { name: t('contact'), href: '/#contact' },
       ],
     },
     {
@@ -58,7 +59,7 @@ export function Footer() {
       links: [
         { name: t('merchants'), href: '#', soon: true },
         { name: t('track_shipment'), href: '#', soon: true },
-        { name: t('faqs'), href: '#faqs' },
+        { name: t('faqs'), href: '/#faqs' },
         // { name: t('sitemap'), href: '/sitemap.xml' },
       ],
     },

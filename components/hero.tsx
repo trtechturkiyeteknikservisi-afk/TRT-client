@@ -149,7 +149,7 @@ export function Hero() {
                   {banners[current]?.description}
                 </p>
 
-                <div className={cn("flex flex-col sm:flex-row gap-6 pt-4", isRTL && "sm:flex-row-reverse")}>
+                <div className="flex flex-col sm:flex-row gap-6 pt-4">
                   <Link
                     href={banners[current]?.link || '#'}
                     className="inline-flex items-center justify-center gap-3 bg-primary text-primary-foreground px-6 py-4 md:px-12 md:py-6 rounded-2xl font-black text-base md:text-xl hover:bg-primary/95 transition-all hover:scale-105 shadow-sm shadow-primary/10 dark:shadow-3xl dark:shadow-primary/40 active:scale-95 group uppercase tracking-widest"
@@ -166,7 +166,7 @@ export function Hero() {
                   </Link>
                 </div>
 
-                <div className={cn("flex flex-col sm:flex-row gap-4 sm:gap-8 pt-4 text-foreground/90", isRTL && "sm:flex-row-reverse")}>
+                <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 pt-4 text-foreground/90">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="text-primary shrink-0" size={20} />
                     <span className="font-semibold">{t('trust_since')}</span>
@@ -177,7 +177,7 @@ export function Hero() {
                   </div>
                 </div>
 
-                <div className={cn("mt-6 p-4 bg-foreground/5 backdrop-blur-md rounded-2xl border border-foreground/10 flex items-start gap-3 max-w-xl", isRTL && "flex-row-reverse text-right")}>
+                <div className={cn("mt-6 p-4 bg-foreground/5 backdrop-blur-md rounded-2xl border border-foreground/10 flex items-start gap-3 max-w-xl", isRTL && "text-right")}>
                   < ShieldCheck className="text-primary shrink-0 mt-0.5" size={20} />
                   <p className="text-sm font-bold text-foreground/80 leading-relaxed">
                     {tContact('form_note')}

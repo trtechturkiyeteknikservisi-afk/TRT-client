@@ -201,7 +201,7 @@ export default function ContactsPage() {
                     <tr>
                         <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t('full_name')}</th>
                         <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t('table_phone') || 'Phone'}</th>
-                        <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t('city') || 'City'}</th>
+                        <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t('address') || 'Address'}</th>
                         <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t('service_type') || 'Service'}</th>
                         <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t('table_status') || 'Status'}</th>
                         <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t('table_snippet') || 'Message'}</th>
@@ -252,13 +252,21 @@ export default function ContactsPage() {
                                         </button>
                                     </div>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap capitalize text-muted-foreground">
-                                    {item.city}
+                                <td className="px-6 py-4 whitespace-nowrap text-muted-foreground">
+                                    <div className="flex flex-col">
+                                        <span className="font-black text-foreground">{item.city}</span>
+                                        <span className="text-[10px] line-clamp-1 max-w-[200px]">{item.address}</span>
+                                    </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className="px-2.5 py-1 rounded-full bg-muted/60 text-[9px] font-black uppercase tracking-[0.1em] text-muted-foreground border">
-                                        {item.serviceType || 'General'}
-                                    </span>
+                                    <div className="flex flex-col gap-1">
+                                        <span className="px-2.5 py-1 rounded-full bg-muted/60 text-[9px] font-black uppercase tracking-[0.1em] text-muted-foreground border w-fit">
+                                            {item.serviceType || 'General'}
+                                        </span>
+                                        {item.deviceModel && (
+                                            <span className="text-[10px] font-bold text-primary">{item.deviceModel}</span>
+                                        )}
+                                    </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                 <button 
@@ -378,6 +386,12 @@ export default function ContactsPage() {
                                     <MapPin size={10} className="text-primary"/><span>{selectedMessage.city}</span>
                                     <span className="opacity-20 border-l h-2 mx-1" />
                                     <Tablet size={10} className="text-primary"/><span>{selectedMessage.serviceType || 'General'}</span>
+                                    {selectedMessage.deviceModel && (
+                                        <>
+                                            <span className="opacity-20 border-l h-2 mx-1" />
+                                            <span className="px-2 py-0.5 bg-primary/10 rounded text-primary text-[8px] font-black">{selectedMessage.deviceModel}</span>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </div>

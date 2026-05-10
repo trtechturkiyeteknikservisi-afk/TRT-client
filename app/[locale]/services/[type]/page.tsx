@@ -16,11 +16,11 @@ import { useTranslations } from 'next-intl';
 const serviceAssets: Record<string, any> = {
   phone: {
     icon: Smartphone,
-    image: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=2070&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1512428559083-a401a3389575?q=80&w=2070&auto=format&fit=crop',
   },
   laptop: {
     icon: Laptop,
-    image: 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?q=80&w=2070&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?q=80&w=2070&auto=format&fit=crop',
   },
   robot: {
     icon: Zap,
@@ -42,9 +42,27 @@ const serviceAssets: Record<string, any> = {
 
 export default function ServicePage() {
   const t = useTranslations('ServiceDetails');
-  const params = useParams();
+  const params = React.use(useParams() as any) as any;
   const type = params.type as string;
+  const [customImage, setCustomImage] = useState<string | null>(null);
   const assets = serviceAssets[type] || serviceAssets.phone;
+
+  React.useEffect(() => {
+    const fetchBanner = async () => {
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+        const response = await axios.get(`${API_URL}/banners`);
+        const fetchedBanners = response.data as any[];
+        const match = fetchedBanners.find(b => b.link && b.link.includes(type));
+        if (match && match.image) {
+          setCustomImage(match.image);
+        }
+      } catch (error) {
+        console.error('Failed to fetch banner for service:', error);
+      }
+    };
+    fetchBanner();
+  }, [type]);
 
   // Type-safe translation access
   const serviceKey = (type === 'kulaklik' ? 'headphones' : type) as 'phone' | 'laptop' | 'robot' | 'watch' | 'tablet' | 'headphones';
@@ -57,10 +75,11 @@ export default function ServicePage() {
       {/* Hero Section */}
       <section className="relative h-[400px] flex items-center justify-center overflow-hidden">
         <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${assets.image})` }}
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-[10s] scale-105"
+          style={{ backgroundImage: `url(${customImage || assets.image})` }}
         >
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-black/20" />
         </div>
         <div className="relative container mx-auto px-4 text-center text-white">
           <motion.div
@@ -74,7 +93,7 @@ export default function ServicePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-4xl md:text-5xl font-bold mb-4"
+            className="text-4xl md:text-5xl font-black mb-4 uppercase tracking-tighter"
           >
             {t(`${serviceKey}.title`)}
           </motion.h1>
@@ -82,7 +101,7 @@ export default function ServicePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-lg text-gray-300 max-w-2xl mx-auto"
+            className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto font-medium"
           >
             {t(`${serviceKey}.description`)}
           </motion.p>
