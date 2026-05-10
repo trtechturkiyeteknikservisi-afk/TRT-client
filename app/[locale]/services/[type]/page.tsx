@@ -42,7 +42,7 @@ const serviceAssets: Record<string, any> = {
 
 export default function ServicePage() {
   const t = useTranslations('ServiceDetails');
-  const params = React.use(useParams() as any) as any;
+  const params = useParams() as any;
   const type = params.type as string;
   const [customImage, setCustomImage] = useState<string | null>(null);
   const assets = serviceAssets[type] || serviceAssets.phone;
@@ -65,8 +65,16 @@ export default function ServicePage() {
   }, [type]);
 
   // Type-safe translation access
-  const serviceKey = (type === 'kulaklik' ? 'headphones' : type) as 'phone' | 'laptop' | 'robot' | 'watch' | 'tablet' | 'headphones';
-  const features = t.raw(`${serviceKey}.features`) as string[];
+  const validKeys = ['phone', 'laptop', 'robot', 'watch', 'tablet', 'headphones'];
+  const serviceKey = (type === 'kulaklik' ? 'headphones' : (validKeys.includes(type) ? type : 'phone')) as 'phone' | 'laptop' | 'robot' | 'watch' | 'tablet' | 'headphones';
+  
+  let features: string[] = [];
+  try {
+    const rawFeatures = t.raw(`${serviceKey}.features`);
+    features = Array.isArray(rawFeatures) ? rawFeatures : [];
+  } catch (e) {
+    console.error('Failed to load features:', e);
+  }
 
   return (
     <main className="min-h-screen bg-background">
@@ -79,6 +87,7 @@ export default function ServicePage() {
           style={{ backgroundImage: `url(${customImage || assets.image})` }}
         >
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          
           <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-black/20" />
         </div>
         <div className="relative container mx-auto px-4 text-center text-white">
@@ -87,6 +96,7 @@ export default function ServicePage() {
             animate={{ opacity: 1, y: 0 }}
             className="inline-flex p-4 bg-primary/20 rounded-2xl mb-6 backdrop-blur-md border border-white/10"
           >
+
             <assets.icon size={40} className="text-primary" />
           </motion.div>
           <motion.h1
