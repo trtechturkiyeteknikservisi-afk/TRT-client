@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const API_BASE = 'http://localhost:5000/api/verify';
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api') + '/verify';
 
 const VerificationAdmin = () => {
     const t = useTranslations('VerificationAdmin');
@@ -122,7 +122,7 @@ const VerificationAdmin = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.post('http://localhost:5000/api/verify/upload-doc', formData, {
+            const res = await axios.post(`${API_BASE}/upload-doc`, formData, {
                 headers: { 
                     'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${token}`

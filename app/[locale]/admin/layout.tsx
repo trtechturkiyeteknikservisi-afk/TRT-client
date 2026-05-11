@@ -251,7 +251,7 @@ export default function AdminLayout({
       </aside>
 
       <main className="flex-grow p-4 sm:p-6 lg:p-8 overflow-y-auto">
-        <div className="max-w-6xl mx-auto">
+        <div className=" mx-auto">
            {children}
         </div>
       </main>

@@ -52,7 +52,8 @@ export default function BlogPage() {
     const fetchBlogs = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`http://localhost:5000/api/blogs?locale=${locale}`);
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+        const response = await axios.get(`${API_URL}/blogs?locale=${locale}`);
         const data = response.data as any[];
         if (data.length > 0) {
           setBlogs(data);

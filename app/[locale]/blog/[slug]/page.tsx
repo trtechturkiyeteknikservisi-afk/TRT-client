@@ -22,7 +22,8 @@ export default function BlogPostPage() {
   useEffect(() => {
     const fetchBlog = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/blogs/${slug}?locale=${locale}`);
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+        const response = await axios.get(`${API_URL}/blogs/${slug}?locale=${locale}`);
         setBlog(response.data);
       } catch (error) {
         console.error('Error fetching blog post', error);

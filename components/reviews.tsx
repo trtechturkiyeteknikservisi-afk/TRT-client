@@ -55,7 +55,8 @@ export function Reviews() {
 
     setLoading(true);
     try {
-      await axios.post('http://localhost:5000/api/content/reviews', form);
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+        await axios.post(`${API_URL}/content/reviews`, form);
       setSubmitted(true);
       setForm({ customerName: '', rating: 5, comment: '' });
       setKvkkAccepted(false);
