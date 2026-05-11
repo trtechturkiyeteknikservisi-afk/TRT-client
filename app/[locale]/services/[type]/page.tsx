@@ -67,7 +67,8 @@ export default function ServicePage() {
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
         const res = await axios.get(`${API_URL}/settings`);
-        if (res.data.support_phone) setSupportPhone(res.data.support_phone);
+        const data = res.data as any;
+        if (data.support_phone) setSupportPhone(data.support_phone);
       } catch (err) {
         console.error("Failed to fetch settings", err);
       }
