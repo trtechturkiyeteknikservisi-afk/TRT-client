@@ -25,9 +25,22 @@ export default async function PoliciesPage(props: { params: Promise<{ locale: st
     else policyContent = data.policy_en ?? '';
 
     if (data.OFFICIAL_DOCUMENT_PATH) {
+      // Robust BASE_URL extraction
+      let baseUrl = API_URL.split('/api')[0];
+      
+      // Ensure baseUrl is absolute and doesn't cause doubling
+      if (baseUrl && !baseUrl.startsWith('http') && !baseUrl.startsWith('/')) {
+        // If it starts with a dot or just the domain, prepend https
+        baseUrl = `https://${baseUrl.replace(/^\./, '')}`;
+      } else if (!baseUrl) {
+        baseUrl = '';
+      }
+
+      const cleanPath = data.OFFICIAL_DOCUMENT_PATH.replace(/^\//, "");
+      
       docUrl = data.OFFICIAL_DOCUMENT_PATH.startsWith('http') 
         ? data.OFFICIAL_DOCUMENT_PATH 
-        : `${BASE_URL}/${data.OFFICIAL_DOCUMENT_PATH}`;
+        : `${baseUrl}/${cleanPath}`;
     }
 
   } catch (error) {
