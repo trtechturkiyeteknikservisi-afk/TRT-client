@@ -5,13 +5,14 @@ import { useParams } from 'next/navigation';
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Link } from '@/i18n/routing';
-import { Smartphone, Laptop, Watch, Zap, CheckCircle2, ShieldCheck, Clock, Award, TabletIcon as Tablet, Headphones } from 'lucide-react';
+import { Smartphone, Laptop, Watch, Zap, CheckCircle2, ShieldCheck, Clock, Award, TabletIcon as Tablet, Headphones, Phone } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { TrustBadges } from "@/components/trust-badges";
 import { ContactForm } from "@/components/contact-form";
 import { ServiceBrands } from "@/components/service-brands";
 import axios from 'axios';
 import { useTranslations } from 'next-intl';
+import { AppleHeadphonesIcon } from '@/components/social-icons';
 
 const serviceAssets: Record<string, any> = {
   phone: {
@@ -35,7 +36,7 @@ const serviceAssets: Record<string, any> = {
     image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=2070&auto=format&fit=crop',
   },
   kulaklik: {
-    icon: Headphones,
+    icon: AppleHeadphonesIcon,
     image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=2070&auto=format&fit=crop',
   }
 };
@@ -45,6 +46,7 @@ export default function ServicePage() {
   const params = useParams() as any;
   const type = params.type as string;
   const [customImage, setCustomImage] = useState<string | null>(null);
+  const [supportPhone, setSupportPhone] = useState<string>("0850 840 15 05");
   const assets = serviceAssets[type] || serviceAssets.phone;
 
   React.useEffect(() => {
@@ -61,7 +63,17 @@ export default function ServicePage() {
         console.error('Failed to fetch banner for service:', error);
       }
     };
+    const fetchSettings = async () => {
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+        const res = await axios.get(`${API_URL}/settings`);
+        if (res.data.support_phone) setSupportPhone(res.data.support_phone);
+      } catch (err) {
+        console.error("Failed to fetch settings", err);
+      }
+    };
     fetchBanner();
+    fetchSettings();
   }, [type]);
 
   // Type-safe translation access
@@ -86,11 +98,11 @@ export default function ServicePage() {
           className="absolute inset-0 bg-cover bg-center transition-transform duration-[10s] scale-105"
           style={{ backgroundImage: `url(${customImage || assets.image})` }}
         >
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-[2px] dark:backdrop-blur-sm transition-colors duration-300" />
           
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-black/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent dark:from-background dark:via-transparent dark:to-black/20 transition-colors duration-300" />
         </div>
-        <div className="relative container mx-auto px-4 text-center text-white">
+        <div className="relative container mx-auto px-4 text-center dark:text-white text-foreground transition-colors duration-300">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -115,6 +127,26 @@ export default function ServicePage() {
           >
             {t(`${serviceKey}.description`)}
           </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="mt-8"
+          >
+            <a 
+              href={`tel:${supportPhone.replace(/\s/g, '')}`}
+              className="inline-flex items-center gap-3 px-8 py-4 bg-black/30 backdrop-blur-xl border border-white/30 rounded-2xl hover:bg-black/40 transition-all group shadow-none dark:shadow-2xl dark:shadow-black/20"
+            >
+              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                <Phone size={20} />
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/60 mb-0.5">{t('contact_us')}</p>
+                <p className="text-xl font-black tracking-tight">{supportPhone}</p>
+              </div>
+            </a>
+          </motion.div>
         </div>
       </section>
 

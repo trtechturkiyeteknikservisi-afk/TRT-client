@@ -10,7 +10,7 @@ export function QuickContactBar() {
   const t = useTranslations('Contact');
   const [settings, setSettings] = useState({
     whatsapp: '908508401505',
-    phone: '0850 840 15 05'
+    support_phone: '0850 840 15 05'
   });
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export function QuickContactBar() {
         if (res.ok) {
           const data = await res.json();
           if (data.whatsapp) setSettings(prev => ({ ...prev, whatsapp: data.whatsapp }));
-          if (data.phone) setSettings(prev => ({ ...prev, phone: data.phone }));
+          if (data.support_phone) setSettings(prev => ({ ...prev, support_phone: data.support_phone }));
         }
       } catch (err) {
         console.error("Failed to fetch settings in QuickContactBar", err);
@@ -31,7 +31,7 @@ export function QuickContactBar() {
   }, []);
 
   const whatsappLink = `https://wa.me/${settings.whatsapp.replace(/\D/g, '')}`;
-  const phoneLink = `tel:${settings.phone.replace(/\s/g, '')}`;
+  const phoneLink = `tel:${settings.support_phone.replace(/\s/g, '')}`;
 
   return (
     <div className="w-full bg-background relative z-30 py-12">
@@ -41,7 +41,7 @@ export function QuickContactBar() {
           <motion.a
             href={phoneLink}
             whileHover={{ y: -8, scale: 1.02 }}
-            className="group relative flex items-center gap-6 bg-card border border-primary/30 p-6 md:p-8 rounded-[1.5rem] overflow-hidden transition-all duration-500"
+            className="group relative flex items-center gap-6 bg-card border-2 border-primary/20 p-6 md:p-8 rounded-[1.5rem] overflow-hidden transition-all duration-500 shadow-xl shadow-primary/5 hover:shadow-primary/20"
           >
             {/* Top active bar - now full by default */}
             <div className="absolute top-0 left-0 w-full h-1.5 bg-primary transition-transform origin-left duration-500" />
@@ -52,7 +52,7 @@ export function QuickContactBar() {
             
             <div className="flex flex-col">
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/60 mb-1">{t('phone_label')}</span>
-              <span className="text-xl md:text-3xl font-black tracking-tighter text-primary">{settings.phone}</span>
+              <span className="text-xl md:text-3xl font-black tracking-tighter text-primary">{settings.support_phone}</span>
             </div>
             
             <div className="ml-auto translate-x-0 transition-all duration-500">
@@ -68,7 +68,7 @@ export function QuickContactBar() {
             target="_blank"
             rel="noopener noreferrer"
             whileHover={{ y: -8, scale: 1.02 }}
-            className="group relative flex items-center gap-6 bg-card border border-emerald-500/30 p-6 md:p-8 rounded-[1.5rem] overflow-hidden transition-all duration-500"
+            className="group relative flex items-center gap-6 bg-card border-2 border-emerald-500/20 p-6 md:p-8 rounded-[1.5rem] overflow-hidden transition-all duration-500 shadow-xl shadow-emerald-500/5 hover:shadow-emerald-500/20"
           >
             {/* Top active bar - now full by default */}
             <div className="absolute top-0 left-0 w-full h-1.5 bg-emerald-500 transition-transform origin-left duration-500" />
@@ -78,7 +78,7 @@ export function QuickContactBar() {
             </div>         
             <div className="flex flex-col">
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500/60 mb-1">{t('whatsapp_label')}</span>
-              <span className="text-xl md:text-3xl font-black tracking-tighter text-emerald-500">{settings.whatsapp}</span>
+              <span className="text-xl md:text-3xl font-black tracking-tighter text-emerald-500">{t('whatsapp_cta')}</span>
             </div>
             
             <div className="ml-auto translate-x-0 transition-all duration-500">

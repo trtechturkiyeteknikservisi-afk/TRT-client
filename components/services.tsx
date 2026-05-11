@@ -6,6 +6,7 @@ import { Link } from '@/i18n/routing';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useTranslations, useLocale } from 'next-intl';
+import { AppleHeadphonesIcon } from './social-icons';
 
 export function Services() {
   const t = useTranslations('Services');
@@ -51,7 +52,7 @@ export function Services() {
     {
       title: t('headphones'),
       description: t('headphones_desc'),
-      icon: Headphones,
+      icon: AppleHeadphonesIcon,
       color: 'bg-indigo-500/10 text-indigo-600',
       link: '/services/kulaklik'
     }

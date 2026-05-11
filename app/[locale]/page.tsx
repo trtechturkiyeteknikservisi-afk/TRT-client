@@ -10,6 +10,7 @@ import { AnimatedStats } from "@/components/animated-stats";
 import { TrustBadges } from "@/components/trust-badges";
 import { RepairProcess } from "@/components/repair-process";
 import { QuickContactBar } from "@/components/quick-contact-bar";
+import { ElegantPhoneBanner } from "@/components/elegant-phone-banner";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 export function generateStaticParams() {
@@ -20,6 +21,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations('Home');
+  const t_trust = await getTranslations('Trust');
   const stats = [
     { label: t('stat_customers'), value: '15K+' },
     { label: t('stat_devices'), value: '20K+' },
@@ -39,8 +41,10 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
 
       <QuickContactBar />
       <RepairProcess />
+      <ElegantPhoneBanner title={t_trust('badge_label')} />
       <TrustBadges />
       <AnimatedStats stats={stats} />
+      <ElegantPhoneBanner />
 
       <Services />
       <div className="bg-muted/30">

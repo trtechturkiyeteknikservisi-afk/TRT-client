@@ -42,7 +42,7 @@ function Counter({ value }: { value: string }) {
 
 export function AnimatedStats({ stats }: { stats: { label: string; value: string }[] }) {
   return (
-    <section className="relative py-24 overflow-hidden border-y bg-background/40 backdrop-blur-md">
+    <section className="relative py-12 overflow-hidden border-y bg-background/40 backdrop-blur-md">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-12 md:gap-8">
           {stats.map((stat, i) => (

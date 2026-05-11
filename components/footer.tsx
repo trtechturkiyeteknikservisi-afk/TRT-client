@@ -12,7 +12,9 @@ import {
   TiktokIcon, 
   SnapchatIcon, 
   TelegramIcon, 
-  WhatsappIcon 
+  WhatsappIcon,
+  LinkedinIcon,
+  PinterestIcon
 } from './social-icons';
 
 const socialLinks = [
@@ -23,6 +25,8 @@ const socialLinks = [
   { icon: YoutubeIcon, href: 'https://youtube.com/@trtservis?si=kb9K3XN-LX4NX-du', label: 'YouTube', color: 'hover:bg-[#FF0000]' },
   { icon: TelegramIcon, href: 'https://t.me/trtservis', label: 'Telegram', color: 'hover:bg-[#0088cc]' },
   { icon: SnapchatIcon, href: 'https://snapchat.com/t/pL3vgBfZ', label: 'Snapchat', color: 'hover:bg-[#FFFC00] hover:text-black' },
+  { icon: LinkedinIcon, href: 'https://www.linkedin.com/in/tr-tech-44a056402?utm_source=share_via&utm_content=profile&utm_medium=member_ios', label: 'LinkedIn', color: 'hover:bg-[#0A66C2]' },
+  { icon: PinterestIcon, href: 'https://tr.pinterest.com/trtservis/?invite_code=6906950e8ba94d7b8b9a3364db735f0d&sender=1122240938304289862', label: 'Pinterest', color: 'hover:bg-[#E60023]' },
 ];
 
 export function Footer() {

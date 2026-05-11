@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { MessageCircle, X } from 'lucide-react';
+import { MessageCircle, X, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
@@ -14,7 +14,9 @@ import {
   TiktokIcon, 
   SnapchatIcon, 
   TelegramIcon, 
-  WhatsappIcon 
+  WhatsappIcon,
+  LinkedinIcon,
+  PinterestIcon
 } from './social-icons';
 
 export function StickyContact() {
@@ -22,6 +24,7 @@ export function StickyContact() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = React.useState(false);
   const [whatsappNumber, setWhatsappNumber] = React.useState("908508401505");
+  const [supportPhone, setSupportPhone] = React.useState("0850 840 15 05");
 
   React.useEffect(() => {
     const fetchSettings = async () => {
@@ -31,6 +34,7 @@ export function StickyContact() {
         if (res.ok) {
           const data = await res.json();
           if (data.whatsapp) setWhatsappNumber(data.whatsapp);
+          if (data.support_phone) setSupportPhone(data.support_phone);
         }
       } catch (err) {
         console.error("Failed to fetch settings in StickyContact", err);
@@ -42,6 +46,7 @@ export function StickyContact() {
   if (pathname?.includes('/admin')) return null;
 
   const socialLinks = [
+    { icon: Phone, href: `tel:${supportPhone.replace(/\s/g, '')}`, color: 'bg-primary' },
     { icon: () => <img src="/whats.png" alt="WhatsApp" className="w-7 h-7 object-contain" />, href: `https://wa.me/${whatsappNumber.replace(/\D/g, '')}`, color: 'bg-[#25D366]' },
     { icon: InstagramIcon, href: 'https://www.instagram.com/trtservis?igsh=MXcxZ25rNjNydjYxZQ%3D%3D&utm_source=qr', color: 'bg-[#E1306C]' },
     { icon: TiktokIcon, href: 'https://www.tiktok.com/@trtservis', color: 'bg-[#000000]', isTiktok: true },
@@ -49,6 +54,8 @@ export function StickyContact() {
     { icon: YoutubeIcon, href: 'https://youtube.com/@trtservis?si=kb9K3XN-LX4NX-du', color: 'bg-[#FF0000]' },
     { icon: TelegramIcon, href: 'https://t.me/trtservis', color: 'bg-[#0088cc]' },
     { icon: SnapchatIcon, href: 'https://snapchat.com/t/pL3vgBfZ', color: 'bg-[#FFFC00]', iconColor: 'text-black' },
+    { icon: LinkedinIcon, href: 'https://www.linkedin.com/in/tr-tech-44a056402?utm_source=share_via&utm_content=profile&utm_medium=member_ios', color: 'bg-[#0A66C2]' },
+    { icon: PinterestIcon, href: 'https://tr.pinterest.com/trtservis/?invite_code=6906950e8ba94d7b8b9a3364db735f0d&sender=1122240938304289862', color: 'bg-[#E60023]' },
   ];
 
   return (
