@@ -249,7 +249,10 @@ export default function PolicyTermsPage() {
                                                 }
                                                 const SERVER_URL = normalizedApiUrl.replace('/api', '');
                                                 const path = settingsData[`${activePolicy}_pdf_${activeLang}`];
-                                                return path.startsWith('http') ? path : `${SERVER_URL}/${path}`;
+                                                if (!path) return '#';
+                                                if (path.startsWith('http')) return path;
+                                                if (path.startsWith('.')) return `https://${path.substring(1)}`;
+                                                return `${SERVER_URL}${path.startsWith('/') ? path : `/${path}`}`;
                                             })()}
                                             target="_blank"
                                             className="p-2 hover:bg-primary/10 text-primary rounded-lg transition-colors"

@@ -67,7 +67,9 @@ const VerificationPage = () => {
 
                 const getFullUrl = (path: string) => {
                     if (!path) return '';
-                    return path.startsWith('http') ? path : `${SERVER_URL}/${path}`;
+                    if (path.startsWith('http')) return path;
+                    if (path.startsWith('.')) return `https://${path.substring(1)}`;
+                    return `${SERVER_URL}${path.startsWith('/') ? path : `/${path}`}`;
                 };
 
                 setPolicyContent({

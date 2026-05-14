@@ -31,13 +31,26 @@ export default async function PoliciesPage(props: { params: Promise<{ locale: st
 
   if (settingsData.OFFICIAL_DOCUMENT_PATH) {
       const path = settingsData.OFFICIAL_DOCUMENT_PATH;
-      officialDocPath = path.startsWith('http') ? path : `${SERVER_URL}/${path}`;
+      if (path.startsWith('http')) {
+          officialDocPath = path;
+      } else if (path.startsWith('.')) {
+          officialDocPath = `https://${path.substring(1)}`;
+      } else {
+          officialDocPath = `${SERVER_URL}${path.startsWith('/') ? path : `/${path}`}`;
+      }
   }
 
   const getPolicyPdf = (id: string) => {
-    const path = settingsData[`${id}_pdf_${locale}`] || settingsData[`${id}_pdf_en`];
+    let path = settingsData[`${id}_pdf_${locale}`] || settingsData[`${id}_pdf_en`];
     if (!path) return null;
-    return path.startsWith('http') ? path : `${SERVER_URL}/${path}`;
+    
+    if (path.startsWith('http')) return path;
+    if (path.startsWith('.')) return `https://${path.substring(1)}`;
+    
+    // If path starts with api/ and SERVER_URL is empty (e.g. API_URL was /api)
+    // we want to ensure it's a root-relative path at least
+    const fullPath = path.startsWith('/') ? path : `/${path}`;
+    return `${SERVER_URL}${fullPath}`;
   };
 
   const policies = [

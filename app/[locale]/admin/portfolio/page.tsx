@@ -286,7 +286,8 @@ export default function PortfolioPage() {
                                     normalizedApiUrl = `https://${cleanUrl}`;
                                 }
                                 const SERVER_URL = normalizedApiUrl.replace('/api', '');
-                                return `${SERVER_URL}${item.url}`;
+                                if (item.url.startsWith('.')) return `https://${item.url.substring(1)}`;
+                                return `${SERVER_URL}${item.url.startsWith('/') ? item.url : `/${item.url}`}`;
                             })()} 
                             alt={item.title_en} 
                             className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" 
