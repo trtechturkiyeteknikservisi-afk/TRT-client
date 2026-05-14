@@ -11,6 +11,7 @@ export default async function PoliciesPage(props: { params: Promise<{ locale: st
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
   
   // Robust SERVER_URL construction
+  console.log("DEBUG: PoliciesPage running with API_URL:", API_URL);
   let normalizedApiUrl = API_URL;
   if (!API_URL.startsWith('http') && !API_URL.startsWith('/')) {
       // Remove leading dot if exists and prepend https://
@@ -21,7 +22,7 @@ export default async function PoliciesPage(props: { params: Promise<{ locale: st
 
   let settingsData: Record<string, string> = {};
   try {
-    const res = await fetch(`${API_URL}/settings`, { cache: 'no-store' });
+    const res = await fetch(`${API_URL}/settings?t=${Date.now()}`, { cache: 'no-store' });
     if (res.ok) {
         settingsData = await res.json();
     }

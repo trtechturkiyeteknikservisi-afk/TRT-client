@@ -53,7 +53,7 @@ const VerificationPage = () => {
     useEffect(() => {
         const fetchPolicies = async () => {
             try {
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/settings`);
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/settings?t=${Date.now()}`);
                 const data = response.data as any;
                 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
                 
