@@ -285,7 +285,7 @@ export default function PortfolioPage() {
                                     const cleanUrl = API_URL.startsWith('.') ? API_URL.substring(1) : API_URL;
                                     normalizedApiUrl = `https://${cleanUrl}`;
                                 }
-                                const SERVER_URL = normalizedApiUrl.replace('/api', '');
+                                const SERVER_URL = normalizedApiUrl.replace(/\/api\/?$/, '');
                                 if (item.url.startsWith('.')) return `https://${item.url.substring(1)}`;
                                 return `${SERVER_URL}${item.url.startsWith('/') ? item.url : `/${item.url}`}`;
                             })()} 

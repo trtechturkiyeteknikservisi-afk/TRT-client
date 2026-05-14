@@ -247,7 +247,7 @@ export default function PolicyTermsPage() {
                                                     const cleanUrl = API_URL.startsWith('.') ? API_URL.substring(1) : API_URL;
                                                     normalizedApiUrl = `https://${cleanUrl}`;
                                                 }
-                                                const SERVER_URL = normalizedApiUrl.replace('/api', '');
+                                                const SERVER_URL = normalizedApiUrl.replace(/\/api\/?$/, '');
                                                 const path = settingsData[`${activePolicy}_pdf_${activeLang}`];
                                                 if (!path) return '#';
                                                 if (path.startsWith('http')) return path;
