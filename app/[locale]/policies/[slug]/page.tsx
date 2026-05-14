@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, ShieldCheck, Scale, Gavel, Truck, ChevronLeft } from 'lucide-react';
+import { FileText, ShieldCheck, Scale, Gavel, Truck, ChevronLeft, Download } from 'lucide-react';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { NextIntlClientProvider } from 'next-intl';
 import { notFound } from 'next/navigation';
@@ -26,12 +26,32 @@ export default async function PolicyDetailPage(props: { params: Promise<{ locale
   const t = await getTranslations('Policies');
   
   let content = t('updated_soon');
+  let pdfUrl = '';
   try {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
     const res = await fetch(`${API_URL}/settings`, { cache: 'no-store' });
     if (res.ok) {
         const settings = await res.json();
-        content = settings[`${slug}_${locale}`] || settings[`${slug}_en`] || content;
+        const settingKey = slug === 'terms' ? 'policy' : slug;
+        content = settings[`${settingKey}_${locale}`] || settings[`${settingKey}_en`] || content;
+        
+        let path = settings[`${slug}_pdf_${locale}`] || settings[`${slug}_pdf_en`];
+        if (path) {
+            if (path.startsWith('http')) {
+                pdfUrl = path;
+            } else if (path.startsWith('.')) {
+                pdfUrl = `https://${path.substring(1)}`;
+            } else {
+                let normalizedApiUrl = API_URL;
+                if (!API_URL.startsWith('http') && !API_URL.startsWith('/')) {
+                    const cleanUrl = API_URL.startsWith('.') ? API_URL.substring(1) : API_URL;
+                    normalizedApiUrl = `https://${cleanUrl}`;
+                }
+                const SERVER_URL = normalizedApiUrl.replace(/\/api\/?$/, '');
+                const fullPath = path.startsWith('/') ? path : `/${path}`;
+                pdfUrl = `${SERVER_URL}${fullPath}`;
+            }
+        }
     }
   } catch (error) {
     console.error(`Failed to fetch policy: ${slug}`, error);
@@ -83,6 +103,17 @@ export default async function PolicyDetailPage(props: { params: Promise<{ locale
                         <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Last Updated</p>
                         <p className="text-xs font-bold text-foreground">{new Date().toLocaleDateString()}</p>
                     </div>
+                    {pdfUrl && (
+                        <a 
+                            href={pdfUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-primary hover:text-primary-foreground transition-all ml-4"
+                        >
+                            <Download size={16} />
+                            PDF
+                        </a>
+                    )}
                 </div>
             </header>
 

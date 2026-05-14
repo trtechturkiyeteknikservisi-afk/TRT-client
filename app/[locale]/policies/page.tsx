@@ -92,11 +92,11 @@ export default async function PoliciesPage(props: { params: Promise<{ locale: st
       desc: t('shipping_desc'),
       icon: Truck,
       color: 'bg-red-500/10 text-red-500',
-      href: getPolicyPdf('shipping') || '/policies/shipping'
+      href: '/policies/shipping'
     }
   ].map(p => ({
     ...p,
-    href: p.id !== 'shipping' ? (getPolicyPdf(p.id) || p.href) : p.href
+    href: p.href
   }));
 
   return (
