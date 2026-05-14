@@ -9,36 +9,18 @@ import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 
 import { ContactForm } from './contact-form';
+import { useSettings } from './settings-provider';
 
 export function Contact() {
   const t = useTranslations('Contact');
-  const [settings, setSettings] = useState({
-    whatsapp: '908508401505',
+  const { settings: globalSettings } = useSettings();
+  
+  const settings = {
+    whatsapp: globalSettings.whatsapp || '908508401505',
     complaints_whatsapp: '905067006677',
-    support_phone: '0850 840 15 05',
-    support_email: 'trtech@trtservis.com'
-  });
-
-  React.useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-        const res = await axios.get(`${API_URL}/settings`);
-        if (res.data) {
-          const data = res.data as any;
-          setSettings({
-            whatsapp: data.whatsapp || '908508401505',
-            complaints_whatsapp: '905067006677',
-            support_phone: data.support_phone || '0850 840 15 05',
-            support_email: data.support_email || 'trtech@trtservis.com'
-          });
-        }
-      } catch (error) {
-        console.error("Failed to fetch settings for contact component", error);
-      }
-    };
-    fetchSettings();
-  }, []);
+    support_phone: globalSettings.support_phone || '0850 840 15 05',
+    support_email: globalSettings.support_email || 'trtech@trtservis.com'
+  };
 
   return (
     <section id="contact" className="py-24 md:py-32 bg-background relative overflow-hidden">

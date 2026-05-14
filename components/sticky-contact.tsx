@@ -19,29 +19,15 @@ import {
   PinterestIcon
 } from './social-icons';
 
+import { useSettings } from './settings-provider';
+
 export function StickyContact() {
+  const { settings } = useSettings();
   const t = useTranslations('Contact');
   const pathname = usePathname();
   const [isOpen, setIsOpen] = React.useState(false);
-  const [whatsappNumber, setWhatsappNumber] = React.useState("908508401505");
-  const [supportPhone, setSupportPhone] = React.useState("0850 840 15 05");
-
-  React.useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-        const res = await fetch(`${API_URL}/settings`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.whatsapp) setWhatsappNumber(data.whatsapp);
-          if (data.support_phone) setSupportPhone(data.support_phone);
-        }
-      } catch (err) {
-        console.error("Failed to fetch settings in StickyContact", err);
-      }
-    };
-    fetchSettings();
-  }, []);
+  const whatsappNumber = settings.whatsapp || "908508401505";
+  const supportPhone = settings.support_phone || "0850 840 15 05";
 
   if (pathname?.includes('/admin')) return null;
 

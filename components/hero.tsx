@@ -9,14 +9,16 @@ import axios from 'axios';
 
 import { useTranslations, useLocale } from 'next-intl';
 import { ContactForm } from './contact-form';
+import { useSettings } from './settings-provider';
 
 export function Hero() {
   const t = useTranslations('Hero');
   const tContact = useTranslations('Contact');
   const locale = useLocale();
   const isRTL = locale === 'ar';
+  const { settings } = useSettings();
   const [current, setCurrent] = useState(0);
-  const [whatsappNumber, setWhatsappNumber] = useState("908508401505");
+  const whatsappNumber = settings.whatsapp || "908508401505";
   const [banners, setBanners] = useState([
     {
       title: t('phone_title'),
@@ -47,7 +49,6 @@ export function Hero() {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
         const response = await axios.get(`${API_URL}/banners?locale=${locale}`);
         const fetchedBanners = response.data as any[];
-        console.log('Fetched banners:', fetchedBanners);
         if (fetchedBanners && fetchedBanners.length > 0) {
           setBanners(fetchedBanners);
         }
@@ -56,18 +57,6 @@ export function Hero() {
       }
     };
     fetchBanners();
-
-    const fetchSettings = async () => {
-      try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-        const res = await axios.get(`${API_URL}/settings`);
-        const data = res.data as any;
-        if (data && data.whatsapp) setWhatsappNumber(data.whatsapp);
-      } catch (error) {
-        console.error('Failed to fetch settings:', error);
-      }
-    };
-    fetchSettings();
   }, [locale]);
 
   useEffect(() => {

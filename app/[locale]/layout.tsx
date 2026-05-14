@@ -12,6 +12,7 @@ import { HideOnAdmin } from "@/components/hide-on-admin";
 import { ScrollToTop } from "@/components/scroll-to-top";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { SettingsProvider } from "@/components/settings-provider";
 
 const almarai = Almarai({
   subsets: ["arabic"],
@@ -74,24 +75,26 @@ export default async function RootLayout(props: {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <NextIntlClientProvider messages={messages}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <HideOnAdmin>
-              <TopTrustBar />
-              <NewsBar />
-              <Header />
-            </HideOnAdmin>
-            {children}
-            <HideOnAdmin>
-              <Footer />
-              <ScrollToTop />
-              <StickyContact />
-            </HideOnAdmin>
-          </ThemeProvider>
+          <SettingsProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <HideOnAdmin>
+                <TopTrustBar />
+                <NewsBar />
+                <Header />
+              </HideOnAdmin>
+              {children}
+              <HideOnAdmin>
+                <Footer />
+                <ScrollToTop />
+                <StickyContact />
+              </HideOnAdmin>
+            </ThemeProvider>
+          </SettingsProvider>
         </NextIntlClientProvider>
       </body>
     </html>

@@ -6,41 +6,31 @@ import { motion } from 'framer-motion';
 import { Megaphone } from 'lucide-react';
 import { useLocale } from 'next-intl';
 import { usePathname } from 'next/navigation';
+import { useSettings } from './settings-provider';
 
 export function NewsBar() {
+  const { settings } = useSettings();
   const locale = useLocale();
   const pathname = usePathname();
   const [news, setNews] = useState<string>('');
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Hide if on admin pages
     if (pathname?.includes('/admin')) {
       setIsVisible(false);
       return;
     }
-    const fetchNews = async () => {
-      try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-        const response = await axios.get(`${API_URL}/settings`);
-        const data = response.data as any;
-        
-        // Get localized news
-        const newsKey = `news_bar_${locale}`;
-        const newsContent = data[newsKey] || data['news_bar_en'] || '';
-        
-        if (newsContent.trim()) {
-          setNews(newsContent);
-          setIsVisible(true);
-        } else {
-          setIsVisible(false);
-        }
-      } catch (error) {
-        console.error('Failed to fetch news bar content', error);
-      }
-    };
-    fetchNews();
-  }, [locale]);
+    
+    const newsKey = `news_bar_${locale}`;
+    const newsContent = settings[newsKey] || settings['news_bar_en'] || '';
+    
+    if (newsContent.trim()) {
+      setNews(newsContent);
+      setIsVisible(true);
+    } else {
+      setIsVisible(false);
+    }
+  }, [locale, pathname, settings]);
 
   if (!isVisible) return null;
 

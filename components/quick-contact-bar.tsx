@@ -5,33 +5,19 @@ import { Phone, MessageSquare, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
+import { useSettings } from './settings-provider';
 
 export function QuickContactBar() {
   const t = useTranslations('Contact');
-  const [settings, setSettings] = useState({
-    whatsapp: '908508401505',
-    support_phone: '0850 840 15 05'
-  });
+  const { settings } = useSettings();
+  
+  const displaySettings = {
+    whatsapp: settings.whatsapp || '908508401505',
+    support_phone: settings.support_phone || '0850 840 15 05'
+  };
 
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-        const res = await fetch(`${API_URL}/settings`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.whatsapp) setSettings(prev => ({ ...prev, whatsapp: data.whatsapp }));
-          if (data.support_phone) setSettings(prev => ({ ...prev, support_phone: data.support_phone }));
-        }
-      } catch (err) {
-        console.error("Failed to fetch settings in QuickContactBar", err);
-      }
-    };
-    fetchSettings();
-  }, []);
-
-  const whatsappLink = `https://wa.me/${settings.whatsapp.replace(/\D/g, '')}`;
-  const phoneLink = `tel:${settings.support_phone.replace(/\s/g, '')}`;
+  const whatsappLink = `https://wa.me/${displaySettings.whatsapp.replace(/\D/g, '')}`;
+  const phoneLink = `tel:${displaySettings.support_phone.replace(/\s/g, '')}`;
 
   return (
     <div className="w-full bg-background relative z-30 py-12">
@@ -52,7 +38,7 @@ export function QuickContactBar() {
             
             <div className="flex flex-col">
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/60 mb-1">{t('phone_label')}</span>
-              <span className="text-xl md:text-3xl font-black tracking-tighter text-primary">{settings.support_phone}</span>
+              <span className="text-xl md:text-3xl font-black tracking-tighter text-primary">{displaySettings.support_phone}</span>
             </div>
             
             <div className="ml-auto translate-x-0 transition-all duration-500">

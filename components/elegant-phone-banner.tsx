@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Phone, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
+import { useSettings } from './settings-provider';
 
 interface ElegantPhoneBannerProps {
   title?: string;
@@ -11,23 +12,8 @@ interface ElegantPhoneBannerProps {
 
 export function ElegantPhoneBanner({ title }: ElegantPhoneBannerProps) {
   const t = useTranslations('Contact');
-  const [phone, setPhone] = useState('0850 840 15 05');
-
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-        const res = await fetch(`${API_URL}/settings`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.support_phone) setPhone(data.support_phone);
-        }
-      } catch (err) {
-        console.error("Failed to fetch settings in ElegantPhoneBanner", err);
-      }
-    };
-    fetchSettings();
-  }, []);
+  const { settings } = useSettings();
+  const phone = settings.support_phone || '0850 840 15 05';
 
   return (
     <div className="relative w-full py-6 overflow-hidden">

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldCheck, X } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
+import { useSettings } from './settings-provider';
 
 interface KVKKCheckboxProps {
     accepted: boolean;
@@ -14,25 +15,11 @@ export function KVKKCheckbox({ accepted, onChange }: KVKKCheckboxProps) {
     const t = useTranslations('Contact');
     const tPolicies = useTranslations('Policies');
     const locale = useLocale();
+    const { settings } = useSettings();
     const [showModal, setShowModal] = useState(false);
-    const [policyContent, setPolicyContent] = useState('');
-
-    useEffect(() => {
-        const fetchSettings = async () => {
-            try {
-                const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-                const res = await fetch(`${API_URL}/settings`);
-                if (res.ok) {
-                    const data = await res.json();
-                    const key = `policy_${locale}`;
-                    if (data[key]) setPolicyContent(data[key]);
-                }
-            } catch (err) {
-                console.error("Failed to fetch settings in KVKKCheckbox", err);
-            }
-        };
-        fetchSettings();
-    }, [locale]);
+    
+    const key = `policy_${locale}`;
+    const policyContent = settings[key] || '';
 
     return (
         <>

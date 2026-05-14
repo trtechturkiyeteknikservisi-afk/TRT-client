@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 
 import { KVKKCheckbox } from './kvkk-checkbox';
+import { useSettings } from './settings-provider';
 
 interface ContactFormProps {
   initialServiceType?: string;
@@ -19,7 +20,8 @@ interface ContactFormProps {
 export function ContactForm({ initialServiceType = 'phone', isSidebar = false, isHeroMini = false }: ContactFormProps) {
   const t = useTranslations('Contact');
   const tTrust = useTranslations('Trust');
-  const [whatsappNumber, setWhatsappNumber] = useState("908508401505");
+  const { settings } = useSettings();
+  const whatsappNumber = settings.whatsapp || "908508401505";
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -39,20 +41,6 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
 
   useEffect(() => {
     setMounted(true);
-
-    const fetchSettings = async () => {
-      try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-        const res = await fetch(`${API_URL}/settings`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.whatsapp) setWhatsappNumber(data.whatsapp);
-        }
-      } catch (err) {
-        console.error("Failed to fetch settings in ContactForm", err);
-      }
-    };
-    fetchSettings();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
