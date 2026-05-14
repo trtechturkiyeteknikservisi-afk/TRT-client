@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { MapPin, Send, CheckCircle, X, ShieldCheck, Truck } from 'lucide-react';
+import { MapPin, Send, CheckCircle, X, ShieldCheck, Truck, Phone } from 'lucide-react';
 import { AddressSelector } from './address-selector';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -21,6 +21,7 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
   const t = useTranslations('Contact');
   const tTrust = useTranslations('Trust');
   const { settings } = useSettings();
+  const supportPhone = settings.support_phone || "0850 840 15 05";
   const whatsappNumber = settings.whatsapp || "908508401505";
   const [formData, setFormData] = useState({
     name: '',
@@ -95,17 +96,50 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
         isHeroMini && "p-5 md:p-7 rounded-2xl bg-white/5 dark:bg-background/20"
       )}>
         
-        <div className={cn("mb-6 text-center sm:text-left", isHeroMini && "mb-5 text-center")}>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest mb-3">
-             <Truck size={12} className="animate-pulse" />
-             <span>{t('cargo_service')}</span>
+        <div className="mb-6 flex flex-row items-start justify-between gap-4">
+          <div className={cn(
+            "space-y-4",
+            isHeroMini ? "text-left" : "text-left"
+          )}>
+            <div className="flex flex-col gap-2 items-start">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest whitespace-nowrap w-fit">
+                 <Truck size={12} className="animate-pulse" />
+                 <span>{t('cargo_service')}</span>
+              </div>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-[10px] font-black uppercase tracking-widest whitespace-nowrap w-fit">
+                 <Truck size={12} className="animate-pulse" />
+                 <span>{tTrust('free_kurye')}</span>
+              </div>
+            </div>
+            
+            <h3 className={cn(
+              "text-2xl font-black tracking-tight leading-none",
+              isHeroMini && "text-xl"
+            )}>
+              {t('send_message')}
+            </h3>
+            
+            {!isHeroMini && (
+              <p className="text-[13px] text-muted-foreground font-medium max-w-md">
+                {t('contact_subtitle')}
+              </p>
+            )}
           </div>
-          <h3 className={cn("text-2xl font-black tracking-tight leading-none", isHeroMini && "text-xl")}>{t('send_message')}</h3>
-          {!isHeroMini && (
-            <p className="text-[13px] text-muted-foreground font-medium mt-2">
-              {t('contact_subtitle')}
-            </p>
-          )}
+          
+          <div className="flex shrink-0 justify-end">
+            <a 
+              href={`tel:${supportPhone.replace(/\s/g, '')}`}
+              className="flex items-center gap-3 px-5 py-3 bg-primary/10 border border-primary/20 hover:bg-primary/20 rounded-2xl transition-all hover:scale-105 group"
+            >
+              <div className="p-2 bg-primary text-primary-foreground rounded-lg group-hover:rotate-12 transition-transform">
+                <Phone size={18} />
+              </div>
+              <div className="flex flex-col items-start leading-tight">
+                <span className="text-[9px] font-black uppercase tracking-widest text-primary/60">{t('phone_label')}</span>
+                <span className="text-base font-black tracking-tighter text-primary" dir="ltr">{supportPhone}</span>
+              </div>
+            </a>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

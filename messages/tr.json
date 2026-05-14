@@ -108,8 +108,8 @@
       "features": ["Tekerlek & Motor Tamiri", "Sensör Kalibrasyonu", "Batarya Değişimi", "Anakart Tamiri", "Derin Temizlik", "Lazer (LDS) Tamiri"]
     },
     "watch": {
-      "title": "Orijinal Saat Restorasyonu",
-      "description": "Lüks ve orijinal saatler için hassas onarım ve bakım. Saatlerinizi en yüksek özenle ve profesyonel araçlarla ele alıyoruz.",
+      "title": "Orijinal Akıllı Saat Restorasyonu",
+      "description": "Orijinal akıllı saatler için hassas onarım ve bakım. Saatlerinizi en yüksek özenle ve profesyonel araçlarla ele alıyoruz.",
       "features": ["Mekanizma Servisi", "Cam Değişimi", "Batarya Değişimi", "Parlatma & Temizlik", "Su Geçirmezlik Testi", "Kordon Değişimi"]
     },
     "tablet": {
@@ -181,7 +181,7 @@
     "service_phone": "Telefon Onarımı",
     "service_laptop": "Laptop Onarımı",
     "service_robot": "Robot Süpürge Onarımı",
-    "service_watch": "Saat Onarımı",
+    "service_watch": "Akıllı saat onarımı",
     "service_tablet": "Tablet Onarımı",
     "service_headphones": "Kulaklık Onarımı",
     "your_message": "Mesajınız",

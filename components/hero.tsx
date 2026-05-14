@@ -73,7 +73,7 @@ export function Hero() {
   }, [banners.length, current]);
 
   return (
-    <section className="relative min-h-screen lg:h-[110vh] w-full overflow-hidden bg-background">
+    <section className="relative min-h-screen w-full overflow-hidden bg-background flex flex-col justify-center pt-20 lg:pt-24 pb-12 lg:pb-16">
       {/* Dynamic Backgrounds */}
       <AnimatePresence mode="wait">
         {banners[current] && (
@@ -102,7 +102,7 @@ export function Hero() {
         )}
       </AnimatePresence>
 
-      <div className="relative container mx-auto px-4 h-full flex flex-col lg:flex-row items-center lg:justify-between gap-16 lg:gap-24 pt-32 lg:pt-0">
+      <div className="relative container mx-auto px-4 w-full flex flex-col lg:flex-row items-center lg:justify-between gap-12 lg:gap-16 z-10">
         {/* Animated Content Section */}
         <div className="w-full lg:flex-1 relative h-full flex items-center">
           <AnimatePresence mode="wait">
@@ -178,30 +178,7 @@ export function Hero() {
         </div>
 
         {/* Static Hero Mini Contact Form */}
-        <div className="block w-full lg:w-[540px] relative z-20 pb-20 lg:pb-0">
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-row items-center justify-center gap-4 mb-5 bg-background/40 backdrop-blur-md p-3 rounded-2xl border border-foreground/5 lg:bg-transparent lg:backdrop-blur-none lg:border-none lg:p-0"
-          >
-            <a 
-              href={`https://wa.me/${whatsappNumber.replace(/\D/g, '')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 hover:scale-105 transition-transform"
-            >
-              <img src="/whats.png" alt="WhatsApp" className="w-6 h-6 object-contain" />
-              <span className="text-lg font-black tracking-tighter text-emerald-500" dir="ltr">{whatsappNumber}</span>
-            </a>
-            
-            <div className="w-1.5 h-1.5 rounded-full bg-foreground/10" />
-            
-            <div className="px-4 py-1.5 bg-red-500/10 border border-red-500/20 rounded-xl">
-              <span className="text-xs font-black uppercase tracking-widest text-red-600 dark:text-white">
-                {useTranslations('Trust')('free_kurye')}
-              </span>
-            </div>
-          </motion.div>
+        <div className="block w-full lg:w-[540px] relative z-20">
           <ContactForm isHeroMini={true} />
         </div>
       </div>

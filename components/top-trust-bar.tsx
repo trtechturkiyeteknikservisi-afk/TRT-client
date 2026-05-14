@@ -27,27 +27,24 @@ export function TopTrustBar() {
     { text: t('fault_detection_chargeable'), icon: AlertCircle },
   ];
 
-  // Duplicate items for seamless loop on mobile only
-  const displayItems = isMobile ? [...trustItems, ...trustItems] : trustItems;
+  // Duplicate items for seamless loop on all screens
+  const displayItems = [...trustItems, ...trustItems, ...trustItems, ...trustItems];
 
   return (
     <div className="bg-[#0a0a0a] border-b border-white/5 py-2 overflow-hidden relative w-full">
-      <div className="px-4 md:px-10">
+      <div className="w-full">
         <div className="flex overflow-hidden group">
           <motion.div 
-            className={cn(
-              "flex items-center whitespace-nowrap",
-              isMobile ? "gap-12" : "justify-between w-full"
-            )}
-            animate={isMobile ? { x: [0, -1500] } : { x: 0 }}
-            transition={isMobile ? {
+            className="flex items-center whitespace-nowrap gap-12 md:gap-24"
+            animate={{ x: [0, -2000] }}
+            transition={{
               x: {
                 repeat: Infinity,
                 repeatType: "loop",
-                duration: 40,
+                duration: 60,
                 ease: "linear",
               },
-            } : {}}
+            }}
           >
             {displayItems.map((item, index) => (
               <div key={index} className="flex items-center gap-2 text-white/80 shrink-0">
