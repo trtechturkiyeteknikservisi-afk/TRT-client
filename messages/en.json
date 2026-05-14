@@ -16,8 +16,8 @@
     "merchants": "Merchants",
     "track_shipment": "Track Shipment",
     "coming_soon": "Soon",
-    "about_us": "About Us",
-    "headphones_repair": "Headphones Repair"
+    "headphones_repair": "Headphones Repair",
+    "cargo_service": "Nationwide Service via Cargo"
   },
   "Footer": {
     "description": "Premium technical service for all your electronic devices in Turkey. Expert repairs with quality parts and guarantee.",
@@ -203,7 +203,8 @@
     "success_message": "Your request has been sent successfully! We will contact you soon.",
     "kvkk_text": "I have read and understood the KVKK Disclosure Text.",
     "sticky_contact_cta": "Contact Us",
-    "contact_subtitle": "We will contact you within 2 business hours"
+    "contact_subtitle": "We will get in touch with you within 2 business hours",
+    "cargo_service": "Nationwide Service via Cargo"
   },
   "Blog": {
     "title": "Technical Insights & News",

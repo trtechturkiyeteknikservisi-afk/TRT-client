@@ -73,7 +73,7 @@ export function Reviews() {
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
       viewport={{ once: true }}
-      className="bg-card p-8 rounded-3xl border shadow-sm relative h-full mb-10"
+      className="bg-card p-8 rounded-2xl border shadow-sm relative h-full mb-10"
     >
       <div className="absolute top-6 right-8 text-primary/10">
         <Quote size={40} />
@@ -117,7 +117,7 @@ export function Reviews() {
         </div>
 
         {showForm && (
-          <div className="mb-10 bg-card border p-6 rounded-3xl text-left max-w-2xl mx-auto">
+          <div className="mb-10 bg-card border p-6 rounded-2xl text-left max-w-2xl mx-auto">
             <form onSubmit={handleSubmitReview} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input

@@ -69,20 +69,23 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex min-h-[4rem] items-center justify-between gap-4 py-2 md:py-0">
+      <div className="w-full xl:container mx-auto px-2 sm:px-4 xl:px-4 2xl:px-8">
+        <div className="flex min-h-[4rem] items-center justify-between gap-1 sm:gap-2 2xl:gap-4 py-2 md:py-0">
           <div className="flex items-center flex-shrink-0">
-            <Link href="/" className="flex items-center">
+            <Link href="/" className="flex flex-col items-center group">
               <img 
                 src={theme === 'dark' ? '/night-logo.png' : '/day-logo.png'} 
                 alt={t('company_name')} 
-                className="h-10 w-auto object-contain transition-all hover:scale-105"
+                className="h-10 w-auto object-contain transition-all group-hover:scale-105"
               />
+              <span className="text-[8px] font-black uppercase tracking-[0.2em] text-primary mt-1 opacity-80 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                {t('cargo_service')}
+              </span>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center flex-wrap justify-center lg:gap-8 gap-x-4 gap-y-1 py-1">
+          <nav className="hidden lg:flex items-center justify-center lg:gap-x-1 xl:gap-x-3 2xl:gap-8 py-1 px-1 xl:px-2 max-w-full">
             {navigation.map((item) => (
               item.isDropdown ? (
                 <div 
@@ -93,7 +96,7 @@ export function Header() {
                 >
                   <Link
                     href={item.href}
-                    className="flex items-center gap-1 lg:text-[13px] text-[10px] font-semibold text-muted-foreground transition-all hover:text-primary active:scale-95"
+                    className="flex items-center gap-1 text-[9.5px] lg:text-[10px] xl:text-[11px] 2xl:text-[13px] font-semibold text-muted-foreground transition-all hover:text-primary active:scale-95 whitespace-nowrap"
                   >
                     <span>{item.name}</span>
                     <ChevronDown size={14} className={cn("transition-transform duration-200", activeDropdown === item.name && "rotate-180")} />
@@ -131,11 +134,11 @@ export function Header() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="flex items-center gap-1 lg:text-[13px] text-[10px] font-semibold text-muted-foreground transition-all hover:text-primary relative group"
+                  className="flex items-center gap-1 text-[9.5px] lg:text-[10px] xl:text-[11px] 2xl:text-[13px] font-semibold text-muted-foreground transition-all hover:text-primary relative group whitespace-nowrap"
                 >
                   {item.name}
                   {item.soon && (
-                    <span className="text-[8px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-md font-black uppercase tracking-tighter animate-pulse border border-primary/20">
+                    <span className="hidden 2xl:inline-block text-[8px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-md font-black uppercase tracking-tighter animate-pulse border border-primary/20">
                       {t('coming_soon')}
                     </span>
                   )}
@@ -150,14 +153,14 @@ export function Header() {
             {/* Theme Toggle */}
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-2.5 rounded-xl hover:bg-muted text-muted-foreground transition-all active:scale-95 border border-transparent hover:border-border"
+              className="p-1.5 xl:p-2.5 rounded-xl hover:bg-muted text-muted-foreground transition-all active:scale-95 border border-transparent hover:border-border"
               aria-label="Toggle theme"
             >
               {theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-blue-600" />}
             </button>
 
             {/* Language Switcher */}
-            <div className="flex items-center bg-muted/50 rounded-xl p-1 border border-border">
+            <div className="flex items-center bg-muted/50 rounded-xl p-0.5 xl:p-1 border border-border">
               {[
                 { code: 'en', label: 'En', flag: 'gb' },
                 { code: 'ar', label: 'AR', flag: 'sa' },
@@ -167,7 +170,7 @@ export function Header() {
                   key={l.code}
                   onClick={() => handleLanguageChange(l.code)}
                   className={cn(
-                    "px-3 py-1.5 rounded-lg text-[11px] font-extrabold transition-all whitespace-nowrap flex items-center gap-2",
+                    "px-1.5 lg:px-2 2xl:px-3 py-1 2xl:py-1.5 rounded-lg text-[10px] xl:text-[11px] font-extrabold transition-all whitespace-nowrap flex items-center gap-1 2xl:gap-1.5",
                     locale === l.code 
                       ? "bg-background text-primary shadow-sm ring-1 ring-border/50" 
                       : "text-muted-foreground hover:bg-muted"
@@ -178,14 +181,14 @@ export function Header() {
                     alt=""
                     className="w-4 h-4 rounded-full object-cover border border-border/50 shadow-sm"
                   />
-                  <span>{l.label}</span>
+                  <span className="hidden 2xl:inline">{l.label}</span>
                 </button>
               ))}
             </div>
 
             {/* Mobile Menu Toggle */}
             <button
-              className="md:hidden p-2.5 rounded-xl hover:bg-muted text-muted-foreground transition-all active:scale-95 border border-transparent hover:border-border"
+              className="lg:hidden p-2.5 rounded-xl hover:bg-muted text-muted-foreground transition-all active:scale-95 border border-transparent hover:border-border"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
@@ -201,7 +204,7 @@ export function Header() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden border-t bg-background overflow-hidden"
+            className="lg:hidden border-t bg-background overflow-hidden"
           >
             <div className="space-y-1 px-4 pb-6 pt-4">
               {navigation.map((item) => (

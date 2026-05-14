@@ -141,7 +141,7 @@ export function RepairProcess() {
           </div>
 
           {/* Active Step Presentation */}
-          <div className="relative bg-card/40 backdrop-blur-3xl rounded-[3rem] border border-white/10 dark:border-white/5 shadow-2xl overflow-hidden min-h-[400px] flex items-center">
+          <div className="relative bg-card/40 backdrop-blur-3xl rounded-3xl border border-white/10 dark:border-white/5 shadow-2xl overflow-hidden min-h-[400px] flex items-center">
              {/* Large background number */}
              <div className={cn(
                  "absolute top-1/2 -translate-y-1/2 text-[20rem] font-black text-foreground/5 select-none pointer-events-none",

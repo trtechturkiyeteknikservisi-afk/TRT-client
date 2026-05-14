@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { MapPin, Send, CheckCircle, X, ShieldCheck } from 'lucide-react';
+import { MapPin, Send, CheckCircle, X, ShieldCheck, Truck } from 'lucide-react';
 import { AddressSelector } from './address-selector';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -90,12 +90,16 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
   return (
     <div className="relative group">
       <div className={cn(
-        "bg-card/90 backdrop-blur-2xl p-6 md:p-8 rounded-[2rem] border border-black/10 dark:border-white/10 shadow-lg dark:shadow-2xl relative",
-        isSidebar && "p-6 rounded-[1.5rem]",
-        isHeroMini && "p-5 md:p-7 rounded-[1.5rem] bg-white/5 dark:bg-background/20"
+        "bg-card/90 backdrop-blur-2xl p-6 md:p-8 rounded-3xl border border-black/10 dark:border-white/10 shadow-lg dark:shadow-2xl relative",
+        isSidebar && "p-6 rounded-2xl",
+        isHeroMini && "p-5 md:p-7 rounded-2xl bg-white/5 dark:bg-background/20"
       )}>
         
         <div className={cn("mb-6 text-center sm:text-left", isHeroMini && "mb-5 text-center")}>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest mb-3">
+             <Truck size={12} className="animate-pulse" />
+             <span>{t('cargo_service')}</span>
+          </div>
           <h3 className={cn("text-2xl font-black tracking-tight leading-none", isHeroMini && "text-xl")}>{t('send_message')}</h3>
           {!isHeroMini && (
             <p className="text-[13px] text-muted-foreground font-medium mt-2">
@@ -173,6 +177,7 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
                     <option value="tablet" className="bg-card text-foreground">{t('service_tablet')}</option>
                     <option value="robot" className="bg-card text-foreground">{t('service_robot')}</option>
                     <option value="watch" className="bg-card text-foreground">{t('service_watch')}</option>
+                    <option value="headphones" className="bg-card text-foreground">{t('service_headphones')}</option>
                 </select>
               </div>
             )}
@@ -236,7 +241,7 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="relative w-full max-w-sm bg-card p-10 rounded-[2.5rem] border shadow-2xl text-center space-y-6"
+              className="relative w-full max-w-sm bg-card p-10 rounded-3xl border shadow-2xl text-center space-y-6"
             >
               <div className="w-20 h-20 bg-primary/10 text-primary rounded-3xl flex items-center justify-center mx-auto">
                   <CheckCircle size={40} />

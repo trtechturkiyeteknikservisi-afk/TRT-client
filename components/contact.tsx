@@ -99,7 +99,7 @@ export function Contact() {
                 { 
                   icon: MessageCircle, 
                   label: t('whatsapp_complaints'), 
-                  value: '0506 700 66 77', 
+                  value: t('whatsapp_cta'), 
                   color: 'red-500',
                   link: `https://wa.me/905067006677`,
                   isWa: true,
@@ -129,14 +129,18 @@ export function Contact() {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: idx * 0.1 }}
                     viewport={{ once: true }}
-                    className="group relative p-6 rounded-[2rem] bg-card/40 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 overflow-hidden"
+                    className="group relative p-6 rounded-3xl bg-card/40 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 overflow-hidden"
                   >
                     <div className={cn(
                       "p-3 rounded-2xl w-fit transition-all duration-500 group-hover:scale-110 shadow-lg",
                       item.isComplaints ? "bg-red-500 text-white shadow-red-500/20" : 
-                      item.isWa ? "bg-green-500 text-white shadow-green-500/20" : "bg-primary text-primary-foreground shadow-primary/20"
+                      item.isWa ? "bg-green-500/10 text-green-500 shadow-green-500/5" : "bg-primary text-primary-foreground shadow-primary/20"
                     )}>
-                      <Icon size={24} strokeWidth={2.5} />
+                      {item.isWa ? (
+                        <img src="/whats.png" alt="WhatsApp" className="w-6 h-6 object-contain" />
+                      ) : (
+                        <Icon size={24} strokeWidth={2.5} />
+                      )}
                     </div>
                     
                     <div className="mt-4 space-y-1">

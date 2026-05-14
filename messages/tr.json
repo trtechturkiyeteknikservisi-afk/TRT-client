@@ -11,13 +11,14 @@
     "phone_repair": "Telefon Onarımı",
     "laptop_repair": "Laptop Onarımı",
     "robot_repair": "Robot Süpürge Onarımı",
-    "watch_repair": "Saat Onarımı",
+    "watch_repair": "Akıllı saat onarımı",
     "tablet_repair": "Tablet Onarımı",
     "merchants": "Kurumsal",
     "track_shipment": "Cihazım  Takibi",
     "coming_soon": "Yakında",
     "about_us": "Hakkımızda",
-    "headphones_repair": "Kulaklık Onarımı"
+    "headphones_repair": "Kulaklık Onarımı",
+    "cargo_service": "Kargo ile Türkiye Geneli Servis"
   },
   "Footer": {
     "description": "Türkiye'deki tüm elektronik cihazlarınız için birinci sınıf teknik servis. Kaliteli parçalar ve garanti ile uzman onarımlar.",
@@ -25,7 +26,7 @@
     "phone_repair": "Akıllı Telefon Onarımı",
     "laptop_repair": "Dizüstü Bilgisayar Onarımı",
     "robot_repair": "Robot Süpürge Onarımı",
-    "watch_repair": "Lüks Saat Onarımı",
+    "watch_repair": "Akıllı saat onarımı",
     "tablet_repair": "Tablet ve iPad Onarımı",
     "company": "Şirket",
     "works": "Portföyümüz",
@@ -122,6 +123,8 @@
       "features": ["AirPods Batarya", "Şarj Kutusu Onarımı", "Hoparlör Değişimi", "Bağlantı Sorunları", "Temizlik ve Restorasyon", "Kafa Bandı Onarımı"]
     },
     "features_title": "Hizmet Özellikleri",
+    "contact_subtitle": "Bizimle iletişime geçin, size en kısa sürede dönüş yapalım.",
+    "cargo_service": "Kargo ile Türkiye Geneli Servis",
     "contact_us": "Bizimle İletişime Geçin",
     "guaranteed": "Garantili",
     "guaranteed_desc": "Tüm parça ve işçilikte 6 ay garanti.",
@@ -204,7 +207,8 @@
     "success_message": "Talebiniz başarıyla gönderildi! Sizinle en kısa sürede iletişime geçeceğiz.",
     "kvkk_text": "KVKK Aydınlatma Metni’ni ve Servis Şartları’nı okudum, anladım ve kabul ediyorum.",
     "sticky_contact_cta": "Bize Ulaşın",
-    "contact_subtitle": "2 iş saati içerisinde sizinle iletişime geçeceğiz"
+    "contact_subtitle": "2 iş saati içerisinde sizinle iletişime geçeceğiz",
+    "cargo_service": "Kargo ile Türkiye Geneli Servis"
   },
   "Blog": {
     "title": "Teknik Bilgiler ve Haberler",
@@ -440,7 +444,7 @@
     "form_phone": "Telefon Numarası",
     "form_email": "E-posta Adresi (Gmail) (Opsiyonel)",
     "form_terms": "Şartlar ve koşulları ve geçerli tüm politikaları kabul ediyorum",
-    "form_submit": "GÖNDER VE BELGEYİ AL",
+    "form_submit": "ONAYLA VE BELGEYİ AL",
     "kvkk_accept": "KVKK Aydınlatma Metni’ni okudum, anladım ve kabul ediyorum.",
     "terms_accept": "Servis Şartları’nı okudum, anladım ve kabul ediyorum.",
     "privacy_note_combined": "Gönder düğmesine tıklayarak KVKK Aydınlatma Metni, Gizlilik Politikası ve Servis Şartları’nı okuduğunuzu ve kabul ettiğinizi beyan etmiş olursunuz.",

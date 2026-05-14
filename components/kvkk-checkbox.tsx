@@ -18,7 +18,7 @@ export function KVKKCheckbox({ accepted, onChange }: KVKKCheckboxProps) {
     const { settings } = useSettings();
     const [showModal, setShowModal] = useState(false);
     
-    const key = `policy_${locale}`;
+    const key = `kvkk_${locale}`;
     const policyContent = settings[key] || '';
 
     return (
@@ -60,7 +60,7 @@ export function KVKKCheckbox({ accepted, onChange }: KVKKCheckboxProps) {
                             initial={{ opacity: 0, y: 30, scale: 0.95 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 30, scale: 0.95 }}
-                            className="relative w-full max-w-2xl bg-card border rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+                            className="relative w-full max-w-2xl bg-card border rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
                         >
                             <div className="p-8 border-b flex items-center justify-between bg-muted/20">
                                 <div className="flex items-center gap-4">

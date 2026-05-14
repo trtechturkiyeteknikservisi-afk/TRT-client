@@ -27,7 +27,7 @@ export function QuickContactBar() {
           <motion.a
             href={phoneLink}
             whileHover={{ y: -8, scale: 1.02 }}
-            className="group relative flex items-center gap-6 bg-card border-2 border-primary/20 p-6 md:p-8 rounded-[1.5rem] overflow-hidden transition-all duration-500 shadow-xl shadow-primary/5 hover:shadow-primary/20"
+            className="group relative flex items-center gap-6 bg-card border-2 border-primary/20 p-6 md:p-8 rounded-2xl overflow-hidden transition-all duration-500 shadow-xl shadow-primary/5 hover:shadow-primary/20"
           >
             {/* Top active bar - now full by default */}
             <div className="absolute top-0 left-0 w-full h-1.5 bg-primary transition-transform origin-left duration-500" />
@@ -54,7 +54,7 @@ export function QuickContactBar() {
             target="_blank"
             rel="noopener noreferrer"
             whileHover={{ y: -8, scale: 1.02 }}
-            className="group relative flex items-center gap-6 bg-card border-2 border-emerald-500/20 p-6 md:p-8 rounded-[1.5rem] overflow-hidden transition-all duration-500 shadow-xl shadow-emerald-500/5 hover:shadow-emerald-500/20"
+            className="group relative flex items-center gap-6 bg-card border-2 border-emerald-500/20 p-6 md:p-8 rounded-2xl overflow-hidden transition-all duration-500 shadow-xl shadow-emerald-500/5 hover:shadow-emerald-500/20"
           >
             {/* Top active bar - now full by default */}
             <div className="absolute top-0 left-0 w-full h-1.5 bg-emerald-500 transition-transform origin-left duration-500" />

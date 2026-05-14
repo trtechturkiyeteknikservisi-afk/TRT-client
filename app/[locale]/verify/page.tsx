@@ -131,7 +131,7 @@ const VerificationPage = () => {
                 <motion.div 
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="max-w-md w-full bg-[#0a0a0a] border border-red-900/30 rounded-[3rem] p-10 text-center shadow-2xl relative overflow-hidden"
+                    className="max-w-md w-full bg-[#0a0a0a] border border-red-900/30 rounded-3xl p-10 text-center shadow-2xl relative overflow-hidden"
                 >
                     <div className="absolute inset-0 bg-gradient-to-b from-red-600/5 to-transparent pointer-events-none" />
                     <div className="relative z-10">
@@ -414,72 +414,75 @@ const VerificationPage = () => {
                                 initial={{ opacity: 0, y: 30, scale: 0.95 }}
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 exit={{ opacity: 0, y: 30, scale: 0.95 }}
-                                className="relative w-full max-w-2xl bg-[#0a0a0a] border border-white/5 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]"
+                                className="relative w-full max-w-xl bg-[#0a0a0a] border border-white/5 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
                             >
-                                <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/5">
+                                <div className="p-6 md:p-8 border-b border-white/5 flex items-center justify-between bg-white/5">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-xl bg-red-600/10 flex items-center justify-center text-red-600">
+                                        <div className="w-12 h-12 rounded-2xl bg-red-600/10 flex items-center justify-center text-red-600 shadow-lg shadow-red-600/5">
                                             <ShieldCheck size={24} />
                                         </div>
-                                        <h3 className="text-lg font-black uppercase tracking-tight text-white">
+                                        <h3 className="text-xl font-black uppercase tracking-tight text-white italic">
                                             {showPolicyModal.type === 'kvkk' ? tPolicies('kvkk') : tPolicies('terms')}
                                         </h3>
                                     </div>
                                     <button 
                                         onClick={() => setShowPolicyModal({show: false, type: null})}
-                                        className="p-3 hover:bg-white/5 rounded-full transition-colors text-gray-500"
+                                        className="p-3 hover:bg-white/10 rounded-full transition-colors text-gray-500 hover:text-white"
                                     >
                                         <X size={20} />
                                     </button>
                                 </div>
-                                <div className="p-6 md:p-10 overflow-y-auto flex-1">
-                                    {showPolicyModal.type && policyPdfs[showPolicyModal.type] ? (
-                                        <div className="flex flex-col items-center justify-center space-y-8 py-10">
-                                            <div className="w-20 h-20 rounded-3xl bg-red-600/5 flex items-center justify-center text-red-600 border border-red-600/10 shadow-2xl shadow-red-600/5">
-                                                <FileText size={40} />
-                                            </div>
-                                            <div className="text-center space-y-2">
-                                                <h4 className="text-xl font-black text-white uppercase tracking-tight italic">
-                                                    {showPolicyModal.type === 'kvkk' ? tPolicies('kvkk') : tPolicies('terms')}
-                                                </h4>
-                                                <p className="text-xs text-gray-500 font-bold uppercase tracking-widest opacity-60">
-                                                    {locale === 'ar' ? 'اختر كيف ترغب في استعراض الوثيقة' : locale === 'tr' ? 'Belgeyi nasıl görüntülemek istersiniz?' : 'How would you like to view the document?'}
-                                                </p>
-                                            </div>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md">
-                                                <a 
-                                                    href={policyPdfs[showPolicyModal.type]}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex flex-col items-center gap-4 p-6 rounded-3xl bg-white/5 border border-white/5 hover:border-red-600/30 hover:bg-red-600/5 transition-all group"
-                                                >
-                                                    <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-gray-400 group-hover:text-red-600 transition-colors">
-                                                        <Eye size={24} />
-                                                    </div>
-                                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 group-hover:text-white transition-colors">
-                                                        {tPolicies('view')}
-                                                    </span>
-                                                </a>
-                                                <a 
-                                                    href={policyPdfs[showPolicyModal.type]}
-                                                    download
-                                                    className="flex flex-col items-center gap-4 p-6 rounded-3xl bg-white/5 border border-white/5 hover:border-red-600/30 hover:bg-red-600/5 transition-all group"
-                                                >
-                                                    <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-gray-400 group-hover:text-red-600 transition-colors">
-                                                        <Download size={24} />
-                                                    </div>
-                                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 group-hover:text-white transition-colors">
-                                                        {tPolicies('download')}
-                                                    </span>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    ) : (
+                                <div className="p-6 md:p-10 overflow-y-auto flex-1 custom-scrollbar">
+                                    {showPolicyModal.type === 'kvkk' ? (
                                         <div 
-                                            className="whitespace-pre-wrap leading-relaxed font-bold text-gray-400 text-sm"
+                                            className="whitespace-pre-wrap leading-relaxed font-bold text-gray-400 text-sm sm:text-base selection:bg-red-600/30"
                                             dir={locale === 'ar' ? 'rtl' : 'ltr'}
                                         >
-                                            {(showPolicyModal.type === 'kvkk' ? policyContent.kvkk : policyContent.terms) || tPolicies('updated_soon')}
+                                            {policyContent.kvkk || tPolicies('updated_soon')}
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-10">
+                                            <div 
+                                                className="whitespace-pre-wrap leading-relaxed font-bold text-gray-400 text-sm sm:text-base selection:bg-red-600/30"
+                                                dir={locale === 'ar' ? 'rtl' : 'ltr'}
+                                            >
+                                                {policyContent.terms || tPolicies('updated_soon')}
+                                            </div>
+                                            
+                                            {policyPdfs.terms && (
+                                                <div className="pt-10 border-t border-white/5">
+                                                    <div className="flex items-center gap-3 mb-6">
+                                                        <div className="h-px grow bg-gradient-to-r from-transparent to-white/10" />
+                                                        <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.3em] whitespace-nowrap opacity-60">
+                                                            {locale === 'ar' ? 'الوثيقة الرسمية' : locale === 'tr' ? 'Resmi Belge' : 'Official Document'}
+                                                        </p>
+                                                        <div className="h-px grow bg-gradient-to-l from-transparent to-white/10" />
+                                                    </div>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                        <a 
+                                                            href={policyPdfs.terms}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="flex items-center justify-center gap-4 p-5 rounded-2xl bg-white/5 border border-white/5 hover:border-red-600/40 hover:bg-red-600/5 transition-all group active:scale-[0.98]"
+                                                        >
+                                                            <Eye size={20} className="text-gray-500 group-hover:text-red-600 transition-colors" />
+                                                            <span className="text-[11px] font-black uppercase tracking-widest text-gray-500 group-hover:text-white transition-colors">
+                                                                {tPolicies('view')}
+                                                            </span>
+                                                        </a>
+                                                        <a 
+                                                            href={policyPdfs.terms}
+                                                            download
+                                                            className="flex items-center justify-center gap-4 p-5 rounded-2xl bg-white/5 border border-white/5 hover:border-red-600/40 hover:bg-red-600/5 transition-all group active:scale-[0.98]"
+                                                        >
+                                                            <Download size={20} className="text-gray-500 group-hover:text-red-600 transition-colors" />
+                                                            <span className="text-[11px] font-black uppercase tracking-widest text-gray-500 group-hover:text-white transition-colors">
+                                                                {tPolicies('download')}
+                                                            </span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>
