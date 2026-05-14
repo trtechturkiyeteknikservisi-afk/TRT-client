@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
-import { Sun, Moon, X, Menu, ChevronDown, Smartphone, Laptop, Watch, Zap, Headphones, TabletIcon as Tablet } from 'lucide-react';
+import { Sun, Moon, X, Menu, ChevronDown, Smartphone, Laptop, Watch, Zap, Headphones, TabletIcon as Tablet, Gavel, Lock, ShieldCheck, FileText, Truck, Scale } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export function Header() {
   const t = useTranslations('Header');
+  const tFooter = useTranslations('Footer');
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
@@ -17,7 +18,7 @@ export function Header() {
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isServicesOpen, setIsServicesOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
   const services = [
     { name: t('phone_repair'), href: '/services/phone', icon: Smartphone },
@@ -26,6 +27,14 @@ export function Header() {
     { name: t('watch_repair'), href: '/services/watch', icon: Watch },
     { name: t('tablet_repair'), href: '/services/tablet', icon: Tablet },
     { name: t('headphones_repair'), href: '/services/kulaklik', icon: Headphones },
+  ];
+
+  const legalPolicies = [
+    { name: tFooter('kvkk'), href: '/policies/kvkk', icon: Gavel },
+    { name: tFooter('privacy_policy'), href: '/policies/privacy', icon: Lock },
+    { name: tFooter('service_terms'), href: '/policies/terms', icon: FileText },
+    { name: tFooter('warranty_terms'), href: '/policies/warranty', icon: ShieldCheck },
+    { name: tFooter('shipping_terms'), href: '/policies/shipping', icon: Truck },
   ];
 
   const navigation = [
@@ -41,7 +50,12 @@ export function Header() {
     { name: t('blog'), href: '/blog' },
     { name: t('merchants'), href: '#', soon: true },
     { name: t('track_shipment'), href: '#', soon: true },
-    { name: t('policy'), href: '/policies' },
+    { 
+      name: t('policy'), 
+      href: '/policies',
+      isDropdown: true,
+      subItems: legalPolicies
+    },
     { name: t('contact'), href: '#contact' },
   ];
 
@@ -51,7 +65,7 @@ export function Header() {
 
   useEffect(() => setMounted(true), []);
 
-  if (!mounted) return <header className="h-16 border-b" />;
+  if (!mounted) return <header className="sticky top-0 z-50 w-full h-20 border-b bg-background/80 backdrop-blur-xl" />;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
@@ -74,18 +88,19 @@ export function Header() {
                 <div 
                   key={item.name} 
                   className="relative group"
-                  onMouseEnter={() => setIsServicesOpen(true)}
-                  onMouseLeave={() => setIsServicesOpen(false)}
+                  onMouseEnter={() => setActiveDropdown(item.name)}
+                  onMouseLeave={() => setActiveDropdown(null)}
                 >
-                  <button
+                  <Link
+                    href={item.href}
                     className="flex items-center gap-1 lg:text-[13px] text-[10px] font-semibold text-muted-foreground transition-all hover:text-primary active:scale-95"
                   >
                     <span>{item.name}</span>
-                    <ChevronDown size={14} className={cn("transition-transform duration-200", isServicesOpen && "rotate-180")} />
-                  </button>
+                    <ChevronDown size={14} className={cn("transition-transform duration-200", activeDropdown === item.name && "rotate-180")} />
+                  </Link>
                   
                   <AnimatePresence>
-                    {isServicesOpen && (
+                    {activeDropdown === item.name && (
                       <motion.div
                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -129,6 +144,7 @@ export function Header() {
               )
             ))}
           </nav>
+
 
           <div className="flex items-center gap-2 flex-shrink-0">
             {/* Theme Toggle */}

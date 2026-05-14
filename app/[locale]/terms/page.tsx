@@ -1,6 +1,4 @@
 import React from 'react';
-import { Header } from '@/components/header';
-import { Footer } from '@/components/footer';
 import { ShieldCheck } from 'lucide-react';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { NextIntlClientProvider } from 'next-intl';
@@ -26,7 +24,6 @@ export default async function TermsPage(props: { params: Promise<{ locale: strin
   return (
     <NextIntlClientProvider messages={messages} locale={locale}>
       <div className="min-h-screen bg-background">
-        <Header />
         <main className="pt-32 pb-20 px-6">
           <div className="max-w-4xl mx-auto space-y-12">
             <header className="text-center space-y-6">
@@ -46,7 +43,6 @@ export default async function TermsPage(props: { params: Promise<{ locale: strin
             </div>
           </div>
         </main>
-        <Footer />
       </div>
     </NextIntlClientProvider>
   );

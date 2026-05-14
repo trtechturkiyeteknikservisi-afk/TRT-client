@@ -10,6 +10,8 @@ import { NewsBar } from "@/components/news-bar";
 import { TopTrustBar } from "@/components/top-trust-bar";
 import { HideOnAdmin } from "@/components/hide-on-admin";
 import { ScrollToTop } from "@/components/scroll-to-top";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 
 const almarai = Almarai({
   subsets: ["arabic"],
@@ -81,9 +83,11 @@ export default async function RootLayout(props: {
             <HideOnAdmin>
               <TopTrustBar />
               <NewsBar />
+              <Header />
             </HideOnAdmin>
             {children}
             <HideOnAdmin>
+              <Footer />
               <ScrollToTop />
               <StickyContact />
             </HideOnAdmin>

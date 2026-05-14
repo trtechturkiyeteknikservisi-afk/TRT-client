@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
 import { Link } from '@/i18n/routing';
 import { Calendar, User, ArrowRight, Search, Tag, Newspaper } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -69,7 +67,6 @@ export default function BlogPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <Header />
       
       <section className="py-24 bg-muted/30">
         <div className="container mx-auto px-4">
@@ -147,7 +144,6 @@ export default function BlogPage() {
         </div>
       </section>
 
-      <Footer />
     </main>
   );
 }

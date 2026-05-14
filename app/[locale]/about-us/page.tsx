@@ -1,8 +1,6 @@
 'use client';
 
 import React from 'react';
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
 import { motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { ShieldCheck, Award, Users, Target } from 'lucide-react';
@@ -13,7 +11,6 @@ export default function AboutUsPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <Header />
       
       {/* Hero Section */}
       <section className="relative py-24 md:py-32 overflow-hidden bg-primary/5">
@@ -108,7 +105,6 @@ export default function AboutUsPage() {
         </div>
       </section>
 
-      <Footer />
     </main>
   );
 }

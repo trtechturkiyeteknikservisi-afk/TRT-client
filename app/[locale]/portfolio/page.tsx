@@ -1,8 +1,6 @@
 'use client';
 
 import React from 'react';
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
 import { Portfolio } from "@/components/portfolio";
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
@@ -12,7 +10,6 @@ export default function PortfolioPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <Header />
       
       {/* Hero Section */}
       <section className="relative py-20 bg-muted/30 overflow-hidden">
@@ -45,7 +42,6 @@ export default function PortfolioPage() {
       {/* Full Works Gallery */}
       <Portfolio limit={0} showTitle={false} />
 
-      <Footer />
     </main>
   );
 }

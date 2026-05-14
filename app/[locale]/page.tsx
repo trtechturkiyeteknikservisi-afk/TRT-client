@@ -1,16 +1,15 @@
-import { Header } from "@/components/header";
 import { Hero } from "@/components/hero";
 import { Services } from "@/components/services";
 import { Portfolio } from "@/components/portfolio";
 import { Contact } from "@/components/contact";
 import { Reviews } from "@/components/reviews";
 import { FAQ } from "@/components/faq";
-import { Footer } from "@/components/footer";
 import { AnimatedStats } from "@/components/animated-stats";
 import { TrustBadges } from "@/components/trust-badges";
 import { RepairProcess } from "@/components/repair-process";
 import { QuickContactBar } from "@/components/quick-contact-bar";
 import { ElegantPhoneBanner } from "@/components/elegant-phone-banner";
+import { LocationMap } from "@/components/location-map";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 export function generateStaticParams() {
@@ -31,7 +30,6 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
 
   return (
     <main className="min-h-screen selection:bg-primary selection:text-primary-foreground overflow-x-hidden">
-      <Header />
       <div className="relative">
         <div className="absolute top-0 left-0 w-full h-[120vh] bg-[radial-gradient(circle_at_50%_0%,hsl(var(--primary)/0.15),transparent_70%)] pointer-events-none -z-10" />
         <div className="absolute top-[20vh] left-[-10%] w-[40%] h-[60vh] bg-primary/5 blur-[120px] rounded-full -z-10 animate-pulse" />
@@ -53,7 +51,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       <Contact />
       <Reviews />
       <FAQ />
-      <Footer />
+      <LocationMap />
     </main>
   );
 }

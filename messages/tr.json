@@ -6,7 +6,7 @@
     "works": "Çalışmalarımız",
     "blog": "Blog",
     "contact": "İletişim",
-    "policy": "Politika ve Şartlar",
+    "policy": "Yasal Politikalar",
     "repair_service": "Teknik Servis",
     "phone_repair": "Telefon Onarımı",
     "laptop_repair": "Laptop Onarımı",
@@ -40,6 +40,12 @@
     "about_us": "Hakkımızda",
     "headphones_repair": "Kulaklık Onarımı",
     "track_shipment": "Kargo Takibi",
+    "legal_policies": "Yasal Politikalar",
+    "kvkk": "KVKK Aydınlatma Metni",
+    "service_terms": "Servis Şartları",
+    "warranty_terms": "Garanti Koşulları",
+    "privacy_policy": "Gizlilik Politikası",
+    "shipping_terms": "Kargo ve Teslimat Şartları",
     "copyright": "© {year} TR TECH. Tüm hakları saklıdır."
   },
   "Home": {
@@ -157,7 +163,7 @@
     "whatsapp_cta": "Sohbet Başlat",
     "email_label": "E-posta",
     "location_label": "Konum",
-    "location_value": "ULU MAH. KIBRIS ŞEHİTLERİ CAD. DANACIOGLU APT NO: 73A OSMANGAZİ/ BURSA",
+    "location_value": "Ulu, Kıbrıs Şehitleri Cd. DANACIOGLU APT NO: 73A, 16220 Osmangazi/Bursa",
     "full_name": "Ad Soyad",
     "phone_number": "Telefon Numarası",
     "city": "Şehir",
@@ -196,7 +202,7 @@
     "sending": "Gönderiliyor...",
     "send_message": "Mesaj Gönder",
     "success_message": "Talebiniz başarıyla gönderildi! Sizinle en kısa sürede iletişime geçeceğiz.",
-    "kvkk_text": "KVKK Aydınlatma Metni 'ni okudum ve anladım.",
+    "kvkk_text": "KVKK Aydınlatma Metni’ni ve Servis Şartları’nı okudum, anladım ve kabul ediyorum.",
     "sticky_contact_cta": "Bize Ulaşın",
     "contact_subtitle": "2 iş saati içerisinde sizinle iletişime geçeceğiz"
   },
@@ -208,9 +214,23 @@
     "no_blogs": "Şu anda blog yazısı bulunmamaktadır."
   },
   "Policies": {
+    "title": "Yasal Politikalar",
+    "desc": "Hizmetlerimizle ilgili tüm yasal bilgilendirme metinlerine aşağıdan ulaşabilirsiniz.",
     "privacy": "Gizlilik Politikası",
-    "terms": "Kullanım Şartları",
-    "updated_soon": "Bu içerik yakında güncellenecektir."
+    "privacy_desc": "Verilerinizin nasıl toplandığı, kullanıldığı ve korunduğu hakkında bilgi alın.",
+    "terms": "Servis Şartları",
+    "terms_desc": "Teknik servis hizmetlerimizle ilgili tüm şartlar ve koşullar burada yer almaktadır.",
+    "kvkk": "KVKK Aydınlatma Metni",
+    "kvkk_desc": "Kişisel verilerinizin korunmasına ilişkin aydınlatma metnimizi inceleyebilirsiniz.",
+    "warranty": "Garanti Koşulları",
+    "warranty_desc": "Garanti kapsamı, şartları ve süreçleri hakkında detaylı bilgi edinin.",
+    "shipping": "Kargo ve Teslimat Şartları",
+    "shipping_desc": "Kargo gönderimi, teslimat süreçleri ve koşulları hakkında bilgi alın.",
+    "updated_soon": "Bu içerik yakında güncellenecektir.",
+    "official_doc": "Resmi Onaylı Belge",
+    "official_doc_desc": "Sistemde kayıtlı olan resmi teknik servis onay belgesini görüntüleyin veya indirin.",
+    "download": "İndir",
+    "view": "Görüntüle"
   },
   "Admin": {
     "title": "TRT Admin",
@@ -280,6 +300,9 @@
     "try_adding": "Bu bölüme yeni içerik eklemeyi deneyin.",
     "save": "Değişiklikleri Kaydet",
     "saved": "Başarıyla kaydedildi",
+    "upload": "Yükle",
+    "upload_success": "Dosya başarıyla yüklendi",
+    "upload_error": "Dosya yüklenirken hata oluştu",
     "password_mismatch": "Şifreler uyuşmuyor",
     "back_to_site": "Siteye Dön",
     "admin_fallback": "Yönetici",
@@ -322,7 +345,13 @@
     "news_placeholder": "Haber içeriğini buraya girin...",
     "no_news_items": "Bu dil için haber öğesi eklenmedi.",
     "account_settings": "Hesap Ayarları",
-    "username_label": "Kullanıcı Adı"
+    "username_label": "Kullanıcı Adı",
+    "policy_pdf_url": "PDF Dosya Bağlantısı",
+    "policy_privacy": "Gizlilik Politikası",
+    "policy_terms": "Servis Şartları",
+    "policy_kvkk": "KVKK Aydınlatma Metni",
+    "policy_warranty": "Garanti Koşulları",
+    "policy_shipping": "Kargo ve Teslimat Şartları"
   },
   "VerificationAdmin": {
     "desc": "Resmi belge taleplerini ve aday müşteri otomasyonunu yönetin",
@@ -395,8 +424,8 @@
     "private_service_warning": "UYARI : TR TECH ÖZEL SERVİSTİR"
   },
   "Verification": {
-    "title": "Resmi Belgenizi Alın",
-    "subtitle": "Mühürlü belgenizi e-posta yoluyla almak için lütfen aşağıdaki bilgileri doğru bir şekilde doldurun",
+    "title": "TEKNİK SERVİS ONAY FORMU",
+    "subtitle": "Servis talebinizi oluşturmak ve dijital servis onay sürecini tamamlamak için aşağıdaki bilgileri doldurun",
     "terms_step_title": "Lütfen önce politika ve şartları okuyun, ardından belgeyi almak için kabul edin ve devam edin",
     "terms_step_button": "Kabul Et ve Devam Et",
     "terms_content_title": "Şartlar ve Koşullar",
@@ -409,10 +438,14 @@
     "form_name": "Ad Soyad",
     "form_whatsapp": "WhatsApp Numarası",
     "form_phone": "Telefon Numarası",
-    "form_email": "E-posta Adresi (Gmail)",
+    "form_email": "E-posta Adresi (Gmail) (Opsiyonel)",
     "form_terms": "Şartlar ve koşulları ve geçerli tüm politikaları kabul ediyorum",
-    "form_submit": "Gönder ve Belgeyi Al",
-    "privacy_note": "Gönder düğmesine tıklayarak, önceden okunan gizlilik politikasını ve kullanım şartlarını otomatik olarak kabul etmiş olursunuz.",
+    "form_submit": "GÖNDER VE BELGEYİ AL",
+    "kvkk_accept": "KVKK Aydınlatma Metni’ni okudum, anladım ve kabul ediyorum.",
+    "terms_accept": "Servis Şartları’nı okudum, anladım ve kabul ediyorum.",
+    "privacy_note_combined": "Gönder düğmesine tıklayarak KVKK Aydınlatma Metni, Gizlilik Politikası ve Servis Şartları’nı okuduğunuzu ve kabul ettiğinizi beyan etmiş olursunuz.",
+    "delivery_note": "Belge, e-posta veya WhatsApp üzerinden tarafınıza iletilecektir",
+    "privacy_note": "Gönder düğmesine tıklayarak KVKK Aydınlatma Metni, Gizlilik Politikası ve Servis Şartları’nı okuduğunuzu ve kabul ettiğinizi beyan etmiş olursunuz.",
     "success_title": "Başarıyla Gönderildi!",
     "success_desc": "Resmi mühürlü belge e-posta adresinize başarıyla gönderildi. Lütfen gelen kutunuzu veya Spam klasörünüzü kontrol edin.",
     "error_title": "Üzgünüz, bir hata oluştu",
@@ -427,5 +460,10 @@
     "mission_desc": "Müşteri memnuniyetini tam olarak sağlamak için orijinal parçalarla, adil fiyatlarla en üst düzeyde teknik servis sunmak.",
     "vision_title": "Vizyonumuz",
     "vision_desc": "Türkiye'de ve ötesinde teknik onarım konusunda öncü ve güvenilir bir merkez olmak."
+  },
+  "Map": {
+    "title": "Haritadaki Konumumuz",
+    "desc": "Bursa'daki merkezimizde bizi ziyaret edin. Bize kolayca ulaşmak için aşağıdaki haritayı kullanabilirsiniz.",
+    "get_directions": "Yol Tarifi Al"
   }
 }

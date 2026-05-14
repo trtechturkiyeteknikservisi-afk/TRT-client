@@ -40,6 +40,12 @@
     "about_us": "About Us",
     "headphones_repair": "Headphones Repair",
     "track_shipment": "Track Shipment",
+    "legal_policies": "Legal Policies",
+    "kvkk": "KVKK Disclosure Text",
+    "service_terms": "Terms of Service",
+    "warranty_terms": "Warranty Conditions",
+    "privacy_policy": "Privacy Policy",
+    "shipping_terms": "Shipping & Delivery Terms",
     "copyright": "© {year} TR TECH. All rights reserved."
   },
   "Home": {
@@ -156,7 +162,7 @@
     "whatsapp_cta": "Click to Chat",
     "email_label": "Email",
     "location_label": "Location",
-    "location_value": "ULU MAH. KIBRIS ŞEHİTLERİ CAD. DANACIOGLU APT NO: 73A OSMANGAZİ/ BURSA",
+    "location_value": "Ulu, Kıbrıs Şehitleri Cd. DANACIOGLU APT NO: 73A, 16220 Osmangazi/Bursa",
     "full_name": "Full Name",
     "phone_number": "Phone Number",
     "city": "City",
@@ -207,9 +213,23 @@
     "no_blogs": "No blog posts available at the moment."
   },
   "Policies": {
+    "title": "Legal Policies",
+    "desc": "You can access all legal information regarding our services below.",
     "privacy": "Privacy Policy",
+    "privacy_desc": "Learn about how your data is collected, used and protected.",
     "terms": "Terms of Service",
-    "updated_soon": "This content will be updated soon."
+    "terms_desc": "All terms and conditions regarding our technical service are located here.",
+    "kvkk": "KVKK Disclosure Text",
+    "kvkk_desc": "You can review our disclosure text regarding the protection of your personal data.",
+    "warranty": "Warranty Conditions",
+    "warranty_desc": "Get detailed information about warranty coverage, terms and processes.",
+    "shipping": "Shipping & Delivery Terms",
+    "shipping_desc": "Information about shipping, delivery processes, and conditions.",
+    "updated_soon": "This content will be updated soon.",
+    "official_doc": "Official Certified Document",
+    "official_doc_desc": "View or download the official technical service approval document registered in the system.",
+    "download": "Download",
+    "view": "View"
   },
   "Admin": {
     "title": "TRT Admin",
@@ -279,6 +299,9 @@
     "try_adding": "Try adding new content to this section.",
     "save": "Save Changes",
     "saved": "Saved successfully",
+    "upload": "Upload",
+    "upload_success": "File uploaded successfully",
+    "upload_error": "Error uploading file",
     "password_mismatch": "Passwords do not match",
     "back_to_site": "Back to Site",
     "admin_fallback": "Admin",
@@ -321,7 +344,13 @@
     "news_placeholder": "Enter news content here...",
     "no_news_items": "No news items added for this language.",
     "account_settings": "Account Settings",
-    "username_label": "Username"
+    "username_label": "Username",
+    "policy_pdf_url": "PDF File URL",
+    "policy_privacy": "Privacy Policy",
+    "policy_terms": "Terms of Service",
+    "policy_kvkk": "KVKK Disclosure",
+    "policy_warranty": "Warranty Conditions",
+    "policy_shipping": "Shipping & Delivery"
   },
   "VerificationAdmin": {
     "desc": "Manage official document requests and lead automation",
@@ -409,7 +438,11 @@
     "form_phone": "Phone Number",
     "form_email": "Email Address (Gmail)",
     "form_terms": "I agree to the terms and conditions and all applicable policies",
-    "form_submit": "Send and Receive Document",
+    "form_submit": "SEND AND RECEIVE DOCUMENT",
+    "kvkk_accept": "I have read, understood, and accept the KVKK Disclosure Text.",
+    "terms_accept": "I have read, understood, and accept the Service Terms.",
+    "privacy_note_combined": "By clicking the submit button, you declare that you have read and accepted the KVKK Disclosure Text, Privacy Policy, and Service Terms.",
+    "delivery_note": "The document will be sent to you via e-mail or WhatsApp.",
     "privacy_note": "By clicking the send button, you automatically agree to the privacy policy and terms of use previously read.",
     "success_title": "Sent Successfully!",
     "success_desc": "The official sealed document has been sent to your email successfully. Please check your inbox or Spam folder.",
@@ -425,5 +458,10 @@
     "mission_desc": "To provide the highest level of technical service at fair prices with original parts to ensure complete customer satisfaction.",
     "vision_title": "Our Vision",
     "vision_desc": "To be the premier and trusted center for technical repair in Turkey and beyond."
+  },
+  "Map": {
+    "title": "Our Location on Map",
+    "desc": "Visit us at our center in Bursa. You can use the map below to reach us easily.",
+    "get_directions": "Get Directions"
   }
 }

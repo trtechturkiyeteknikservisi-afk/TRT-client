@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
 import { Calendar, User, Clock, ChevronLeft, Share2, Tag, Quote, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
@@ -37,11 +35,9 @@ export default function BlogPostPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
-        <Header />
         <div className="flex-grow flex items-center justify-center">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent animate-spin rounded-full" />
         </div>
-        <Footer />
       </div>
     );
   }
@@ -49,7 +45,6 @@ export default function BlogPostPage() {
   if (!blog) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
-        <Header />
         <div className="flex-grow flex flex-col items-center justify-center text-center px-4">
           <h1 className="text-4xl font-black mb-4">404</h1>
           <p className="text-muted-foreground mb-8">Post not found</p>
@@ -57,14 +52,12 @@ export default function BlogPostPage() {
             Back to Blog
           </Link>
         </div>
-        <Footer />
       </div>
     );
   }
 
   return (
     <main className="min-h-screen bg-background">
-      <Header />
       
       {/* Hero Header */}
       <section className="relative h-[60vh] min-h-[400px] flex items-end justify-center overflow-hidden">
@@ -174,7 +167,6 @@ export default function BlogPostPage() {
         </div>
       </section>
 
-      <Footer />
     </main>
   );
 }

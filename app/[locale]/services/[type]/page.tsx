@@ -2,8 +2,6 @@
 
 import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
 import { Link } from '@/i18n/routing';
 import { Smartphone, Laptop, Watch, Zap, CheckCircle2, ShieldCheck, Clock, Award, TabletIcon as Tablet, Headphones, Phone } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -91,7 +89,6 @@ export default function ServicePage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <Header />
       
       {/* Hero Section */}
       <section className="relative h-[400px] flex items-center justify-center overflow-hidden">
@@ -152,7 +149,6 @@ export default function ServicePage() {
       </section>
 
       <ServiceBrands type={serviceKey} />
-      <TrustBadges />
       
       <section className="py-24">
         <div className="container mx-auto px-4">
@@ -207,7 +203,6 @@ export default function ServicePage() {
         </div>
       </section>
 
-      <Footer />
     </main>
   );
 }
