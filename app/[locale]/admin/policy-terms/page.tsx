@@ -87,7 +87,7 @@ export default function PolicyTermsPage() {
 
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.post(`${API_BASE}/verify/upload-doc`, formData, {
+      const response = await axios.post<{ path: string }>(`${API_BASE}/verify/upload-doc`, formData, {
         headers: { 
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
