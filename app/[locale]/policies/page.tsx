@@ -9,7 +9,15 @@ export default async function PoliciesPage(props: { params: Promise<{ locale: st
 
   let officialDocPath = '';
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-  const SERVER_URL = API_URL.replace('/api', '');
+  
+  // Robust SERVER_URL construction
+  let normalizedApiUrl = API_URL;
+  if (!API_URL.startsWith('http') && !API_URL.startsWith('/')) {
+      // Remove leading dot if exists and prepend https://
+      const cleanUrl = API_URL.startsWith('.') ? API_URL.substring(1) : API_URL;
+      normalizedApiUrl = `https://${cleanUrl}`;
+  }
+  const SERVER_URL = normalizedApiUrl.replace('/api', '');
 
   let settingsData: Record<string, string> = {};
   try {

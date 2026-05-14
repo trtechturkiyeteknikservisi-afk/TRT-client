@@ -277,7 +277,20 @@ export default function PortfolioPage() {
               >
                 <div className="aspect-video relative overflow-hidden bg-muted">
                     {item.type === 'image' ? (
-                        <img src={item.url.startsWith('http') ? item.url : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000'}${item.url}`} alt={item.title_en} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" />
+                        <img 
+                            src={item.url.startsWith('http') ? item.url : (() => {
+                                const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+                                let normalizedApiUrl = API_URL;
+                                if (!API_URL.startsWith('http') && !API_URL.startsWith('/')) {
+                                    const cleanUrl = API_URL.startsWith('.') ? API_URL.substring(1) : API_URL;
+                                    normalizedApiUrl = `https://${cleanUrl}`;
+                                }
+                                const SERVER_URL = normalizedApiUrl.replace('/api', '');
+                                return `${SERVER_URL}${item.url}`;
+                            })()} 
+                            alt={item.title_en} 
+                            className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" 
+                        />
                     ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center bg-black/90 text-white gap-3">
                              <PlayCircle size={48} className="text-primary" />

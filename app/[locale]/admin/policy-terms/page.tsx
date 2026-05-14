@@ -240,7 +240,17 @@ export default function PolicyTermsPage() {
                                     </div>
                                     <div className="flex items-center gap-1">
                                         <a 
-                                            href={`${API_BASE.replace('/api', '')}/${settingsData[`${activePolicy}_pdf_${activeLang}`]}`}
+                                            href={(() => {
+                                                const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+                                                let normalizedApiUrl = API_URL;
+                                                if (!API_URL.startsWith('http') && !API_URL.startsWith('/')) {
+                                                    const cleanUrl = API_URL.startsWith('.') ? API_URL.substring(1) : API_URL;
+                                                    normalizedApiUrl = `https://${cleanUrl}`;
+                                                }
+                                                const SERVER_URL = normalizedApiUrl.replace('/api', '');
+                                                const path = settingsData[`${activePolicy}_pdf_${activeLang}`];
+                                                return path.startsWith('http') ? path : `${SERVER_URL}/${path}`;
+                                            })()}
                                             target="_blank"
                                             className="p-2 hover:bg-primary/10 text-primary rounded-lg transition-colors"
                                             title="View File"
