@@ -18,7 +18,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const fetchSettings = async () => {
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-      const response = await axios.get(`${API_URL}/settings`);
+      const response = await axios.get<Record<string, string>>(`${API_URL}/settings`);
       setSettings(response.data || {});
     } catch (error) {
       console.error('Failed to fetch settings in SettingsProvider:', error);
