@@ -75,7 +75,7 @@ export function Header() {
           <div className="flex items-center flex-shrink-0">
             <Link href="/" className="flex flex-col items-center group">
               <img 
-                src={theme === 'dark' ? '/night-logo.png' : '/day-logo.png'} 
+                src={mounted ? (theme === 'dark' ? '/night-logo.png' : '/day-logo.png') : '/day-logo.png'} 
                 alt={t('company_name')} 
                 className="h-10 w-auto object-contain transition-all group-hover:scale-105"
               />
@@ -154,7 +154,7 @@ export function Header() {
             {/* Theme Toggle */}
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-1.5 xl:p-2.5 rounded-xl hover:bg-muted text-muted-foreground transition-all active:scale-95 border border-transparent hover:border-border"
+              className="p-1.5 xl:p-2.5 rounded-xl hover:bg-muted text-muted-foreground transition-all active:scale-95 border border-transparent hover:border-border cursor-pointer"
               aria-label="Toggle theme"
             >
               {theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-blue-600" />}
@@ -171,14 +171,14 @@ export function Header() {
                   key={l.code}
                   onClick={() => handleLanguageChange(l.code)}
                   className={cn(
-                    "px-1.5 lg:px-2 2xl:px-3 py-1 2xl:py-1.5 rounded-lg text-[10px] xl:text-[11px] font-extrabold transition-all whitespace-nowrap flex items-center gap-1 2xl:gap-1.5",
+                    "px-1.5 lg:px-2 2xl:px-3 py-1 2xl:py-1.5 rounded-lg text-[10px] xl:text-[11px] font-extrabold transition-all whitespace-nowrap flex items-center gap-1 2xl:gap-1.5 cursor-pointer",
                     locale === l.code 
                       ? "bg-background text-primary shadow-sm ring-1 ring-border/50" 
                       : "text-muted-foreground hover:bg-muted"
                   )}
                 >
                   <img 
-                    src={`https://flagcdn.com/w40/${l.flag}.png`} 
+                    src={l.flag === 'tr' ? 'https://flagcdn.com/tr.svg' : `https://flagcdn.com/w40/${l.flag}.png`} 
                     alt=""
                     className="w-4 h-4 rounded-full object-cover border border-border/50 shadow-sm"
                   />

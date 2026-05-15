@@ -118,7 +118,7 @@ export function Contact() {
                   label: t('location_label'), 
                   value: t('location_value'), 
                   color: 'orange-500',
-                  link: '#' 
+                  link: 'https://maps.app.goo.gl/tB9vC5ZzX7rGZzX78' // Placeholder for actual link, or a search link
                 }
               ].map((item, idx) => {
                 const Icon = item.icon;

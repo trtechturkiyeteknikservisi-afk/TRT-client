@@ -95,7 +95,7 @@ export function FAQ() {
                 "group rounded-xl border transition-all duration-500 overflow-hidden",
                 openIndex === index 
                   ? "bg-card border-primary/50 shadow-lg shadow-primary/10" 
-                  : "bg-muted/30 border-border/50 hover:border-primary/30 hover:bg-muted/50"
+                  : "bg-muted/30 border-primary/10 dark:border-border/50 hover:border-primary/30 hover:bg-muted/50"
               )}
             >
               <button

@@ -110,9 +110,9 @@ export function RepairProcess() {
                     )}
                   >
                      <div className={cn(
-                         "w-10 h-10 md:w-14 md:h-14 rounded-xl flex items-center justify-center border-2 transition-all duration-500",
+                         "w-10 h-10 md:w-14 md:h-14 rounded-xl flex items-center justify-center border-2 transition-all duration-500 relative z-10",
                          isActive ? "bg-primary border-primary text-primary-foreground shadow-[0_0_20px_rgba(220,38,38,0.4)]" : 
-                         isPast ? "bg-primary/20 border-primary/50 text-foreground" : "bg-card border-border text-muted-foreground group-hover:border-primary/50"
+                         isPast ? "bg-background border-primary/50 text-foreground" : "bg-background border-border text-muted-foreground group-hover:border-primary/50"
                      )}>
                         <step.icon size={20} className={cn("md:w-6 md:h-6", isActive && "animate-pulse")} />
                      </div>
@@ -141,7 +141,7 @@ export function RepairProcess() {
           </div>
 
           {/* Active Step Presentation */}
-          <div className="relative bg-card/40 backdrop-blur-lg rounded-xl border border-white/10 dark:border-white/5 shadow-lg overflow-hidden min-h-[400px] flex items-center">
+          <div className="relative bg-card/40 backdrop-blur-lg rounded-xl border border-primary/10 dark:border-white/5 shadow-lg overflow-hidden min-h-[400px] flex items-center">
              {/* Large background number */}
              <div className={cn(
                  "absolute top-1/2 -translate-y-1/2 text-[20rem] font-black text-foreground/5 select-none pointer-events-none",

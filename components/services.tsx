@@ -90,7 +90,7 @@ export function Services() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="group relative bg-card/50 backdrop-blur-lg p-10 rounded-xl border-2 border-border/50 transition-all hover:border-primary hover:bg-card hover:shadow-xl flex flex-col h-full overflow-hidden"
+              className="group relative bg-card/50 backdrop-blur-lg p-10 rounded-xl border-2 border-primary/10 dark:border-border/50 transition-all hover:border-primary hover:bg-card hover:shadow-xl flex flex-col h-full overflow-hidden"
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[3rem] -z-10 transition-colors group-hover:bg-primary/10" />
               <div className="inline-flex p-5 rounded-xl mb-10 w-fit transition-all duration-500 group-hover:bg-primary group-hover:text-primary-foreground bg-muted text-foreground ring-1 ring-border/50">

@@ -62,7 +62,7 @@ export function Hero() {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrent((prev) => (banners.length > 0 ? (prev + 1) % banners.length : 0));
-    }, 5000);
+    }, 5000); // Set to 5s as requested
     return () => clearInterval(timer);
   }, [banners.length]);
 
@@ -86,7 +86,7 @@ export function Hero() {
             className="absolute inset-0"
           >
             <div
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-[10s] scale-105 group-hover:scale-100"
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-[20s] scale-105 group-hover:scale-100"
               style={{ backgroundImage: `url(${banners[current].image})` }}
             >
               {/* Multi-layered gradient for depth */}

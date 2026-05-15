@@ -32,38 +32,56 @@ export function StickyContact() {
   if (pathname?.includes('/trt-secure-panel-2026')) return null;
 
   const socialLinks = [
-    { icon: Phone, href: `tel:${supportPhone.replace(/\s/g, '')}`, color: 'bg-primary' },
-    { icon: () => <img src="/whats.png" alt="WhatsApp" className="w-7 h-7 object-contain" />, href: `https://wa.me/${whatsappNumber.replace(/\D/g, '')}`, color: 'bg-[#25D366]' },
-    { icon: InstagramIcon, href: 'https://www.instagram.com/trtservis?igsh=MXcxZ25rNjNydjYxZQ%3D%3D&utm_source=qr', color: 'bg-[#E1306C]' },
-    { icon: TiktokIcon, href: 'https://www.tiktok.com/@trtservis', color: 'bg-[#000000]', isTiktok: true },
-    { icon: FacebookIcon, href: 'https://www.facebook.com/share/185YU5woZA/?mibextid=wwXIfr', color: 'bg-[#1877F2]' },
-    { icon: YoutubeIcon, href: 'https://youtube.com/@trtservis?si=kb9K3XN-LX4NX-du', color: 'bg-[#FF0000]' },
-    { icon: TelegramIcon, href: 'https://t.me/trtservis', color: 'bg-[#0088cc]' },
-    { icon: SnapchatIcon, href: 'https://snapchat.com/t/pL3vgBfZ', color: 'bg-[#FFFC00]', iconColor: 'text-black' },
-    { icon: LinkedinIcon, href: 'https://www.linkedin.com/in/tr-tech-44a056402?utm_source=share_via&utm_content=profile&utm_medium=member_ios', color: 'bg-[#0A66C2]' },
-    { icon: PinterestIcon, href: 'https://tr.pinterest.com/trtservis/?invite_code=6906950e8ba94d7b8b9a3364db735f0d&sender=1122240938304289862', color: 'bg-[#E60023]' },
+    { icon: Phone, href: `tel:${supportPhone.replace(/\s/g, '')}`, color: '#dc2626' },
+    { icon: WhatsappIcon, href: `https://wa.me/${whatsappNumber.replace(/\D/g, '')}`, color: '#25D366', isImg: true },
+    { icon: InstagramIcon, href: 'https://www.instagram.com/trtservis?igsh=MXcxZ25rNjNydjYxZQ%3D%3D&utm_source=qr', color: '#E1306C' },
+    { icon: TiktokIcon, href: 'https://www.tiktok.com/@trtservis', color: '#000000' },
+    { icon: FacebookIcon, href: 'https://www.facebook.com/share/185YU5woZA/?mibextid=wwXIfr', color: '#1877F2' },
+    { icon: YoutubeIcon, href: 'https://youtube.com/@trtservis?si=kb9K3XN-LX4NX-du', color: '#FF0000' },
+    { icon: TelegramIcon, href: 'https://t.me/trtservis', color: '#0088cc' },
+    { icon: SnapchatIcon, href: 'https://snapchat.com/t/pL3vgBfZ', color: '#FFFC00', iconColor: 'text-black' },
+    { icon: LinkedinIcon, href: 'https://www.linkedin.com/in/tr-tech-44a056402?utm_source=share_via&utm_content=profile&utm_medium=member_ios', color: '#0A66C2' },
+    { icon: PinterestIcon, href: 'https://tr.pinterest.com/trtservis/?invite_code=6906950e8ba94d7b8b9a3364db735f0d&sender=1122240938304289862', color: '#E60023' },
   ];
 
   return (
-    <div className="fixed bottom-8 right-8 z-[100] flex flex-col-reverse items-center gap-4">
+    <div className="fixed bottom-6 right-6 z-[100] flex flex-col-reverse items-center gap-4">
       {/* Main Toggle Button */}
       <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "w-16 h-16 rounded-full shadow-lg flex items-center justify-center transition-all duration-500",
-          isOpen ? "bg-red-500 text-white rotate-90" : "bg-primary text-primary-foreground"
+          "w-12 h-12 md:w-14 md:h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-500 overflow-hidden",
+          isOpen ? "bg-white text-primary" : "bg-primary text-primary-foreground"
         )}
       >
         <AnimatePresence mode="wait">
           {isOpen ? (
-            <motion.div key="close" initial={{ opacity: 0, rotate: -90 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0, rotate: 90 }}>
-              <X size={28} strokeWidth={2.5} />
+            <motion.div 
+              key="close" 
+              initial={{ opacity: 0, rotate: -180 }} 
+              animate={{ opacity: 1, rotate: 0 }} 
+              exit={{ opacity: 0, rotate: 180 }}
+              className="relative flex items-center justify-center"
+            >
+              {/* Rotating Circle Only */}
+              <svg className="w-10 h-10 animate-[spin_2s_linear_infinite]" viewBox="0 0 100 100">
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="40"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="10"
+                  strokeDasharray="180"
+                  strokeLinecap="round"
+                />
+              </svg>
             </motion.div>
           ) : (
             <motion.div key="open" initial={{ opacity: 0, rotate: 90 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0, rotate: -90 }}>
-              <img src="/whats.png" alt="Contact" className="w-10 h-10 object-contain" />
+              <img src="/whats.png" alt="Contact" className="w-8 h-8 md:w-10 md:h-10 object-contain" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -84,12 +102,14 @@ export function StickyContact() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 20, scale: 0.5 }}
                 transition={{ delay: idx * 0.05, type: 'spring', stiffness: 260, damping: 20 }}
-                className={cn(
-                  "w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform",
-                  social.color
-                )}
+                className="w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center bg-white shadow-xl hover:scale-110 transition-transform group"
               >
-                <Icon size={20} className={social.iconColor || "text-white"} />
+                <div 
+                  className="w-full h-full rounded-full flex items-center justify-center transition-colors"
+                  style={{ color: social.color }}
+                >
+                  <Icon size={32} className={cn("transition-transform group-hover:scale-110", social.iconColor || "")} />
+                </div>
               </motion.a>
             );
           })}
