@@ -31,7 +31,7 @@ export default function ReviewsPage() {
       console.error('Error fetching reviews', err);
       if (err?.response?.status === 401) {
         localStorage.removeItem('token');
-        router.push('/admin/login');
+        router.push('/trt-secure-panel-2026/login');
       }
     } finally {
       setLoading(false);
@@ -93,7 +93,7 @@ export default function ReviewsPage() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.05 }}
-                className="bg-card p-5 rounded-2xl border shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
+                className="bg-card p-5 rounded-lg border shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
               >
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -123,7 +123,7 @@ export default function ReviewsPage() {
                     <button
                       onClick={() => approveReview(item.id)}
                       disabled={actionLoading}
-                      className="flex-grow flex items-center justify-center space-x-1.5 px-4 py-2.5 rounded-xl bg-emerald-500 text-white font-black text-[10px] hover:bg-emerald-600 transition-all shadow-md shadow-emerald-500/10 active:scale-95 disabled:opacity-50"
+                      className="flex-grow flex items-center justify-center space-x-1.5 px-4 py-2.5 rounded-md bg-emerald-500 text-white font-black text-[10px] hover:bg-emerald-600 transition-all shadow-md shadow-emerald-500/10 active:scale-95 disabled:opacity-50"
                     >
                       <CheckCircle size={14} />
                       <span>{t('approve')}</span>
@@ -132,7 +132,7 @@ export default function ReviewsPage() {
                   <button
                     onClick={() => deleteItem(item.id)}
                     disabled={actionLoading}
-                    className="p-2.5 rounded-xl bg-red-500/5 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-90"
+                    className="p-2.5 rounded-md bg-red-500/5 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-90"
                   >
                     <Trash2 size={16} strokeWidth={2.5} />
                   </button>

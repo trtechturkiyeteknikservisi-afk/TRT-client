@@ -31,6 +31,7 @@ export default function PolicyTermsPage() {
     { id: 'kvkk', label: t('policy_kvkk') || 'KVKK Disclosure' },
     { id: 'warranty', label: t('policy_warranty') || 'Warranty Conditions' },
     { id: 'shipping', label: t('policy_shipping') || 'Shipping & Delivery' },
+    { id: 'custom', label: t('policy_custom') || 'Custom Policy' },
   ];
 
   const languages = [
@@ -51,7 +52,7 @@ export default function PolicyTermsPage() {
       console.error('Error fetching settings', err);
       if (err?.response?.status === 401) {
         localStorage.removeItem('token');
-        router.push('/admin/login');
+        router.push('/trt-secure-panel-2026/login');
       }
     } finally {
       setLoading(false);
@@ -147,7 +148,7 @@ export default function PolicyTermsPage() {
            <button
              onClick={handleUpdate}
              disabled={actionLoading}
-             className="flex items-center justify-center space-x-2 px-8 py-3.5 rounded-2xl bg-primary text-primary-foreground font-black text-sm shadow-xl shadow-primary/20 hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50"
+             className="flex items-center justify-center space-x-2 px-8 py-3.5 rounded-lg bg-primary text-primary-foreground font-black text-sm shadow-xl shadow-primary/20 hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50"
            >
               <Save size={18} />
               <span className="uppercase tracking-widest">{actionLoading ? t('loading') : t('save')}</span>
@@ -155,13 +156,13 @@ export default function PolicyTermsPage() {
       </header>
 
       {message && (
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-emerald-500/10 text-emerald-600 p-4 rounded-xl border border-emerald-500/20 font-bold flex items-center space-x-3 text-sm">
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-emerald-500/10 text-emerald-600 p-4 rounded-md border border-emerald-500/20 font-bold flex items-center space-x-3 text-sm">
            <CheckCircle size={16} />
            <span>{message}</span>
         </motion.div>
       )}
 
-      <div className="bg-card border rounded-[2.5rem] p-6 sm:p-10 shadow-2xl shadow-black/5 relative overflow-hidden">
+      <div className="bg-card border rounded-md p-6 sm:p-10 shadow-2xl shadow-black/5 relative overflow-hidden">
         <div className="absolute top-0 right-0 p-10 opacity-[0.02] pointer-events-none">
             <ShieldCheck size={200} />
         </div>
@@ -173,7 +174,7 @@ export default function PolicyTermsPage() {
               key={policy.id}
               onClick={() => setActivePolicy(policy.id)}
               className={cn(
-                "px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all border",
+                "px-5 py-2.5 rounded-md text-[11px] font-black uppercase tracking-wider transition-all border",
                 activePolicy === policy.id 
                   ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20 scale-105" 
                   : "bg-muted/50 text-muted-foreground hover:bg-muted border-transparent"
@@ -185,13 +186,13 @@ export default function PolicyTermsPage() {
         </div>
 
         {/* Language Tabs */}
-        <div className="flex items-center gap-2 mb-8 bg-muted/30 p-1.5 rounded-2xl border w-fit">
+        <div className="flex items-center gap-2 mb-8 bg-muted/30 p-1.5 rounded-lg border w-fit">
             {languages.map((lang) => (
                 <button
                     key={lang.id}
                     onClick={() => setActiveLang(lang.id)}
                     className={cn(
-                        "flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
+                        "flex items-center gap-2 px-6 py-2.5 rounded-md text-xs font-black uppercase tracking-widest transition-all",
                         activeLang === lang.id
                             ? "bg-card text-foreground shadow-xl border border-border/50"
                             : "text-muted-foreground hover:text-foreground"
@@ -215,7 +216,7 @@ export default function PolicyTermsPage() {
             >
                 <div className="flex items-center justify-between px-2">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                        <div className="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center text-primary">
                             <Languages size={20} />
                         </div>
                         <div>
@@ -229,7 +230,7 @@ export default function PolicyTermsPage() {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2 bg-muted/50 px-4 py-2.5 rounded-2xl border border-border/50 min-w-[200px]">
+                        <div className="flex items-center gap-2 bg-muted/50 px-4 py-2.5 rounded-lg border border-border/50 min-w-[200px]">
                             <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground whitespace-nowrap">PDF:</span>
                             
                             {settingsData[`${activePolicy}_pdf_${activeLang}`] ? (
@@ -275,7 +276,7 @@ export default function PolicyTermsPage() {
                         </div>
 
                         <label className={cn(
-                            "cursor-pointer flex items-center gap-2 px-6 py-2.5 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all",
+                            "cursor-pointer flex items-center gap-2 px-6 py-2.5 rounded-lg font-black text-[11px] uppercase tracking-widest transition-all",
                             uploading === `${activePolicy}_pdf_${activeLang}` 
                                 ? "bg-muted text-muted-foreground cursor-wait" 
                                 : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground border border-primary/20"
@@ -288,12 +289,12 @@ export default function PolicyTermsPage() {
                             ) : (
                                 <>
                                     <FileUp size={16} />
-                                    <span>{settingsData[`${activePolicy}_pdf_${activeLang}`] ? 'Change File' : 'Upload PDF'}</span>
+                                    <span>{settingsData[`${activePolicy}_pdf_${activeLang}`] ? 'Change File' : 'Upload PDF/TXT'}</span>
                                 </>
                             )}
                             <input 
                                 type="file" 
-                                accept=".pdf" 
+                                accept=".pdf,.txt" 
                                 className="hidden" 
                                 onChange={(e) => handleFileUpload(e, activeLang)}
                                 disabled={!!uploading}
@@ -307,7 +308,7 @@ export default function PolicyTermsPage() {
                         value={getPolicyContent(activeLang)}
                         onChange={(e) => updatePolicyContent(activeLang, e.target.value)}
                         placeholder={t('policy_placeholder') || "Edit policy content..."}
-                        className="w-full px-6 py-5 rounded-3xl border bg-background/50 outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/30 font-bold text-sm min-h-[450px] leading-relaxed transition-all resize-none"
+                        className="w-full px-6 py-5 rounded-lg border bg-background/50 outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/30 font-bold text-sm min-h-[450px] leading-relaxed transition-all resize-none"
                     />
                     <div className="absolute bottom-4 right-4 opacity-0 group-focus-within:opacity-100 transition-opacity">
                         <span className="text-[9px] font-black uppercase tracking-widest text-primary bg-primary/5 px-3 py-1 rounded-full border border-primary/10">

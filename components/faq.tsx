@@ -38,13 +38,13 @@ export function FAQ() {
   }, [locale]);
 
   return (
-    <section id="faqs" className="py-24 md:py-32 bg-background relative overflow-hidden">
+    <section id="faqs" className="py-12 md:py-32 bg-background relative overflow-hidden">
       {/* Visual Accent Background */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[160px] -z-10" />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Centered Header Section */}
-        <div className="max-w-3xl mx-auto text-center mb-16 md:mb-24 space-y-6">
+        <div className="max-w-3xl mx-auto text-center mb-12 md:mb-24 space-y-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -92,9 +92,9 @@ export function FAQ() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true }}
               className={cn(
-                "group rounded-[2.5rem] border transition-all duration-500 overflow-hidden",
+                "group rounded-xl border transition-all duration-500 overflow-hidden",
                 openIndex === index 
-                  ? "bg-card border-primary/50 shadow-2xl shadow-primary/10" 
+                  ? "bg-card border-primary/50 shadow-lg shadow-primary/10" 
                   : "bg-muted/30 border-border/50 hover:border-primary/30 hover:bg-muted/50"
               )}
             >
@@ -109,7 +109,7 @@ export function FAQ() {
                   {faq.question}
                 </span>
                 <div className={cn(
-                  "min-w-10 min-h-10 rounded-2xl flex items-center justify-center transition-all duration-500",
+                  "min-w-10 min-h-10 rounded-xl flex items-center justify-center transition-all duration-500",
                   openIndex === index 
                     ? "bg-primary text-primary-foreground rotate-180 scale-110" 
                     : "bg-background text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"

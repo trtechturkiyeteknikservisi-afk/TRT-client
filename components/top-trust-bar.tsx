@@ -33,18 +33,9 @@ export function TopTrustBar() {
   return (
     <div className="bg-[#0a0a0a] border-b border-white/5 py-2 overflow-hidden relative w-full">
       <div className="w-full">
-        <div className="flex overflow-hidden group">
-          <motion.div 
-            className="flex items-center whitespace-nowrap gap-12 md:gap-24"
-            animate={{ x: [0, -2000] }}
-            transition={{
-              x: {
-                repeat: Infinity,
-                repeatType: "loop",
-                duration: 60,
-                ease: "linear",
-              },
-            }}
+        <div className="flex overflow-hidden group cursor-pointer">
+          <div 
+            className="flex items-center whitespace-nowrap gap-12 md:gap-24 animate-marquee-slow group-hover:[animation-play-state:paused] active:[animation-play-state:paused]"
           >
             {displayItems.map((item, index) => (
               <div key={index} className="flex items-center gap-2 text-white/80 shrink-0">
@@ -54,7 +45,7 @@ export function TopTrustBar() {
                 </span>
               </div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </div>
     </div>

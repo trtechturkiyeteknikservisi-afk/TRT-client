@@ -157,7 +157,7 @@ export default function EmployeesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center bg-card p-6 rounded-2xl border border-border/50 shadow-sm">
+      <div className="flex justify-between items-center bg-card p-6 rounded-lg border border-border/50 shadow-sm">
         <div>
           <h1 className="text-2xl font-black uppercase tracking-tight flex items-center gap-3">
             <Shield className="text-primary" />
@@ -167,14 +167,14 @@ export default function EmployeesPage() {
         </div>
         <button
           onClick={() => handleOpenModal()}
-          className="bg-primary text-primary-foreground px-6 py-2.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all flex items-center gap-2 shadow-lg shadow-primary/20"
+          className="bg-primary text-primary-foreground px-6 py-2.5 rounded-md font-bold text-sm hover:opacity-90 transition-all flex items-center gap-2 shadow-lg shadow-primary/20"
         >
           <UserPlus size={18} />
           {t('add_employee')}
         </button>
       </div>
 
-      <div className="bg-card rounded-2xl border border-border/50 shadow-sm overflow-hidden min-h-[400px]">
+      <div className="bg-card rounded-lg border border-border/50 shadow-sm overflow-hidden min-h-[400px]">
         {loading ? (
           <div className="p-8 text-center text-muted-foreground">{t('loading')}</div>
         ) : (
@@ -246,7 +246,7 @@ export default function EmployeesPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-card w-full max-w-2xl rounded-3xl border border-border/50 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+              className="bg-card w-full max-w-2xl rounded-lg border border-border/50 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
             >
               <div className="p-6 border-b border-border/50 flex justify-between items-center bg-muted/10">
                 <h2 className="text-xl font-black uppercase tracking-tight flex items-center gap-2">
@@ -263,7 +263,7 @@ export default function EmployeesPage() {
 
               <div className="p-6 overflow-y-auto flex-grow">
                 {formError && (
-                  <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-sm font-bold flex items-center gap-2">
+                  <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-md text-red-500 text-sm font-bold flex items-center gap-2">
                     <ShieldAlert size={18} />
                     {formError}
                   </div>
@@ -278,7 +278,7 @@ export default function EmployeesPage() {
                          required
                          value={formData.username}
                          onChange={e => setFormData({...formData, username: e.target.value})}
-                         className="w-full bg-background border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-primary transition-colors text-sm font-bold"
+                         className="w-full bg-background border border-border rounded-md px-4 py-3 focus:outline-none focus:border-primary transition-colors text-sm font-bold"
                          placeholder="ahmed_staff"
                        />
                     </div>
@@ -292,7 +292,7 @@ export default function EmployeesPage() {
                            required={!editingId}
                            value={formData.password}
                            onChange={e => setFormData({...formData, password: e.target.value})}
-                           className="w-full bg-background border border-border rounded-xl px-4 py-3 pl-10 focus:outline-none focus:border-primary transition-colors text-sm"
+                           className="w-full bg-background border border-border rounded-md px-4 py-3 pl-10 focus:outline-none focus:border-primary transition-colors text-sm"
                            placeholder="***"
                          />
                          <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -325,7 +325,7 @@ export default function EmployeesPage() {
                           <div
                             key={perm.id}
                             onClick={() => handleTogglePermission(perm.id)}
-                            className={`cursor-pointer border rounded-xl p-3 flex items-center gap-3 transition-all ${isSelected ? 'bg-primary/10 border-primary shadow-sm shadow-primary/10' : 'bg-muted/20 border-border/50 hover:border-border'}`}
+                            className={`cursor-pointer border rounded-md p-3 flex items-center gap-3 transition-all ${isSelected ? 'bg-primary/10 border-primary shadow-sm shadow-primary/10' : 'bg-muted/20 border-border/50 hover:border-border'}`}
                           >
                             <div className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors ${isSelected ? 'bg-primary border-primary text-primary-foreground' : 'border-muted-foreground/30 bg-background'}`}>
                                {isSelected && <CheckCircle2 size={14} />}
@@ -343,7 +343,7 @@ export default function EmployeesPage() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-6 py-2.5 rounded-xl text-sm font-bold text-muted-foreground hover:bg-muted transition-colors"
+                  className="px-6 py-2.5 rounded-md text-sm font-bold text-muted-foreground hover:bg-muted transition-colors"
                 >
                   {t('cancel')}
                 </button>
@@ -351,7 +351,7 @@ export default function EmployeesPage() {
                   form="employee-form"
                   type="submit"
                   disabled={formLoading}
-                  className="bg-primary text-primary-foreground px-8 py-2.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all flex items-center gap-2 shadow-lg shadow-primary/20 disabled:opacity-50"
+                  className="bg-primary text-primary-foreground px-8 py-2.5 rounded-md font-bold text-sm hover:opacity-90 transition-all flex items-center gap-2 shadow-lg shadow-primary/20 disabled:opacity-50"
                 >
                   {formLoading ? t('loading') : t('save_employee')}
                 </button>

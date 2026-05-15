@@ -91,7 +91,7 @@ export default function ServicePage() {
     <main className="min-h-screen bg-background">
       
       {/* Hero Section */}
-      <section className="relative h-[400px] flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[500px] md:h-[600px] flex items-center justify-center overflow-hidden pt-32 md:pt-0">
         <div 
           className="absolute inset-0 bg-cover bg-center transition-transform duration-[10s] scale-105"
           style={{ backgroundImage: `url(${customImage || assets.image})` }}
@@ -104,7 +104,7 @@ export default function ServicePage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-flex p-4 bg-primary/20 rounded-2xl mb-6 backdrop-blur-md border border-white/10"
+            className="inline-flex p-4 bg-primary/20 rounded-xl mb-6 backdrop-blur-md border border-white/10"
           >
 
             <assets.icon size={40} className="text-primary" />
@@ -134,9 +134,9 @@ export default function ServicePage() {
           >
             <a 
               href={`tel:${supportPhone.replace(/\s/g, '')}`}
-              className="inline-flex items-center gap-3 px-8 py-4 bg-black/30 backdrop-blur-xl border border-white/30 rounded-2xl hover:bg-black/40 transition-all group shadow-none dark:shadow-2xl dark:shadow-black/20"
+              className="inline-flex items-center gap-3 px-8 py-4 bg-black/30 backdrop-blur-xl border border-white/30 rounded-xl hover:bg-black/40 transition-all group shadow-none dark:shadow-2xl dark:shadow-black/20"
             >
-              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white group-hover:scale-110 transition-transform">
                 <Phone size={20} />
               </div>
               <div className="text-right">

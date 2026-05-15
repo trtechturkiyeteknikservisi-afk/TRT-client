@@ -29,7 +29,7 @@ export function StickyContact() {
   const whatsappNumber = settings.whatsapp || "908508401505";
   const supportPhone = settings.support_phone || "0850 840 15 05";
 
-  if (pathname?.includes('/admin')) return null;
+  if (pathname?.includes('/trt-secure-panel-2026')) return null;
 
   const socialLinks = [
     { icon: Phone, href: `tel:${supportPhone.replace(/\s/g, '')}`, color: 'bg-primary' },
@@ -52,7 +52,7 @@ export function StickyContact() {
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-500",
+          "w-16 h-16 rounded-full shadow-lg flex items-center justify-center transition-all duration-500",
           isOpen ? "bg-red-500 text-white rotate-90" : "bg-primary text-primary-foreground"
         )}
       >

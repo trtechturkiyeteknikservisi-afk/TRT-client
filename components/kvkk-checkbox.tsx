@@ -60,7 +60,7 @@ export function KVKKCheckbox({ accepted, onChange }: KVKKCheckboxProps) {
                             initial={{ opacity: 0, y: 30, scale: 0.95 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 30, scale: 0.95 }}
-                            className="relative w-full max-w-2xl bg-card border rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+                            className="relative w-full max-w-2xl bg-card border rounded-xl shadow-lg overflow-hidden flex flex-col max-h-[85vh]"
                         >
                             <div className="p-8 border-b flex items-center justify-between bg-muted/20">
                                 <div className="flex items-center gap-4">
@@ -89,7 +89,7 @@ export function KVKKCheckbox({ accepted, onChange }: KVKKCheckboxProps) {
                             <div className="p-6 md:p-8 border-t bg-muted/20 flex justify-end gap-4">
                                  <button 
                                    onClick={() => { setShowModal(false); onChange(true); }}
-                                   className="px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-primary/20"
+                                   className="px-8 py-4 bg-primary text-primary-foreground rounded-xl font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-primary/20"
                                  >
                                    {t('close')}
                                  </button>

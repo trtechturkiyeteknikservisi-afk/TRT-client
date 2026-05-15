@@ -58,7 +58,7 @@ export default function SettingsPage() {
       console.error('Error fetching settings', err);
       if (err?.response?.status === 401) {
         localStorage.removeItem('token');
-        router.push('/admin/login');
+        router.push('/trt-secure-panel-2026/login');
       }
     } finally {
       setLoading(false);
@@ -135,7 +135,7 @@ export default function SettingsPage() {
            <button
              onClick={handleUpdate}
              disabled={actionLoading}
-             className="flex items-center space-x-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-black text-sm shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50"
+             className="flex items-center space-x-2 px-6 py-3 rounded-md bg-primary text-primary-foreground font-black text-sm shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50"
            >
               <Save size={18} />
               <span>{actionLoading ? t('loading') : t('save')}</span>
@@ -143,16 +143,16 @@ export default function SettingsPage() {
       </header>
 
       {message && (
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-emerald-500/10 text-emerald-600 p-4 rounded-xl border border-emerald-500/20 font-bold flex items-center space-x-3 text-sm">
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-emerald-500/10 text-emerald-600 p-4 rounded-md border border-emerald-500/20 font-bold flex items-center space-x-3 text-sm">
            <CheckCircle size={16} />
            <span>{message}</span>
         </motion.div>
       )}
 
       <div className="grid grid-cols-1 gap-6">
-          <div className="bg-card p-8 rounded-2xl border shadow-sm space-y-6">
+          <div className="bg-card p-8 rounded-lg border shadow-sm space-y-6">
                <div className="flex items-center space-x-3 border-b pb-4">
-                    <div className="w-10 h-10 bg-green-500/10 text-green-600 rounded-xl flex items-center justify-center">
+                    <div className="w-10 h-10 bg-green-500/10 text-green-600 rounded-md flex items-center justify-center">
                         <MessageCircle size={20} />
                     </div>
                     <h3 className="text-lg font-black tracking-tight uppercase">{t('support_contact')}</h3>
@@ -168,7 +168,7 @@ export default function SettingsPage() {
                                 value={settingsForm.whatsapp}
                                 onChange={(e) => setSettingsForm((prev) => ({ ...prev, whatsapp: e.target.value }))}
                                 placeholder="e.g., 908508401505"
-                                className="w-full pl-12 pr-4 py-3 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
+                                className="w-full pl-12 pr-4 py-3 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
                               />
                           </div>
                       </div>
@@ -181,7 +181,7 @@ export default function SettingsPage() {
                                 value={settingsForm.support_phone}
                                 onChange={(e) => setSettingsForm((prev) => ({ ...prev, support_phone: e.target.value }))}
                                 placeholder="e.g., 0850 840 15 05"
-                                className="w-full pl-12 pr-4 py-3 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
+                                className="w-full pl-12 pr-4 py-3 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
                               />
                           </div>
                       </div>
@@ -194,7 +194,7 @@ export default function SettingsPage() {
                                 value={settingsForm.support_email}
                                 onChange={(e) => setSettingsForm((prev) => ({ ...prev, support_email: e.target.value }))}
                                 placeholder="e.g., support@trt-service.com"
-                                className="w-full pl-12 pr-4 py-3 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
+                                className="w-full pl-12 pr-4 py-3 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
                               />
                           </div>
                       </div>
@@ -210,7 +210,7 @@ export default function SettingsPage() {
                       </div>
 
                       {['ar', 'en', 'tr'].map((lang) => (
-                          <div key={lang} className="space-y-3 p-4 bg-muted/30 rounded-2xl border border-border/50">
+                          <div key={lang} className="space-y-3 p-4 bg-muted/30 rounded-lg border border-border/50">
                               <div className="flex items-center justify-between mb-2">
                                   <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
                                       {t('news_items_label')} ({lang.toUpperCase()})
@@ -244,7 +244,7 @@ export default function SettingsPage() {
                                                       setSettingsForm(prev => ({ ...prev, [key]: newArr.join('\n') }));
                                                   }}
                                                   placeholder={t('news_placeholder')}
-                                                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                                                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
                                                   dir={lang === 'ar' ? 'rtl' : 'ltr'}
                                               />
                                           </div>
@@ -255,7 +255,7 @@ export default function SettingsPage() {
                                                   const newArr = arr.filter((_, i) => i !== idx);
                                                   setSettingsForm(prev => ({ ...prev, [key]: newArr.join('\n') }));
                                               }}
-                                              className="p-2.5 text-red-500 hover:bg-red-500/10 rounded-xl transition-colors"
+                                              className="p-2.5 text-red-500 hover:bg-red-500/10 rounded-md transition-colors"
                                           >
                                               <Save size={14} className="rotate-45" /> {/* Use as close icon */}
                                           </button>
@@ -271,9 +271,9 @@ export default function SettingsPage() {
                </div>
           </div>
 
-          <div className="bg-card p-8 rounded-2xl border shadow-sm space-y-6">
+          <div className="bg-card p-8 rounded-lg border shadow-sm space-y-6">
                <div className="flex items-center space-x-3 border-b pb-4">
-                    <div className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
+                    <div className="w-10 h-10 bg-primary/10 text-primary rounded-md flex items-center justify-center">
                         <Lock size={20} />
                     </div>
                     <h3 className="text-lg font-black tracking-tight uppercase">{t('account_settings')}</h3>
@@ -288,7 +288,7 @@ export default function SettingsPage() {
                                 value={settingsForm.username}
                                 onChange={(e) => setSettingsForm((prev) => ({ ...prev, username: e.target.value }))}
                                 placeholder="Username"
-                                className="w-full pl-12 pr-4 py-3 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
+                                className="w-full pl-12 pr-4 py-3 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
                             />
                         </div>
                     </div>
@@ -299,7 +299,7 @@ export default function SettingsPage() {
                             value={settingsForm.password}
                             onChange={(e) => setSettingsForm((prev) => ({ ...prev, password: e.target.value }))}
                             placeholder="••••••••"
-                            className="w-full px-4 py-3 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
+                            className="w-full px-4 py-3 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
                         />
                     </div>
                     <div className="space-y-1">
@@ -309,7 +309,7 @@ export default function SettingsPage() {
                             value={settingsForm.confirmPassword}
                             onChange={(e) => setSettingsForm((prev) => ({ ...prev, confirmPassword: e.target.value }))}
                             placeholder="••••••••"
-                            className="w-full px-4 py-3 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
+                            className="w-full px-4 py-3 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
                         />
                     </div>
                </div>

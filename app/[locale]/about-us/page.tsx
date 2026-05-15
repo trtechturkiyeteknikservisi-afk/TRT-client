@@ -13,7 +13,7 @@ export default function AboutUsPage() {
     <main className="min-h-screen bg-background">
       
       {/* Hero Section */}
-      <section className="relative py-24 md:py-32 overflow-hidden bg-primary/5">
+      <section className="relative pt-32 pb-24 md:pt-40 md:pb-32 overflow-hidden bg-primary/5">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/10 blur-[120px] -z-10 rounded-full" />
         <div className="container mx-auto px-4 text-center">
           <motion.div
@@ -62,14 +62,14 @@ export default function AboutUsPage() {
               </div>
               
               <div className="grid grid-cols-2 gap-6 pt-8">
-                <div className="p-6 bg-card border rounded-3xl space-y-3">
+                <div className="p-6 bg-card border rounded-xl space-y-3">
                   <div className="w-12 h-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center">
                     <Target size={24} />
                   </div>
                   <h3 className="font-black text-xl">{t('mission_title')}</h3>
                   <p className="text-sm text-muted-foreground">{t('mission_desc')}</p>
                 </div>
-                <div className="p-6 bg-card border rounded-3xl space-y-3">
+                <div className="p-6 bg-card border rounded-xl space-y-3">
                   <div className="w-12 h-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center">
                     <Award size={24} />
                   </div>
@@ -89,9 +89,9 @@ export default function AboutUsPage() {
               <img 
                 src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=2070&auto=format&fit=crop" 
                 alt="About TR TECH" 
-                className="rounded-[3rem] shadow-2xl border-4 border-background object-cover aspect-square lg:aspect-video"
+                className="rounded-xl shadow-2xl border-4 border-background object-cover aspect-square lg:aspect-video"
               />
-              <div className="absolute bottom-8 left-8 right-8 p-8 bg-background/80 backdrop-blur-xl rounded-[2rem] border shadow-2xl">
+              <div className="absolute bottom-8 left-8 right-8 p-8 bg-background/80 backdrop-blur-xl rounded-xl border shadow-2xl">
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 bg-primary text-primary-foreground rounded-2xl flex items-center justify-center font-black text-2xl">20+</div>
                   <div>

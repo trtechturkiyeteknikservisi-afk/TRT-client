@@ -49,7 +49,7 @@ export function RepairProcess() {
   }, [isPlaying, steps.length]);
 
   return (
-    <section className="py-32 relative overflow-hidden bg-background">
+    <section className="py-16 md:py-32 relative overflow-hidden bg-background">
       {/* Dynamic Background */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(220,38,38,0.03),transparent_70%)] pointer-events-none" />
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 blur-[150px] rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none" />
@@ -58,7 +58,7 @@ export function RepairProcess() {
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
         
         {/* Header Section */}
-        <div className="text-center max-w-3xl mx-auto mb-20">
+        <div className="text-center max-w-3xl mx-auto mb-10 md:mb-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -81,7 +81,7 @@ export function RepairProcess() {
         <div className="max-w-6xl mx-auto">
           
           {/* Top Timeline Navigation */}
-          <div className="relative mb-16">
+          <div className="relative mb-10 md:mb-16">
             {/* The line connecting the steps */}
             <div className="absolute top-1/2 -translate-y-1/2 left-0 w-full h-1 bg-muted rounded-full overflow-hidden">
                 <motion.div 
@@ -110,7 +110,7 @@ export function RepairProcess() {
                     )}
                   >
                      <div className={cn(
-                         "w-10 h-10 md:w-14 md:h-14 rounded-2xl flex items-center justify-center border-2 transition-all duration-500",
+                         "w-10 h-10 md:w-14 md:h-14 rounded-xl flex items-center justify-center border-2 transition-all duration-500",
                          isActive ? "bg-primary border-primary text-primary-foreground shadow-[0_0_20px_rgba(220,38,38,0.4)]" : 
                          isPast ? "bg-primary/20 border-primary/50 text-foreground" : "bg-card border-border text-muted-foreground group-hover:border-primary/50"
                      )}>
@@ -141,7 +141,7 @@ export function RepairProcess() {
           </div>
 
           {/* Active Step Presentation */}
-          <div className="relative bg-card/40 backdrop-blur-3xl rounded-3xl border border-white/10 dark:border-white/5 shadow-2xl overflow-hidden min-h-[400px] flex items-center">
+          <div className="relative bg-card/40 backdrop-blur-lg rounded-xl border border-white/10 dark:border-white/5 shadow-lg overflow-hidden min-h-[400px] flex items-center">
              {/* Large background number */}
              <div className={cn(
                  "absolute top-1/2 -translate-y-1/2 text-[20rem] font-black text-foreground/5 select-none pointer-events-none",
@@ -179,7 +179,7 @@ export function RepairProcess() {
                             <motion.div 
                                 animate={{ y: [0, -15, 0] }}
                                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                                className="relative w-48 h-48 md:w-64 md:h-64 rounded-full bg-gradient-to-br from-card to-background border border-border flex items-center justify-center shadow-2xl"
+                                className="relative w-48 h-48 md:w-64 md:h-64 rounded-full bg-gradient-to-br from-card to-background border border-border flex items-center justify-center shadow-lg"
                             >
                                 <div className="absolute inset-2 rounded-full border border-primary/20 border-dashed animate-[spin_10s_linear_infinite]" />
                                 {React.createElement(steps[activeStep].icon, { 

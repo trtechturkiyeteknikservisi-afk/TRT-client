@@ -37,7 +37,7 @@ export default function PortfolioPage() {
       console.error('Error fetching portfolio', err);
       if (err?.response?.status === 401) {
         localStorage.removeItem('token');
-        router.push('/admin/login');
+        router.push('/trt-secure-panel-2026/login');
       }
     } finally {
       setLoading(false);
@@ -135,9 +135,9 @@ export default function PortfolioPage() {
         <h2 className="text-3xl font-black tracking-tight uppercase">{t('menu_portfolio')}</h2>
       </header>
 
-      <div className="bg-card border rounded-2xl p-8 shadow-sm">
+      <div className="bg-card border rounded-lg p-8 shadow-sm">
         <div className="flex items-center space-x-3 mb-8">
-            <div className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-primary/10 text-primary rounded-md flex items-center justify-center">
                 <Plus size={20} strokeWidth={3} />
             </div>
             <h3 className="text-2xl font-black tracking-tight uppercase">{t('save_work')}</h3>
@@ -150,7 +150,7 @@ export default function PortfolioPage() {
                     <select
                         value={uploadForm.type}
                         onChange={(e) => setUploadForm((prev) => ({ ...prev, type: e.target.value }))}
-                        className="w-full px-3 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                        className="w-full px-3 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
                     >
                         <option value="image">Image</option>
                         <option value="video">Video</option>
@@ -159,7 +159,7 @@ export default function PortfolioPage() {
                
                <div className="space-y-1">
                     <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1 mb-1 block">File Upload</label>
-                    <label className="flex items-center justify-center px-4 py-2.5 rounded-xl border-2 border-dashed border-primary/20 bg-primary/5 cursor-pointer hover:bg-primary/10 transition-all text-[10px] font-black uppercase tracking-widest text-primary gap-2">
+                    <label className="flex items-center justify-center px-4 py-2.5 rounded-md border-2 border-dashed border-primary/20 bg-primary/5 cursor-pointer hover:bg-primary/10 transition-all text-[10px] font-black uppercase tracking-widest text-primary gap-2">
                         <Upload size={14} />
                         <span>{selectedFile ? selectedFile.name : "Choose File"}</span>
                         <input type="file" className="hidden" onChange={(e) => setSelectedFile(e.target.files?.[0] || null)} />
@@ -172,14 +172,14 @@ export default function PortfolioPage() {
                         value={uploadForm.url}
                         onChange={(e) => setUploadForm((prev) => ({ ...prev, url: e.target.value }))}
                         placeholder="https://..."
-                        className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                        className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
                     />
                </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* English */}
-            <div className="space-y-4 p-5 bg-muted/20 rounded-2xl border border-dashed border-primary/20">
+            <div className="space-y-4 p-5 bg-muted/20 rounded-lg border border-dashed border-primary/20">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xl">🇺🇸</span>
                 <h4 className="font-black text-xs uppercase tracking-wider">English Version</h4>
@@ -189,7 +189,7 @@ export default function PortfolioPage() {
                 <input
                   value={uploadForm.title_en}
                   onChange={(e) => setUploadForm(p => ({ ...p, title_en: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
                   required
                 />
               </div>
@@ -198,13 +198,13 @@ export default function PortfolioPage() {
                 <textarea
                   value={uploadForm.description_en}
                   onChange={(e) => setUploadForm(p => ({ ...p, description_en: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-24"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-24"
                 />
               </div>
             </div>
 
             {/* Turkish */}
-            <div className="space-y-4 p-5 bg-muted/20 rounded-2xl border border-dashed border-primary/20">
+            <div className="space-y-4 p-5 bg-muted/20 rounded-lg border border-dashed border-primary/20">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xl">🇹🇷</span>
                 <h4 className="font-black text-xs uppercase tracking-wider">Türkçe Versiyon</h4>
@@ -214,7 +214,7 @@ export default function PortfolioPage() {
                 <input
                   value={uploadForm.title_tr}
                   onChange={(e) => setUploadForm(p => ({ ...p, title_tr: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
                   required
                 />
               </div>
@@ -223,13 +223,13 @@ export default function PortfolioPage() {
                 <textarea
                   value={uploadForm.description_tr}
                   onChange={(e) => setUploadForm(p => ({ ...p, description_tr: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-24"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-24"
                 />
               </div>
             </div>
 
             {/* Arabic */}
-            <div className="space-y-4 p-5 bg-muted/20 rounded-2xl border border-dashed border-primary/20" dir="rtl">
+            <div className="space-y-4 p-5 bg-muted/20 rounded-lg border border-dashed border-primary/20" dir="rtl">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xl">🇸🇦</span>
                 <h4 className="font-black text-xs uppercase tracking-wider">النسخة العربية</h4>
@@ -239,7 +239,7 @@ export default function PortfolioPage() {
                 <input
                   value={uploadForm.title_ar}
                   onChange={(e) => setUploadForm(p => ({ ...p, title_ar: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
                   required
                 />
               </div>
@@ -248,7 +248,7 @@ export default function PortfolioPage() {
                 <textarea
                   value={uploadForm.description_ar}
                   onChange={(e) => setUploadForm(p => ({ ...p, description_ar: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-24"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-24"
                 />
               </div>
             </div>
@@ -257,7 +257,7 @@ export default function PortfolioPage() {
           <button
             type="submit"
             disabled={actionLoading}
-            className="w-full px-6 py-4 rounded-xl bg-primary text-primary-foreground font-black text-sm shadow-xl shadow-primary/30 hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50 uppercase tracking-widest"
+            className="w-full px-6 py-4 rounded-md bg-primary text-primary-foreground font-black text-sm shadow-xl shadow-primary/30 hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50 uppercase tracking-widest"
           >
             {actionLoading ? t('loading') : t('save_work')}
           </button>
@@ -273,7 +273,7 @@ export default function PortfolioPage() {
                 key={item.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-card rounded-2xl border shadow-sm overflow-hidden hover:shadow-md transition-all group flex flex-col border-muted/50"
+                className="bg-card rounded-lg border shadow-sm overflow-hidden hover:shadow-md transition-all group flex flex-col border-muted/50"
               >
                 <div className="aspect-video relative overflow-hidden bg-muted">
                     {item.type === 'image' ? (
@@ -306,7 +306,7 @@ export default function PortfolioPage() {
                     <button
                         onClick={() => deleteItem(item.id)}
                         disabled={actionLoading}
-                        className="absolute top-3 right-3 p-2.5 rounded-xl bg-red-500 text-white shadow-xl opacity-0 group-hover:opacity-100 transition-all active:scale-90"
+                        className="absolute top-3 right-3 p-2.5 rounded-md bg-red-500 text-white shadow-xl opacity-0 group-hover:opacity-100 transition-all active:scale-90"
                     >
                         <Trash2 size={16} />
                     </button>

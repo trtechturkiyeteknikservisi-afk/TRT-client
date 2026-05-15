@@ -38,7 +38,7 @@ export default function AdminLayout({
     const token = localStorage.getItem('token');
     
     if (!token) {
-      router.push('/admin/login');
+      router.push('/trt-secure-panel-2026/login');
     } else if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
@@ -47,7 +47,7 @@ export default function AdminLayout({
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    router.push('/admin/login');
+    router.push('/trt-secure-panel-2026/login');
   };
 
   const handleLocaleChange = (newLocale: string) => {
@@ -55,16 +55,16 @@ export default function AdminLayout({
   };
 
   const rawMenuItems = [
-    { id: 'analytics', href: '/admin/analytics', name: t('menu_analytics') || 'Analytics', icon: BarChart3, permission: 'VIEW_ANALYTICS' },
-    { id: 'contacts', href: '/admin/contacts', name: t('menu_contacts'), icon: MessageSquare, permission: 'MANAGE_CONTACTS' },
-    { id: 'blogs', href: '/admin/blogs', name: t('menu_blogs'), icon: BookOpen, permission: 'MANAGE_BLOGS' },
-    { id: 'reviews', href: '/admin/reviews', name: t('menu_reviews'), icon: Star, permission: 'MANAGE_REVIEWS' },
-    { id: 'faqs', href: '/admin/faqs', name: t('menu_faqs'), icon: HelpCircle, permission: 'MANAGE_FAQS' },
-    { id: 'portfolio', href: '/admin/portfolio', name: t('menu_portfolio'), icon: ImageIcon, permission: 'MANAGE_PORTFOLIO' },
-    { id: 'banners', href: '/admin/banners', name: t('menu_banners') || 'Banners', icon: Images, permission: 'MANAGE_BANNERS' },
-    { id: 'verification', href: '/admin/verification', name: t('menu_verification') || 'Official Requests', icon: ShieldCheck, permission: 'MANAGE_VERIFICATIONS' },
-    { id: 'policy-terms', href: '/admin/policy-terms', name: t('menu_policy') || 'Policy & Terms', icon: BookOpen, permission: 'MANAGE_SETTINGS' },
-    { id: 'settings', href: '/admin/settings', name: t('menu_settings'), icon: Settings, permission: 'MANAGE_SETTINGS' },
+    { id: 'analytics', href: '/trt-secure-panel-2026/analytics', name: t('menu_analytics') || 'Analytics', icon: BarChart3, permission: 'VIEW_ANALYTICS' },
+    { id: 'contacts', href: '/trt-secure-panel-2026/contacts', name: t('menu_contacts'), icon: MessageSquare, permission: 'MANAGE_CONTACTS' },
+    { id: 'blogs', href: '/trt-secure-panel-2026/blogs', name: t('menu_blogs'), icon: BookOpen, permission: 'MANAGE_BLOGS' },
+    { id: 'reviews', href: '/trt-secure-panel-2026/reviews', name: t('menu_reviews'), icon: Star, permission: 'MANAGE_REVIEWS' },
+    { id: 'faqs', href: '/trt-secure-panel-2026/faqs', name: t('menu_faqs'), icon: HelpCircle, permission: 'MANAGE_FAQS' },
+    { id: 'portfolio', href: '/trt-secure-panel-2026/portfolio', name: t('menu_portfolio'), icon: ImageIcon, permission: 'MANAGE_PORTFOLIO' },
+    { id: 'banners', href: '/trt-secure-panel-2026/banners', name: t('menu_banners') || 'Banners', icon: Images, permission: 'MANAGE_BANNERS' },
+    { id: 'verification', href: '/trt-secure-panel-2026/verification', name: t('menu_verification') || 'Official Requests', icon: ShieldCheck, permission: 'MANAGE_VERIFICATIONS' },
+    { id: 'policy-terms', href: '/trt-secure-panel-2026/policy-terms', name: t('menu_policy') || 'Policy & Terms', icon: BookOpen, permission: 'MANAGE_SETTINGS' },
+    { id: 'settings', href: '/trt-secure-panel-2026/settings', name: t('menu_settings'), icon: Settings, permission: 'MANAGE_SETTINGS' },
   ];
 
   const canManageUsers = user?.role === 'admin' || user?.permissions?.includes('*') || user?.permissions?.includes('MANAGE_USERS');
@@ -75,7 +75,7 @@ export default function AdminLayout({
   });
 
   if (canManageUsers) {
-    const employeesItem = { id: 'employees', href: '/admin/employees', name: t('menu_employees') || 'Employees', icon: UserIcon, permission: 'MANAGE_USERS' };
+    const employeesItem = { id: 'employees', href: '/trt-secure-panel-2026/employees', name: t('menu_employees') || 'Employees', icon: UserIcon, permission: 'MANAGE_USERS' };
     // Add employees item after analytics (index 1) if not already exists in filtered list
     if (!menuItems.find(m => m.id === 'employees')) {
       menuItems.splice(1, 0, employeesItem as any);
@@ -97,7 +97,7 @@ export default function AdminLayout({
 
       {/* Mobile Header */}
       <header className="lg:hidden h-16 bg-card border-b border-border/50 flex items-center justify-between px-6 z-40 sticky top-0">
-        <Link href="/admin/analytics" className="flex items-center gap-2">
+        <Link href="/trt-secure-panel-2026/analytics" className="flex items-center gap-2">
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/20">
             <span className="text-primary-foreground font-black text-sm">T</span>
           </div>
@@ -105,7 +105,7 @@ export default function AdminLayout({
         </Link>
         <button 
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="p-2 rounded-xl bg-muted/50 text-foreground hover:bg-primary hover:text-primary-foreground transition-all"
+          className="p-2 rounded-md bg-muted/50 text-foreground hover:bg-primary hover:text-primary-foreground transition-all"
         >
           {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
@@ -129,8 +129,8 @@ export default function AdminLayout({
       )}>
         <div className="p-6 border-b border-border/30">
           <div className="flex items-center justify-between lg:block">
-            <Link href="/admin/analytics" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/30 group-hover:rotate-6 transition-all duration-500">
+            <Link href="/trt-secure-panel-2026/analytics" className="flex items-center gap-3 group">
+              <div className="w-10 h-10 bg-primary rounded-md flex items-center justify-center shadow-lg shadow-primary/30 group-hover:rotate-6 transition-all duration-500">
                 <span className="text-primary-foreground font-black text-xl">T</span>
               </div>
               <div className="flex flex-col">
@@ -146,7 +146,7 @@ export default function AdminLayout({
             </button>
           </div>
           
-          <div className="mt-6 flex items-center justify-center bg-muted/30 rounded-xl p-1 border border-border/50 overflow-hidden">
+          <div className="mt-6 flex items-center justify-center bg-muted/30 rounded-md p-1 border border-border/50 overflow-hidden">
             {[
               { code: 'en', flag: 'gb' },
               { code: 'ar', flag: 'sa' },
@@ -184,7 +184,7 @@ export default function AdminLayout({
                 key={item.id}
                 href={item.href}
                 className={cn(
-                  "w-full flex items-center justify-between px-4 py-2.5 rounded-xl font-bold text-[13px] transition-all duration-300 relative group overflow-hidden",
+                  "w-full flex items-center justify-between px-4 py-2.5 rounded-md font-bold text-[13px] transition-all duration-300 relative group overflow-hidden",
                   active 
                     ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" 
                     : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
@@ -210,7 +210,7 @@ export default function AdminLayout({
           <div className="pt-4 mt-4 border-t border-border/10">
             <Link
               href="/"
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-black text-[11px] text-primary bg-primary/5 hover:bg-primary hover:text-white transition-all duration-300 uppercase tracking-widest group shadow-sm border border-primary/10"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-md font-black text-[11px] text-primary bg-primary/5 hover:bg-primary hover:text-white transition-all duration-300 uppercase tracking-widest group shadow-sm border border-primary/10"
             >
               <LogOut className={cn("w-4 h-4 transition-transform group-hover:-translate-x-1", locale === 'ar' ? 'rotate-180 group-hover:translate-x-1' : '')} />
               <span>{t('back_to_site')}</span>
@@ -219,7 +219,7 @@ export default function AdminLayout({
         </nav>
 
         <div className="p-5 border-t border-border/30 bg-muted/5 space-y-3">
-          <div className="flex items-center gap-3 px-2 py-2.5 rounded-xl bg-background shadow-sm border border-border/50">
+          <div className="flex items-center gap-3 px-2 py-2.5 rounded-md bg-background shadow-sm border border-border/50">
             <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0 group hover:rotate-6 transition-transform">
               <UserIcon size={16} strokeWidth={2.5} />
             </div>
@@ -234,14 +234,14 @@ export default function AdminLayout({
           <div className="grid grid-cols-2 gap-2">
              <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="flex items-center justify-center p-2.5 rounded-xl bg-background border border-border/50 hover:border-primary hover:bg-primary/5 transition-all text-foreground active:scale-95"
+              className="flex items-center justify-center p-2.5 rounded-md bg-background border border-border/50 hover:border-primary hover:bg-primary/5 transition-all text-foreground active:scale-95"
               title={t('toggle_theme')}
             >
               {theme === 'dark' ? <Sun size={18} className="text-yellow-500" /> : <Moon size={18} className="text-primary" />}
             </button>
             <button
               onClick={handleLogout}
-              className="flex items-center justify-center p-2.5 rounded-xl bg-red-500/5 text-red-500 border border-transparent hover:border-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95"
+              className="flex items-center justify-center p-2.5 rounded-md bg-red-500/5 text-red-500 border border-transparent hover:border-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95"
               title={t('sign_out')}
             >
               <LogOut size={18} />

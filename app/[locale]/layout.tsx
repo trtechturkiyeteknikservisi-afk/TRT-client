@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Almarai } from "next/font/google";
 import "../globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -6,7 +6,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { MessageCircle } from 'lucide-react';
 import { StickyContact } from "@/components/sticky-contact";
-import { NewsBar } from "@/components/news-bar";
+
 import { TopTrustBar } from "@/components/top-trust-bar";
 import { HideOnAdmin } from "@/components/hide-on-admin";
 import { ScrollToTop } from "@/components/scroll-to-top";
@@ -29,6 +29,15 @@ export const metadata: Metadata = {
   keywords: ["phone repair", "laptop repair", "robot vacuum repair", "watch repair", "technical service", "Turkey", "Bursa"],
   authors: [{ name: "TRT Team" }],
   creator: "TRT",
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#000000' },
+  ],
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default async function RootLayout(props: {
@@ -84,7 +93,6 @@ export default async function RootLayout(props: {
             >
               <HideOnAdmin>
                 <TopTrustBar />
-                <NewsBar />
                 <Header />
               </HideOnAdmin>
               {children}

@@ -74,7 +74,7 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
 
   if (!mounted) return (
     <div className={cn(
-      "bg-card/40 backdrop-blur-xl p-6 rounded-3xl border border-black/10 dark:border-white/10 animate-pulse",
+      "bg-card/40 backdrop-blur-lg p-6 rounded-xl border border-black/10 dark:border-white/10 animate-pulse",
       isHeroMini && "p-4"
     )}>
       <div className="h-6 bg-muted rounded w-1/2 mb-4" />
@@ -91,12 +91,12 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
   return (
     <div className="relative group">
       <div className={cn(
-        "bg-card/90 backdrop-blur-2xl p-6 md:p-8 rounded-3xl border border-black/10 dark:border-white/10 shadow-lg dark:shadow-2xl relative",
-        isSidebar && "p-6 rounded-2xl",
-        isHeroMini && "p-5 md:p-7 rounded-2xl bg-white/5 dark:bg-background/20"
+        "bg-card/90 backdrop-blur-lg p-6 md:p-8 rounded-xl border border-black/10 dark:border-white/10 shadow-md dark:shadow-xl relative",
+        isSidebar && "p-6 rounded-lg",
+        isHeroMini && "p-5 md:p-7 rounded-lg bg-white/5 dark:bg-background/20"
       )}>
         
-        <div className="mb-6 flex flex-row items-start justify-between gap-4">
+        <div className="mb-6 flex flex-col sm:flex-row items-start justify-between gap-6">
           <div className={cn(
             "space-y-4",
             isHeroMini ? "text-left" : "text-left"
@@ -126,10 +126,10 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
             )}
           </div>
           
-          <div className="flex shrink-0 justify-end">
+          <div className="flex shrink-0 justify-start sm:justify-end w-full sm:w-auto">
             <a 
               href={`tel:${supportPhone.replace(/\s/g, '')}`}
-              className="flex items-center gap-3 px-5 py-3 bg-primary/10 border border-primary/20 hover:bg-primary/20 rounded-2xl transition-all hover:scale-105 group"
+              className="flex items-center gap-3 px-5 py-3 bg-primary/10 border border-primary/20 hover:bg-primary/20 rounded-xl transition-all hover:scale-105 group"
             >
               <div className="p-2 bg-primary text-primary-foreground rounded-lg group-hover:rotate-12 transition-transform">
                 <Phone size={18} />
@@ -275,9 +275,9 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="relative w-full max-w-sm bg-card p-10 rounded-3xl border shadow-2xl text-center space-y-6"
+              className="relative w-full max-w-sm bg-card p-10 rounded-xl border shadow-xl text-center space-y-6"
             >
-              <div className="w-20 h-20 bg-primary/10 text-primary rounded-3xl flex items-center justify-center mx-auto">
+              <div className="w-20 h-20 bg-primary/10 text-primary rounded-xl flex items-center justify-center mx-auto">
                   <CheckCircle size={40} />
               </div>
               <div className="space-y-2">

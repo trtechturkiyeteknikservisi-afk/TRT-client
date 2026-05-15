@@ -10,6 +10,7 @@ import { RepairProcess } from "@/components/repair-process";
 import { QuickContactBar } from "@/components/quick-contact-bar";
 import { ElegantPhoneBanner } from "@/components/elegant-phone-banner";
 import { LocationMap } from "@/components/location-map";
+import { NewsBar } from "@/components/news-bar";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 export function generateStaticParams() {
@@ -22,8 +23,8 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
   const t = await getTranslations('Home');
   const t_trust = await getTranslations('Trust');
   const stats = [
-    { label: t('stat_customers'), value: '15K+' },
-    { label: t('stat_devices'), value: '20K+' },
+    { label: t('stat_customers'), value: locale === 'tr' ? '15B+' : '15K+' },
+    { label: t('stat_devices'), value: locale === 'tr' ? '20B+' : '20K+' },
     { label: t('stat_experience'), value: '22+' },
     { label: t('stat_technicians'), value: '15+' },
   ];
@@ -31,12 +32,13 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
   return (
     <main className="min-h-screen selection:bg-primary selection:text-primary-foreground overflow-x-hidden">
       <div className="relative">
-        <div className="absolute top-0 left-0 w-full h-[120vh] bg-[radial-gradient(circle_at_50%_0%,hsl(var(--primary)/0.15),transparent_70%)] pointer-events-none -z-10" />
-        <div className="absolute top-[20vh] left-[-10%] w-[40%] h-[60vh] bg-primary/5 blur-[120px] rounded-full -z-10 animate-pulse" />
-        <div className="absolute top-[40vh] right-[-10%] w-[40%] h-[60vh] bg-primary/5 blur-[120px] rounded-full -z-10 animate-pulse delay-700" />
+        <div className="absolute top-0 left-0 w-full h-[120vh] bg-[radial-gradient(circle_at_50%_0%,hsl(var(--primary)/0.08),transparent_70%)] pointer-events-none -z-10" />
+        <div className="absolute top-[20vh] left-[-10%] w-[40%] h-[60vh] bg-primary/3 blur-[80px] rounded-full -z-10 animate-pulse" />
+        <div className="absolute top-[40vh] right-[-10%] w-[40%] h-[60vh] bg-primary/3 blur-[80px] rounded-full -z-10 animate-pulse delay-700" />
         <Hero />
       </div>
 
+      <NewsBar />
       <QuickContactBar />
       <RepairProcess />
       <ElegantPhoneBanner title={t_trust('badge_label')} />

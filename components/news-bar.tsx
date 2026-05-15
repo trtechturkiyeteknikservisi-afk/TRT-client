@@ -16,7 +16,7 @@ export function NewsBar() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    if (pathname?.includes('/admin')) {
+    if (pathname?.includes('/trt-secure-panel-2026')) {
       setIsVisible(false);
       return;
     }
@@ -41,26 +41,16 @@ export function NewsBar() {
       {/* Glossy Overlay */}
       <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-transparent to-white/5 pointer-events-none" />
       
-      <div className="container mx-auto flex items-center gap-6 relative px-4">
+      <div className="w-full flex items-center gap-6 relative px-4">
         {/* Label Prefix */}
-        <div className="flex items-center gap-2 shrink-0 bg-white/20 px-3 py-1 rounded-full border border-white/20 backdrop-blur-sm shadow-sm">
+        <div className="flex items-center justify-center shrink-0 bg-white/20 w-8 h-8 rounded-full border border-white/20 backdrop-blur-sm shadow-sm">
           <Megaphone size={14} className="animate-bounce" />
-          <span className="text-[10px] font-black uppercase tracking-widest">
-            {locale === 'ar' ? 'آخر الأخبار' : locale === 'tr' ? 'Son Haberler' : 'Latest News'}
-          </span>
         </div>
 
         {/* Marquee Container */}
-        <div className="flex-1 overflow-hidden">
-          <motion.div
-            initial={{ x: "100%" }}
-            animate={{ x: "-100%" }}
-            transition={{
-              duration: 20, // أسرع لتناسب الجوال والشاشات المختلفة
-              repeat: Infinity,
-              ease: "linear",
-            }}
-            className="whitespace-nowrap flex items-center gap-20"
+        <div className="flex-1 overflow-hidden group cursor-pointer">
+          <div
+            className="whitespace-nowrap flex items-center gap-20 animate-marquee group-hover:[animation-play-state:paused] active:[animation-play-state:paused]"
           >
             {/* عرض قائمة الأخبار */}
             {newsItems.map((item, idx) => (
@@ -91,7 +81,7 @@ export function NewsBar() {
                 </span>
               </React.Fragment>
             ))}
-          </motion.div>
+          </div>
         </div>
       </div>
     </div>

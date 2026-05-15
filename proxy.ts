@@ -7,40 +7,33 @@ const intlMiddleware = createMiddleware(routing);
 export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Check if the pathname is missing a locale
-  const pathnameIsMissingLocale = routing.locales.every(
-    (locale) => !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
-  );
-
-  if (pathnameIsMissingLocale) {
-    // Detect country from headers (common headers provided by Vercel, Cloudflare, etc.)
-    const country = (request.headers.get('x-vercel-ip-country') || 
-                     request.headers.get('cf-ipcountry') || 
-                     'TR').toUpperCase();
-
-    // List of Arabic-speaking countries ISO codes
-    const arabicCountries = [
-      'DZ', 'BH', 'KM', 'DJ', 'EG', 'IQ', 'JO', 'KW', 'LB', 'LY', 
-      'MR', 'MA', 'OM', 'PS', 'QA', 'SA', 'SO', 'SD', 'SY', 'TN', 'AE', 'YE'
-    ];
-
-    let locale = 'en'; // Default for non-Arabic, non-Turkish countries
+  // Manual country detection only for the root path and if no locale cookie is set
+  if (pathname === '/') {
+    const localeCookie = request.cookies.get('NEXT_LOCALE')?.value;
     
-    if (arabicCountries.includes(country)) {
-      locale = 'ar';
-    } else if (country === 'TR') {
-      locale = 'tr';
-    }
+    if (!localeCookie) {
+      const country = (request.headers.get('x-vercel-ip-country') || 
+                       request.headers.get('cf-ipcountry') || 
+                       '').toUpperCase();
 
-    // Redirect to the detected locale
-    const url = new URL(`/${locale}${pathname === '/' ? '' : pathname}`, request.url);
-    return NextResponse.redirect(url);
+      const arabicCountries = [
+        'DZ', 'BH', 'KM', 'DJ', 'EG', 'IQ', 'JO', 'KW', 'LB', 'LY', 
+        'MR', 'MA', 'OM', 'PS', 'QA', 'SA', 'SO', 'SD', 'SY', 'TN', 'AE', 'YE'
+      ];
+
+      if (arabicCountries.includes(country)) {
+        return NextResponse.redirect(new URL('/ar', request.url));
+      } else if (country === 'TR') {
+        return NextResponse.redirect(new URL('/tr', request.url));
+      }
+      // If no specific country match, just let intlMiddleware handle it via Accept-Language (Browser preference)
+    }
   }
 
   return intlMiddleware(request);
 }
 
 export const config = {
+  // Matcher for all paths except static files and internal Next.js paths
   matcher: ['/((?!api|trpc|_next|_vercel|.*\\..*).*)']
 };
-

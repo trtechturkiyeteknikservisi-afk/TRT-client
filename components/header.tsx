@@ -35,6 +35,7 @@ export function Header() {
     { name: tFooter('service_terms'), href: '/policies/terms', icon: FileText },
     { name: tFooter('warranty_terms'), href: '/policies/warranty', icon: ShieldCheck },
     { name: tFooter('shipping_terms'), href: '/policies/shipping', icon: Truck },
+    { name: tFooter('official_doc'), href: '/policies/custom', icon: ShieldCheck },
   ];
 
   const navigation = [
@@ -65,10 +66,10 @@ export function Header() {
 
   useEffect(() => setMounted(true), []);
 
-  if (!mounted) return <header className="sticky top-0 z-50 w-full h-20 border-b bg-background/80 backdrop-blur-xl" />;
+  if (!mounted) return <header className="sticky top-0 z-50 w-full h-20 border-b bg-background/80 backdrop-blur-lg" />;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
       <div className="w-full xl:container mx-auto px-2 sm:px-4 xl:px-4 2xl:px-8">
         <div className="flex min-h-[4rem] items-center justify-between gap-1 sm:gap-2 2xl:gap-4 py-2 md:py-0">
           <div className="flex items-center flex-shrink-0">
@@ -110,7 +111,7 @@ export function Header() {
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
                         transition={{ duration: 0.2 }}
                         className={cn(
-                          "absolute top-full mt-2 w-64 bg-card border border-border rounded-2xl shadow-2xl overflow-hidden p-2",
+                          "absolute top-full mt-2 w-64 bg-card border border-border rounded-xl shadow-lg overflow-hidden p-2",
                           locale === 'ar' ? "-right-4" : "-left-4"
                         )}
                       >

@@ -75,13 +75,14 @@ export function Footer() {
         { name: t('warranty_terms'), href: '/policies/warranty' },
         { name: t('privacy_policy'), href: '/policies/privacy' },
         { name: t('shipping_terms'), href: '/policies/shipping' },
+        { name: t('official_doc'), href: '/policies/custom' },
       ],
     },
   ];
 
   return (
     <footer className="bg-card pt-16 pb-8 relative overflow-hidden border-t-4 border-primary">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[300px] bg-primary/5 blur-[120px] -z-10" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[300px] bg-primary/5 blur-[80px] -z-10" />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">

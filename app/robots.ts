@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/admin/', '/api/'],
+      disallow: ['/trt-secure-panel-2026/', '/api/'],
     },
     sitemap: 'https://elektrofoni.com.tr/sitemap.xml',
   };

@@ -73,7 +73,7 @@ export function Hero() {
   }, [banners.length, current]);
 
   return (
-    <section className="relative min-h-screen w-full overflow-hidden bg-background flex flex-col justify-center pt-20 lg:pt-24 pb-12 lg:pb-16">
+    <section className="relative min-h-screen w-full overflow-hidden bg-background flex flex-col justify-center pt-[140px] lg:pt-24 pb-10 lg:pb-16">
       {/* Dynamic Backgrounds */}
       <AnimatePresence mode="wait">
         {banners[current] && (
@@ -102,7 +102,7 @@ export function Hero() {
         )}
       </AnimatePresence>
 
-      <div className="relative container mx-auto px-4 w-full flex flex-col lg:flex-row items-center lg:justify-between gap-12 lg:gap-16 z-10">
+      <div className="relative container mx-auto px-4 w-full flex flex-col lg:flex-row items-center lg:justify-between gap-8 lg:gap-16 z-10">
         {/* Animated Content Section */}
         <div className="w-full lg:flex-1 relative h-full flex items-center">
           <AnimatePresence mode="wait">
@@ -118,7 +118,7 @@ export function Hero() {
                   isRTL ? "text-right lg:border-r-4 border-primary lg:pr-10" : "text-left lg:border-l-4 border-primary lg:pl-10"
                 )}
               >
-                <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-xl">
+                <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-lg">
                   <div className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
@@ -126,10 +126,10 @@ export function Hero() {
                   <span className="text-xs font-black uppercase tracking-[0.3em] text-primary">{t('badge')}</span>
                 </div>
 
-                <h1 className="text-2xl sm:text-3xl md:text-6xl lg:text-7xl font-black tracking-tighter leading-[0.85] text-foreground uppercase">
+                <h1 className="text-lg sm:text-3xl md:text-6xl lg:text-7xl font-black tracking-tight leading-tight md:leading-[0.85] text-foreground uppercase">
                   {(banners[current]?.title || '').split(' ').map((word, i) => (
-                    <span key={i} className={cn("block", i === 1 ? "text-primary italic" : "text-foreground")}>
-                      {word}
+                    <span key={i} className={cn(i === 1 ? "text-primary italic" : "text-foreground", "inline")}>
+                      {word}{' '}
                     </span>
                   ))}
                 </h1>
@@ -141,7 +141,7 @@ export function Hero() {
                 <div className="flex flex-col sm:flex-row gap-6 pt-4">
                   <Link
                     href={banners[current]?.link || '#'}
-                    className="inline-flex items-center justify-center gap-3 bg-primary text-primary-foreground px-6 py-4 md:px-12 md:py-6 rounded-2xl font-black text-base md:text-xl hover:bg-primary/95 transition-all hover:scale-105 shadow-sm shadow-primary/10 dark:shadow-3xl dark:shadow-primary/40 active:scale-95 group uppercase tracking-widest"
+                    className="inline-flex items-center justify-center gap-3 bg-primary text-primary-foreground px-6 py-4 md:px-12 md:py-6 rounded-xl font-black text-base md:text-xl hover:bg-primary/95 transition-all hover:scale-105 shadow-md shadow-primary/20 dark:shadow-xl dark:shadow-primary/30 active:scale-95 group uppercase tracking-widest"
                   >
                     <span>{banners[current]?.cta}</span>
                     <ArrowRight className={cn("w-5 h-5 md:w-6 md:h-6 transition-transform", isRTL ? "group-hover:-translate-x-2 rotate-180" : "group-hover:translate-x-2")} />
@@ -149,7 +149,7 @@ export function Hero() {
                   
                   <Link
                     href="/portfolio"
-                    className="inline-flex items-center justify-center gap-3 bg-white/5 backdrop-blur-3xl text-foreground px-6 py-4 md:px-12 md:py-6 rounded-2xl font-black text-base md:text-xl hover:bg-white/10 transition-all border border-white/10 hover:border-primary/50 uppercase tracking-widest"
+                    className="inline-flex items-center justify-center gap-3 bg-white/5 backdrop-blur-lg text-foreground px-6 py-4 md:px-12 md:py-6 rounded-xl font-black text-base md:text-xl hover:bg-white/10 transition-all border border-white/10 hover:border-primary/50 uppercase tracking-widest"
                   >
                     <span>{t('our_works')}</span>
                   </Link>
@@ -166,7 +166,7 @@ export function Hero() {
                   </div>
                 </div>
 
-                <div className={cn("mt-6 p-4 bg-foreground/5 backdrop-blur-md rounded-2xl border border-foreground/10 flex items-start gap-3 max-w-xl", isRTL && "text-right")}>
+                <div className={cn("mt-6 p-4 bg-foreground/5 backdrop-blur-lg rounded-xl border border-foreground/10 flex items-start gap-3 max-w-xl", isRTL && "text-right")}>
                   < ShieldCheck className="text-primary shrink-0 mt-0.5" size={20} />
                   <p className="text-sm font-bold text-foreground/80 leading-relaxed">
                     {tContact('form_note')}

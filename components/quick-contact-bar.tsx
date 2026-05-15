@@ -20,19 +20,19 @@ export function QuickContactBar() {
   const phoneLink = `tel:${displaySettings.support_phone.replace(/\s/g, '')}`;
 
   return (
-    <div className="w-full bg-background relative z-30 py-12">
+    <div className="w-full bg-background relative z-30 py-6 md:py-12">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
           {/* Phone Card */}
           <motion.a
             href={phoneLink}
             whileHover={{ y: -8, scale: 1.02 }}
-            className="group relative flex items-center gap-6 bg-card border-2 border-primary/20 p-6 md:p-8 rounded-2xl overflow-hidden transition-all duration-500 shadow-xl shadow-primary/5 hover:shadow-primary/20"
+            className="group relative flex items-center gap-6 bg-card border-2 border-primary/20 p-6 md:p-8 rounded-xl overflow-hidden transition-all duration-500 shadow-xl shadow-primary/5 hover:shadow-primary/20"
           >
             {/* Top active bar - now full by default */}
             <div className="absolute top-0 left-0 w-full h-1.5 bg-primary transition-transform origin-left duration-500" />
             
-            <div className="p-4 bg-primary/10 rounded-2xl text-primary scale-110 transition-transform duration-500">
+            <div className="p-4 bg-primary/10 rounded-xl text-primary scale-110 transition-transform duration-500">
               <Phone size={36} strokeWidth={2.5} />
             </div>
             
@@ -54,12 +54,12 @@ export function QuickContactBar() {
             target="_blank"
             rel="noopener noreferrer"
             whileHover={{ y: -8, scale: 1.02 }}
-            className="group relative flex items-center gap-6 bg-card border-2 border-emerald-500/20 p-6 md:p-8 rounded-2xl overflow-hidden transition-all duration-500 shadow-xl shadow-emerald-500/5 hover:shadow-emerald-500/20"
+            className="group relative flex items-center gap-6 bg-card border-2 border-emerald-500/20 p-6 md:p-8 rounded-xl overflow-hidden transition-all duration-500 shadow-xl shadow-emerald-500/5 hover:shadow-emerald-500/20"
           >
             {/* Top active bar - now full by default */}
             <div className="absolute top-0 left-0 w-full h-1.5 bg-emerald-500 transition-transform origin-left duration-500" />
             
-            <div className="p-2.5 bg-emerald-500/10 rounded-2xl scale-110 transition-transform duration-500 flex items-center justify-center">
+            <div className="p-2.5 bg-emerald-500/10 rounded-xl scale-110 transition-transform duration-500 flex items-center justify-center">
               <img src="/whats.png" alt="WhatsApp" className="w-12 h-12 object-contain drop-shadow-md scale-110" />
             </div>         
             <div className="flex flex-col">

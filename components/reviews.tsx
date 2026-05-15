@@ -73,7 +73,7 @@ export function Reviews() {
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
       viewport={{ once: true }}
-      className="bg-card p-8 rounded-2xl border shadow-sm relative h-full mb-10"
+      className="bg-card p-8 rounded-xl border shadow-sm relative h-full mb-10"
     >
       <div className="absolute top-6 right-8 text-primary/10">
         <Quote size={40} />
@@ -101,9 +101,9 @@ export function Reviews() {
   );
 
   return (
-    <section className="py-24 bg-muted/30">
+    <section className="py-12 md:py-24 bg-muted/30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center max-w-7xl">
-        <div className="max-w-3xl mx-auto mb-16">
+        <div className="max-w-3xl mx-auto mb-10 md:mb-16">
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl mb-4">{t('title')}</h2>
           <p className="text-lg text-muted-foreground">
             {t('desc')}
@@ -117,7 +117,7 @@ export function Reviews() {
         </div>
 
         {showForm && (
-          <div className="mb-10 bg-card border p-6 rounded-2xl text-left max-w-2xl mx-auto">
+          <div className="mb-10 bg-card border p-6 rounded-xl text-left max-w-2xl mx-auto">
             <form onSubmit={handleSubmitReview} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input

@@ -36,7 +36,7 @@ export default function FaqsPage() {
       console.error('Error fetching faqs', err);
       if (err?.response?.status === 401) {
         localStorage.removeItem('token');
-        router.push('/admin/login');
+        router.push('/trt-secure-panel-2026/login');
       }
     } finally {
       setLoading(false);
@@ -93,9 +93,9 @@ export default function FaqsPage() {
         <h2 className="text-3xl font-black tracking-tight uppercase">{t('menu_faqs')}</h2>
       </header>
 
-      <div className="bg-card border rounded-2xl p-8 shadow-sm">
+      <div className="bg-card border rounded-lg p-8 shadow-sm">
         <div className="flex items-center space-x-3 mb-8">
-            <div className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-primary/10 text-primary rounded-md flex items-center justify-center">
                 <Plus size={20} strokeWidth={3} />
             </div>
             <h3 className="text-2xl font-black tracking-tight uppercase">{t('add_faq')}</h3>
@@ -104,7 +104,7 @@ export default function FaqsPage() {
         <form onSubmit={createItem} className="space-y-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* English */}
-            <div className="space-y-4 p-5 bg-muted/20 rounded-2xl border border-dashed border-primary/20">
+            <div className="space-y-4 p-5 bg-muted/20 rounded-lg border border-dashed border-primary/20">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xl">🇺🇸</span>
                 <h4 className="font-black text-xs uppercase tracking-wider">English FAQ</h4>
@@ -114,7 +114,7 @@ export default function FaqsPage() {
                 <input
                   value={faqForm.question_en}
                   onChange={(e) => setFaqForm(p => ({ ...p, question_en: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
                   required
                 />
               </div>
@@ -123,14 +123,14 @@ export default function FaqsPage() {
                 <textarea
                   value={faqForm.answer_en}
                   onChange={(e) => setFaqForm(p => ({ ...p, answer_en: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-24"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-24"
                   required
                 />
               </div>
             </div>
 
             {/* Turkish */}
-            <div className="space-y-4 p-5 bg-muted/20 rounded-2xl border border-dashed border-primary/20">
+            <div className="space-y-4 p-5 bg-muted/20 rounded-lg border border-dashed border-primary/20">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xl">🇹🇷</span>
                 <h4 className="font-black text-xs uppercase tracking-wider">Türkçe SSS</h4>
@@ -140,7 +140,7 @@ export default function FaqsPage() {
                 <input
                   value={faqForm.question_tr}
                   onChange={(e) => setFaqForm(p => ({ ...p, question_tr: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
                   required
                 />
               </div>
@@ -149,14 +149,14 @@ export default function FaqsPage() {
                 <textarea
                   value={faqForm.answer_tr}
                   onChange={(e) => setFaqForm(p => ({ ...p, answer_tr: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-24"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-24"
                   required
                 />
               </div>
             </div>
 
             {/* Arabic */}
-            <div className="space-y-4 p-5 bg-muted/20 rounded-2xl border border-dashed border-primary/20" dir="rtl">
+            <div className="space-y-4 p-5 bg-muted/20 rounded-lg border border-dashed border-primary/20" dir="rtl">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xl">🇸🇦</span>
                 <h4 className="font-black text-xs uppercase tracking-wider">الأسئلة الشائعة بالعربي</h4>
@@ -166,7 +166,7 @@ export default function FaqsPage() {
                 <input
                   value={faqForm.question_ar}
                   onChange={(e) => setFaqForm(p => ({ ...p, question_ar: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
                   required
                 />
               </div>
@@ -175,7 +175,7 @@ export default function FaqsPage() {
                 <textarea
                   value={faqForm.answer_ar}
                   onChange={(e) => setFaqForm(p => ({ ...p, answer_ar: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-24"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-24"
                   required
                 />
               </div>
@@ -185,7 +185,7 @@ export default function FaqsPage() {
           <button
             type="submit"
             disabled={actionLoading}
-            className="w-full px-6 py-4 rounded-xl bg-primary text-primary-foreground font-black text-sm shadow-xl shadow-primary/30 hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50 uppercase tracking-widest"
+            className="w-full px-6 py-4 rounded-md bg-primary text-primary-foreground font-black text-sm shadow-xl shadow-primary/30 hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50 uppercase tracking-widest"
           >
             {actionLoading ? t('loading') : t('add_faq')}
           </button>
@@ -196,7 +196,7 @@ export default function FaqsPage() {
         {loading ? (
              <div className="flex justify-center py-20"><div className="w-12 h-12 border-4 border-primary border-t-transparent animate-spin rounded-full" /></div>
         ) : data.length === 0 ? (
-          <div className="py-20 bg-card border rounded-2xl flex flex-col items-center justify-center text-muted-foreground border-dashed">
+          <div className="py-20 bg-card border rounded-lg flex flex-col items-center justify-center text-muted-foreground border-dashed">
             <HelpCircle size={64} className="mb-4 opacity-20" />
             <p className="font-bold text-xl">{t('no_records')}</p>
           </div>
@@ -206,16 +206,16 @@ export default function FaqsPage() {
                 key={item.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-card rounded-2xl border shadow-sm flex flex-col p-6 hover:shadow-md hover:border-primary/20 transition-all group"
+                className="bg-card rounded-lg border shadow-sm flex flex-col p-6 hover:shadow-md hover:border-primary/20 transition-all group"
               >
                   <div className="flex items-start justify-between mb-6">
-                      <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-primary/5 text-primary">
+                      <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-primary/5 text-primary">
                           <Languages size={24} strokeWidth={2.5} />
                       </div>
                       <button
                           onClick={() => deleteItem(item.id)}
                           disabled={actionLoading}
-                          className="p-3 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95"
+                          className="p-3 rounded-md bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95"
                       >
                           <Trash2 size={18} strokeWidth={2.5} />
                       </button>

@@ -7,7 +7,7 @@ export default function DashboardRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/admin/analytics');
+    router.replace('/trt-secure-panel-2026/analytics');
   }, [router]);
 
   return (

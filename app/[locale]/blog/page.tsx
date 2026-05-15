@@ -68,13 +68,13 @@ export default function BlogPage() {
   return (
     <main className="min-h-screen bg-background">
       
-      <section className="py-24 bg-muted/30">
+      <section className="pt-32 pb-24 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-16">
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="inline-flex p-3 bg-primary/10 rounded-2xl text-primary mb-6"
+              className="inline-flex p-3 bg-primary/10 rounded-xl text-primary mb-6"
             >
               <Newspaper size={32} />
             </motion.div>
@@ -87,7 +87,7 @@ export default function BlogPage() {
           </div>
 
           {!loading && blogs.length === 0 && (
-            <div className="text-center py-20 bg-card rounded-[2.5rem] border border-border/50">
+            <div className="text-center py-20 bg-card rounded-xl border border-border/50">
               <p className="text-muted-foreground font-bold">{t('no_blogs')}</p>
             </div>
           )}
@@ -99,7 +99,7 @@ export default function BlogPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-card rounded-[2.5rem] border border-border/50 overflow-hidden group hover:shadow-2xl hover:shadow-primary/5 transition-all flex flex-col h-full"
+                className="bg-card rounded-xl border border-border/50 overflow-hidden group hover:shadow-2xl hover:shadow-primary/5 transition-all flex flex-col h-full"
               >
                 <div className="relative h-64 overflow-hidden">
                   <img

@@ -11,13 +11,14 @@ const iconMap: Record<string, any> = {
   kvkk: Gavel,
   warranty: FileText,
   shipping: Truck,
+  custom: Gavel,
 };
 
 export default async function PolicyDetailPage(props: { params: Promise<{ locale: string; slug: string }> }) {
   const { locale, slug } = await props.params;
   setRequestLocale(locale);
 
-  const validSlugs = ['privacy', 'terms', 'kvkk', 'warranty', 'shipping'];
+  const validSlugs = ['privacy', 'terms', 'kvkk', 'warranty', 'shipping', 'custom'];
   if (!validSlugs.includes(slug)) {
     notFound();
   }
@@ -63,7 +64,7 @@ export default async function PolicyDetailPage(props: { params: Promise<{ locale
   return (
     <NextIntlClientProvider messages={messages} locale={locale}>
       <div className="min-h-screen bg-background">
-        <main className="pt-16 pb-20 px-4 sm:px-6 lg:px-8">
+        <main className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-6xl mx-auto space-y-10">
             {/* Breadcrumb / Back Link */}
             <nav className="flex items-center gap-2">
@@ -78,7 +79,7 @@ export default async function PolicyDetailPage(props: { params: Promise<{ locale
                 </Link>
             </nav>
 
-            <header className="flex flex-col md:flex-row md:items-center justify-between gap-8 bg-card border border-border/50 p-8 rounded-2xl relative overflow-hidden group shadow-sm">
+            <header className="flex flex-col md:flex-row md:items-center justify-between gap-8 bg-card border border-border/50 p-8 rounded-xl relative overflow-hidden group shadow-sm">
                 <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity pointer-events-none">
                     <Icon size={120} />
                 </div>
@@ -93,31 +94,41 @@ export default async function PolicyDetailPage(props: { params: Promise<{ locale
                         </h1>
                         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mt-2 flex items-center gap-2">
                             <span className="w-8 h-0.5 bg-primary rounded-full" />
-                            Official Document
+                            {t('official_doc')}
                         </p>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-4 relative z-10">
                     <div className="text-right hidden md:block">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Last Updated</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t('footer_note')}</p>
                         <p className="text-xs font-bold text-foreground">{new Date().toLocaleDateString()}</p>
                     </div>
                     {pdfUrl && (
                         <a 
                             href={pdfUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-primary hover:text-primary-foreground transition-all ml-4"
+                            download
+                            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-red-700 transition-all ml-4 shadow-lg shadow-red-600/20"
                         >
                             <Download size={16} />
-                            PDF
+                            {t('download')}
                         </a>
                     )}
                 </div>
             </header>
 
-            <div className="bg-card p-8 md:p-12 lg:p-16 rounded-2xl border shadow-2xl shadow-black/5 prose prose-stone dark:prose-invert max-w-none">
+            {pdfUrl && (
+                <div className="w-full aspect-[1/1.4] md:aspect-[1.4/1] bg-card rounded-xl border-2 border-primary/5 shadow-2xl overflow-hidden relative group">
+                    <iframe 
+                        src={`${pdfUrl}#toolbar=0&navpanes=0`} 
+                        className="w-full h-full border-none"
+                        title={t(slug)}
+                    />
+                    <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/20 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+            )}
+
+            <div className="bg-card p-8 md:p-12 lg:p-16 rounded-xl border shadow-2xl shadow-black/5 prose prose-stone dark:prose-invert max-w-none">
                 <div className="whitespace-pre-wrap font-bold leading-relaxed text-lg text-foreground/90 selection:bg-primary/10" dir={isRTL ? "rtl" : "ltr"}>
                     {content}
                 </div>

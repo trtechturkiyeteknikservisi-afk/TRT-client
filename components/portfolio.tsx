@@ -45,10 +45,10 @@ export function Portfolio({ limit = 6, showTitle = true }: PortfolioProps) {
   const displayedWorks = limit > 0 ? works.slice(0, limit) : works;
 
   return (
-    <section id="works" className="py-24 bg-background overflow-hidden">
+    <section id="works" className="py-12 md:py-24 bg-background overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {showTitle && (
-          <div className="text-center max-w-3xl mx-auto mb-16">
+          <div className="text-center max-w-3xl mx-auto mb-10 md:mb-16">
             <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl mb-4">{t('title')}</h2>
             <p className="text-lg text-muted-foreground">
               {t('desc')}
@@ -64,7 +64,7 @@ export function Portfolio({ limit = 6, showTitle = true }: PortfolioProps) {
               whileInView={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="group relative cursor-pointer overflow-hidden rounded-2xl aspect-video bg-muted"
+              className="group relative cursor-pointer overflow-hidden rounded-xl aspect-video bg-muted"
               onClick={() => setSelectedWork(work)}
             >
               {work.type === 'video' ? (
@@ -92,7 +92,7 @@ export function Portfolio({ limit = 6, showTitle = true }: PortfolioProps) {
           <div className="mt-16 text-center">
             <Link
               href="/portfolio"
-              className="inline-flex items-center justify-center px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-bold uppercase tracking-widest text-sm hover:bg-primary/90 transition-all active:scale-95 shadow-xl shadow-primary/20"
+              className="inline-flex items-center justify-center px-8 py-4 bg-primary text-primary-foreground rounded-xl font-bold uppercase tracking-widest text-sm hover:bg-primary/90 transition-all active:scale-95 shadow-md shadow-primary/10"
             >
               {t('view_more')}
             </Link>
@@ -109,7 +109,7 @@ export function Portfolio({ limit = 6, showTitle = true }: PortfolioProps) {
           >
             <X size={32} />
           </button>
-          <div className="max-w-5xl w-full max-h-[80vh] overflow-hidden rounded-2xl">
+          <div className="max-w-5xl w-full max-h-[80vh] overflow-hidden rounded-xl">
             {selectedWork.type === 'video' ? (
               <video src={selectedWork.url} className="w-full h-full object-contain" controls autoPlay />
             ) : (

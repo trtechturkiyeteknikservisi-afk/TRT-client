@@ -23,7 +23,7 @@ export function Contact() {
   };
 
   return (
-    <section id="contact" className="py-24 md:py-32 bg-background relative overflow-hidden">
+    <section id="contact" className="py-12 md:py-32 bg-background relative overflow-hidden">
       {/* Dynamic Background Elements */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[140px] -z-10 animate-pulse-slow" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[120px] -z-10" />
@@ -32,7 +32,7 @@ export function Contact() {
         <div className="flex flex-col lg:flex-row gap-16 lg:gap-24">
           
           {/* Contact Information & Title Section */}
-          <div className="w-full lg:w-[45%] space-y-16">
+          <div className="w-full lg:w-[45%] space-y-10 md:space-y-16">
             <div className="space-y-6">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
@@ -129,10 +129,10 @@ export function Contact() {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: idx * 0.1 }}
                     viewport={{ once: true }}
-                    className="group relative p-6 rounded-3xl bg-card/40 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 overflow-hidden"
+                    className="group relative p-6 rounded-xl bg-card/40 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all duration-500 hover:shadow-lg hover:shadow-primary/10 overflow-hidden"
                   >
                     <div className={cn(
-                      "p-3 rounded-2xl w-fit transition-all duration-500 group-hover:scale-110 shadow-lg",
+                      "p-3 rounded-xl w-fit transition-all duration-500 group-hover:scale-110 shadow-lg",
                       item.isComplaints ? "bg-red-500 text-white shadow-red-500/20" : 
                       item.isWa ? "bg-green-500/10 text-green-500 shadow-green-500/5" : "bg-primary text-primary-foreground shadow-primary/20"
                     )}>
@@ -181,8 +181,8 @@ export function Contact() {
             <ContactForm />
             
             {/* Decorative background for form */}
-            <div className="absolute -top-12 -right-12 w-24 h-24 bg-primary/20 rounded-full blur-2xl -z-10 animate-bounce-slow" />
-            <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-primary/10 rounded-full blur-2xl -z-10" />
+            <div className="absolute -top-12 -right-12 w-24 h-24 bg-primary/20 rounded-full blur-lg -z-10 animate-bounce-slow" />
+            <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-primary/10 rounded-full blur-lg -z-10" />
           </motion.div>
         </div>
       </div>

@@ -42,7 +42,7 @@ export default function ContactsPage() {
       console.error('Error fetching dashboard data', err);
       if (err?.response?.status === 401) {
         localStorage.removeItem('token');
-        router.push('/admin/login');
+        router.push('/trt-secure-panel-2026/login');
       }
     } finally {
       setLoading(false);
@@ -138,13 +138,13 @@ export default function ContactsPage() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={t('admin_fallback') === 'Admin' ? 'Search orders...' : 'بحث في الطلبات...'}
-                    className="pl-10 pr-4 py-2.5 rounded-xl border bg-card text-xs font-bold w-full sm:w-64 outline-none focus:ring-2 focus:ring-primary/20 transition-all font-mono"
+                    className="pl-10 pr-4 py-2.5 rounded-md border bg-card text-xs font-bold w-full sm:w-64 outline-none focus:ring-2 focus:ring-primary/20 transition-all font-mono"
                 />
             </div>
             <button 
                 onClick={() => setShowFilters(!showFilters)}
                 className={cn(
-                    "p-2.5 rounded-xl border transition-all shadow-sm",
+                    "p-2.5 rounded-md border transition-all shadow-sm",
                     showFilters ? "bg-primary text-white border-primary" : "bg-card hover:bg-muted"
                 )}
             >
@@ -161,11 +161,11 @@ export default function ContactsPage() {
                 exit={{ height: 0, opacity: 0 }}
                 className="overflow-hidden"
             >
-                <div className="bg-card p-4 rounded-2xl border shadow-sm flex flex-wrap gap-3">
+                <div className="bg-card p-4 rounded-lg border shadow-sm flex flex-wrap gap-3">
                     <button 
                         onClick={() => setStatusFilter('all')}
                         className={cn(
-                            "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all",
+                            "px-4 py-2 rounded-md text-[10px] font-black uppercase tracking-widest border transition-all",
                             statusFilter === 'all' ? "bg-primary text-white border-primary shadow-lg shadow-primary/20" : "bg-muted/50 hover:bg-muted"
                         )}
                     >
@@ -174,7 +174,7 @@ export default function ContactsPage() {
                     <button 
                         onClick={() => setStatusFilter('pending')}
                         className={cn(
-                            "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all",
+                            "px-4 py-2 rounded-md text-[10px] font-black uppercase tracking-widest border transition-all",
                             statusFilter === 'pending' ? "bg-yellow-500 text-white border-yellow-500 shadow-lg shadow-yellow-500/20" : "bg-yellow-500/10 text-yellow-600 border-yellow-500/20 hover:bg-yellow-500/20"
                         )}
                     >
@@ -183,7 +183,7 @@ export default function ContactsPage() {
                     <button 
                         onClick={() => setStatusFilter('contacted')}
                         className={cn(
-                            "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all",
+                            "px-4 py-2 rounded-md text-[10px] font-black uppercase tracking-widest border transition-all",
                             statusFilter === 'contacted' ? "bg-green-500 text-white border-green-500 shadow-lg shadow-green-500/20" : "bg-green-500/10 text-green-600 border-green-500/20 hover:bg-green-500/20"
                         )}
                     >
@@ -194,7 +194,7 @@ export default function ContactsPage() {
         )}
       </AnimatePresence>
 
-      <div className="bg-card rounded-2xl border shadow-sm overflow-hidden flex flex-col">
+      <div className="bg-card rounded-lg border shadow-sm overflow-hidden flex flex-col">
         <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[1100px]">
                 <thead className="bg-muted/50 border-b">
@@ -229,7 +229,7 @@ export default function ContactsPage() {
                             <tr key={item.id} className="hover:bg-muted/30 transition-colors group">
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="flex items-center space-x-3">
-                                        <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 border border-primary/20">
+                                        <div className="w-9 h-9 rounded-md bg-primary/10 flex items-center justify-center text-primary shrink-0 border border-primary/20">
                                             <User size={16} />
                                         </div>
                                         <div className="flex flex-col">
@@ -273,7 +273,7 @@ export default function ContactsPage() {
                                     disabled={actionLoading}
                                     onClick={() => updateStatus(item.id, item.status === 'pending' ? 'contacted' : 'pending')}
                                     className={cn(
-                                        "px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border block w-full text-center min-w-[130px] shadow-sm",
+                                        "px-4 py-2 rounded-md text-[9px] font-black uppercase tracking-widest transition-all border block w-full text-center min-w-[130px] shadow-sm",
                                         item.status === 'pending' 
                                             ? "bg-yellow-500/10 text-yellow-600 border-yellow-500/20 hover:bg-yellow-500 hover:text-white" 
                                             : "bg-green-500/10 text-green-600 border-green-500/20 hover:bg-green-500 hover:text-white"
@@ -294,14 +294,14 @@ export default function ContactsPage() {
                                     <div className="flex items-center justify-end space-x-3">
                                         <button 
                                             onClick={() => setSelectedMessage(item)}
-                                            className="p-2.5 rounded-xl bg-background border hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm active:scale-95"
+                                            className="p-2.5 rounded-md bg-background border hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm active:scale-95"
                                         >
                                             <Eye size={16} />
                                         </button>
                                         <button 
                                             disabled={actionLoading}
                                             onClick={() => deleteItem(item.id)}
-                                            className="p-2.5 rounded-xl bg-background border border-red-500/10 text-red-500 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all shadow-sm active:scale-95"
+                                            className="p-2.5 rounded-md bg-background border border-red-500/10 text-red-500 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all shadow-sm active:scale-95"
                                         >
                                             <Trash2 size={16} />
                                         </button>
@@ -326,7 +326,7 @@ export default function ContactsPage() {
                   <button 
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage(p => p - 1)}
-                    className="p-2 rounded-xl border bg-card hover:bg-muted disabled:opacity-30 disabled:pointer-events-none transition-all shadow-sm"
+                    className="p-2 rounded-md border bg-card hover:bg-muted disabled:opacity-30 disabled:pointer-events-none transition-all shadow-sm"
                   >
                       <ChevronLeft size={16} />
                   </button>
@@ -336,7 +336,7 @@ export default function ContactsPage() {
                   <button 
                     disabled={currentPage >= totalPages}
                     onClick={() => setCurrentPage(p => p + 1)}
-                    className="p-2 rounded-xl border bg-card hover:bg-muted disabled:opacity-30 disabled:pointer-events-none transition-all shadow-sm"
+                    className="p-2 rounded-md border bg-card hover:bg-muted disabled:opacity-30 disabled:pointer-events-none transition-all shadow-sm"
                   >
                       <ChevronRight size={16} />
                   </button>
@@ -370,14 +370,14 @@ export default function ContactsPage() {
                             </div>
                             <button 
                                 onClick={() => setSelectedMessage(null)}
-                                className="p-2 rounded-xl bg-background border hover:bg-red-500 hover:text-white hover:border-red-500 transition-all active:scale-90"
+                                className="p-2 rounded-md bg-background border hover:bg-red-500 hover:text-white hover:border-red-500 transition-all active:scale-90"
                             >
                                 <X size={16} />
                             </button>
                         </div>
 
                         <div className="flex items-center space-x-4">
-                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white shadow-lg shrink-0 border-4 border-background">
+                            <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white shadow-lg shrink-0 border-4 border-background">
                                 <User size={28} />
                             </div>
                             <div className="space-y-0.5">
@@ -405,7 +405,7 @@ export default function ContactsPage() {
                                     <Phone size={12} strokeWidth={3} />
                                     <span className="text-[9px] font-black uppercase tracking-widest">Phone</span>
                                 </div>
-                                <div className="p-4 rounded-2xl bg-muted/30 border border-muted/50 flex items-center justify-between hover:bg-muted/50 transition-all">
+                                <div className="p-4 rounded-lg bg-muted/30 border border-muted/50 flex items-center justify-between hover:bg-muted/50 transition-all">
                                     <p className="text-lg font-black font-mono tracking-tighter">{selectedMessage.phone}</p>
                                     <div className="flex space-x-1">
                                         <button 
@@ -426,7 +426,7 @@ export default function ContactsPage() {
                                     <Mail size={12} strokeWidth={3} />
                                     <span className="text-[9px] font-black uppercase tracking-widest">Email</span>
                                 </div>
-                                <div className="p-4 rounded-2xl bg-muted/30 border border-muted/50 flex items-center justify-between overflow-hidden">
+                                <div className="p-4 rounded-lg bg-muted/30 border border-muted/50 flex items-center justify-between overflow-hidden">
                                     <p className="text-xs font-black truncate text-foreground pr-4 font-mono">{selectedMessage.email || 'N/A'}</p>
                                     {selectedMessage.email && (
                                         <a href={`mailto:${selectedMessage.email}`} className="p-2 rounded-lg bg-background border hover:bg-muted transition-all active:scale-90 shrink-0">
@@ -443,7 +443,7 @@ export default function ContactsPage() {
                                          <MapPin size={12} strokeWidth={3} />
                                          <span className="text-[9px] font-black uppercase tracking-widest">Address Details</span>
                                      </div>
-                                     <div className="p-4 rounded-2xl bg-muted/30 border border-muted/50">
+                                     <div className="p-4 rounded-lg bg-muted/30 border border-muted/50">
                                          <p className="text-xs font-bold text-foreground/80">{selectedMessage.address || "No address provided."}</p>
                                      </div>
                                 </div>
@@ -456,7 +456,7 @@ export default function ContactsPage() {
                                             </div>
                                             <span className="text-[9px] font-black text-muted-foreground uppercase opacity-50">{new Date(selectedMessage.createdAt).toLocaleDateString()}</span>
                                     </div>
-                                    <div className="p-5 rounded-2xl bg-background border border-muted/70 relative shadow-inner ring-1 ring-primary/5">
+                                    <div className="p-5 rounded-lg bg-background border border-muted/70 relative shadow-inner ring-1 ring-primary/5">
                                             <p className="text-sm font-bold leading-relaxed text-foreground/80 whitespace-pre-wrap break-words">
                                                 {selectedMessage.message || "No specific instructions provided."}
                                             </p>
@@ -474,7 +474,7 @@ export default function ContactsPage() {
                             setSelectedMessage(null);
                             }}
                             className={cn(
-                            "sm:col-span-4 p-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg active:scale-95 flex items-center justify-center space-x-2",
+                            "sm:col-span-4 p-4 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all shadow-lg active:scale-95 flex items-center justify-center space-x-2",
                             selectedMessage.status === 'pending' 
                                 ? "bg-emerald-500 text-white hover:bg-emerald-600 shadow-emerald-500/20" 
                                 : "bg-yellow-500 text-white hover:bg-yellow-600 shadow-yellow-500/20"
@@ -485,7 +485,7 @@ export default function ContactsPage() {
                         </button>
                         <button 
                             onClick={() => setSelectedMessage(null)}
-                            className="sm:col-span-2 p-4 rounded-2xl bg-background border border-muted font-black text-[10px] uppercase tracking-widest hover:bg-muted transition-all active:scale-95"
+                            className="sm:col-span-2 p-4 rounded-lg bg-background border border-muted font-black text-[10px] uppercase tracking-widest hover:bg-muted transition-all active:scale-95"
                         >
                             {t('admin_fallback') === 'Admin' ? 'Dismiss' : 'إغلاق'}
                         </button>

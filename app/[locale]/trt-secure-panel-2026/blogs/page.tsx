@@ -37,7 +37,7 @@ export default function BlogsPage() {
       console.error('Error fetching blogs', err);
       if (err?.response?.status === 401) {
         localStorage.removeItem('token');
-        router.push('/admin/login');
+        router.push('/trt-secure-panel-2026/login');
       }
     } finally {
       setLoading(false);
@@ -117,9 +117,9 @@ export default function BlogsPage() {
         <h2 className="text-3xl font-black tracking-tight uppercase">{t('menu_blogs')}</h2>
       </header>
 
-      <div className="bg-card border rounded-2xl p-8 shadow-sm">
+      <div className="bg-card border rounded-lg p-8 shadow-sm">
         <div className="flex items-center space-x-3 mb-8">
-            <div className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-primary/10 text-primary rounded-md flex items-center justify-center">
                 <Plus size={20} strokeWidth={3} />
             </div>
             <h3 className="text-2xl font-black tracking-tight uppercase">{t('publish_blog')}</h3>
@@ -130,7 +130,7 @@ export default function BlogsPage() {
             <div className="space-y-1">
               <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Featured Image</label>
               <div className="flex gap-4">
-                <label className="flex-grow flex items-center justify-center px-4 py-2.5 rounded-xl border-2 border-dashed border-primary/20 bg-primary/5 cursor-pointer hover:bg-primary/10 transition-all text-[10px] font-black uppercase tracking-widest text-primary gap-2">
+                <label className="flex-grow flex items-center justify-center px-4 py-2.5 rounded-md border-2 border-dashed border-primary/20 bg-primary/5 cursor-pointer hover:bg-primary/10 transition-all text-[10px] font-black uppercase tracking-widest text-primary gap-2">
                   <Upload size={14} />
                   <span>{actionLoading ? 'Uploading...' : 'Upload Image'}</span>
                   <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" />
@@ -139,7 +139,7 @@ export default function BlogsPage() {
                   value={blogForm.image}
                   onChange={(e) => setBlogForm(p => ({ ...p, image: e.target.value }))}
                   placeholder="Or Image URL..."
-                  className="w-full flex-[2] px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                  className="w-full flex-[2] px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
                 />
               </div>
             </div>
@@ -148,14 +148,14 @@ export default function BlogsPage() {
               <input
                 value={blogForm.author}
                 onChange={(e) => setBlogForm(p => ({ ...p, author: e.target.value }))}
-                className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* English */}
-            <div className="space-y-4 p-5 bg-muted/20 rounded-2xl border border-dashed border-primary/20">
+            <div className="space-y-4 p-5 bg-muted/20 rounded-lg border border-dashed border-primary/20">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xl">🇺🇸</span>
                 <h4 className="font-black text-xs uppercase tracking-wider">English Version</h4>
@@ -165,7 +165,7 @@ export default function BlogsPage() {
                 <input
                   value={blogForm.title_en}
                   onChange={(e) => setBlogForm(p => ({ ...p, title_en: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
                   required
                 />
               </div>
@@ -174,14 +174,14 @@ export default function BlogsPage() {
                 <textarea
                   value={blogForm.content_en}
                   onChange={(e) => setBlogForm(p => ({ ...p, content_en: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-32"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-32"
                   required
                 />
               </div>
             </div>
 
             {/* Turkish */}
-            <div className="space-y-4 p-5 bg-muted/20 rounded-2xl border border-dashed border-primary/20">
+            <div className="space-y-4 p-5 bg-muted/20 rounded-lg border border-dashed border-primary/20">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xl">🇹🇷</span>
                 <h4 className="font-black text-xs uppercase tracking-wider">Türkçe Versiyon</h4>
@@ -191,7 +191,7 @@ export default function BlogsPage() {
                 <input
                   value={blogForm.title_tr}
                   onChange={(e) => setBlogForm(p => ({ ...p, title_tr: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
                   required
                 />
               </div>
@@ -200,14 +200,14 @@ export default function BlogsPage() {
                 <textarea
                   value={blogForm.content_tr}
                   onChange={(e) => setBlogForm(p => ({ ...p, content_tr: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-32"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-32"
                   required
                 />
               </div>
             </div>
 
             {/* Arabic */}
-            <div className="space-y-4 p-5 bg-muted/20 rounded-2xl border border-dashed border-primary/20" dir="rtl">
+            <div className="space-y-4 p-5 bg-muted/20 rounded-lg border border-dashed border-primary/20" dir="rtl">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xl">🇸🇦</span>
                 <h4 className="font-black text-xs uppercase tracking-wider">النسخة العربية</h4>
@@ -217,7 +217,7 @@ export default function BlogsPage() {
                 <input
                   value={blogForm.title_ar}
                   onChange={(e) => setBlogForm(p => ({ ...p, title_ar: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
                   required
                 />
               </div>
@@ -226,7 +226,7 @@ export default function BlogsPage() {
                 <textarea
                   value={blogForm.content_ar}
                   onChange={(e) => setBlogForm(p => ({ ...p, content_ar: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-32"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-32"
                   required
                 />
               </div>
@@ -236,7 +236,7 @@ export default function BlogsPage() {
           <button
             type="submit"
             disabled={actionLoading}
-            className="w-full px-6 py-4 rounded-xl bg-primary text-primary-foreground font-black text-sm shadow-xl shadow-primary/30 hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50 uppercase tracking-widest"
+            className="w-full px-6 py-4 rounded-md bg-primary text-primary-foreground font-black text-sm shadow-xl shadow-primary/30 hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50 uppercase tracking-widest"
           >
             {actionLoading ? t('loading') : t('publish_blog')}
           </button>
@@ -252,7 +252,7 @@ export default function BlogsPage() {
                 key={item.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-card rounded-2xl border shadow-sm overflow-hidden hover:shadow-md transition-all group border-muted/50"
+                className="bg-card rounded-lg border shadow-sm overflow-hidden hover:shadow-md transition-all group border-muted/50"
               >
                 <div className="flex flex-col md:flex-row h-full">
                     {item.image && (
@@ -275,7 +275,7 @@ export default function BlogsPage() {
                             <button
                                 onClick={() => deleteBlog(item.id)}
                                 disabled={actionLoading}
-                                className="p-2.5 rounded-xl bg-red-500/5 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95"
+                                className="p-2.5 rounded-md bg-red-500/5 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95"
                             >
                                 <Trash2 size={16} strokeWidth={2.5} />
                             </button>

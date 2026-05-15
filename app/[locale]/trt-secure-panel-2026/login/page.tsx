@@ -24,7 +24,7 @@ export default function LoginPage() {
       const data = response.data as any;
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
-      router.push('/admin/dashboard');
+      router.push('/trt-secure-panel-2026/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
     } finally {
@@ -43,8 +43,8 @@ export default function LoginPage() {
           animate={{ opacity: 1, y: 0 }}
           className="w-full max-w-md"
         >
-          <div className="bg-card p-8 md:p-12 rounded-[2.5rem] border shadow-2xl shadow-primary/5 relative group">
-            <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-24 h-24 bg-primary rounded-3xl flex items-center justify-center shadow-2xl shadow-primary/40 group-hover:rotate-12 transition-transform duration-500">
+          <div className="bg-card p-8 md:p-12 rounded-md border shadow-2xl shadow-primary/5 relative group">
+            <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-24 h-24 bg-primary rounded-lg flex items-center justify-center shadow-2xl shadow-primary/40 group-hover:rotate-12 transition-transform duration-500">
               <Lock className="text-primary-foreground" size={40} />
             </div>
 
@@ -62,7 +62,7 @@ export default function LoginPage() {
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="w-full pl-12 pr-6 py-4 rounded-2xl bg-muted/50 border-transparent focus:bg-background focus:ring-2 focus:ring-primary outline-none transition-all font-bold"
+                    className="w-full pl-12 pr-6 py-4 rounded-lg bg-muted/50 border-transparent focus:bg-background focus:ring-2 focus:ring-primary outline-none transition-all font-bold"
                     placeholder="Enter your username"
                     required
                   />
@@ -77,7 +77,7 @@ export default function LoginPage() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-12 pr-6 py-4 rounded-2xl bg-muted/50 border-transparent focus:bg-background focus:ring-2 focus:ring-primary outline-none transition-all font-bold"
+                    className="w-full pl-12 pr-6 py-4 rounded-lg bg-muted/50 border-transparent focus:bg-background focus:ring-2 focus:ring-primary outline-none transition-all font-bold"
                     placeholder="••••••••"
                     required
                   />
@@ -88,7 +88,7 @@ export default function LoginPage() {
                 <motion.div 
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="flex items-center space-x-2 text-red-500 bg-red-500/10 p-4 rounded-xl text-sm font-bold border border-red-500/20"
+                  className="flex items-center space-x-2 text-red-500 bg-red-500/10 p-4 rounded-md text-sm font-bold border border-red-500/20"
                 >
                   <AlertCircle size={18} />
                   <span>{error}</span>
@@ -98,7 +98,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex items-center justify-center space-x-2 bg-primary text-primary-foreground py-5 rounded-2xl font-black text-lg hover:bg-primary/90 transition-all shadow-2xl shadow-primary/30 active:scale-95 disabled:opacity-50 group"
+                className="w-full flex items-center justify-center space-x-2 bg-primary text-primary-foreground py-5 rounded-lg font-black text-lg hover:bg-primary/90 transition-all shadow-2xl shadow-primary/30 active:scale-95 disabled:opacity-50 group"
               >
                 <span>{loading ? 'Authenticating...' : 'Sign In'}</span>
                 {!loading && <LogIn size={22} className="group-hover:translate-x-1 transition-transform" />}

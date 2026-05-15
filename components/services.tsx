@@ -59,11 +59,11 @@ export function Services() {
   ];
 
   return (
-    <section id="services" className="py-32 bg-background relative overflow-hidden">
-      <div className={cn("absolute top-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -z-10", isRTL ? "right-[-10%]" : "left-[-10%]")} />
+    <section id="services" className="py-16 md:py-32 bg-background relative overflow-hidden">
+      <div className={cn("absolute top-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[80px] -z-10", isRTL ? "right-[-10%]" : "left-[-10%]")} />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto mb-20 text-center">
+        <div className="max-w-4xl mx-auto mb-12 md:mb-20 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -90,10 +90,10 @@ export function Services() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="group relative bg-card/50 backdrop-blur-xl p-10 rounded-3xl border-2 border-border/50 transition-all hover:border-primary hover:bg-card hover:shadow-[0_40px_80px_-15px_rgba(255,0,0,0.15)] flex flex-col h-full overflow-hidden"
+              className="group relative bg-card/50 backdrop-blur-lg p-10 rounded-xl border-2 border-border/50 transition-all hover:border-primary hover:bg-card hover:shadow-xl flex flex-col h-full overflow-hidden"
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[5rem] -z-10 transition-colors group-hover:bg-primary/10" />
-              <div className="inline-flex p-5 rounded-3xl mb-10 w-fit transition-all duration-500 group-hover:bg-primary group-hover:text-primary-foreground bg-muted text-foreground ring-1 ring-border/50">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[3rem] -z-10 transition-colors group-hover:bg-primary/10" />
+              <div className="inline-flex p-5 rounded-xl mb-10 w-fit transition-all duration-500 group-hover:bg-primary group-hover:text-primary-foreground bg-muted text-foreground ring-1 ring-border/50">
                 {service.icon && <service.icon size={36} strokeWidth={2.5} />}
               </div>
               <h3 className="text-2xl md:text-2xl font-black mb-4 text-foreground tracking-tight uppercase">{service.title}</h3>
@@ -102,7 +102,7 @@ export function Services() {
               </p>
               <Link
                 href={service.link}
-                className="inline-flex items-center justify-between w-full p-4 rounded-3xl bg-muted/50 text-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-all font-black uppercase tracking-widest text-xs border border-border/50 group-hover:border-primary"
+                className="inline-flex items-center justify-between w-full p-4 rounded-xl bg-muted/50 text-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-all font-black uppercase tracking-widest text-xs border border-border/50 group-hover:border-primary"
               >
                 <span>{t('view_service') || 'Details'}</span>
                 <ArrowRight size={18} className={cn(isRTL && "rotate-180")} />

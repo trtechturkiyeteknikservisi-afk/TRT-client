@@ -13,7 +13,7 @@ export function LocationMap() {
   const directionsUrl = "https://maps.app.goo.gl/9kUMHWGGjDsoswFz9";
 
   return (
-    <section className="py-24 relative overflow-hidden bg-background">
+    <section className="py-12 md:py-24 relative overflow-hidden bg-background">
       {/* Background Decorative Elements */}
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -z-10" />
       <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-primary/10 rounded-full blur-[100px] -z-10 animate-pulse-slow" />
@@ -48,7 +48,7 @@ export function LocationMap() {
                   {t('desc')}
                 </p>
 
-                <div className="p-6 rounded-2xl bg-card border border-border/50 shadow-xl shadow-primary/5 space-y-4">
+                <div className="p-6 rounded-xl bg-card border border-border/50 shadow-xl shadow-primary/5 space-y-4">
                   <div className="flex items-start gap-4 text-start">
                     <div className="p-3 rounded-xl bg-primary/10 text-primary shrink-0">
                       <MapPin size={20} />
@@ -84,7 +84,7 @@ export function LocationMap() {
               whileInView={{ opacity: 1, scale: 1 }}
               transition={{ duration: 1 }}
               viewport={{ once: true }}
-              className="lg:col-span-3 h-[400px] md:h-[500px] relative rounded-[2.5rem] overflow-hidden border-8 border-card shadow-2xl group"
+              className="lg:col-span-3 h-[400px] md:h-[500px] relative rounded-xl overflow-hidden border-8 border-card shadow-lg group"
             >
               <iframe
                 src={mapUrl}
@@ -98,9 +98,9 @@ export function LocationMap() {
               />
               
               {/* Overlay Gradient for premium look */}
-              <div className="absolute inset-0 pointer-events-none border border-white/10 rounded-[2rem]" />
+              <div className="absolute inset-0 pointer-events-none border border-white/10 rounded-xl" />
               
-              <div className="absolute bottom-6 right-6 p-4 rounded-2xl bg-background/80 backdrop-blur-md border border-border/50 shadow-xl hidden md:flex items-center gap-3 animate-fade-in pointer-events-none">
+              <div className="absolute bottom-6 right-6 p-4 rounded-xl bg-background/80 backdrop-blur-md border border-border/50 shadow-xl hidden md:flex items-center gap-3 animate-fade-in pointer-events-none">
                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
                 <span className="text-sm font-bold uppercase tracking-tight">{t_contact('location_detected')}</span>
               </div>

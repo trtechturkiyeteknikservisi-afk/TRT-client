@@ -53,7 +53,7 @@ export default function BannersPage() {
       console.error('Error fetching banners', err);
       if (err?.response?.status === 401) {
         localStorage.removeItem('token');
-        router.push('/admin/login');
+        router.push('/trt-secure-panel-2026/login');
       }
     } finally {
       setLoading(false);
@@ -176,9 +176,9 @@ export default function BannersPage() {
         <h2 className="text-3xl font-black tracking-tight uppercase">{t('menu_banners') || 'Banners'}</h2>
       </header>
 
-      <div className="bg-card border rounded-2xl p-8 shadow-sm">
+      <div className="bg-card border rounded-lg p-8 shadow-sm">
         <div className="flex items-center space-x-3 mb-8">
-            <div className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-primary/10 text-primary rounded-md flex items-center justify-center">
                 {editingId ? <Edit2 size={20} strokeWidth={3} /> : <Plus size={20} strokeWidth={3} />}
             </div>
             <h3 className="text-2xl font-black tracking-tight uppercase">{editingId ? 'Edit Banner' : (t('add_banner') || 'Create New Banner')}</h3>
@@ -188,7 +188,7 @@ export default function BannersPage() {
           {/* Multi-language inputs */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* English */}
-            <div className="space-y-4 p-5 bg-muted/20 rounded-2xl border border-dashed border-primary/20">
+            <div className="space-y-4 p-5 bg-muted/20 rounded-lg border border-dashed border-primary/20">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xl">🇺🇸</span>
                 <h4 className="font-black text-sm uppercase tracking-wider">English Version</h4>
@@ -198,7 +198,7 @@ export default function BannersPage() {
                 <input
                   value={bannerForm.title_en}
                   onChange={(e) => setBannerForm(p => ({ ...p, title_en: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
                   required
                 />
               </div>
@@ -207,7 +207,7 @@ export default function BannersPage() {
                 <textarea
                   value={bannerForm.description_en}
                   onChange={(e) => setBannerForm(p => ({ ...p, description_en: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm h-20"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm h-20"
                   required
                 />
               </div>
@@ -216,14 +216,14 @@ export default function BannersPage() {
                 <input
                   value={bannerForm.cta_en}
                   onChange={(e) => setBannerForm(p => ({ ...p, cta_en: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
                   required
                 />
               </div>
             </div>
 
             {/* Turkish */}
-            <div className="space-y-4 p-5 bg-muted/20 rounded-2xl border border-dashed border-primary/20">
+            <div className="space-y-4 p-5 bg-muted/20 rounded-lg border border-dashed border-primary/20">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xl">🇹🇷</span>
                 <h4 className="font-black text-sm uppercase tracking-wider">Türkçe Versiyon</h4>
@@ -233,7 +233,7 @@ export default function BannersPage() {
                 <input
                   value={bannerForm.title_tr}
                   onChange={(e) => setBannerForm(p => ({ ...p, title_tr: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
                   required
                 />
               </div>
@@ -242,7 +242,7 @@ export default function BannersPage() {
                 <textarea
                   value={bannerForm.description_tr}
                   onChange={(e) => setBannerForm(p => ({ ...p, description_tr: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm h-20"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm h-20"
                   required
                 />
               </div>
@@ -251,14 +251,14 @@ export default function BannersPage() {
                 <input
                   value={bannerForm.cta_tr}
                   onChange={(e) => setBannerForm(p => ({ ...p, cta_tr: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
                   required
                 />
               </div>
             </div>
 
             {/* Arabic */}
-            <div className="space-y-4 p-5 bg-muted/20 rounded-2xl border border-dashed border-primary/20" dir="rtl">
+            <div className="space-y-4 p-5 bg-muted/20 rounded-lg border border-dashed border-primary/20" dir="rtl">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xl">🇸🇦</span>
                 <h4 className="font-black text-sm uppercase tracking-wider">المحتوى العربي</h4>
@@ -268,7 +268,7 @@ export default function BannersPage() {
                 <input
                   value={bannerForm.title_ar}
                   onChange={(e) => setBannerForm(p => ({ ...p, title_ar: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
                   required
                 />
               </div>
@@ -277,7 +277,7 @@ export default function BannersPage() {
                 <textarea
                   value={bannerForm.description_ar}
                   onChange={(e) => setBannerForm(p => ({ ...p, description_ar: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm h-20"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm h-20"
                   required
                 />
               </div>
@@ -286,7 +286,7 @@ export default function BannersPage() {
                 <input
                   value={bannerForm.cta_ar}
                   onChange={(e) => setBannerForm(p => ({ ...p, cta_ar: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
                   required
                 />
               </div>
@@ -301,7 +301,7 @@ export default function BannersPage() {
                 <select
                   value={bannerForm.link}
                   onChange={(e) => setBannerForm(p => ({ ...p, link: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
+                  className="w-full px-4 py-3 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
                 >
                   {PREDEFINED_LINKS.map(link => (
                     <option key={link.value} value={link.value}>{link.label} ({link.value})</option>
@@ -320,7 +320,7 @@ export default function BannersPage() {
                       accept="image/*"
                       onChange={handleImageUpload}
                       disabled={uploadLoading}
-                      className="w-full px-4 py-2.5 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm cursor-pointer file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                      className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm cursor-pointer file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
                     />
                     {uploadLoading && (
                       <div className="absolute right-4 top-1/2 -translate-y-1/2">
@@ -352,7 +352,7 @@ export default function BannersPage() {
                     active: true 
                   });
                 }}
-                className="w-1/3 px-6 py-4 rounded-xl bg-muted text-muted-foreground font-black text-sm hover:bg-muted/80 transition-all uppercase tracking-widest border border-dashed"
+                className="w-1/3 px-6 py-4 rounded-md bg-muted text-muted-foreground font-black text-sm hover:bg-muted/80 transition-all uppercase tracking-widest border border-dashed"
               >
                 Cancel Edit
               </button>
@@ -360,7 +360,7 @@ export default function BannersPage() {
             <button
               type="submit"
               disabled={actionLoading || !bannerForm.image}
-              className={cn("px-6 py-4 rounded-xl text-primary-foreground font-black text-sm shadow-xl shadow-primary/30 hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:grayscale uppercase tracking-widest", editingId ? "w-2/3 bg-blue-600" : "w-full bg-primary")}
+              className={cn("px-6 py-4 rounded-md text-primary-foreground font-black text-sm shadow-xl shadow-primary/30 hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:grayscale uppercase tracking-widest", editingId ? "w-2/3 bg-blue-600" : "w-full bg-primary")}
             >
               {actionLoading ? t('loading') : (editingId ? 'Update Banner' : (t('add_banner') || 'Save and Add Banner'))}
             </button>
@@ -372,7 +372,7 @@ export default function BannersPage() {
         {loading ? (
              <div className="py-20 flex justify-center"><div className="w-12 h-12 border-4 border-primary border-t-transparent animate-spin rounded-full" /></div>
         ) : data.length === 0 ? (
-          <div className="py-20 bg-card border rounded-2xl flex flex-col items-center justify-center text-muted-foreground border-dashed">
+          <div className="py-20 bg-card border rounded-lg flex flex-col items-center justify-center text-muted-foreground border-dashed">
             <Images size={64} className="mb-4 opacity-20" />
             <p className="font-bold text-xl">{t('no_records')}</p>
           </div>
@@ -383,7 +383,7 @@ export default function BannersPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className={cn(
-                  "bg-card rounded-2xl border overflow-hidden shadow-sm hover:shadow-xl transition-all group",
+                  "bg-card rounded-lg border overflow-hidden shadow-sm hover:shadow-xl transition-all group",
                   !item.active && "opacity-60 grayscale-[0.5]"
                 )}
               >
@@ -440,7 +440,7 @@ export default function BannersPage() {
                                 <button
                                     onClick={() => handleEdit(item)}
                                     disabled={actionLoading}
-                                    className="p-3 rounded-xl bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all shadow-sm active:scale-90"
+                                    className="p-3 rounded-md bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all shadow-sm active:scale-90"
                                 >
                                     <Edit2 size={18} strokeWidth={2.5} />
                                 </button>
@@ -448,7 +448,7 @@ export default function BannersPage() {
                                     onClick={() => toggleActive(item)}
                                     disabled={actionLoading}
                                     className={cn(
-                                        "p-3 rounded-xl transition-all shadow-sm active:scale-90",
+                                        "p-3 rounded-md transition-all shadow-sm active:scale-90",
                                         item.active 
                                             ? "bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500 hover:text-white" 
                                             : "bg-green-500/10 text-green-600 hover:bg-green-500 hover:text-white"
@@ -459,7 +459,7 @@ export default function BannersPage() {
                                 <button
                                     onClick={() => deleteBanner(item.id)}
                                     disabled={actionLoading}
-                                    className="p-3 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-90"
+                                    className="p-3 rounded-md bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-90"
                                 >
                                     <Trash2 size={18} strokeWidth={2.5} />
                                 </button>

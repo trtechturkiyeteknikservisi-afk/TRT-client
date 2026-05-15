@@ -46,6 +46,7 @@
     "warranty_terms": "Warranty Conditions",
     "privacy_policy": "Privacy Policy",
     "shipping_terms": "Shipping & Delivery Terms",
+    "official_doc": "All Legal Documents (PDF)",
     "copyright": "© {year} TR TECH. All rights reserved."
   },
   "Home": {
@@ -226,11 +227,14 @@
     "warranty_desc": "Get detailed information about warranty coverage, terms and processes.",
     "shipping": "Shipping & Delivery Terms",
     "shipping_desc": "Information about shipping, delivery processes, and conditions.",
+    "custom": "All Legal Documents (PDF)",
+    "custom_desc": "Download all service terms, warranty conditions and legal policies in a single file.",
     "updated_soon": "This content will be updated soon.",
-    "official_doc": "Official Certified Document",
-    "official_doc_desc": "View or download the official technical service approval document registered in the system.",
-    "download": "Download",
-    "view": "View"
+    "official_doc": "All Legal Documents (PDF)",
+    "official_doc_desc": "Download all service terms, warranty conditions and legal policies in a single file.",
+    "download": "Download PDF",
+    "view": "View",
+    "footer_note": "Officially stamped and signed."
   },
   "Admin": {
     "title": "TRT Admin",
@@ -351,18 +355,25 @@
     "policy_terms": "Terms of Service",
     "policy_kvkk": "KVKK Disclosure",
     "policy_warranty": "Warranty Conditions",
-    "policy_shipping": "Shipping & Delivery"
+    "policy_shipping": "Shipping & Delivery",
+    "policy_custom": "Tüm Yasal Belgeler (PDF)"
   },
   "VerificationAdmin": {
     "desc": "Manage official document requests and lead automation",
     "configure": "Configure Email & Document",
     "settings_title": "System Settings",
     "email_subject": "Email Subject",
+    "email_subject_placeholder": "Official Sealed Document - TRT",
     "email_body": "Email Body (HTML Supported)",
-    "placeholder_hint": "Use {name} as placeholder for customer name",
+    "placeholder_hint": "Use '{name}' as placeholder for customer name",
     "document_label": "Official Document (PDF/JPG)",
     "upload_hint": "Click or Drag to Upload PDF",
     "no_doc": "No custom document uploaded",
+    "whatsapp_message": "WhatsApp Message Text",
+    "whatsapp_message_placeholder": "Hello '{name}', here is your official document...",
+    "whatsapp_document_label": "Official Document for WhatsApp (PDF/TXT)",
+    "official_doc": "Official Document",
+    "official_doc_desc": "Download all service terms and legal policies in a single file.",
     "save_config": "Save Configuration",
     "table_info": "Lead Info",
     "table_channels": "Channels",
