@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { 
   BookOpen, Trash2, Search, Upload, Plus, Languages, User, Calendar
 } from 'lucide-react';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations, useLocale, useFormatter } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useRouter } from '@/i18n/routing';
 
@@ -15,6 +15,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 export default function BlogsPage() {
   const t = useTranslations('Admin');
   const locale = useLocale();
+  const format = useFormatter();
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -269,7 +270,7 @@ export default function BlogsPage() {
                                 </div>
                                 <div className="flex items-center gap-2 text-muted-foreground">
                                     <Calendar size={14} className="text-primary" />
-                                    <span className="text-[10px] font-bold uppercase tracking-tight">{new Date(item.date).toLocaleDateString()}</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-tight">{format.dateTime(new Date(item.date), { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                                 </div>
                             </div>
                             <button

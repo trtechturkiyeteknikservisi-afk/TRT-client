@@ -24,7 +24,7 @@ export default async function TermsPage(props: { params: Promise<{ locale: strin
   return (
     <NextIntlClientProvider messages={messages} locale={locale}>
       <div className="min-h-screen bg-background">
-        <main className="pt-32 pb-20 px-6">
+        <main className="pb-20 px-6">
           <div className="max-w-4xl mx-auto space-y-12">
             <header className="text-center space-y-6">
                 <div className="inline-flex items-center justify-center w-20 h-20 rounded-[2rem] bg-indigo-500/10 text-indigo-500 mb-4">

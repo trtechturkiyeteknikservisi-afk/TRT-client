@@ -91,15 +91,15 @@ export default async function RootLayout(props: {
               enableSystem
               disableTransitionOnChange
             >
-              <HideOnAdmin>
-                <div className="fixed top-0 left-0 right-0 z-50">
+              <div className="sticky top-0 z-[100] w-full bg-background">
+                <HideOnAdmin>
                   <TopTrustBar />
                   <Header />
-                </div>
-                {/* Spacer to prevent content from going under the fixed header */}
-                <div className="h-[120px] lg:h-[130px]" />
-              </HideOnAdmin>
-              {children}
+                </HideOnAdmin>
+              </div>
+              <main className="overflow-x-hidden">
+                {children}
+              </main>
               <HideOnAdmin>
                 <Footer />
                 <ScrollToTop />

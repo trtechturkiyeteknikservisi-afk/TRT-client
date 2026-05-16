@@ -6,13 +6,14 @@ import { Calendar, User, Clock, ChevronLeft, Share2, Tag, Quote, ArrowLeft } fro
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { Link } from '@/i18n/routing';
-import { useLocale, useTranslations } from 'next-intl';
+import { useLocale, useTranslations, useFormatter } from 'next-intl';
 
 export default function BlogPostPage() {
   const params = useParams();
   const slug = params.slug as string;
   const locale = useLocale();
   const t = useTranslations('Blog');
+  const format = useFormatter();
   
   const [blog, setBlog] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -96,7 +97,7 @@ export default function BlogPostPage() {
           >
             <div className="flex items-center gap-2">
               <Calendar size={18} className="text-primary" />
-              <span>{new Date(blog.date).toLocaleDateString(locale)}</span>
+              <span>{format.dateTime(new Date(blog.date), { day: 'numeric', month: 'long', year: 'numeric' })}</span>
             </div>
             <div className="flex items-center gap-2">
               <User size={18} className="text-primary" />

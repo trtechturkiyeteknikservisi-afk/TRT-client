@@ -7,7 +7,7 @@ import {
   BarChart3, MessageSquare, BookOpen, Star, HelpCircle, 
   Image as ImageIcon, Clock, CheckCircle, TrendingUp
 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useFormatter } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useRouter } from '@/i18n/routing';
 
@@ -15,6 +15,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export default function AnalyticsPage() {
   const t = useTranslations('Admin');
+  const format = useFormatter();
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -151,7 +152,7 @@ export default function AnalyticsPage() {
               <div className="flex justify-between px-4 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 pt-4">
                   {(stats?.traffic || []).map((item: any, i: number) => {
                       const date = new Date(item.date);
-                      const dayName = date.toLocaleDateString(undefined, { weekday: 'short' });
+                      const dayName = format.dateTime(date, { weekday: 'short' });
                       return (
                         <span key={i} className="w-full text-center">{dayName}</span>
                       );

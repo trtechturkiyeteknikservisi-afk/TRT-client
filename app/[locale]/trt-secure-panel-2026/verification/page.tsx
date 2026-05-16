@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useFormatter } from 'next-intl';
 import axios from 'axios';
 import { 
     FileText, 
@@ -29,6 +29,7 @@ const VerificationAdmin = () => {
     const router = useRouter();
     const t = useTranslations('VerificationAdmin');
     const tHeader = useTranslations('Admin');
+    const format = useFormatter();
     const [leads, setLeads] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
@@ -418,7 +419,7 @@ const VerificationAdmin = () => {
                                     <td className="px-6 py-4 text-center">
                                         <div className="flex flex-col">
                                             <span className="text-[10px] font-bold text-foreground">
-                                                {new Date(lead.createdAt).toLocaleDateString()}
+                                                {format.dateTime(new Date(lead.createdAt), { day: 'numeric', month: 'long', year: 'numeric' })}
                                             </span>
                                             <span className="text-[9px] font-medium text-muted-foreground">
                                                 {new Date(lead.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

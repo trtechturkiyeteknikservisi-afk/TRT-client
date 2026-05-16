@@ -64,7 +64,7 @@ export default async function PolicyDetailPage(props: { params: Promise<{ locale
   return (
     <NextIntlClientProvider messages={messages} locale={locale}>
       <div className="min-h-screen bg-background">
-        <main className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+        <main className="pb-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-6xl mx-auto space-y-10">
             {/* Breadcrumb / Back Link */}
             <nav className="flex items-center gap-2">
@@ -102,7 +102,9 @@ export default async function PolicyDetailPage(props: { params: Promise<{ locale
                 <div className="flex items-center gap-4 relative z-10">
                     <div className="text-right hidden md:block">
                         <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t('footer_note')}</p>
-                        <p className="text-xs font-bold text-foreground">{new Date().toLocaleDateString()}</p>
+                        <p className="text-xs font-bold text-foreground">
+                            {new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date())}
+                        </p>
                     </div>
                     {pdfUrl && (
                         <a 

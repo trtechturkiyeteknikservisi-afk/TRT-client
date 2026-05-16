@@ -10,7 +10,7 @@ import { ContactForm } from "@/components/contact-form";
 import { ServiceBrands } from "@/components/service-brands";
 import axios from 'axios';
 import { useTranslations } from 'next-intl';
-import { AppleHeadphonesIcon } from '@/components/social-icons';
+import { AppleHeadphonesIcon, RobotVacuumIcon } from '@/components/social-icons';
 
 const serviceAssets: Record<string, any> = {
   phone: {
@@ -22,9 +22,8 @@ const serviceAssets: Record<string, any> = {
     image: 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?q=80&w=2070&auto=format&fit=crop',
   },
   robot: {
-    icon: Zap,
+    icon: RobotVacuumIcon,
     image: 'https://images.unsplash.com/photo-1518133835878-5a93cc3f89e5?q=80&w=2070&auto=format&fit=crop',
-    customIcon: '/robot.png'
   },
   watch: {
     icon: Watch,
@@ -36,8 +35,7 @@ const serviceAssets: Record<string, any> = {
   },
   kulaklik: {
     icon: AppleHeadphonesIcon,
-    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=2070&auto=format&fit=crop',
-    customIcon: '/airpods.png'
+    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=2070&auto=format&fit=crop'
   }
 };
 
@@ -93,7 +91,7 @@ export default function ServicePage() {
     <main className="min-h-screen bg-background">
       
       {/* Hero Section */}
-      <section className="relative min-h-[500px] md:h-[600px] flex items-center justify-center overflow-hidden pt-32 md:pt-0">
+      <section className="relative min-h-[500px] md:h-[600px] flex items-center justify-center overflow-hidden pt-8 md:pt-0">
         <div 
           className="absolute inset-0 bg-cover bg-center transition-transform duration-[10s] scale-105"
           style={{ backgroundImage: `url(${customImage || assets.image})` }}
@@ -114,7 +112,7 @@ export default function ServicePage() {
                 <img src={assets.customIcon} alt="" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal transition-all scale-110" />
               </div>
             ) : (
-              <assets.icon size={56} className="text-primary" />
+              <assets.icon size={80} className="text-red-600" />
             )}
           </motion.div>
           <motion.h1

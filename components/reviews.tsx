@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Star, Quote } from 'lucide-react';
 import axios from 'axios';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useFormatter } from 'next-intl';
 
 // Swiper Imports
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -22,6 +22,7 @@ const mockReviews = [
 
 export function Reviews() {
   const t = useTranslations('Reviews');
+  const format = useFormatter();
   const [reviews, setReviews] = useState(mockReviews);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -94,7 +95,11 @@ export function Reviews() {
       <div>
         <p className="font-bold text-foreground">{review.customerName}</p>
         <p className="text-xs text-muted-foreground uppercase tracking-widest">
-          {new Date(review.date).toLocaleDateString()}
+          {format.dateTime(new Date(review.date), {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+          })}
         </p>
       </div>
     </motion.div>

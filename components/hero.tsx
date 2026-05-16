@@ -73,7 +73,7 @@ export function Hero() {
   }, [banners.length, current]);
 
   return (
-    <section className="relative min-h-screen w-full overflow-hidden bg-background flex flex-col justify-center pt-[100px] lg:pt-24 pb-10 lg:pb-16">
+    <section className="relative min-h-screen w-full overflow-hidden bg-background flex flex-col pt-8 lg:justify-center pb-10 lg:pb-16">
       {/* Dynamic Backgrounds */}
       <AnimatePresence mode="wait">
         {banners[current] && (
@@ -104,7 +104,7 @@ export function Hero() {
 
       <div className="relative container mx-auto px-4 w-full flex flex-col lg:flex-row items-center lg:justify-between gap-8 lg:gap-16 z-10">
         {/* Animated Content Section */}
-        <div className="w-full lg:flex-1 relative min-h-[350px] lg:min-h-[500px] flex items-center">
+        <div className="w-full lg:flex-1 relative min-h-[450px] lg:min-h-[550px] flex items-center">
           <AnimatePresence mode="wait">
             {banners[current] && (
               <motion.div
@@ -126,7 +126,7 @@ export function Hero() {
                   <span className="text-xs font-black uppercase tracking-[0.3em] text-primary">{t('badge')}</span>
                 </div>
 
-                <h1 className="text-lg sm:text-3xl md:text-6xl lg:text-7xl font-black tracking-tight leading-tight md:leading-[0.85] text-foreground uppercase">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-tight md:leading-[0.85] text-foreground uppercase min-h-[2.2em] md:min-h-[1.8em]">
                   {(banners[current]?.title || '').split(' ').map((word, i) => (
                     <span key={i} className={cn(i === 1 ? "text-primary italic" : "text-foreground", "inline")}>
                       {word}{' '}
@@ -134,7 +134,7 @@ export function Hero() {
                   ))}
                 </h1>
 
-                <p className="text-lg md:text-2xl text-muted-foreground font-semibold max-w-xl leading-relaxed">
+                <p className="text-lg md:text-2xl text-muted-foreground font-semibold max-w-xl leading-relaxed min-h-[3em] md:min-h-[2.5em]">
                   {banners[current]?.description}
                 </p>
 

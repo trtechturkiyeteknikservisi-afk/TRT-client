@@ -5,7 +5,7 @@ import { Link } from '@/i18n/routing';
 import { Calendar, User, ArrowRight, Search, Tag, Newspaper } from 'lucide-react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import { useLocale, useTranslations } from 'next-intl';
+import { useLocale, useTranslations, useFormatter } from 'next-intl';
 
 const mockBlogs = [
   {
@@ -43,6 +43,7 @@ const mockBlogs = [
 export default function BlogPage() {
   const t = useTranslations('Blog');
   const locale = useLocale();
+  const format = useFormatter();
   const [blogs, setBlogs] = useState(mockBlogs);
   const [loading, setLoading] = useState(false);
 
@@ -68,7 +69,7 @@ export default function BlogPage() {
   return (
     <main className="min-h-screen bg-background">
       
-      <section className="pt-32 pb-24 bg-muted/30">
+      <section className="pb-24 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-16">
             <motion.div
@@ -117,7 +118,7 @@ export default function BlogPage() {
                   <div className="flex items-center space-x-4 text-xs font-bold text-muted-foreground/60 mb-6 uppercase tracking-widest">
                     <div className="flex items-center space-x-2">
                       <Calendar size={14} className="text-primary" />
-                      <span>{new Date(blog.date).toLocaleDateString(locale)}</span>
+                      <span>{format.dateTime(new Date(blog.date), { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <User size={14} className="text-primary" />

@@ -6,7 +6,7 @@ import { Link } from '@/i18n/routing';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useTranslations, useLocale } from 'next-intl';
-import { AppleHeadphonesIcon } from './social-icons';
+import { AppleHeadphonesIcon, RobotVacuumIcon } from './social-icons';
 
 export function Services() {
   const t = useTranslations('Services');
@@ -31,8 +31,7 @@ export function Services() {
     {
       title: t('robot'),
       description: t('robot_desc'),
-      icon: Zap,
-      customIcon: '/robot.png',
+      icon: RobotVacuumIcon,
       color: 'bg-yellow-500/10 text-yellow-600',
       link: '/services/robot'
     },
@@ -54,7 +53,6 @@ export function Services() {
       title: t('headphones'),
       description: t('headphones_desc'),
       icon: AppleHeadphonesIcon,
-      customIcon: '/airpods.png',
       color: 'bg-indigo-500/10 text-indigo-600',
       link: '/services/kulaklik'
     }
@@ -99,7 +97,7 @@ export function Services() {
                 {service.customIcon ? (
                   <img src={service.customIcon} alt="" className="w-16 h-16 object-contain group-hover:brightness-0 group-hover:invert transition-all" />
                 ) : (
-                  service.icon && <service.icon size={48} strokeWidth={2.5} />
+                  service.icon && <service.icon size={64} strokeWidth={2.5} />
                 )}
               </div>
               <h3 className="text-2xl md:text-2xl font-black mb-4 text-foreground tracking-tight uppercase">{service.title}</h3>

@@ -24,7 +24,7 @@ export default async function PrivacyPage(props: { params: Promise<{ locale: str
   return (
     <NextIntlClientProvider messages={messages} locale={locale}>
       <div className="min-h-screen bg-background">
-        <main className="pt-32 pb-20 px-6">
+        <main className="pb-20 px-6">
           <div className="max-w-4xl mx-auto space-y-12">
             <header className="text-center space-y-6">
                 <div className="inline-flex items-center justify-center w-20 h-20 rounded-[2rem] bg-primary/10 text-primary mb-4">

@@ -13,7 +13,7 @@ export default function AboutUsPage() {
     <main className="min-h-screen bg-background">
       
       {/* Hero Section */}
-      <section className="relative pt-32 pb-24 md:pt-40 md:pb-32 overflow-hidden bg-primary/5">
+      <section className="relative pb-24 md:pt-40 md:pb-32 overflow-hidden bg-primary/5">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/10 blur-[120px] -z-10 rounded-full" />
         <div className="container mx-auto px-4 text-center">
           <motion.div

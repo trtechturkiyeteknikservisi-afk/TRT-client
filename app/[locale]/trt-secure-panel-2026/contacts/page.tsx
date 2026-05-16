@@ -8,7 +8,7 @@ import {
   Search, Phone, Mail, MapPin, Tablet, Eye, X, User, MessageSquare, Copy, Check, Filter, ChevronLeft, ChevronRight, SlidersHorizontal, 
   Calendar, Hash, ExternalLink
 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useFormatter } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useRouter } from '@/i18n/routing';
 
@@ -17,6 +17,7 @@ const ITEMS_PER_PAGE = 8;
 
 export default function ContactsPage() {
   const t = useTranslations('Admin');
+  const format = useFormatter();
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -454,7 +455,7 @@ export default function ContactsPage() {
                                                 <MessageSquare size={12} strokeWidth={3} />
                                                 <span className="text-[9px] font-black uppercase tracking-widest">Requirement Details</span>
                                             </div>
-                                            <span className="text-[9px] font-black text-muted-foreground uppercase opacity-50">{new Date(selectedMessage.createdAt).toLocaleDateString()}</span>
+                                            <span className="text-[9px] font-black text-muted-foreground uppercase opacity-50">{format.dateTime(new Date(selectedMessage.createdAt), { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                                     </div>
                                     <div className="p-5 rounded-lg bg-background border border-muted/70 relative shadow-inner ring-1 ring-primary/5">
                                             <p className="text-sm font-bold leading-relaxed text-foreground/80 whitespace-pre-wrap break-words">
