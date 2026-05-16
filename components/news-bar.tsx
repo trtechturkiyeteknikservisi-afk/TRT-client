@@ -37,16 +37,16 @@ export function NewsBar() {
   const newsItems = news.split('\n').filter(item => item.trim());
 
   return (
-    <div className="bg-primary text-primary-foreground py-2.5 overflow-hidden relative border-b border-white/10 shadow-lg z-[200]">
+    <div className="bg-primary text-primary-foreground py-1.5 overflow-hidden relative border-b border-white/10 shadow-lg ">
       {/* Glossy Overlay */}
       <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-transparent to-white/5 pointer-events-none" />
       
       <div className="w-full flex items-center gap-6 relative px-4">
         {/* Label Prefix */}
-        <div className="flex items-center justify-center shrink-0 bg-white/20 w-8 h-8 rounded-full border border-white/20 backdrop-blur-sm shadow-sm">
-          <Megaphone size={14} className="animate-bounce" />
+        <div className="flex items-center justify-center shrink-0">
+          <Megaphone size={13} className="animate-bounce" />
         </div>
-
+ 
         {/* Marquee Container */}
         <div className="flex-1 overflow-hidden group cursor-pointer">
           <div
@@ -55,7 +55,7 @@ export function NewsBar() {
             {/* عرض قائمة الأخبار */}
             {newsItems.map((item, idx) => (
               <React.Fragment key={idx}>
-                <span className="text-xs sm:text-sm font-bold uppercase tracking-wide flex items-center gap-3">
+                <span className="text-[10px] font-black uppercase tracking-[0.15em] leading-none flex items-center gap-3">
                   {item}
                   {newsItems.length > 1 && (
                     <span className="relative flex h-2 w-2 items-center justify-center">
@@ -70,7 +70,7 @@ export function NewsBar() {
             {/* التكرار لضمان حركة مستمرة سلسة */}
             {newsItems.map((item, idx) => (
               <React.Fragment key={`rep-${idx}`}>
-                <span className="text-xs sm:text-sm font-bold uppercase tracking-wide flex items-center gap-3">
+                <span className="text-[10px] font-black uppercase tracking-[0.15em] leading-none flex items-center gap-3">
                   {item}
                   {newsItems.length > 1 && (
                     <span className="relative flex h-2 w-2 items-center justify-center">

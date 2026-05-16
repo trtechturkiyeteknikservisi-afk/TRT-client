@@ -26,8 +26,8 @@ export function ElegantPhoneBanner({ title }: ElegantPhoneBannerProps) {
         >
           <div className="flex flex-col items-center md:items-start text-center md:text-left gap-2">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white shadow-md shadow-primary/10">
-                <Phone size={16} />
+              <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center">
+                <img src="/calling.webp" alt="Phone" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
               </div>
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/60">
                 {title || t('phone_label')}

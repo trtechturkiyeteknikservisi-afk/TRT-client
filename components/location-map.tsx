@@ -32,7 +32,9 @@ export function LocationMap() {
                 className="space-y-6"
               >
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-xs font-black uppercase tracking-widest border border-primary/20">
-                  <MapPin size={14} className="animate-bounce" />
+                  <div className="w-6 h-6 rounded-full overflow-hidden">
+                    <img src="/location.webp" alt="Location" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
+                  </div>
                   <span>{t('title')}</span>
                 </div>
 
@@ -50,8 +52,8 @@ export function LocationMap() {
 
                 <div className="p-6 rounded-xl bg-card border border-border/50 shadow-xl shadow-primary/5 space-y-4">
                   <div className="flex items-start gap-4 text-start">
-                    <div className="p-3 rounded-xl bg-primary/10 text-primary shrink-0">
-                      <MapPin size={20} />
+                    <div className="w-12 h-12 rounded-full overflow-hidden shrink-0">
+                      <img src="/location.webp" alt="Location" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
                     </div>
                     <div>
                       <p className="text-xs font-black uppercase tracking-wider text-muted-foreground mb-1">

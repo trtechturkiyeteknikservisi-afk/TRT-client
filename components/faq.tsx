@@ -99,7 +99,7 @@ export function FAQ() {
               )}
             >
               <button
-                className="w-full flex items-center justify-between p-8 text-left"
+                className="w-full flex items-center justify-between p-8 text-left cursor-pointer"
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
               >
                 <span className={cn(

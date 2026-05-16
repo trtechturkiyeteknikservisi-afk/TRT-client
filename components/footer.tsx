@@ -99,32 +99,35 @@ export function Footer() {
             <p className="text-sm text-muted-foreground leading-relaxed font-semibold">
               {t('description')}
             </p>
-            <div className="flex flex-wrap gap-2">
-              {socialLinks.map((social) => {
-                const Icon = social.icon as any;
-                
-                return (
-                  <a
-                    key={social.label}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ 
-                      backgroundColor: mounted && theme === 'light' ? social.brandColor : undefined,
-                      color: mounted && theme === 'light' ? 'white' : undefined
-                    } as React.CSSProperties}
-                    className={cn(
-                      "p-2 rounded-lg transition-all duration-300 ring-1 ring-border/50 shadow-sm hover:-translate-y-1",
-                      mounted && theme === 'dark' 
-                        ? cn("bg-muted/50 text-muted-foreground hover:text-white", social.color)
-                        : "hover:brightness-90"
-                    )}
-                    aria-label={social.label}
-                  >
-                    <Icon size={18} />
-                  </a>
-                );
-              })}
+            <div className="flex flex-wrap gap-4 pt-2">
+              {[
+                { image: '/whatsap.webp', href: 'https://wa.me/908508401505', label: 'WhatsApp' },
+                { image: '/instagram.webp', href: 'https://www.instagram.com/trtservis?igsh=MXcxZ25rNjNydjYxZQ%3D%3D&utm_source=qr', label: 'Instagram' },
+                { image: '/tiktok.webp', href: 'https://www.tiktok.com/@trtservis', label: 'TikTok' },
+                { image: '/facebook.webp', href: 'https://www.facebook.com/share/185YU5woZA/?mibextid=wwXIfr', label: 'Facebook' },
+                { image: '/youtube.webp', href: 'https://youtube.com/@trtservis?si=kb9K3XN-LX4NX-du', label: 'YouTube' },
+                { image: '/telegram.webp', href: 'https://t.me/trtservis', label: 'Telegram' },
+                { image: '/snapchat.webp', href: 'https://snapchat.com/t/pL3vgBfZ', label: 'Snapchat' },
+                { image: '/linkedin.webp', href: 'https://www.linkedin.com/in/tr-tech-44a056402?utm_source=share_via&utm_content=profile&utm_medium=member_ios', label: 'LinkedIn' },
+                { image: '/pinterest.webp', href: 'https://tr.pinterest.com/trtservis/?invite_code=6906950e8ba94d7b8b9a3364db735f0d&sender=1122240938304289862', label: 'Pinterest' },
+              ].map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-8 h-8 flex items-center justify-center transition-all duration-300 hover:-translate-y-1 hover:scale-110 !bg-transparent !shadow-none !border-0 !outline-none rounded-full overflow-hidden"
+                  style={{ background: 'none', backgroundColor: 'transparent', boxShadow: 'none', border: 'none' }}
+                  aria-label={social.label}
+                >
+                  <img 
+                    src={social.image} 
+                    alt={social.label} 
+                    className="w-full h-full object-contain !bg-transparent !shadow-none !border-0 rounded-full mix-blend-multiply dark:mix-blend-normal" 
+                    style={{ background: 'none', backgroundColor: 'transparent' }} 
+                  />
+                </a>
+              ))}
             </div>
           </div>
 

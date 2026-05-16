@@ -2,6 +2,7 @@
   "Header": {
     "company_name": "TRT",
     "home": "Home",
+    "about_us": "About Us",
     "services": "Services",
     "works": "Our Works",
     "blog": "Blog",
@@ -160,6 +161,7 @@
     "desc": "Request a repair or ask a question. Our expert team is ready to help you.",
     "phone_label": "Call Us",
     "whatsapp_label": "WhatsApp Support",
+    "whatsapp_complaints": "Complaints & WhatsApp",
     "whatsapp_cta": "Click to Chat",
     "email_label": "Email",
     "location_label": "Location",

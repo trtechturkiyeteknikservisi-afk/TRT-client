@@ -62,7 +62,7 @@ export function Hero() {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrent((prev) => (banners.length > 0 ? (prev + 1) % banners.length : 0));
-    }, 5000); // Set to 5s as requested
+    }, 6000); // 6 Seconds as requested
     return () => clearInterval(timer);
   }, [banners.length]);
 
@@ -73,7 +73,7 @@ export function Hero() {
   }, [banners.length, current]);
 
   return (
-    <section className="relative min-h-screen w-full overflow-hidden bg-background flex flex-col justify-center pt-[140px] lg:pt-24 pb-10 lg:pb-16">
+    <section className="relative min-h-screen w-full overflow-hidden bg-background flex flex-col justify-center pt-[100px] lg:pt-24 pb-10 lg:pb-16">
       {/* Dynamic Backgrounds */}
       <AnimatePresence mode="wait">
         {banners[current] && (
@@ -82,7 +82,7 @@ export function Hero() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1 }}
+            transition={{ duration: 1.5 }} // Smoother background fade
             className="absolute inset-0"
           >
             <div
@@ -104,7 +104,7 @@ export function Hero() {
 
       <div className="relative container mx-auto px-4 w-full flex flex-col lg:flex-row items-center lg:justify-between gap-8 lg:gap-16 z-10">
         {/* Animated Content Section */}
-        <div className="w-full lg:flex-1 relative h-full flex items-center">
+        <div className="w-full lg:flex-1 relative min-h-[350px] lg:min-h-[500px] flex items-center">
           <AnimatePresence mode="wait">
             {banners[current] && (
               <motion.div
@@ -155,7 +155,7 @@ export function Hero() {
                   </Link>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 pt-4 text-foreground/90">
+                <div className="hidden lg:flex flex-col sm:flex-row gap-4 sm:gap-8 pt-4 text-foreground/90">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="text-primary shrink-0" size={20} />
                     <span className="font-semibold">{t('trust_since')}</span>
@@ -166,7 +166,7 @@ export function Hero() {
                   </div>
                 </div>
 
-                <div className={cn("mt-6 p-4 bg-foreground/5 backdrop-blur-lg rounded-xl border border-foreground/10 flex items-start gap-3 max-w-xl", isRTL && "text-right")}>
+                <div className={cn("hidden lg:flex mt-6 p-4 bg-foreground/5 backdrop-blur-lg rounded-xl border border-foreground/10 items-start gap-3 max-w-xl", isRTL && "text-right")}>
                   < ShieldCheck className="text-primary shrink-0 mt-0.5" size={20} />
                   <p className="text-sm font-bold text-foreground/80 leading-relaxed">
                     {tContact('form_note')}
@@ -176,30 +176,73 @@ export function Hero() {
             )}
           </AnimatePresence>
         </div>
-
-        {/* Static Hero Mini Contact Form */}
-        <div className="block w-full lg:w-[540px] relative z-20">
+        
+        {/* Contact Form & Trust Section */}
+        <div className="block w-full lg:w-[540px] relative z-20 space-y-6">
           <ContactForm isHeroMini={true} />
+          
+          {/* Mobile-only Trust Badges & Indicators (Under the form) */}
+          <div className="lg:hidden space-y-6">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 pt-4 text-foreground/90 bg-card/40 backdrop-blur-md p-6 rounded-xl border border-border/50">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="text-primary shrink-0" size={20} />
+                <span className="font-semibold">{t('trust_since')}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="text-primary shrink-0" size={20} />
+                <span className="font-semibold">{t('trust_experience')}</span>
+              </div>
+            </div>
+
+            <div className={cn("p-4 bg-foreground/5 backdrop-blur-lg rounded-xl border border-foreground/10 flex items-start gap-3", isRTL && "text-right")}>
+              <ShieldCheck className="text-primary shrink-0 mt-0.5" size={20} />
+              <p className="text-sm font-bold text-foreground/80 leading-relaxed">
+                {tContact('form_note')}
+              </p>
+            </div>
+
+            <div className="flex flex-row items-center justify-center gap-8 py-4">
+              <div className="flex items-center gap-4 text-white font-black text-xs tracking-widest uppercase drop-shadow-lg">
+                <span className="text-primary bg-background/50 px-2 py-1 rounded-md backdrop-blur-sm">0{current + 1}</span>
+                <div className="w-8 h-px bg-white/40" />
+                <span className="bg-background/50 px-2 py-1 rounded-md backdrop-blur-sm">0{banners.length}</span>
+              </div>
+              
+              <div className="flex flex-row gap-2">
+                {banners.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrent(index)}
+                    className={cn(
+                      "w-8 h-1 rounded-full transition-all duration-500",
+                      current === index ? "bg-primary w-12" : "bg-white/20"
+                    )}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className={cn("absolute bottom-8 flex flex-col gap-4", isRTL ? "left-8" : "right-8")}>
+      {/* Desktop-only Absolute Indicators */}
+      <div className={cn("hidden lg:flex absolute bottom-8 flex-col gap-4 z-[30]", isRTL ? "left-8" : "right-8")}>
         {banners.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrent(index)}
             className={cn(
               "h-12 w-1.5 rounded-full transition-all duration-500",
-              current === index ? "bg-primary h-20" : "bg-muted-foreground/20 hover:bg-muted-foreground/40"
+              current === index ? "bg-primary h-20" : "bg-white/20 hover:bg-white/40"
             )}
           />
         ))}
       </div>
 
-      <div className={cn("absolute bottom-8 flex items-center gap-4 text-muted-foreground font-bold text-sm tracking-widest uppercase", isRTL ? "right-8" : "left-8")}>
-        <span className="text-primary">0{current + 1}</span>
-        <div className="w-12 h-px bg-muted-foreground/20" />
-        <span>0{banners.length}</span>
+      <div className={cn("hidden lg:flex absolute bottom-8 items-center gap-4 text-white font-black text-sm tracking-widest uppercase z-[30] drop-shadow-lg", isRTL ? "right-8" : "left-8")}>
+        <span className="text-primary bg-background/50 px-2 py-1 rounded-md backdrop-blur-sm">0{current + 1}</span>
+        <div className="w-12 h-px bg-white/40" />
+        <span className="bg-background/50 px-2 py-1 rounded-md backdrop-blur-sm">0{banners.length}</span>
       </div>
     </section>
   );

@@ -23,10 +23,10 @@ export function Header() {
   const services = [
     { name: t('phone_repair'), href: '/services/phone', icon: Smartphone },
     { name: t('laptop_repair'), href: '/services/laptop', icon: Laptop },
-    { name: t('robot_repair'), href: '/services/robot', icon: Zap },
+    { name: t('robot_repair'), href: '/services/robot', icon: Zap, customIcon: '/robot.png' },
     { name: t('watch_repair'), href: '/services/watch', icon: Watch },
     { name: t('tablet_repair'), href: '/services/tablet', icon: Tablet },
-    { name: t('headphones_repair'), href: '/services/kulaklik', icon: Headphones },
+    { name: t('headphones_repair'), href: '/services/kulaklik', icon: Headphones, customIcon: '/airpods.png' },
   ];
 
   const legalPolicies = [
@@ -69,7 +69,7 @@ export function Header() {
   if (!mounted) return <header className="sticky top-0 z-50 w-full h-20 border-b bg-background/80 backdrop-blur-lg" />;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
+    <header className="w-full border-b bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
       <div className="w-full xl:container mx-auto px-2 sm:px-4 xl:px-4 2xl:px-8">
         <div className="flex min-h-[4rem] items-center justify-between gap-1 sm:gap-2 2xl:gap-4 py-2 md:py-0">
           <div className="flex items-center flex-shrink-0">
@@ -77,7 +77,7 @@ export function Header() {
               <img 
                 src={mounted ? (theme === 'dark' ? '/night-logo.png' : '/day-logo.png') : '/day-logo.png'} 
                 alt={t('company_name')} 
-                className="h-10 w-auto object-contain transition-all group-hover:scale-105"
+                className="h-10 w-auto min-w-[120px] object-contain transition-all group-hover:scale-105"
               />
               <span className="text-[8px] font-black uppercase tracking-[0.2em] text-primary mt-1 opacity-80 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                 {t('cargo_service')}
@@ -121,8 +121,12 @@ export function Header() {
                             href={sub.href}
                             className="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-muted transition-colors group/item"
                           >
-                            <div className="p-2 bg-primary/10 rounded-lg text-primary group-hover/item:bg-primary group-hover/item:text-primary-foreground transition-colors">
-                              <sub.icon size={18} />
+                            <div className="p-2 bg-primary/10 rounded-lg text-primary group-hover/item:bg-primary group-hover/item:text-primary-foreground transition-colors overflow-hidden">
+                              {'customIcon' in sub && sub.customIcon ? (
+                                <img src={sub.customIcon as string} alt="" className="w-[24px] h-[24px] object-contain group-hover/item:brightness-0 group-hover/item:invert" />
+                              ) : (
+                                <sub.icon size={18} />
+                              )}
                             </div>
                             <span className="text-sm font-bold text-muted-foreground group-hover/item:text-foreground">{sub.name}</span>
                           </Link>
@@ -154,7 +158,7 @@ export function Header() {
             {/* Theme Toggle */}
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-1.5 xl:p-2.5 rounded-xl hover:bg-muted text-muted-foreground transition-all active:scale-95 border border-transparent hover:border-border cursor-pointer"
+              className="hidden sm:flex p-1.5 xl:p-2.5 rounded-xl hover:bg-muted text-muted-foreground transition-all active:scale-95 border border-transparent hover:border-border cursor-pointer flex-shrink-0"
               aria-label="Toggle theme"
             >
               {theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-blue-600" />}
@@ -171,7 +175,7 @@ export function Header() {
                   key={l.code}
                   onClick={() => handleLanguageChange(l.code)}
                   className={cn(
-                    "px-1.5 lg:px-2 2xl:px-3 py-1 2xl:py-1.5 rounded-lg text-[10px] xl:text-[11px] font-extrabold transition-all whitespace-nowrap flex items-center gap-1 2xl:gap-1.5 cursor-pointer",
+                    "px-1.5 lg:px-2 2xl:px-3 py-1 2xl:py-1.5 rounded-lg text-[10px] xl:text-[11px] font-extrabold transition-all whitespace-nowrap flex items-center justify-center gap-1 2xl:gap-1.5 cursor-pointer",
                     locale === l.code 
                       ? "bg-background text-primary shadow-sm ring-1 ring-border/50" 
                       : "text-muted-foreground hover:bg-muted"
@@ -189,10 +193,10 @@ export function Header() {
 
             {/* Mobile Menu Toggle */}
             <button
-              className="lg:hidden p-2.5 rounded-xl hover:bg-muted text-muted-foreground transition-all active:scale-95 border border-transparent hover:border-border"
+              className="lg:hidden p-1.5 rounded-lg text-muted-foreground transition-all active:scale-95 flex-shrink-0"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
+              {isMenuOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
           </div>
         </div>
@@ -222,7 +226,13 @@ export function Header() {
                           className="flex items-center gap-4 px-4 py-3 text-base font-bold text-muted-foreground hover:bg-muted hover:text-primary rounded-xl transition-all"
                           onClick={() => setIsMenuOpen(false)}
                         >
-                          <sub.icon size={20} className={cn(locale === 'ar' ? 'ml-4' : 'mr-4', "text-primary")} />
+                          <div className={cn(locale === 'ar' ? 'ml-4' : 'mr-4', "w-7 h-7 flex items-center justify-center")}>
+                            {'customIcon' in sub && sub.customIcon ? (
+                              <img src={sub.customIcon as string} alt="" className="w-full h-full object-contain" />
+                            ) : (
+                              <sub.icon size={24} className="text-primary" />
+                            )}
+                          </div>
                           <span>{sub.name}</span>
                         </Link>
                       ))}

@@ -32,29 +32,25 @@ export function StickyContact() {
   if (pathname?.includes('/trt-secure-panel-2026')) return null;
 
   const socialLinks = [
-    { icon: Phone, href: `tel:${supportPhone.replace(/\s/g, '')}`, color: '#dc2626' },
-    { icon: WhatsappIcon, href: `https://wa.me/${whatsappNumber.replace(/\D/g, '')}`, color: '#25D366', isImg: true },
-    { icon: InstagramIcon, href: 'https://www.instagram.com/trtservis?igsh=MXcxZ25rNjNydjYxZQ%3D%3D&utm_source=qr', color: '#E1306C' },
-    { icon: TiktokIcon, href: 'https://www.tiktok.com/@trtservis', color: '#000000' },
-    { icon: FacebookIcon, href: 'https://www.facebook.com/share/185YU5woZA/?mibextid=wwXIfr', color: '#1877F2' },
-    { icon: YoutubeIcon, href: 'https://youtube.com/@trtservis?si=kb9K3XN-LX4NX-du', color: '#FF0000' },
-    { icon: TelegramIcon, href: 'https://t.me/trtservis', color: '#0088cc' },
-    { icon: SnapchatIcon, href: 'https://snapchat.com/t/pL3vgBfZ', color: '#FFFC00', iconColor: 'text-black' },
-    { icon: LinkedinIcon, href: 'https://www.linkedin.com/in/tr-tech-44a056402?utm_source=share_via&utm_content=profile&utm_medium=member_ios', color: '#0A66C2' },
-    { icon: PinterestIcon, href: 'https://tr.pinterest.com/trtservis/?invite_code=6906950e8ba94d7b8b9a3364db735f0d&sender=1122240938304289862', color: '#E60023' },
+    { image: '/facebook.webp', href: 'https://www.facebook.com/share/185YU5woZA/?mibextid=wwXIfr' },
+    { image: '/instagram.webp', href: 'https://www.instagram.com/trtservis?igsh=MXcxZ25rNjNydjYxZQ%3D%3D&utm_source=qr' },
+    { image: '/whatsap.webp', href: `https://wa.me/${whatsappNumber.replace(/\D/g, '')}` },
+    { image: '/tiktok.webp', href: 'https://www.tiktok.com/@trtservis' },
+    { image: '/youtube.webp', href: 'https://youtube.com/@trtservis?si=kb9K3XN-LX4NX-du' },
+    { image: '/telegram.webp', href: 'https://t.me/trtservis' },
+    { image: '/snapchat.webp', href: 'https://snapchat.com/t/pL3vgBfZ' },
+    { image: '/linkedin.webp', href: 'https://www.linkedin.com/in/tr-tech-44a056402?utm_source=share_via&utm_content=profile&utm_medium=member_ios' },
+    { image: '/pinterest.webp', href: 'https://tr.pinterest.com/trtservis/?invite_code=6906950e8ba94d7b8b9a3364db735f0d&sender=1122240938304289862' },
+    { image: '/calling.webp', href: `tel:${supportPhone.replace(/\s/g, '')}` },
   ];
 
   return (
-    <div className="fixed bottom-6 right-6 z-[100] flex flex-col-reverse items-center gap-4">
-      {/* Main Toggle Button */}
+    <div className="fixed bottom-6 left-6 z-[100] flex flex-col-reverse items-center gap-4">
       <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(!isOpen)}
-        className={cn(
-          "w-12 h-12 md:w-14 md:h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-500 overflow-hidden",
-          isOpen ? "bg-white text-primary" : "bg-primary text-primary-foreground"
-        )}
+        className="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center transition-all duration-500 cursor-pointer"
       >
         <AnimatePresence mode="wait">
           {isOpen ? (
@@ -63,25 +59,14 @@ export function StickyContact() {
               initial={{ opacity: 0, rotate: -180 }} 
               animate={{ opacity: 1, rotate: 0 }} 
               exit={{ opacity: 0, rotate: 180 }}
-              className="relative flex items-center justify-center"
+              className="relative flex items-center justify-center p-2 !bg-transparent !shadow-none"
+              style={{ background: 'none', backgroundColor: 'transparent', boxShadow: 'none' }}
             >
-              {/* Rotating Circle Only */}
-              <svg className="w-10 h-10 animate-[spin_2s_linear_infinite]" viewBox="0 0 100 100">
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="40"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="10"
-                  strokeDasharray="180"
-                  strokeLinecap="round"
-                />
-              </svg>
+              <X size={24} className="text-primary" />
             </motion.div>
           ) : (
-            <motion.div key="open" initial={{ opacity: 0, rotate: 90 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0, rotate: -90 }}>
-              <img src="/whats.png" alt="Contact" className="w-8 h-8 md:w-10 md:h-10 object-contain" />
+            <motion.div key="open" initial={{ opacity: 0, rotate: 90 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0, rotate: -90 }} className="w-full h-full rounded-full overflow-hidden">
+              <img src="/whatsap.webp" alt="Contact" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -102,14 +87,21 @@ export function StickyContact() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 20, scale: 0.5 }}
                 transition={{ delay: idx * 0.05, type: 'spring', stiffness: 260, damping: 20 }}
-                className="w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center bg-white shadow-xl hover:scale-110 transition-transform group"
+                className="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center hover:scale-110 transition-transform group cursor-pointer !bg-transparent !shadow-none !border-0"
+                style={{ background: 'none', backgroundColor: 'transparent', boxShadow: 'none', border: 'none' }}
               >
-                <div 
-                  className="w-full h-full rounded-full flex items-center justify-center transition-colors"
-                  style={{ color: social.color }}
-                >
-                  <Icon size={32} className={cn("transition-transform group-hover:scale-110", social.iconColor || "")} />
-                </div>
+                {social.image ? (
+                  <div className="w-full h-full rounded-full overflow-hidden">
+                    <img src={social.image} alt="" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal rounded-full overflow-hidden" />
+                  </div>
+                ) : (
+                  <div 
+                    className="w-full h-full flex items-center justify-center text-primary !bg-transparent"
+                    style={{ background: 'none', backgroundColor: 'transparent' }}
+                  >
+                    <Icon className="w-6 h-6 md:w-8 md:h-8 transition-transform group-hover:scale-110" />
+                  </div>
+                )}
               </motion.a>
             );
           })}

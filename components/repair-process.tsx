@@ -82,45 +82,58 @@ export function RepairProcess() {
           
           {/* Top Timeline Navigation */}
           <div className="relative mb-10 md:mb-16">
-            {/* The line connecting the steps */}
-            <div className="absolute top-1/2 -translate-y-1/2 left-0 w-full h-1 bg-muted rounded-full overflow-hidden">
-                <motion.div 
-                   className="h-full bg-primary origin-left"
-                   initial={{ scaleX: 0 }}
-                   animate={{ scaleX: (activeStep + 1) / steps.length }}
-                   style={{ transformOrigin: isRTL ? 'right' : 'left' }}
-                   transition={{ duration: 0.5, ease: "easeInOut" }}
-                />
-            </div>
-
-            <div className="flex justify-between relative z-10 w-full">
+            <div className="flex items-center justify-between relative z-10 w-full px-4 md:px-10">
               {steps.map((step, index) => {
                 const isActive = index === activeStep;
                 const isPast = index < activeStep;
+                
                 return (
-                  <button
-                    key={index}
-                    onClick={() => {
-                        setActiveStep(index);
-                        setIsPlaying(false);
-                    }}
-                    className={cn(
-                      "group relative flex flex-col items-center gap-3 transition-all duration-300",
-                      isActive ? "scale-110" : "scale-100 opacity-70 hover:opacity-100"
+                  <React.Fragment key={index}>
+                    {/* Line segment before this step (except for first step) */}
+                    {index > 0 && (
+                      <div className="flex-1 h-0.5 md:h-1 mx-2 md:mx-4 relative overflow-hidden bg-muted/30 rounded-full">
+                        <motion.div 
+                          className="absolute inset-0 bg-primary"
+                          initial={{ scaleX: 0 }}
+                          animate={{ scaleX: index <= activeStep ? 1 : 0 }}
+                          transition={{ duration: 0.5 }}
+                          style={{ transformOrigin: isRTL ? 'right' : 'left' }}
+                        />
+                      </div>
                     )}
-                  >
-                     <div className={cn(
-                         "w-10 h-10 md:w-14 md:h-14 rounded-xl flex items-center justify-center border-2 transition-all duration-500 relative z-10",
-                         isActive ? "bg-primary border-primary text-primary-foreground shadow-[0_0_20px_rgba(220,38,38,0.4)]" : 
-                         isPast ? "bg-background border-primary/50 text-foreground" : "bg-background border-border text-muted-foreground group-hover:border-primary/50"
-                     )}>
-                        <step.icon size={20} className={cn("md:w-6 md:h-6", isActive && "animate-pulse")} />
-                     </div>
-                     {/* Tooltip for desktop hover */}
-                     <span className="hidden md:block absolute -bottom-8 opacity-0 group-hover:opacity-100 text-xs font-bold text-foreground text-center w-24 transition-opacity">
+
+                    <button
+                      onClick={() => {
+                          setActiveStep(index);
+                          setIsPlaying(false);
+                      }}
+                      className={cn(
+                        "group relative flex flex-col items-center transition-all duration-300 cursor-pointer",
+                        isActive ? "scale-110" : "scale-100 opacity-70 hover:opacity-100"
+                      )}
+                    >
+                       <div className={cn(
+                           "w-10 h-10 md:w-16 md:h-16 rounded-xl flex items-center justify-center border-2 transition-all duration-500 relative z-10 shadow-sm",
+                           isActive ? "bg-primary border-primary text-primary-foreground shadow-[0_0_30px_rgba(220,38,38,0.4)]" : 
+                           isPast ? "bg-background border-primary/50 text-foreground" : "bg-background border-border text-muted-foreground group-hover:border-primary/50"
+                       )}>
+                          <step.icon size={20} className={cn("md:w-7 md:h-7", isActive && "animate-pulse")} />
+                       </div>
+                       
+                       {/* Mobile title (only for active) */}
+                       <span className={cn(
+                         "absolute -bottom-6 text-[8px] font-bold uppercase tracking-tighter whitespace-nowrap md:hidden transition-opacity",
+                         isActive ? "opacity-100" : "opacity-0"
+                       )}>
                          {step.title}
-                     </span>
-                  </button>
+                       </span>
+
+                       {/* Desktop title for hover */}
+                       <span className="hidden md:block absolute -bottom-10 opacity-0 group-hover:opacity-100 text-xs font-bold text-foreground text-center w-28 transition-all">
+                           {step.title}
+                       </span>
+                    </button>
+                  </React.Fragment>
                 );
               })}
             </div>

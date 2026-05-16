@@ -24,6 +24,7 @@ const serviceAssets: Record<string, any> = {
   robot: {
     icon: Zap,
     image: 'https://images.unsplash.com/photo-1518133835878-5a93cc3f89e5?q=80&w=2070&auto=format&fit=crop',
+    customIcon: '/robot.png'
   },
   watch: {
     icon: Watch,
@@ -36,6 +37,7 @@ const serviceAssets: Record<string, any> = {
   kulaklik: {
     icon: AppleHeadphonesIcon,
     image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=2070&auto=format&fit=crop',
+    customIcon: '/airpods.png'
   }
 };
 
@@ -107,7 +109,13 @@ export default function ServicePage() {
             className="inline-flex p-4 bg-primary/20 rounded-xl mb-6 backdrop-blur-md border border-white/10"
           >
 
-            <assets.icon size={40} className="text-primary" />
+            {assets.customIcon ? (
+              <div className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center">
+                <img src={assets.customIcon} alt="" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal transition-all scale-110" />
+              </div>
+            ) : (
+              <assets.icon size={56} className="text-primary" />
+            )}
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -136,8 +144,8 @@ export default function ServicePage() {
               href={`tel:${supportPhone.replace(/\s/g, '')}`}
               className="inline-flex items-center gap-3 px-8 py-4 bg-black/30 backdrop-blur-xl border border-white/30 rounded-xl hover:bg-black/40 transition-all group shadow-none dark:shadow-2xl dark:shadow-black/20"
             >
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white group-hover:scale-110 transition-transform">
-                <Phone size={20} />
+              <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center">
+                <img src="/calling.webp" alt="Phone" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
               </div>
               <div className="text-right">
                 <p className="text-[10px] font-black uppercase tracking-widest text-white/60 mb-0.5">{t('contact_us')}</p>

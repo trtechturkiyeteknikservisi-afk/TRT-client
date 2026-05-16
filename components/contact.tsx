@@ -78,7 +78,7 @@ export function Contact() {
             </div>
 
             {/* Quick Contact Cards */}
-            <div className="grid grid-cols-2  gap-1 md:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
               {[
                 { 
                   icon: Phone, 
@@ -86,7 +86,8 @@ export function Contact() {
                   value: settings.support_phone, 
                   color: 'primary',
                   link: `tel:${settings.support_phone}`,
-                  ltr: true
+                  ltr: true,
+                  image: '/calling.webp'
                 },
                 { 
                   icon: MessageCircle, 
@@ -94,7 +95,8 @@ export function Contact() {
                   value: t('whatsapp_cta'), 
                   color: 'green-500',
                   link: `https://wa.me/${settings.whatsapp.replace(/\D/g, '')}`,
-                  isWa: true
+                  isWa: true,
+                  image: '/whatsap.webp'
                 },
                 { 
                   icon: MessageCircle, 
@@ -103,7 +105,8 @@ export function Contact() {
                   color: 'red-500',
                   link: `https://wa.me/905067006677`,
                   isWa: true,
-                  isComplaints: true
+                  isComplaints: true,
+                  image: '/whatsap.webp'
                 },
                 { 
                   icon: Mail, 
@@ -111,14 +114,16 @@ export function Contact() {
                   value: settings.support_email, 
                   color: 'indigo-500',
                   link: `mailto:${settings.support_email}`,
-                  isEmail: true
+                  isEmail: true,
+                  image: '/mail.webp'
                 },
                 { 
                   icon: MapPin, 
                   label: t('location_label'), 
                   value: t('location_value'), 
                   color: 'orange-500',
-                  link: 'https://maps.app.goo.gl/tB9vC5ZzX7rGZzX78' // Placeholder for actual link, or a search link
+                  link: 'https://maps.app.goo.gl/9kUMHWGGjDsoswFz9',
+                  image: '/location.webp'
                 }
               ].map((item, idx) => {
                 const Icon = item.icon;
@@ -129,37 +134,35 @@ export function Contact() {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: idx * 0.1 }}
                     viewport={{ once: true }}
-                    className="group relative p-6 rounded-xl bg-card/40 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all duration-500 hover:shadow-lg hover:shadow-primary/10 overflow-hidden"
+                    className="group relative p-6 rounded-xl bg-card/40 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all duration-500 hover:shadow-lg hover:shadow-primary/10 overflow-hidden cursor-pointer flex flex-col items-center text-center"
                   >
+                    <a 
+                      href={item.link !== '#' ? item.link : undefined}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute inset-0 z-20"
+                    />
                     <div className={cn(
-                      "p-3 rounded-xl w-fit transition-all duration-500 group-hover:scale-110 shadow-lg",
-                      item.isComplaints ? "bg-red-500 text-white shadow-red-500/20" : 
-                      item.isWa ? "bg-green-500/10 text-green-500 shadow-green-500/5" : "bg-primary text-primary-foreground shadow-primary/20"
+                      "p-1 transition-all duration-500 group-hover:scale-110 flex items-center justify-center rounded-full overflow-hidden w-16 h-16",
+                      "bg-transparent shadow-none"
                     )}>
-                      {item.isWa ? (
-                        <img src="/whats.png" alt="WhatsApp" className="w-6 h-6 object-contain" />
+                      {item.image ? (
+                        <img src={item.image} alt="" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal rounded-full overflow-hidden" />
                       ) : (
-                        <Icon size={24} strokeWidth={2.5} />
+                        <Icon size={32} strokeWidth={2.5} />
                       )}
                     </div>
                     
-                    <div className="mt-4 space-y-1">
+                    <div className="mt-4 space-y-1 w-full">
                       <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-70 group-hover:opacity-100 transition-opacity">
                         {item.label}
                       </p>
-                      {item.link !== '#' ? (
-                        <a 
-                          href={item.link} 
-                          className="text-base font-black group-hover:text-primary transition-colors block cursor-pointer"
-                          dir={item.ltr ? "ltr" : "auto"}
-                          target={item.isWa ? "_blank" : "_self"}
-                          rel={item.isWa ? "noopener noreferrer" : ""}
-                        >
-                          {item.value}
-                        </a>
-                      ) : (
-                        <p className="text-base font-black">{item.value}</p>
-                      )}
+                      <p className={cn(
+                        "text-base font-black group-hover:text-primary transition-colors block",
+                        item.ltr && "truncate" // Keep it readable
+                      )} dir={item.ltr ? "ltr" : undefined}>
+                        {item.value}
+                      </p>
                     </div>
                     
                     {/* Subtle design element */}

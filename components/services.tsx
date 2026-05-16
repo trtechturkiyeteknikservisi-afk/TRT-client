@@ -32,6 +32,7 @@ export function Services() {
       title: t('robot'),
       description: t('robot_desc'),
       icon: Zap,
+      customIcon: '/robot.png',
       color: 'bg-yellow-500/10 text-yellow-600',
       link: '/services/robot'
     },
@@ -53,6 +54,7 @@ export function Services() {
       title: t('headphones'),
       description: t('headphones_desc'),
       icon: AppleHeadphonesIcon,
+      customIcon: '/airpods.png',
       color: 'bg-indigo-500/10 text-indigo-600',
       link: '/services/kulaklik'
     }
@@ -90,11 +92,15 @@ export function Services() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="group relative bg-card/50 backdrop-blur-lg p-10 rounded-xl border-2 border-primary/10 dark:border-border/50 transition-all hover:border-primary hover:bg-card hover:shadow-xl flex flex-col h-full overflow-hidden"
+              className="group relative bg-card/50 backdrop-blur-lg p-10 rounded-xl border-2 border-primary/10 dark:border-border/50 transition-all hover:border-primary hover:bg-card hover:shadow-xl flex flex-col items-center text-center h-full overflow-hidden cursor-pointer"
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[3rem] -z-10 transition-colors group-hover:bg-primary/10" />
-              <div className="inline-flex p-5 rounded-xl mb-10 w-fit transition-all duration-500 group-hover:bg-primary group-hover:text-primary-foreground bg-muted text-foreground ring-1 ring-border/50">
-                {service.icon && <service.icon size={36} strokeWidth={2.5} />}
+              <div className="inline-flex p-5 rounded-xl mb-10 w-fit transition-all duration-500 group-hover:bg-primary group-hover:text-primary-foreground bg-muted text-foreground ring-1 ring-border/50 overflow-hidden">
+                {service.customIcon ? (
+                  <img src={service.customIcon} alt="" className="w-16 h-16 object-contain group-hover:brightness-0 group-hover:invert transition-all" />
+                ) : (
+                  service.icon && <service.icon size={48} strokeWidth={2.5} />
+                )}
               </div>
               <h3 className="text-2xl md:text-2xl font-black mb-4 text-foreground tracking-tight uppercase">{service.title}</h3>
               <p className="text-lg text-muted-foreground mb-10 font-semibold leading-relaxed flex-grow">
@@ -102,7 +108,7 @@ export function Services() {
               </p>
               <Link
                 href={service.link}
-                className="inline-flex items-center justify-between w-full p-4 rounded-xl bg-muted/50 text-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-all font-black uppercase tracking-widest text-xs border border-border/50 group-hover:border-primary"
+                className="inline-flex items-center justify-center gap-3 w-full p-4 rounded-xl bg-muted/50 text-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-all font-black uppercase tracking-widest text-xs border border-border/50 group-hover:border-primary"
               >
                 <span>{t('view_service') || 'Details'}</span>
                 <ArrowRight size={18} className={cn(isRTL && "rotate-180")} />
