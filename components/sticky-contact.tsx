@@ -75,9 +75,7 @@ export function StickyContact() {
       {/* Social Media Icons Vertical List */}
       <div className="flex flex-col-reverse items-center gap-3">
         <AnimatePresence>
-          {isOpen && socialLinks.map((social, idx) => {
-            const Icon = social.icon as any;
-            return (
+          {isOpen && socialLinks.map((social, idx) => (
               <motion.a
                 key={idx}
                 href={social.href}
@@ -90,21 +88,11 @@ export function StickyContact() {
                 className="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center hover:scale-110 transition-transform group cursor-pointer !bg-transparent !shadow-none !border-0"
                 style={{ background: 'none', backgroundColor: 'transparent', boxShadow: 'none', border: 'none' }}
               >
-                {social.image ? (
-                  <div className="w-full h-full rounded-full overflow-hidden">
-                    <img src={social.image} alt="" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal rounded-full overflow-hidden" />
-                  </div>
-                ) : (
-                  <div 
-                    className="w-full h-full flex items-center justify-center text-primary !bg-transparent"
-                    style={{ background: 'none', backgroundColor: 'transparent' }}
-                  >
-                    <Icon className="w-6 h-6 md:w-8 md:h-8 transition-transform group-hover:scale-110" />
-                  </div>
-                )}
+                <div className="w-full h-full rounded-full overflow-hidden">
+                  <img src={social.image} alt="" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal rounded-full overflow-hidden" />
+                </div>
               </motion.a>
-            );
-          })}
+          ))}
         </AnimatePresence>
       </div>
     </div>
