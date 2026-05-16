@@ -8,12 +8,21 @@ import { cn } from '@/lib/utils';
 import { useTranslations, useLocale } from 'next-intl';
 import { AppleHeadphonesIcon, RobotVacuumIcon } from './social-icons';
 
+interface ServiceItem {
+  title: string;
+  description: string;
+  icon: any;
+  color: string;
+  link: string;
+  customIcon?: string;
+}
+
 export function Services() {
   const t = useTranslations('Services');
   const locale = useLocale();
   const isRTL = locale === 'ar';
   
-  const services = [
+  const services: ServiceItem[] = [
     {
       title: t('phone'),
       description: t('phone_desc'),
