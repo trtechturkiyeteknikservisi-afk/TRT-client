@@ -79,7 +79,7 @@ export function RepairProcess() {
     if (isPlaying) {
       interval = setInterval(() => {
         setActiveStep((prev) => (prev + 1) % steps.length);
-      }, 2000);
+      }, 5000); // Increased from 2000ms to 5000ms for better reading time
     }
     return () => clearInterval(interval);
   }, [isPlaying, steps.length]);
@@ -133,11 +133,9 @@ export function RepairProcess() {
 
         {/* Interactive Interactive Process UI */}
         <div className="max-w-6xl mx-auto">
-          
-          {/* Top Timeline Navigation */}
           <div 
             ref={scrollContainerRef} 
-            className="relative mb-10 md:mb-16 overflow-x-auto scrollbar-hide py-4 -mx-4 px-4 md:mx-0 md:px-0 touch-pan-x overscroll-x-contain select-none cursor-grab active:cursor-grabbing"
+            className="relative mb-10 md:mb-16 overflow-x-auto scrollbar-hide pt-4 pb-14 md:pb-28 -mx-4 px-4 md:mx-0 md:px-0 touch-pan-x overscroll-x-contain select-none cursor-grab active:cursor-grabbing"
             style={{ WebkitOverflowScrolling: 'touch' }}
             onMouseDown={handleMouseDown}
             onMouseLeave={handleMouseLeave}
@@ -183,22 +181,18 @@ export function RepairProcess() {
                           <step.icon size={26} className={cn("md:w-10 md:h-10", isActive && "animate-pulse")} />
                        </div>
                        
-                       {/* Mobile title (only for active) */}
+                       {/* Sleek, dynamically responsive step title with perfect spacing */}
                        <span className={cn(
-                         "absolute -bottom-6 text-[8px] font-bold uppercase tracking-tighter whitespace-nowrap md:hidden transition-opacity",
-                         index === 0 
-                           ? (isRTL ? "right-0 translate-x-0" : "left-0 translate-x-0")
-                           : index === steps.length - 1
-                           ? (isRTL ? "left-0 translate-x-0" : "right-0 translate-x-0")
-                           : "left-1/2 -translate-x-1/2",
-                         isActive ? "opacity-100" : "opacity-0"
+                         "absolute text-center whitespace-normal leading-tight font-bold uppercase tracking-wider transition-all duration-300 pointer-events-none",
+                         // Tiny elegant font sizes and spacing
+                         "top-full mt-2 w-20 left-1/2 -translate-x-1/2 text-[8px]",
+                         "md:mt-3 md:text-[10px] md:w-28",
+                         // Dynamically responsive visibility: active-only on mobile, always visible on desktop
+                         isActive 
+                           ? "text-primary opacity-100 font-extrabold" 
+                           : "text-muted-foreground scale-100 opacity-0 md:opacity-60 group-hover:opacity-100 group-hover:text-primary"
                        )}>
                          {step.title}
-                       </span>
-
-                       {/* Desktop title for hover */}
-                       <span className="hidden md:block absolute -bottom-10 opacity-0 group-hover:opacity-100 text-xs font-bold text-foreground text-center w-28 transition-all">
-                           {step.title}
                        </span>
                     </button>
                   </React.Fragment>
@@ -222,7 +216,7 @@ export function RepairProcess() {
           </div>
 
           {/* Active Step Presentation */}
-          <div className="relative bg-card/40 backdrop-blur-lg rounded-xl border border-primary/10 dark:border-white/5 shadow-lg overflow-hidden min-h-[400px] flex items-center">
+          <div className="relative bg-card/40 backdrop-blur-lg rounded-xl border border-primary/10 dark:border-white/5 shadow-lg overflow-hidden min-h-[600px] md:min-h-[450px] flex items-center">
              {/* Large background number */}
              <div className={cn(
                  "absolute top-1/2 -translate-y-1/2 text-[20rem] font-black text-foreground/5 select-none pointer-events-none",
