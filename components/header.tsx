@@ -245,7 +245,7 @@ export function Header() {
 
             {/* Mobile Menu Toggle */}
             <button
-              className="xl:hidden p-1 rounded-lg text-muted-foreground transition-all active:scale-95 flex-shrink-0"
+              className="xl:hidden p-1 rounded-lg text-muted-foreground transition-all active:scale-95 flex-shrink-0 cursor-pointer"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? <X size={20} /> : <Menu size={20} />}

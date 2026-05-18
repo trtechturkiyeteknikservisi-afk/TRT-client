@@ -9,6 +9,7 @@ import {
 import { useTranslations, useLocale } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useRouter } from '@/i18n/routing';
+import toast from 'react-hot-toast';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -63,7 +64,7 @@ export default function BannersPage() {
   const saveBanner = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!bannerForm.image) {
-      alert('Please upload an image first');
+      toast.error('Please upload an image first');
       return;
     }
     const token = localStorage.getItem('token');
@@ -73,10 +74,12 @@ export default function BannersPage() {
         await axios.put(`${API_BASE}/banners/${editingId}`, bannerForm, {
           headers: { Authorization: `Bearer ${token}` }
         });
+        toast.success('Banner updated successfully!');
       } else {
         await axios.post(`${API_BASE}/banners`, bannerForm, {
           headers: { Authorization: `Bearer ${token}` }
         });
+        toast.success('Banner published successfully!');
       }
       setBannerForm({ 
         title_en: '', title_tr: '', title_ar: '',
@@ -90,6 +93,7 @@ export default function BannersPage() {
       fetchData();
     } catch (err) {
       console.error('Error saving banner', err);
+      toast.error('Failed to save banner.');
     } finally {
       setActionLoading(false);
     }
@@ -115,9 +119,11 @@ export default function BannersPage() {
       await axios.put(`${API_BASE}/banners/${banner.id}`, { active: !banner.active }, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      toast.success('Banner visibility updated!');
       fetchData();
     } catch (err) {
       console.error('Error updating banner', err);
+      toast.error('Failed to update banner status.');
     } finally {
       setActionLoading(false);
     }
@@ -129,9 +135,11 @@ export default function BannersPage() {
     setActionLoading(true);
     try {
       await axios.delete(`${API_BASE}/banners/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      toast.success('Banner deleted successfully!');
       fetchData();
     } catch (err) {
       console.error('Error deleting banner', err);
+      toast.error('Failed to delete banner.');
     } finally {
       setActionLoading(false);
     }
@@ -154,9 +162,10 @@ export default function BannersPage() {
         }
       });
       setBannerForm(prev => ({ ...prev, image: (res.data as any).url }));
+      toast.success('Image uploaded successfully!');
     } catch (err) {
       console.error('Error uploading image', err);
-      alert('Failed to upload image. Please try again.');
+      toast.error('Failed to upload image. Please try again.');
     } finally {
       setUploadLoading(false);
     }

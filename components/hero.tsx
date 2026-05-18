@@ -103,9 +103,10 @@ export function Hero({ initialBanners }: HeroProps) {
         {banners.map((banner, index) => (
           <motion.div
             key={`bg-${index}`}
-            initial={{ opacity: 0 }}
+            initial={{ opacity: 0, visibility: 'hidden' }}
             animate={{ 
-              opacity: index === current ? 1 : 0
+              opacity: index === current ? 1 : 0,
+              visibility: index === current ? 'visible' : 'hidden'
             }}
             transition={{ duration: 1.5 }} // Smoother background fade
             className="absolute inset-0 z-0"
@@ -116,7 +117,7 @@ export function Hero({ initialBanners }: HeroProps) {
                 src={banner.image}
                 alt="Banner Background"
                 fill
-                priority={index === 0}
+                priority={true}
                 className="object-cover"
                 sizes="100vw"
               />
@@ -135,21 +136,22 @@ export function Hero({ initialBanners }: HeroProps) {
 
       <div className="relative container mx-auto px-4 w-full flex flex-col lg:flex-row items-center lg:justify-between gap-8 lg:gap-16 z-10">
         {/* Animated Content Section */}
-        <div className="w-full lg:flex-1 relative h-[500px] sm:h-[550px] lg:h-[650px] flex items-center overflow-hidden">
+        <div className="w-full lg:flex-1 relative h-[600px] sm:h-[650px] lg:h-[750px] flex items-center">
           {banners.map((banner, index) => (
             <motion.div
               key={`content-${index}`}
-              initial={{ opacity: 0, x: isRTL ? 40 : -40 }}
+              initial={{ opacity: 0, x: isRTL ? 40 : -40, visibility: 'hidden' }}
               animate={{ 
                 opacity: index === current ? 1 : 0,
                 x: index === current ? 0 : (isRTL ? -40 : 40),
+                visibility: index === current ? 'visible' : 'hidden'
               }}
               style={{
                 pointerEvents: index === current ? 'auto' : 'none'
               }}
               transition={{ duration: 0.6, ease: "easeInOut" }}
               className={cn(
-                "absolute inset-0 flex flex-col justify-center space-y-6 md:space-y-10 z-10", 
+                "absolute inset-0 flex flex-col justify-center space-y-4 md:space-y-6 z-10", 
                 isRTL ? "text-right lg:border-r-4 border-primary lg:pr-10" : "text-left lg:border-l-4 border-primary lg:pl-10"
               )}
             >
@@ -248,7 +250,7 @@ export function Hero({ initialBanners }: HeroProps) {
                     key={index}
                     onClick={() => setCurrent(index)}
                     className={cn(
-                      "w-8 h-1 rounded-full transition-all duration-500",
+                      "w-8 h-1 rounded-full transition-all duration-500 cursor-pointer",
                       current === index ? "bg-primary w-12" : "bg-white/20"
                     )}
                   />
@@ -266,7 +268,7 @@ export function Hero({ initialBanners }: HeroProps) {
             key={index}
             onClick={() => setCurrent(index)}
             className={cn(
-              "h-12 w-1.5 rounded-full transition-all duration-500",
+              "h-12 w-1.5 rounded-full transition-all duration-500 cursor-pointer",
               current === index ? "bg-primary h-20" : "bg-white/20 hover:bg-white/40"
             )}
           />

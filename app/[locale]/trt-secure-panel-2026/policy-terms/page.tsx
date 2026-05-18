@@ -10,6 +10,7 @@ import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useRouter } from '@/i18n/routing';
 import { FileUp, Eye, Trash2, FileText } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -18,7 +19,6 @@ export default function PolicyTermsPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [uploading, setUploading] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
   const [activePolicy, setActivePolicy] = useState('privacy');
   const [activeLang, setActiveLang] = useState('tr');
   const [settingsData, setSettingsData] = useState<Record<string, string>>({});
@@ -60,17 +60,17 @@ export default function PolicyTermsPage() {
   };
 
   const handleUpdate = async (event: React.FormEvent) => {
-    event.preventDefault();
+    if (event) event.preventDefault();
     const token = localStorage.getItem('token');
     setActionLoading(true);
     try {
       await axios.put(`${API_BASE}/settings`, settingsData, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setMessage(t('saved') || 'Settings updated successfully');
-      setTimeout(() => setMessage(null), 3000);
+      toast.success(t('saved') || 'Settings updated successfully');
     } catch (err) {
       console.error('Error updating settings', err);
+      toast.error('Failed to update settings.');
     } finally {
       setActionLoading(false);
     }
@@ -97,12 +97,10 @@ export default function PolicyTermsPage() {
       
       const filePath = response.data.path;
       setSettingsData(prev => ({ ...prev, [key]: filePath }));
-      setMessage(t('upload_success') || 'File uploaded successfully');
-      setTimeout(() => setMessage(null), 3000);
+      toast.success(t('upload_success') || 'File uploaded successfully');
     } catch (err) {
       console.error('Error uploading file', err);
-      setMessage(t('upload_error') || 'Error uploading file');
-      setTimeout(() => setMessage(null), 3000);
+      toast.error(t('upload_error') || 'Error uploading file');
     } finally {
       setUploading(null);
     }
@@ -154,13 +152,6 @@ export default function PolicyTermsPage() {
               <span className="uppercase tracking-widest">{actionLoading ? t('loading') : t('save')}</span>
            </button>
       </header>
-
-      {message && (
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-emerald-500/10 text-emerald-600 p-4 rounded-md border border-emerald-500/20 font-bold flex items-center space-x-3 text-sm">
-           <CheckCircle size={16} />
-           <span>{message}</span>
-        </motion.div>
-      )}
 
       <div className="bg-card border rounded-md p-6 sm:p-10 shadow-2xl shadow-black/5 relative overflow-hidden">
         <div className="absolute top-0 right-0 p-10 opacity-[0.02] pointer-events-none">

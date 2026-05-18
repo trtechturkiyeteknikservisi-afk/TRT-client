@@ -11,6 +11,7 @@ import {
 import { useTranslations, useFormatter } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useRouter } from '@/i18n/routing';
+import toast from 'react-hot-toast';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 const ITEMS_PER_PAGE = 8;
@@ -57,9 +58,11 @@ export default function ContactsPage() {
       await axios.patch(`${API_BASE}/contacts/${id}/status`, { status }, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      toast.success('Order status updated successfully!');
       fetchData();
     } catch (err) {
       console.error('Error updating status', err);
+      toast.error('Failed to update status.');
     } finally {
       setActionLoading(false);
     }
@@ -73,9 +76,11 @@ export default function ContactsPage() {
       await axios.delete(`${API_BASE}/contacts/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      toast.success('Order deleted successfully!');
       fetchData();
     } catch (err) {
       console.error('Error deleting item', err);
+      toast.error('Failed to delete order.');
     } finally {
       setActionLoading(false);
     }
@@ -85,6 +90,7 @@ export default function ContactsPage() {
     if (!text) return;
     navigator.clipboard.writeText(text);
     setCopiedId(id);
+    toast.success('Copied to clipboard!');
     setTimeout(() => setCopiedId(null), 2000);
   };
 

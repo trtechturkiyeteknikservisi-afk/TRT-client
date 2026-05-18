@@ -133,14 +133,6 @@ export default function BlogPostPage() {
                     ) : <br key={idx} />
                 ))}
             </div>
-
-            {/* Quote Block Placeholder */}
-            <div className="my-16 p-10 bg-muted/30 border-l-8 border-primary rounded-3xl relative overflow-hidden">
-                <Quote size={80} className="absolute -top-4 -right-4 text-primary/5 -rotate-12" />
-                <p className="text-2xl font-black italic text-foreground tracking-tight leading-snug">
-                    "Professional repair isn't just about fixing the hardware; it's about restoring the digital heartbeat of your daily life."
-                </p>
-            </div>
           </article>
 
           {/* Sidebar-like interactions */}
@@ -156,11 +148,7 @@ export default function BlogPostPage() {
             </div>
             
             <div className="flex items-center gap-4">
-                <button className="flex items-center gap-2 px-6 py-3 bg-muted hover:bg-muted/80 rounded-xl transition-all font-bold text-sm uppercase tracking-widest">
-                    <Share2 size={16} className="text-primary" />
-                    Share
-                </button>
-                <Link href="/#contact" className="px-6 py-3 bg-primary text-primary-foreground rounded-xl font-black text-sm uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-105 transition-all">
+                <Link href="/#contact" className="px-6 py-3 bg-primary text-primary-foreground rounded-xl font-black text-sm uppercase tracking-widest hover:scale-105 transition-all">
                     Repair Now
                 </Link>
             </div>

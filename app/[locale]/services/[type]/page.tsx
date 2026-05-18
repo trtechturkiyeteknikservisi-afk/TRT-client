@@ -142,9 +142,9 @@ export default function ServicePage() {
               href={`tel:${supportPhone.replace(/\s/g, '')}`}
               className="inline-flex items-center gap-3 px-8 py-4 bg-black/30 backdrop-blur-xl border border-white/30 rounded-xl hover:bg-black/40 transition-all group shadow-none dark:shadow-2xl dark:shadow-black/20"
             >
-              <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white dark:bg-white shadow-md border border-border/10 p-1.5 shrink-0">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white dark:bg-white shadow-md border border-border/10 p-0.5 shrink-0">
                 <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center">
-                  <img src="/calling.webp" alt="Phone" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
+                  <img src="/calling-new.webp" alt="Phone" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
                 </div>
               </div>
               <div className="text-right">
@@ -155,7 +155,6 @@ export default function ServicePage() {
           </motion.div>
         </div>
       </section>
-
       <ServiceBrands type={serviceKey} />
       
       <section className="py-24">

@@ -168,7 +168,7 @@ export function RepairProcess() {
           <div className="flex justify-center mb-8">
               <button 
                   onClick={() => setIsPlaying(!isPlaying)}
-                  className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
+                  className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors cursor-pointer"
               >
                   {isPlaying ? (
                       <><Pause size={14} /> {t('pause_autoplay')}</>

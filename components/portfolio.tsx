@@ -104,7 +104,7 @@ export function Portfolio({ limit = 6, showTitle = true }: PortfolioProps) {
       {selectedWork && (
         <div className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4">
           <button
-            className="absolute top-4 right-4 p-2 text-white hover:bg-white/10 rounded-full transition-colors"
+            className="absolute top-4 right-4 p-2 text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer"
             onClick={() => setSelectedWork(null)}
           >
             <X size={32} />

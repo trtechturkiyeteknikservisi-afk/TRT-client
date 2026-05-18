@@ -230,7 +230,7 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
           <button
             type="submit"
             disabled={loading || !kvkkAccepted}
-            className="group relative w-full h-14 bg-primary text-primary-foreground rounded-xl font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 overflow-hidden shadow-lg shadow-primary/10 dark:shadow-xl dark:shadow-primary/20 transition-all active:scale-[0.98] disabled:opacity-50 mt-2"
+            className="group relative w-full h-14 bg-primary text-primary-foreground rounded-xl font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 overflow-hidden shadow-lg shadow-primary/10 dark:shadow-xl dark:shadow-primary/20 transition-all active:scale-[0.98] disabled:opacity-50 mt-2 cursor-pointer disabled:cursor-not-allowed"
           >
             <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
             
@@ -278,7 +278,7 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
               </div>
               <button
                 onClick={() => setShowSuccessModal(false)}
-                className="w-full h-12 bg-foreground text-background rounded-xl font-black text-[11px] uppercase tracking-widest"
+                className="w-full h-12 bg-foreground text-background rounded-xl font-black text-[11px] uppercase tracking-widest cursor-pointer"
               >
                 {t('close')}
               </button>

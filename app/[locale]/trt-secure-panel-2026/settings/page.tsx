@@ -9,6 +9,7 @@ import {
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useRouter } from '@/i18n/routing';
+import toast from 'react-hot-toast';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -16,7 +17,6 @@ export default function SettingsPage() {
   const t = useTranslations('Admin');
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   
   const [settingsForm, setSettingsForm] = useState({
@@ -66,7 +66,7 @@ export default function SettingsPage() {
   };
 
   const handleUpdate = async (event: React.FormEvent) => {
-    event.preventDefault();
+    if (event) event.preventDefault();
     const token = localStorage.getItem('token');
     setActionLoading(true);
     try {
@@ -86,7 +86,8 @@ export default function SettingsPage() {
       const accountPayload: any = { username: settingsForm.username };
       if (settingsForm.password) {
         if (settingsForm.password !== settingsForm.confirmPassword) {
-            setMessage('Passwords do not match');
+            toast.error('Passwords do not match');
+            setActionLoading(false);
             return;
         }
         accountPayload.password = settingsForm.password;
@@ -96,10 +97,10 @@ export default function SettingsPage() {
          headers: { Authorization: `Bearer ${token}` }
       });
 
-      setMessage(t('saved'));
-      setTimeout(() => setMessage(null), 3000);
+      toast.success(t('saved') || 'Settings saved successfully');
     } catch (err) {
       console.error('Error updating settings', err);
+      toast.error('Failed to update settings.');
     } finally {
       setActionLoading(false);
     }
@@ -141,13 +142,6 @@ export default function SettingsPage() {
               <span>{actionLoading ? t('loading') : t('save')}</span>
            </button>
       </header>
-
-      {message && (
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-emerald-500/10 text-emerald-600 p-4 rounded-md border border-emerald-500/20 font-bold flex items-center space-x-3 text-sm">
-           <CheckCircle size={16} />
-           <span>{message}</span>
-        </motion.div>
-      )}
 
       <div className="grid grid-cols-1 gap-6">
           <div className="bg-card p-8 rounded-lg border shadow-sm space-y-6">

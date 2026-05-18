@@ -144,7 +144,7 @@ const VerificationPage = () => {
                         </p>
                         <button 
                             onClick={() => router.push('/')}
-                            className="px-8 py-4 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all"
+                            className="px-8 py-4 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all cursor-pointer"
                         >
                             {locale === 'ar' ? 'العودة للرئيسية' : locale === 'tr' ? 'Ana Sayfaya Dön' : 'Back to Home'}
                         </button>
@@ -181,7 +181,7 @@ const VerificationPage = () => {
                                 key={l.code}
                                 onClick={() => handleLocaleChange(l.code as any)}
                                 className={cn(
-                                    "px-3 py-1.5 rounded-lg transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest", 
+                                    "px-3 py-1.5 rounded-lg transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest cursor-pointer", 
                                     locale === l.code ? "bg-red-600 text-white shadow-lg shadow-red-600/20" : "text-gray-500 hover:text-white"
                                 )}
                             >
@@ -314,7 +314,7 @@ const VerificationPage = () => {
                                 <button 
                                     type="button"
                                     onClick={() => setShowPolicyModal({show: true, type: 'kvkk'})}
-                                    className="text-red-500 hover:underline decoration-red-500/30 underline-offset-4 text-left"
+                                    className="text-red-500 hover:underline decoration-red-500/30 underline-offset-4 text-left cursor-pointer"
                                 >
                                     {t('kvkk_accept').split('KVKK Aydınlatma Metni')[0]}
                                     <span className="underline decoration-red-500/50">KVKK Aydınlatma Metni</span>
@@ -340,7 +340,7 @@ const VerificationPage = () => {
                                 <button 
                                     type="button"
                                     onClick={() => setShowPolicyModal({show: true, type: 'terms'})}
-                                    className="text-red-500 hover:underline decoration-red-500/30 underline-offset-4 text-left"
+                                    className="text-red-500 hover:underline decoration-red-500/30 underline-offset-4 text-left cursor-pointer"
                                 >
                                     {t('terms_accept').split('Servis Şartları')[0]}
                                     <span className="underline decoration-red-500/50">Servis Şartları</span>
@@ -374,14 +374,14 @@ const VerificationPage = () => {
                             <button 
                                 type="button"
                                 onClick={() => router.back()}
-                                className="p-4 rounded-xl bg-white/5 border border-white/5 text-gray-500 hover:bg-white/10 transition-all active:scale-95"
+                                className="p-4 rounded-xl bg-white/5 border border-white/5 text-gray-500 hover:bg-white/10 transition-all active:scale-95 cursor-pointer"
                             >
                                 <ChevronLeft className={cn("w-5 h-5", locale === 'ar' && "rotate-180")} />
                             </button>
                             <button 
                                 type="submit"
                                 disabled={loading || !kvkkAccepted || !termsAccepted}
-                                className="grow group relative bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-xs py-4 rounded-xl transition-all duration-300 shadow-2xl shadow-red-600/20 overflow-hidden active:scale-[0.98]"
+                                className="grow group relative bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-xs py-4 rounded-xl transition-all duration-300 shadow-2xl shadow-red-600/20 overflow-hidden active:scale-[0.98] cursor-pointer"
                             >
                                 <div className="flex items-center justify-center gap-3 relative z-10">
                                     {loading ? (
@@ -493,7 +493,7 @@ const VerificationPage = () => {
                                             else setTermsAccepted(true);
                                             setShowPolicyModal({show: false, type: null}); 
                                         }}
-                                        className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-red-600/20"
+                                        className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-red-600/20 cursor-pointer"
                                     >
                                         {tContact('close')}
                                     </button>

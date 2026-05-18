@@ -4,14 +4,14 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { 
-  BookOpen, Trash2, Search, Upload, Plus, Languages, User, Calendar
+  BookOpen, Trash2, Search, Upload, Plus, Languages, User, Calendar, Edit3
 } from 'lucide-react';
 import { useTranslations, useLocale, useFormatter } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useRouter } from '@/i18n/routing';
+import toast from 'react-hot-toast';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-
 export default function BlogsPage() {
   const t = useTranslations('Admin');
   const locale = useLocale();
@@ -19,12 +19,21 @@ export default function BlogsPage() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [blogForm, setBlogForm] = useState({ 
     title_en: '', title_tr: '', title_ar: '',
     content_en: '', content_tr: '', content_ar: '',
     image: '', author: 'Admin'
   });
   const router = useRouter();
+
+  const showToast = (type: 'success' | 'error', message: string) => {
+    if (type === 'success') {
+      toast.success(message);
+    } else {
+      toast.error(message);
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -45,22 +54,74 @@ export default function BlogsPage() {
     }
   };
 
+  const startEdit = (item: any) => {
+    setEditingId(item.id);
+    setBlogForm({
+      title_en: item.title_en || '', title_tr: item.title_tr || '', title_ar: item.title_ar || '',
+      content_en: item.content_en || '', content_tr: item.content_tr || '', content_ar: item.content_ar || '',
+      image: item.image || '', author: item.author || 'Admin'
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setBlogForm({ 
+      title_en: '', title_tr: '', title_ar: '',
+      content_en: '', content_tr: '', content_ar: '',
+      image: '', author: 'Admin' 
+    });
+  };
+
   const createBlog = async (event: React.FormEvent) => {
     event.preventDefault();
+
+    // Validate that at least one language version is completely filled (both Title and Content)
+    const hasEn = blogForm.title_en.trim() && blogForm.content_en.trim();
+    const hasTr = blogForm.title_tr.trim() && blogForm.content_tr.trim();
+    const hasAr = blogForm.title_ar.trim() && blogForm.content_ar.trim();
+
+    if (!hasEn && !hasTr && !hasAr) {
+      showToast('error', 'Please fill out Title and Content for at least one language version (English, Turkish, or Arabic).');
+      return;
+    }
+
+    // Determine the fallback content (first filled language version)
+    const fallback = {
+      title: blogForm.title_en.trim() || blogForm.title_tr.trim() || blogForm.title_ar.trim(),
+      content: blogForm.content_en.trim() || blogForm.content_tr.trim() || blogForm.content_ar.trim()
+    };
+
+    // Populate empty language versions with the fallback content
+    const finalizedForm = {
+      ...blogForm,
+      title_en: blogForm.title_en.trim() || fallback.title,
+      content_en: blogForm.content_en.trim() || fallback.content,
+      title_tr: blogForm.title_tr.trim() || fallback.title,
+      content_tr: blogForm.content_tr.trim() || fallback.content,
+      title_ar: blogForm.title_ar.trim() || fallback.title,
+      content_ar: blogForm.content_ar.trim() || fallback.content,
+    };
+
     const token = localStorage.getItem('token');
     setActionLoading(true);
     try {
-      await axios.post(`${API_BASE}/blogs`, blogForm, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setBlogForm({ 
-        title_en: '', title_tr: '', title_ar: '',
-        content_en: '', content_tr: '', content_ar: '',
-        image: '', author: 'Admin' 
-      });
+      if (editingId) {
+        await axios.put(`${API_BASE}/blogs/${editingId}`, finalizedForm, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        showToast('success', 'Blog post updated successfully!');
+      } else {
+        await axios.post(`${API_BASE}/blogs`, finalizedForm, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        showToast('success', 'Blog post published successfully!');
+      }
+      cancelEdit();
       fetchData();
     } catch (err) {
-      console.error('Error creating blog', err);
+      console.error('Error saving blog', err);
+      showToast('error', editingId ? 'Failed to update blog post.' : 'Failed to publish blog post.');
     } finally {
       setActionLoading(false);
     }
@@ -72,9 +133,11 @@ export default function BlogsPage() {
     setActionLoading(true);
     try {
       await axios.delete(`${API_BASE}/blogs/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      showToast('success', 'Blog post deleted successfully!');
       fetchData();
     } catch (err) {
       console.error('Error deleting blog', err);
+      showToast('error', 'Failed to delete blog post.');
     } finally {
       setActionLoading(false);
     }
@@ -97,8 +160,10 @@ export default function BlogsPage() {
         }
       });
       setBlogForm(prev => ({ ...prev, image: (res.data as any).url }));
+      showToast('success', 'Image uploaded successfully!');
     } catch (err) {
       console.error('Error uploading image', err);
+      showToast('error', 'Failed to upload image.');
     } finally {
       setActionLoading(false);
     }
@@ -109,7 +174,8 @@ export default function BlogsPage() {
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+
       <header>
         <div className="flex items-center space-x-2 text-primary mb-2">
           <div className="w-6 h-1 bg-primary rounded-full" />
@@ -167,7 +233,6 @@ export default function BlogsPage() {
                   value={blogForm.title_en}
                   onChange={(e) => setBlogForm(p => ({ ...p, title_en: e.target.value }))}
                   className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
-                  required
                 />
               </div>
               <div className="space-y-1">
@@ -176,7 +241,6 @@ export default function BlogsPage() {
                   value={blogForm.content_en}
                   onChange={(e) => setBlogForm(p => ({ ...p, content_en: e.target.value }))}
                   className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-32"
-                  required
                 />
               </div>
             </div>
@@ -193,7 +257,6 @@ export default function BlogsPage() {
                   value={blogForm.title_tr}
                   onChange={(e) => setBlogForm(p => ({ ...p, title_tr: e.target.value }))}
                   className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
-                  required
                 />
               </div>
               <div className="space-y-1">
@@ -202,7 +265,6 @@ export default function BlogsPage() {
                   value={blogForm.content_tr}
                   onChange={(e) => setBlogForm(p => ({ ...p, content_tr: e.target.value }))}
                   className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-32"
-                  required
                 />
               </div>
             </div>
@@ -219,7 +281,6 @@ export default function BlogsPage() {
                   value={blogForm.title_ar}
                   onChange={(e) => setBlogForm(p => ({ ...p, title_ar: e.target.value }))}
                   className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
-                  required
                 />
               </div>
               <div className="space-y-1">
@@ -228,19 +289,29 @@ export default function BlogsPage() {
                   value={blogForm.content_ar}
                   onChange={(e) => setBlogForm(p => ({ ...p, content_ar: e.target.value }))}
                   className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-32"
-                  required
                 />
               </div>
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={actionLoading}
-            className="w-full px-6 py-4 rounded-md bg-primary text-primary-foreground font-black text-sm shadow-xl shadow-primary/30 hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50 uppercase tracking-widest"
-          >
-            {actionLoading ? t('loading') : t('publish_blog')}
-          </button>
+          <div className="flex gap-4">
+              <button
+                type="submit"
+                disabled={actionLoading}
+                className="flex-grow px-6 py-4 rounded-md bg-primary text-primary-foreground font-black text-sm hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50 uppercase tracking-widest cursor-pointer"
+              >
+                {actionLoading ? t('loading') : (editingId ? 'Update Blog' : t('publish_blog'))}
+              </button>
+              {editingId && (
+                <button
+                    type="button"
+                    onClick={cancelEdit}
+                    className="px-6 py-4 rounded-md bg-muted text-foreground font-black text-sm hover:bg-muted/80 transition-all active:scale-[0.98] uppercase tracking-widest cursor-pointer"
+                >
+                    Cancel Edit
+                </button>
+              )}
+          </div>
         </form>
       </div>
 
@@ -273,13 +344,24 @@ export default function BlogsPage() {
                                     <span className="text-[10px] font-bold uppercase tracking-tight">{format.dateTime(new Date(item.date), { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                                 </div>
                             </div>
-                            <button
-                                onClick={() => deleteBlog(item.id)}
-                                disabled={actionLoading}
-                                className="p-2.5 rounded-md bg-red-500/5 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95"
-                            >
-                                <Trash2 size={16} strokeWidth={2.5} />
-                            </button>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => startEdit(item)}
+                                    disabled={actionLoading}
+                                    className="p-2.5 rounded-md bg-blue-500/5 text-blue-500 hover:bg-blue-500 hover:text-white transition-all shadow-sm active:scale-95 cursor-pointer"
+                                    title="Edit Blog"
+                                >
+                                    <Edit3 size={16} strokeWidth={2.5} />
+                                </button>
+                                <button
+                                    onClick={() => deleteBlog(item.id)}
+                                    disabled={actionLoading}
+                                    className="p-2.5 rounded-md bg-red-500/5 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95 cursor-pointer"
+                                    title="Delete Blog"
+                                >
+                                    <Trash2 size={16} strokeWidth={2.5} />
+                                </button>
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

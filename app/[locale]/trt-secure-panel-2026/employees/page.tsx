@@ -7,6 +7,7 @@ import {
   ShieldAlert, Shield, ShieldCheck, UserPlus, Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import toast from 'react-hot-toast';
 
 const PERMISSIONS = [
   { id: 'VIEW_ANALYTICS', label: 'View Analytics' },
@@ -126,8 +127,10 @@ export default function EmployeesPage() {
 
       await fetchUsers();
       setIsModalOpen(false);
+      toast.success(editingId ? 'Employee updated successfully!' : 'Employee added successfully!');
     } catch (error: any) {
       setFormError(error.message);
+      toast.error(error.message || 'An error occurred.');
     } finally {
       setFormLoading(false);
     }
@@ -135,7 +138,7 @@ export default function EmployeesPage() {
 
   const handleDelete = async (id: number, role: string) => {
     if (role === 'admin') {
-      alert('Cannot delete main admin account');
+      toast.error('Cannot delete main admin account');
       return;
     }
     if (!confirm('Are you sure you want to delete this employee?')) return;
@@ -149,9 +152,10 @@ export default function EmployeesPage() {
       });
       if (!res.ok) throw new Error('Failed to delete');
       await fetchUsers();
+      toast.success('Employee deleted successfully!');
     } catch (error) {
       console.error(error);
-      alert('Failed to delete user');
+      toast.error('Failed to delete user');
     }
   };
 

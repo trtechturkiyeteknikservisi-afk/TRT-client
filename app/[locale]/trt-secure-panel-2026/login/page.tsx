@@ -98,7 +98,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex items-center justify-center space-x-2 bg-primary text-primary-foreground py-5 rounded-lg font-black text-lg hover:bg-primary/90 transition-all shadow-2xl shadow-primary/30 active:scale-95 disabled:opacity-50 group"
+                className="w-full flex items-center justify-center space-x-2 bg-primary text-primary-foreground py-5 rounded-lg font-black text-lg hover:bg-primary/90 transition-all shadow-2xl shadow-primary/30 active:scale-95 disabled:opacity-50 group cursor-pointer disabled:cursor-not-allowed"
               >
                 <span>{loading ? 'Authenticating...' : 'Sign In'}</span>
                 {!loading && <LogIn size={22} className="group-hover:translate-x-1 transition-transform" />}

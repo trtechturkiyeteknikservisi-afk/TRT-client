@@ -115,7 +115,7 @@ export function Reviews() {
           </p>
           <button
             onClick={() => setShowForm((prev) => !prev)}
-            className="mt-6 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold hover:scale-105 transition-transform"
+            className="mt-6 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold hover:scale-105 transition-transform cursor-pointer"
           >
             {t('add_review')}
           </button>
@@ -158,7 +158,7 @@ export function Reviews() {
               <button
                 type="submit"
                 disabled={loading || !kvkkAccepted}
-                className="w-full px-4 py-4 rounded-xl bg-primary text-primary-foreground font-black uppercase tracking-widest disabled:opacity-50"
+                className="w-full px-4 py-4 rounded-xl bg-primary text-primary-foreground font-black uppercase tracking-widest disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
               >
                 {loading ? t('sending') : t('submit')}
               </button>

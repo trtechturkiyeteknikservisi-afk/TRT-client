@@ -39,7 +39,7 @@ export function KVKKCheckbox({ accepted, onChange }: KVKKCheckboxProps) {
                     <button 
                         type="button"
                         onClick={() => setShowModal(true)}
-                        className="text-primary hover:underline underline-offset-2 decoration-primary/30 text-left"
+                        className="text-primary hover:underline underline-offset-2 decoration-primary/30 text-left cursor-pointer"
                     >
                         {t('kvkk_text')}
                     </button>
@@ -73,7 +73,7 @@ export function KVKKCheckbox({ accepted, onChange }: KVKKCheckboxProps) {
                                 </div>
                                 <button 
                                     onClick={() => setShowModal(false)}
-                                    className="p-3 hover:bg-foreground/5 rounded-full transition-colors text-muted-foreground"
+                                    className="p-3 hover:bg-foreground/5 rounded-full transition-colors text-muted-foreground cursor-pointer"
                                 >
                                     <X size={24} />
                                 </button>
@@ -89,7 +89,7 @@ export function KVKKCheckbox({ accepted, onChange }: KVKKCheckboxProps) {
                             <div className="p-6 md:p-8 border-t bg-muted/20 flex justify-end gap-4">
                                  <button 
                                    onClick={() => { setShowModal(false); onChange(true); }}
-                                   className="px-8 py-4 bg-primary text-primary-foreground rounded-xl font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-primary/20"
+                                   className="px-8 py-4 bg-primary text-primary-foreground rounded-xl font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-primary/20 cursor-pointer"
                                  >
                                    {t('close')}
                                  </button>

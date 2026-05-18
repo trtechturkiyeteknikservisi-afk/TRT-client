@@ -9,6 +9,7 @@ import {
 import { useTranslations, useLocale } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useRouter } from '@/i18n/routing';
+import toast from 'react-hot-toast';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -55,9 +56,11 @@ export default function FaqsPage() {
         question_en: '', question_tr: '', question_ar: '',
         answer_en: '', answer_tr: '', answer_ar: '' 
       });
+      toast.success('FAQ added successfully!');
       fetchData();
     } catch (err) {
       console.error('Error creating faq', err);
+      toast.error('Failed to create FAQ.');
     } finally {
       setActionLoading(false);
     }
@@ -71,9 +74,11 @@ export default function FaqsPage() {
       await axios.delete(`${API_BASE}/content/faqs/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      toast.success('FAQ deleted successfully!');
       fetchData();
     } catch (err) {
       console.error('Error deleting faq', err);
+      toast.error('Failed to delete FAQ.');
     } finally {
       setActionLoading(false);
     }

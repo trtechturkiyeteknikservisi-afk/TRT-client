@@ -9,6 +9,7 @@ import {
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useRouter } from '@/i18n/routing';
+import toast from 'react-hot-toast';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -65,7 +66,7 @@ export default function PortfolioPage() {
       }
 
       if (!finalUrl) {
-        alert('Please provide a file or a direct URL');
+        toast.error('Please provide a file or a direct URL');
         setActionLoading(false);
         return;
       }
@@ -96,10 +97,11 @@ export default function PortfolioPage() {
         type: 'image', url: '' 
       });
       setSelectedFile(null);
+      toast.success('Work added successfully to portfolio!');
       fetchData();
     } catch (err) {
       console.error('Error uploading to portfolio', err);
-      alert('Failed to save work. Please check the console for details.');
+      toast.error('Failed to save work. Please check the console for details.');
     } finally {
       setActionLoading(false);
     }
@@ -113,9 +115,11 @@ export default function PortfolioPage() {
       await axios.delete(`${API_BASE}/content/portfolio/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      toast.success('Portfolio item deleted successfully!');
       fetchData();
     } catch (err) {
       console.error('Error deleting portfolio item', err);
+      toast.error('Failed to delete portfolio item.');
     } finally {
       setActionLoading(false);
     }

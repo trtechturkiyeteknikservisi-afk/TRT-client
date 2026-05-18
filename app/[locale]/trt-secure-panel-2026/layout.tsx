@@ -12,6 +12,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useTheme } from 'next-themes';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Toaster } from 'react-hot-toast';
 
 export default function AdminLayout({
   children,
@@ -107,6 +108,7 @@ export default function AdminLayout({
 
   return (
     <div className="h-screen bg-background flex flex-col lg:flex-row font-almarai overflow-hidden">
+      <Toaster position="top-center" reverseOrder={false} />
       {/* Background Effects removed for debugging blur issue */}
 
       {/* Mobile Header */}

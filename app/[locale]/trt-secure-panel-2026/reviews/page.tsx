@@ -9,6 +9,7 @@ import {
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useRouter } from '@/i18n/routing';
+import toast from 'react-hot-toast';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -45,24 +46,29 @@ export default function ReviewsPage() {
       await axios.put(`${API_BASE}/content/reviews/${id}`, { approved: true }, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      toast.success('Review approved successfully!');
       fetchData();
     } catch (err) {
       console.error('Error approving review', err);
+      toast.error('Failed to approve review.');
     } finally {
       setActionLoading(false);
     }
   };
 
   const deleteItem = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this review?')) return;
     const token = localStorage.getItem('token');
     setActionLoading(true);
     try {
       await axios.delete(`${API_BASE}/content/reviews/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      toast.success('Review deleted successfully!');
       fetchData();
     } catch (err) {
       console.error('Error deleting review', err);
+      toast.error('Failed to delete review.');
     } finally {
       setActionLoading(false);
     }

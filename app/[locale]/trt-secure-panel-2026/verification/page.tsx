@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from '@/i18n/routing';
+import toast from 'react-hot-toast';
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api') + '/verify';
 
@@ -103,8 +104,9 @@ const VerificationAdmin = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setLeads(leads.filter(l => l.id !== id));
+            toast.success(t('delete_success') || 'Deleted successfully!');
         } catch (err) {
-            alert(t('delete_error'));
+            toast.error(t('delete_error'));
         }
     };
 
@@ -119,9 +121,9 @@ const VerificationAdmin = () => {
             );
             await Promise.all(promises);
             setShowSettings(false);
-            alert(t('save_success'));
+            toast.success(t('save_success'));
         } catch (err) {
-            alert(t('save_error'));
+            toast.error(t('save_error'));
         } finally {
             setLoading(false);
         }
@@ -146,9 +148,9 @@ const VerificationAdmin = () => {
             
             const filePath = (res.data as any).path;
             setSettings(prev => ({ ...prev, [targetKey]: filePath }));
-            alert(t('upload_success'));
+            toast.success(t('upload_success'));
         } catch (err) {
-            alert(t('upload_error'));
+            toast.error(t('upload_error'));
         } finally {
             setUploading(null);
         }
