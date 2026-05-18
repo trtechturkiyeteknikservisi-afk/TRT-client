@@ -29,20 +29,16 @@ export function StickyContact() {
   const [isOpen, setIsOpen] = React.useState(false);
   const whatsappNumber = settings.whatsapp || "908508401505";
   const supportPhone = settings.support_phone || "0850 840 15 05";
+  const supportEmail = settings.support_email || "trtech@trtservis.com";
 
   if (pathname?.includes('/trt-secure-panel-2026')) return null;
 
   const socialLinks = [
-    { image: '/facebook.webp', href: 'https://www.facebook.com/TRTechServis/' },
+    { image: '/maill.webp', href: `mailto:${supportEmail}` },
+    { image: '/location.png', href: 'https://maps.app.goo.gl/9kUMHWGGjDsoswFz9' },
     { image: '/instagram.webp', href: 'https://www.instagram.com/trtservis?igsh=MXcxZ25rNjNydjYxZQ%3D%3D&utm_source=qr' },
+    { image: '/calling-new.webp', href: `tel:${supportPhone.replace(/\s/g, '')}` },
     { image: '/whatsap.webp', href: `https://wa.me/${whatsappNumber.replace(/\D/g, '')}` },
-    { image: '/tiktok.webp', href: 'https://www.tiktok.com/@trtservis' },
-    { image: '/youtube.webp', href: 'https://youtube.com/@trtservis?si=kb9K3XN-LX4NX-du' },
-    { image: '/telegram.webp', href: 'https://t.me/trtservis' },
-    { image: '/snapchat.webp', href: 'https://snapchat.com/t/pL3vgBfZ' },
-    { image: '/linkedin.webp', href: 'https://www.linkedin.com/company/trtservis/' },
-    { image: '/pinterest.webp', href: 'https://tr.pinterest.com/trtservis/?invite_code=6906950e8ba94d7b8b9a3364db735f0d&sender=1122240938304289862' },
-    { image: '/calling.webp', href: `tel:${supportPhone.replace(/\s/g, '')}` },
   ];
 
   return (
@@ -60,13 +56,21 @@ export function StickyContact() {
               initial={{ opacity: 0, rotate: -180 }} 
               animate={{ opacity: 1, rotate: 0 }} 
               exit={{ opacity: 0, rotate: 180 }}
-              className="relative flex items-center justify-center w-10 h-10 md:w-14 md:h-14 rounded-full bg-white dark:bg-white shadow-lg border border-border/10"
+              className="relative flex items-center justify-center w-full h-full rounded-full bg-white dark:bg-white shadow-lg border border-border/10"
             >
               <X size={24} className="text-primary" />
             </motion.div>
           ) : (
-            <motion.div key="open" initial={{ opacity: 0, rotate: 90 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0, rotate: -90 }} className="w-full h-full rounded-full overflow-hidden relative">
-              <Image src="/whatsap.webp" alt="Contact" width={56} height={56} className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
+            <motion.div 
+              key="open" 
+              initial={{ opacity: 0, rotate: 90 }} 
+              animate={{ opacity: 1, rotate: 0 }} 
+              exit={{ opacity: 0, rotate: -90 }} 
+              className="w-full h-full rounded-full bg-white dark:bg-white shadow-lg border border-border/10 flex items-center justify-center p-2"
+            >
+              <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center">
+                <Image src="/whatsap.webp" alt="Contact" width={56} height={56} className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -85,10 +89,9 @@ export function StickyContact() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 20, scale: 0.5 }}
                 transition={{ delay: idx * 0.05, type: 'spring', stiffness: 260, damping: 20 }}
-                className="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center hover:scale-110 transition-transform group cursor-pointer !bg-transparent !shadow-none !border-0"
-                style={{ background: 'none', backgroundColor: 'transparent', boxShadow: 'none', border: 'none' }}
+                className="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center rounded-full bg-white dark:bg-white shadow-lg border border-border/10 hover:shadow-xl transition-all duration-300 p-2 group cursor-pointer"
               >
-                <div className="w-full h-full rounded-full overflow-hidden relative">
+                <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center">
                   <Image src={social.image} alt="" width={56} height={56} className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal rounded-full overflow-hidden" />
                 </div>
               </motion.a>

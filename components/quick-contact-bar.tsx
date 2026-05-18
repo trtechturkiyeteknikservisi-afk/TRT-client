@@ -32,8 +32,10 @@ export function QuickContactBar() {
             {/* Top active bar - now full by default */}
             <div className="absolute top-0 left-0 w-full h-1.5 bg-primary transition-transform origin-left duration-500" />
             
-            <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-transparent">
-              <img src="/calling.webp" alt="Phone" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
+            <div className="w-16 h-16 rounded-full flex items-center justify-center bg-white dark:bg-white shadow-lg border border-border/10 p-2.5 shrink-0">
+              <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center">
+                <img src="/calling-new.webp" alt="Phone" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
+              </div>
             </div>
             
             <div className="flex flex-col">
@@ -59,8 +61,10 @@ export function QuickContactBar() {
             {/* Top active bar - now full by default */}
             <div className="absolute top-0 left-0 w-full h-1.5 bg-emerald-500 transition-transform origin-left duration-500" />
             
-            <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-transparent">
-              <img src="/whatsap.webp" alt="WhatsApp" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
+            <div className="w-16 h-16 rounded-full flex items-center justify-center bg-white dark:bg-white shadow-lg border border-border/10 p-2.5 shrink-0">
+              <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center">
+                <img src="/whatsap.webp" alt="WhatsApp" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
+              </div>
             </div>         
             <div className="flex flex-col">
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500/60 mb-1">{t('whatsapp_label')}</span>

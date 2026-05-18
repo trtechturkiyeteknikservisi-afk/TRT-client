@@ -73,19 +73,6 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
     }
   };
 
-  if (!mounted) return (
-    <div className={cn(
-      "bg-card/40 backdrop-blur-lg p-6 rounded-xl border border-black/10 dark:border-white/10 animate-pulse",
-      isHeroMini && "p-4"
-    )}>
-      <div className="h-6 bg-muted rounded w-1/2 mb-4" />
-      <div className="space-y-4">
-        <div className="h-10 bg-muted rounded" />
-        <div className="h-10 bg-muted rounded" />
-      </div>
-    </div>
-  );
-
   const inputClasses = "w-full h-11 px-4 rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 focus:bg-black/10 dark:focus:bg-white/10 focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold text-sm text-foreground";
   const textareaClasses = "w-full p-4 rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 focus:bg-black/10 dark:focus:bg-white/10 focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold text-sm text-foreground resize-none";
 
@@ -131,8 +118,10 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
                 href={`tel:${supportPhone.replace(/\s/g, '')}`}
                 className="flex items-center gap-3 px-5 py-3 bg-primary/10 border border-primary/20 hover:bg-primary/20 rounded-xl transition-all hover:scale-105 group"
               >
-                <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center shrink-0">
-                  <Image src="/calling.webp" alt="Phone" width={40} height={40} className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
+                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white dark:bg-white shadow-md border border-border/10 p-1.5 shrink-0">
+                  <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center">
+                    <Image src="/calling-new.webp" alt="Phone" width={40} height={40} className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
+                  </div>
                 </div>
                 <div className="flex flex-col items-start leading-tight">
                   <span className="text-[9px] font-black uppercase tracking-widest text-primary/60">{t('phone_label')}</span>

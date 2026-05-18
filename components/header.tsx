@@ -68,8 +68,6 @@ export function Header() {
 
   useEffect(() => setMounted(true), []);
 
-  if (!mounted) return <header className="sticky top-0 z-50 w-full h-20 border-b bg-background/80 backdrop-blur-lg" />;
-
   return (
     <header className="w-full border-b bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
       <div className="w-full xl:container mx-auto px-2 sm:px-4 xl:px-4 2xl:px-8">
@@ -77,12 +75,20 @@ export function Header() {
           <div className="flex items-center flex-shrink-0">
             <Link href="/" className="flex flex-col items-center group">
               <Image 
-                src={mounted ? (resolvedTheme === 'dark' ? '/night-logo.png' : '/day-logo.png') : '/day-logo.png'} 
+                src="/day-logo.png" 
                 alt={t('company_name')}
                 width={120}
                 height={40}
                 priority
-                className="h-8 md:h-10 w-auto min-w-[90px] md:min-w-[120px] object-contain transition-all group-hover:scale-105"
+                className="h-8 md:h-10 w-auto min-w-[90px] md:min-w-[120px] object-contain transition-all group-hover:scale-105 dark:hidden block"
+              />
+              <Image 
+                src="/night-logo.png" 
+                alt={t('company_name')}
+                width={120}
+                height={40}
+                priority
+                className="h-8 md:h-10 w-auto min-w-[90px] md:min-w-[120px] object-contain transition-all group-hover:scale-105 hidden dark:block"
               />
               <span className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.2em] text-primary mt-1 opacity-80 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                 {t('cargo_service')}

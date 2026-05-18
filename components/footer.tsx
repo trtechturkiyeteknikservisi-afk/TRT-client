@@ -89,15 +89,20 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
           <div className="space-y-6">
             <Link href="/" className="flex items-center">
-              {mounted && (
-                <Image 
-                  src={theme === 'dark' ? '/night-logo.png' : '/day-logo.png'} 
-                  alt="TRT Service"
-                  width={150}
-                  height={40}
-                  className="h-10 w-auto object-contain transition-all hover:scale-105"
-                />
-              )}
+              <Image 
+                src="/day-logo.png" 
+                alt="TRT Service"
+                width={150}
+                height={40}
+                className="h-10 w-auto object-contain transition-all hover:scale-105 dark:hidden block"
+              />
+              <Image 
+                src="/night-logo.png" 
+                alt="TRT Service"
+                width={150}
+                height={40}
+                className="h-10 w-auto object-contain transition-all hover:scale-105 hidden dark:block"
+              />
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed font-semibold">
               {t('description')}
@@ -119,18 +124,18 @@ export function Footer() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-8 h-8 flex items-center justify-center transition-all duration-300 hover:-translate-y-1 hover:scale-110 !bg-transparent !shadow-none !border-0 !outline-none rounded-full overflow-hidden"
-                  style={{ background: 'none', backgroundColor: 'transparent', boxShadow: 'none', border: 'none' }}
+                  className="w-9 h-9 flex items-center justify-center rounded-full bg-white dark:bg-white shadow-md border border-border/10 hover:-translate-y-1 hover:scale-110 hover:shadow-lg transition-all duration-300 p-1.5 cursor-pointer"
                   aria-label={social.label}
                 >
-                  <Image 
-                    src={social.image} 
-                    alt={social.label}
-                    width={32}
-                    height={32}
-                    className="w-full h-full object-contain !bg-transparent !shadow-none !border-0 rounded-full mix-blend-multiply dark:mix-blend-normal" 
-                    style={{ background: 'none', backgroundColor: 'transparent' }} 
-                  />
+                  <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center">
+                    <Image 
+                      src={social.image} 
+                      alt={social.label}
+                      width={32}
+                      height={32}
+                      className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" 
+                    />
+                  </div>
                 </a>
               ))}
             </div>

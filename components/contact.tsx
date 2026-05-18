@@ -87,7 +87,7 @@ export function Contact() {
                   color: 'primary',
                   link: `tel:${settings.support_phone}`,
                   ltr: true,
-                  image: '/calling.webp'
+                  image: '/calling-new.webp'
                 },
                 { 
                   icon: MessageCircle, 
@@ -115,7 +115,7 @@ export function Contact() {
                   color: 'indigo-500',
                   link: `mailto:${settings.support_email}`,
                   isEmail: true,
-                  image: '/mail.webp'
+                  image: '/maill.webp'
                 },
                 { 
                   icon: MapPin, 
@@ -123,7 +123,7 @@ export function Contact() {
                   value: t('location_value'), 
                   color: 'orange-500',
                   link: 'https://maps.app.goo.gl/9kUMHWGGjDsoswFz9',
-                  image: '/location.webp'
+                  image: '/location.png'
                 }
               ].map((item, idx) => {
                 const Icon = item.icon;
@@ -142,15 +142,14 @@ export function Contact() {
                       rel="noopener noreferrer"
                       className="absolute inset-0 z-20"
                     />
-                    <div className={cn(
-                      "p-1 transition-all duration-500 group-hover:scale-110 flex items-center justify-center rounded-full overflow-hidden w-16 h-16",
-                      "bg-transparent shadow-none"
-                    )}>
-                      {item.image ? (
-                        <img src={item.image} alt="" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal rounded-full overflow-hidden" />
-                      ) : (
-                        <Icon size={32} strokeWidth={2.5} />
-                      )}
+                    <div className="transition-all duration-500 group-hover:scale-110 flex items-center justify-center rounded-full w-16 h-16 bg-white dark:bg-white shadow-lg border border-border/10 p-2.5 shrink-0">
+                      <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center">
+                        {item.image ? (
+                          <img src={item.image} alt="" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
+                        ) : (
+                          <Icon size={32} strokeWidth={2.5} className="text-gray-800" />
+                        )}
+                      </div>
                     </div>
                     
                     <div className="mt-4 space-y-1 w-full">

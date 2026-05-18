@@ -12,7 +12,19 @@ import { useTranslations, useLocale } from 'next-intl';
 import { ContactForm } from './contact-form';
 import { useSettings } from './settings-provider';
 
-export function Hero() {
+export interface BannerItem {
+  title: string;
+  description: string;
+  image: string;
+  cta: string;
+  link: string;
+}
+
+interface HeroProps {
+  initialBanners?: BannerItem[];
+}
+
+export function Hero({ initialBanners }: HeroProps) {
   const t = useTranslations('Hero');
   const tContact = useTranslations('Contact');
   const locale = useLocale();
@@ -20,31 +32,39 @@ export function Hero() {
   const { settings } = useSettings();
   const [current, setCurrent] = useState(0);
   const whatsappNumber = settings.whatsapp || "908508401505";
-  const [banners, setBanners] = useState([
-    {
-      title: t('phone_title'),
-      description: t('phone_desc'),
-      image: 'https://images.unsplash.com/photo-1512428559083-a401a3389575?q=80&w=2070&auto=format&fit=crop',
-      cta: t('cta_phone'),
-      link: '/services/phone'
-    },
-    {
-      title: t('laptop_title'),
-      description: t('laptop_desc'),
-      image: 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?q=80&w=2070&auto=format&fit=crop',
-      cta: t('cta_laptop'),
-      link: '/services/laptop'
-    },
-    {
-      title: t('robot_title'),
-      description: t('robot_desc'),
-      image: 'https://images.unsplash.com/photo-1518133835878-5a93cc3f89e5?q=80&w=2070&auto=format&fit=crop',
-      cta: t('cta_robot'),
-      link: '/services/robot'
+  const [banners, setBanners] = useState<BannerItem[]>(() => {
+    if (initialBanners && initialBanners.length > 0) {
+      return initialBanners;
     }
-  ]);
+    return [
+      {
+        title: t('phone_title'),
+        description: t('phone_desc'),
+        image: 'https://images.unsplash.com/photo-1512428559083-a401a3389575?q=80&w=2070&auto=format&fit=crop',
+        cta: t('cta_phone'),
+        link: '/services/phone'
+      },
+      {
+        title: t('laptop_title'),
+        description: t('laptop_desc'),
+        image: 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?q=80&w=2070&auto=format&fit=crop',
+        cta: t('cta_laptop'),
+        link: '/services/laptop'
+      },
+      {
+        title: t('robot_title'),
+        description: t('robot_desc'),
+        image: 'https://images.unsplash.com/photo-1518133835878-5a93cc3f89e5?q=80&w=2070&auto=format&fit=crop',
+        cta: t('cta_robot'),
+        link: '/services/robot'
+      }
+    ];
+  });
 
   useEffect(() => {
+    if (initialBanners && initialBanners.length > 0) {
+      return;
+    }
     const fetchBanners = async () => {
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
@@ -58,7 +78,7 @@ export function Hero() {
       }
     };
     fetchBanners();
-  }, [locale]);
+  }, [locale, initialBanners]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -74,24 +94,29 @@ export function Hero() {
   }, [banners.length, current]);
 
   return (
-    <section className="relative min-h-screen w-full overflow-hidden bg-background flex flex-col pt-8 lg:justify-center pb-10 lg:pb-16">
+    <section 
+      style={{ overflowAnchor: 'none' }}
+      className="relative min-h-screen w-full overflow-hidden bg-background flex flex-col pt-8 lg:justify-center pb-10 lg:pb-16"
+    >
       {/* Dynamic Backgrounds */}
-      <AnimatePresence mode="wait">
-        {banners[current] && (
+      <div className="absolute inset-0 overflow-hidden">
+        {banners.map((banner, index) => (
           <motion.div
-            key={`bg-${current}`}
+            key={`bg-${index}`}
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            animate={{ 
+              opacity: index === current ? 1 : 0
+            }}
             transition={{ duration: 1.5 }} // Smoother background fade
-            className="absolute inset-0"
+            className="absolute inset-0 z-0"
+            style={{ pointerEvents: index === current ? 'auto' : 'none' }}
           >
             <div className="absolute inset-0 transition-transform duration-[20s] scale-105 group-hover:scale-100">
               <Image 
-                src={banners[current].image}
+                src={banner.image}
                 alt="Banner Background"
                 fill
-                priority
+                priority={index === 0}
                 className="object-cover"
                 sizes="100vw"
               />
@@ -105,82 +130,85 @@ export function Hero() {
               <div className="absolute inset-0 bg-black/5 dark:bg-black/20" />
             </div>
           </motion.div>
-        )}
-      </AnimatePresence>
+        ))}
+      </div>
 
       <div className="relative container mx-auto px-4 w-full flex flex-col lg:flex-row items-center lg:justify-between gap-8 lg:gap-16 z-10">
         {/* Animated Content Section */}
         <div className="w-full lg:flex-1 relative h-[500px] sm:h-[550px] lg:h-[650px] flex items-center overflow-hidden">
-          <AnimatePresence initial={false}>
-            {banners[current] && (
-              <motion.div
-                key={`content-${current}`}
-                initial={{ opacity: 0, x: isRTL ? 40 : -40 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: isRTL ? -40 : 40 }}
-                transition={{ duration: 0.6, ease: "easeInOut" }}
-                className={cn(
-                  "absolute inset-0 flex flex-col justify-center space-y-6 md:space-y-10", 
-                  isRTL ? "text-right lg:border-r-4 border-primary lg:pr-10" : "text-left lg:border-l-4 border-primary lg:pl-10"
-                )}
-              >
-                <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-lg w-fit">
-                  <div className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-                  </div>
-                  <span className="text-xs font-black uppercase tracking-[0.3em] text-primary">{t('badge')}</span>
+          {banners.map((banner, index) => (
+            <motion.div
+              key={`content-${index}`}
+              initial={{ opacity: 0, x: isRTL ? 40 : -40 }}
+              animate={{ 
+                opacity: index === current ? 1 : 0,
+                x: index === current ? 0 : (isRTL ? -40 : 40),
+              }}
+              style={{
+                pointerEvents: index === current ? 'auto' : 'none'
+              }}
+              transition={{ duration: 0.6, ease: "easeInOut" }}
+              className={cn(
+                "absolute inset-0 flex flex-col justify-center space-y-6 md:space-y-10 z-10", 
+                isRTL ? "text-right lg:border-r-4 border-primary lg:pr-10" : "text-left lg:border-l-4 border-primary lg:pl-10"
+              )}
+            >
+              <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-lg w-fit">
+                <div className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                 </div>
+                <span className="text-xs font-black uppercase tracking-[0.3em] text-primary">{t('badge')}</span>
+              </div>
 
-                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-tight md:leading-[0.85] text-foreground uppercase">
-                  {(banners[current]?.title || '').split(' ').map((word, i) => (
-                    <span key={i} className={cn(i === 1 ? "text-primary italic" : "text-foreground", "inline")}>
-                      {word}{' '}
-                    </span>
-                  ))}
-                </h1>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-tight md:leading-[0.85] text-foreground uppercase">
+                {(banner?.title || '').split(' ').map((word, i) => (
+                  <span key={i} className={cn(i === 1 ? "text-primary italic" : "text-foreground", "inline")}>
+                    {word}{' '}
+                  </span>
+                ))}
+              </h1>
 
-                <p className="text-lg md:text-2xl text-muted-foreground font-semibold max-w-xl leading-relaxed">
-                  {banners[current]?.description}
+              <p className="text-lg md:text-2xl text-muted-foreground font-semibold max-w-xl leading-relaxed">
+                {banner?.description}
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-6 pt-4">
+                <Link
+                  href={banner?.link || '#'}
+                  className="inline-flex items-center justify-center gap-3 bg-primary text-primary-foreground px-6 py-4 md:px-12 md:py-6 rounded-xl font-black text-base md:text-xl hover:bg-primary/95 transition-all hover:scale-105 shadow-md shadow-primary/20 dark:shadow-xl dark:shadow-primary/30 active:scale-95 group uppercase tracking-widest"
+                >
+                  <span>{banner?.cta}</span>
+                  <ArrowRight className={cn("w-5 h-5 md:w-6 md:h-6 transition-transform", isRTL ? "group-hover:-translate-x-2 rotate-180" : "group-hover:translate-x-2")} />
+                </Link>
+                
+                <Link
+                  href="/portfolio"
+                  className="inline-flex items-center justify-center gap-3 bg-white/5 backdrop-blur-lg text-foreground px-6 py-4 md:px-12 md:py-6 rounded-xl font-black text-base md:text-xl hover:bg-white/10 transition-all border border-white/10 hover:border-primary/50 uppercase tracking-widest"
+                >
+                  <span>{t('our_works')}</span>
+                </Link>
+              </div>
+
+              <div className="hidden lg:flex flex-col sm:flex-row gap-4 sm:gap-8 pt-4 text-foreground/90">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="text-primary shrink-0" size={20} />
+                  <span className="font-semibold">{t('trust_since')}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="text-primary shrink-0" size={20} />
+                  <span className="font-semibold">{t('trust_experience')}</span>
+                </div>
+              </div>
+
+              <div className={cn("hidden lg:flex mt-6 p-4 bg-foreground/5 backdrop-blur-lg rounded-xl border border-foreground/10 items-start gap-3 max-w-xl", isRTL && "text-right")}>
+                <ShieldCheck className="text-primary shrink-0 mt-0.5" size={20} />
+                <p className="text-sm font-bold text-foreground/80 leading-relaxed">
+                  {tContact('form_note')}
                 </p>
-
-                <div className="flex flex-col sm:flex-row gap-6 pt-4">
-                  <Link
-                    href={banners[current]?.link || '#'}
-                    className="inline-flex items-center justify-center gap-3 bg-primary text-primary-foreground px-6 py-4 md:px-12 md:py-6 rounded-xl font-black text-base md:text-xl hover:bg-primary/95 transition-all hover:scale-105 shadow-md shadow-primary/20 dark:shadow-xl dark:shadow-primary/30 active:scale-95 group uppercase tracking-widest"
-                  >
-                    <span>{banners[current]?.cta}</span>
-                    <ArrowRight className={cn("w-5 h-5 md:w-6 md:h-6 transition-transform", isRTL ? "group-hover:-translate-x-2 rotate-180" : "group-hover:translate-x-2")} />
-                  </Link>
-                  
-                  <Link
-                    href="/portfolio"
-                    className="inline-flex items-center justify-center gap-3 bg-white/5 backdrop-blur-lg text-foreground px-6 py-4 md:px-12 md:py-6 rounded-xl font-black text-base md:text-xl hover:bg-white/10 transition-all border border-white/10 hover:border-primary/50 uppercase tracking-widest"
-                  >
-                    <span>{t('our_works')}</span>
-                  </Link>
-                </div>
-
-                <div className="hidden lg:flex flex-col sm:flex-row gap-4 sm:gap-8 pt-4 text-foreground/90">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="text-primary shrink-0" size={20} />
-                    <span className="font-semibold">{t('trust_since')}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="text-primary shrink-0" size={20} />
-                    <span className="font-semibold">{t('trust_experience')}</span>
-                  </div>
-                </div>
-
-                <div className={cn("hidden lg:flex mt-6 p-4 bg-foreground/5 backdrop-blur-lg rounded-xl border border-foreground/10 items-start gap-3 max-w-xl", isRTL && "text-right")}>
-                  < ShieldCheck className="text-primary shrink-0 mt-0.5" size={20} />
-                  <p className="text-sm font-bold text-foreground/80 leading-relaxed">
-                    {tContact('form_note')}
-                  </p>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              </div>
+            </motion.div>
+          ))}
         </div>
         
         {/* Contact Form & Trust Section */}

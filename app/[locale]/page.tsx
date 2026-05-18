@@ -32,13 +32,27 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
     { label: t('stat_technicians'), value: '15+' },
   ];
 
+  let initialBanners = [];
+  try {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+    const res = await fetch(`${API_URL}/banners?locale=${locale}`, {
+      next: { revalidate: 60 },
+      signal: AbortSignal.timeout(3000)
+    });
+    if (res.ok) {
+      initialBanners = await res.json();
+    }
+  } catch (error: any) {
+    console.warn("Could not prefetch banners server-side:", error.message);
+  }
+
   return (
     <main className="min-h-screen selection:bg-primary selection:text-primary-foreground overflow-x-hidden">
       <div className="relative">
         <div className="absolute top-0 left-0 w-full h-[120vh] bg-[radial-gradient(circle_at_50%_0%,hsl(var(--primary)/0.08),transparent_70%)] pointer-events-none -z-10" />
         <div className="absolute top-[20vh] left-[-10%] w-[40%] h-[60vh] bg-primary/3 blur-[80px] rounded-full -z-10 animate-pulse" />
         <div className="absolute top-[40vh] right-[-10%] w-[40%] h-[60vh] bg-primary/3 blur-[80px] rounded-full -z-10 animate-pulse delay-700" />
-        <Hero />
+        <Hero initialBanners={initialBanners} />
       </div>
 
       <NewsBar />

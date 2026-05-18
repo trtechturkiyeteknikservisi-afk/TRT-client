@@ -106,7 +106,7 @@ export function Reviews() {
   );
 
   return (
-    <section className="py-12 md:py-24 bg-muted/30">
+    <section style={{ overflowAnchor: 'none' }} className="py-12 md:py-24 bg-muted/30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center max-w-7xl">
         <div className="max-w-3xl mx-auto mb-10 md:mb-16">
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl mb-4">{t('title')}</h2>
