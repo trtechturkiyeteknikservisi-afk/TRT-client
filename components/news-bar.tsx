@@ -50,7 +50,7 @@ export function NewsBar() {
         {/* Marquee Container */}
         <div className="flex-1 overflow-hidden group cursor-pointer">
           <div
-            className="whitespace-nowrap flex items-center gap-20 animate-marquee group-hover:[animation-play-state:paused] active:[animation-play-state:paused]"
+            className="whitespace-nowrap flex items-center gap-20 animate-marquee-slow group-hover:[animation-play-state:paused] active:[animation-play-state:paused]"
           >
             {/* عرض قائمة الأخبار */}
             {newsItems.map((item, idx) => (

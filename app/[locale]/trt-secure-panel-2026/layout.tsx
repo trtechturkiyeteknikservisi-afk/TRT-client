@@ -179,7 +179,7 @@ export default function AdminLayout({
                 <img 
                   src={`https://flagcdn.com/w40/${l.flag}.png`} 
                   alt={l.code}
-                  className="w-3.5 h-3.5 rounded-full object-cover border border-border/50 shadow-sm"
+                  className="w-[18px] h-[12px] rounded-sm object-cover border border-border/50 shadow-sm"
                 />
                 <span>{l.code}</span>
               </button>

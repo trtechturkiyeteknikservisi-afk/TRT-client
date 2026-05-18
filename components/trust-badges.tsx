@@ -49,7 +49,7 @@ export function TrustBadges() {
                         className="group relative flex flex-col items-center text-center p-8 rounded-xl bg-card/40 backdrop-blur-md border border-primary/10 dark:border-border hover:border-primary/50 transition-all duration-300 hover:-translate-y-2 shadow-sm hover:shadow-lg hover:shadow-primary/10"
                     >
                         <div className="w-20 h-20 rounded-xl bg-muted flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-primary-foreground group-hover:rotate-12 transition-all duration-500 ring-4 ring-background shadow-lg">
-                            <item.icon size={36} strokeWidth={2} className="text-primary group-hover:text-white" />
+                            <item.icon size={52} strokeWidth={2} className="text-primary group-hover:text-white" />
                         </div>
                         <h3 className="text-xl md:text-2xl font-black mb-4 text-foreground uppercase tracking-tight leading-tight">
                             {item.title}

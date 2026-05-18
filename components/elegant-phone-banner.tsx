@@ -26,7 +26,7 @@ export function ElegantPhoneBanner({ title }: ElegantPhoneBannerProps) {
         >
           <div className="flex flex-col items-center md:items-start text-center md:text-left gap-2">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white dark:bg-white shadow-md border border-border/10 p-1.5 shrink-0">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white dark:bg-white shadow-md border border-border/10 p-0.5 shrink-0">
                 <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center">
                   <img src="/calling-new.webp" alt="Phone" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
                 </div>

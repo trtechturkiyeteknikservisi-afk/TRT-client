@@ -102,11 +102,11 @@ export function Services() {
               className="group relative bg-card/50 backdrop-blur-lg p-10 rounded-xl border-2 border-primary/10 dark:border-border/50 transition-all hover:border-primary hover:bg-card hover:shadow-xl flex flex-col items-center text-center h-full overflow-hidden cursor-pointer"
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[3rem] -z-10 transition-colors group-hover:bg-primary/10" />
-              <div className="inline-flex p-5 rounded-xl mb-10 w-fit transition-all duration-500 group-hover:bg-primary group-hover:text-primary-foreground bg-muted text-foreground ring-1 ring-border/50 overflow-hidden">
+              <div className="inline-flex p-2 rounded-xl mb-10 w-fit transition-all duration-500 group-hover:bg-primary group-hover:text-primary-foreground bg-muted text-foreground ring-1 ring-border/50 overflow-hidden">
                 {service.customIcon ? (
-                  <img src={service.customIcon} alt="" className="w-16 h-16 object-contain group-hover:brightness-0 group-hover:invert transition-all" />
+                  <img src={service.customIcon} alt="" className="w-[72px] h-[72px] object-contain group-hover:brightness-0 group-hover:invert transition-all" />
                 ) : (
-                  service.icon && <service.icon size={64} strokeWidth={2.5} />
+                  service.icon && <service.icon size={72} strokeWidth={2.5} />
                 )}
               </div>
               <h3 className="text-2xl md:text-2xl font-black mb-4 text-foreground tracking-tight uppercase">{service.title}</h3>

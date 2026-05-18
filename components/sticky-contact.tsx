@@ -58,7 +58,7 @@ export function StickyContact() {
               exit={{ opacity: 0, rotate: 180 }}
               className="relative flex items-center justify-center w-full h-full rounded-full bg-white dark:bg-white shadow-lg border border-border/10"
             >
-              <X size={24} className="text-primary" />
+              <X size={28} className="text-primary" />
             </motion.div>
           ) : (
             <motion.div 
@@ -66,9 +66,18 @@ export function StickyContact() {
               initial={{ opacity: 0, rotate: 90 }} 
               animate={{ opacity: 1, rotate: 0 }} 
               exit={{ opacity: 0, rotate: -90 }} 
-              className="w-full h-full rounded-full bg-white dark:bg-white shadow-lg border border-border/10 flex items-center justify-center p-2"
+              className="w-full h-full rounded-full bg-white dark:bg-white shadow-lg border border-border/10 flex items-center justify-center p-0.5 relative"
             >
-              <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center">
+              {/* Radiating Ripple Wave 1 (CSS Animated Outline + Fill) */}
+              <div className="absolute inset-0 rounded-full border border-primary/50 dark:border-white/50 bg-primary/10 dark:bg-white/10 pointer-events-none animate-ripple-1" />
+              
+              {/* Radiating Ripple Wave 2 (CSS Animated Outline + Fill) */}
+              <div className="absolute inset-0 rounded-full border border-primary/30 dark:border-white/30 bg-primary/5 dark:bg-white/5 pointer-events-none animate-ripple-2" />
+              
+              {/* Thick Premium Ambient Glow (CSS Animated) */}
+              <div className="absolute -inset-2 rounded-full bg-primary/20 dark:bg-white/15 blur-[10px] pointer-events-none animate-breathe" />
+
+              <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center z-10">
                 <Image src="/whatsap.webp" alt="Contact" width={56} height={56} className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
               </div>
             </motion.div>
@@ -89,7 +98,7 @@ export function StickyContact() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 20, scale: 0.5 }}
                 transition={{ delay: idx * 0.05, type: 'spring', stiffness: 260, damping: 20 }}
-                className="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center rounded-full bg-white dark:bg-white shadow-lg border border-border/10 hover:shadow-xl transition-all duration-300 p-2 group cursor-pointer"
+                className="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center rounded-full bg-white dark:bg-white shadow-lg border border-border/10 hover:shadow-xl transition-all duration-300 p-0.5 group cursor-pointer"
               >
                 <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center">
                   <Image src={social.image} alt="" width={56} height={56} className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal rounded-full overflow-hidden" />

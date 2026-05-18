@@ -118,7 +118,7 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
                 href={`tel:${supportPhone.replace(/\s/g, '')}`}
                 className="flex items-center gap-3 px-5 py-3 bg-primary/10 border border-primary/20 hover:bg-primary/20 rounded-xl transition-all hover:scale-105 group"
               >
-                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white dark:bg-white shadow-md border border-border/10 p-1.5 shrink-0">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white dark:bg-white shadow-md border border-border/10 p-0.5 shrink-0">
                   <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center">
                     <Image src="/calling-new.webp" alt="Phone" width={40} height={40} className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
                   </div>

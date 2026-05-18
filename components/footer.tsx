@@ -124,7 +124,7 @@ export function Footer() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-9 h-9 flex items-center justify-center rounded-full bg-white dark:bg-white shadow-md border border-border/10 hover:-translate-y-1 hover:scale-110 hover:shadow-lg transition-all duration-300 p-1.5 cursor-pointer"
+                  className="w-9 h-9 flex items-center justify-center rounded-full bg-white dark:bg-white shadow-md border border-border/10 hover:-translate-y-1 hover:scale-110 hover:shadow-lg transition-all duration-300 p-0.5 cursor-pointer"
                   aria-label={social.label}
                 >
                   <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center">

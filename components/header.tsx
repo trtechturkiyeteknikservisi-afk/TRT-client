@@ -68,10 +68,23 @@ export function Header() {
 
   useEffect(() => setMounted(true), []);
 
+  const isLinkActive = (item: typeof navigation[0]) => {
+    if (item.isDropdown) {
+      return item.subItems?.some(sub => pathname === sub.href || pathname.startsWith(sub.href + '/')) ?? false;
+    }
+    if (item.href === '/') {
+      return pathname === '/';
+    }
+    if (item.href.startsWith('#')) {
+      return false;
+    }
+    return pathname === item.href || pathname.startsWith(item.href + '/');
+  };
+
   return (
     <header className="w-full border-b bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
-      <div className="w-full xl:container mx-auto px-2 sm:px-4 xl:px-4 2xl:px-8">
-        <div className="flex min-h-[4rem] items-center justify-between gap-0.5 sm:gap-2 py-2 md:py-0">
+      <div className="w-full container mx-auto px-2 sm:px-4 xl:px-4 ">
+        <div className="flex min-h-[4rem] items-center justify-between gap-2 py-2 md:py-0">
           <div className="flex items-center flex-shrink-0">
             <Link href="/" className="flex flex-col items-center group">
               <Image 
@@ -97,7 +110,7 @@ export function Header() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center justify-center lg:gap-x-1 xl:gap-x-3 2xl:gap-8 py-1 px-1 xl:px-2 max-w-full">
+          <nav className="hidden xl:flex items-center justify-between xl:gap-x-2.5 2xl:gap-x-5 py-1 flex-grow flex-shrink-0 ml-4 xl:ml-8 mr-4 xl:mr-6 2xl:mr-8 max-w-full">
             {navigation.map((item) => (
               item.isDropdown ? (
                 <div 
@@ -108,10 +121,23 @@ export function Header() {
                 >
                   <Link
                     href={item.href}
-                    className="flex items-center gap-1 text-[9.5px] lg:text-[10px] xl:text-[11px] 2xl:text-[13px] font-semibold text-muted-foreground transition-all hover:text-primary active:scale-95 whitespace-nowrap"
+                    className={cn(
+                      "flex items-center gap-1 text-[10px] lg:text-[10.5px] xl:text-[10.5px] 2xl:text-[12.5px] font-extrabold uppercase tracking-wider transition-all active:scale-95 whitespace-nowrap relative pb-1",
+                      isLinkActive(item) 
+                        ? "text-primary dark:text-white" 
+                        : "text-muted-foreground hover:text-primary dark:hover:text-white"
+                    )}
                   >
                     <span>{item.name}</span>
                     <ChevronDown size={14} className={cn("transition-transform duration-200", activeDropdown === item.name && "rotate-180")} />
+                    <span 
+                      className={cn(
+                        "absolute bottom-0 left-0 h-0.5 transition-all group-hover:w-full",
+                        isLinkActive(item) 
+                          ? "w-full bg-black dark:bg-primary" 
+                          : "w-0 bg-primary"
+                      )} 
+                    />
                   </Link>
                   
                   <AnimatePresence>
@@ -134,10 +160,10 @@ export function Header() {
                           >
                             <div className="p-2 bg-primary/10 rounded-lg text-primary group-hover/item:bg-primary group-hover/item:text-primary-foreground transition-colors overflow-hidden">
                               {'customIcon' in sub && sub.customIcon ? (
-                                <Image src={sub.customIcon as string} alt="" width={24} height={24} className="w-[24px] h-[24px] object-contain group-hover/item:brightness-0 group-hover/item:invert" />
-                              ) : (
-                                <sub.icon size={24} />
-                              )}
+                                  <Image src={sub.customIcon as string} alt="" width={24} height={24} className="w-[24px] h-[24px] object-contain group-hover/item:brightness-0 group-hover/item:invert" />
+                                ) : (
+                                  <sub.icon size={24} />
+                                )}
                             </div>
                             <span className="text-sm font-bold text-muted-foreground group-hover/item:text-foreground">{sub.name}</span>
                           </Link>
@@ -150,7 +176,12 @@ export function Header() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="flex items-center gap-1 text-[9.5px] lg:text-[10px] xl:text-[11px] 2xl:text-[13px] font-semibold text-muted-foreground transition-all hover:text-primary relative group whitespace-nowrap"
+                  className={cn(
+                    "flex items-center gap-1 text-[10px] lg:text-[10.5px] xl:text-[10.5px] 2xl:text-[12.5px] font-extrabold uppercase tracking-wider transition-all relative group whitespace-nowrap pb-1",
+                    isLinkActive(item) 
+                      ? "text-primary dark:text-white" 
+                      : "text-muted-foreground hover:text-primary dark:hover:text-white"
+                  )}
                 >
                   {item.name}
                   {item.soon && (
@@ -158,7 +189,14 @@ export function Header() {
                       {t('coming_soon')}
                     </span>
                   )}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
+                  <span 
+                    className={cn(
+                      "absolute bottom-0 left-0 h-0.5 transition-all group-hover:w-full",
+                      isLinkActive(item) 
+                        ? "w-full bg-black dark:bg-primary" 
+                        : "w-0 bg-primary"
+                    )} 
+                  />
                 </Link>
               )
             ))}
@@ -175,8 +213,8 @@ export function Header() {
               {theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-blue-600" />}
             </button>
 
-            {/* Language Switcher */}
-            <div className="flex items-center bg-muted/50 rounded-xl p-0.5 xl:p-1 border border-border">
+              {/* Language Switcher */}
+            <div className="flex items-center bg-muted/50 rounded-xl p-0.5 xl:p-1 border border-border flex-shrink-0">
               {[
                 { code: 'en', label: 'En', flag: 'gb' },
                 { code: 'ar', label: 'AR', flag: 'sa' },
@@ -186,7 +224,7 @@ export function Header() {
                   key={l.code}
                   onClick={() => handleLanguageChange(l.code)}
                   className={cn(
-                    "px-1 lg:px-2 2xl:px-3 py-1 2xl:py-1.5 rounded-lg text-[10px] xl:text-[11px] font-extrabold transition-all whitespace-nowrap flex items-center justify-center gap-1 2xl:gap-1.5 cursor-pointer",
+                    "px-1 lg:px-1.5 xl:px-1.5 2xl:px-2 py-1 rounded-lg text-[9px] xl:text-[9.5px] 2xl:text-[10px] font-extrabold whitespace-nowrap flex items-center justify-center gap-0.5 sm:gap-1 2xl:gap-1 cursor-pointer",
                     locale === l.code 
                       ? "bg-background text-primary shadow-sm ring-1 ring-border/50" 
                       : "text-muted-foreground hover:bg-muted"
@@ -195,13 +233,10 @@ export function Header() {
                   <Image 
                     src={l.flag === 'tr' ? 'https://flagcdn.com/w80/tr.png' : `https://flagcdn.com/w40/${l.flag}.png`} 
                     alt=""
-                    width={16}
-                    height={16}
+                    width={20}
+                    height={14}
                     unoptimized
-                    className={cn(
-                      "w-4 h-4 rounded-full object-cover border border-border/50 shadow-sm",
-                      l.flag === 'tr' && "object-[35%_50%]"
-                    )}
+                    className="w-4 h-2.5 sm:w-4.5 sm:h-3 xl:w-4.5 xl:h-3 2xl:w-5 2xl:h-3.5 rounded-sm object-cover border border-border/50 shadow-sm"
                   />
                   <span className="hidden xl:inline">{l.label}</span>
                 </button>
@@ -210,7 +245,7 @@ export function Header() {
 
             {/* Mobile Menu Toggle */}
             <button
-              className="lg:hidden p-1 rounded-lg text-muted-foreground transition-all active:scale-95 flex-shrink-0"
+              className="xl:hidden p-1 rounded-lg text-muted-foreground transition-all active:scale-95 flex-shrink-0"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -226,7 +261,7 @@ export function Header() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden border-t bg-background overflow-hidden"
+            className="xl:hidden border-t bg-background overflow-hidden"
           >
             <div className="space-y-1 px-4 pb-6 pt-4">
               {navigation.map((item) => (

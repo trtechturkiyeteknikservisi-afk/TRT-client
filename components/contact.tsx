@@ -142,7 +142,7 @@ export function Contact() {
                       rel="noopener noreferrer"
                       className="absolute inset-0 z-20"
                     />
-                    <div className="transition-all duration-500 group-hover:scale-110 flex items-center justify-center rounded-full w-16 h-16 bg-white dark:bg-white shadow-lg border border-border/10 p-2.5 shrink-0">
+                    <div className="transition-all duration-500 group-hover:scale-110 flex items-center justify-center rounded-full w-16 h-16 bg-white dark:bg-white shadow-lg border border-border/10 p-0.5 shrink-0">
                       <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center">
                         {item.image ? (
                           <img src={item.image} alt="" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />

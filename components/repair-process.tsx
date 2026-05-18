@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   MessageSquare, 
   Ticket, 
@@ -22,6 +22,7 @@ export function RepairProcess() {
   const t = useTranslations('RepairProcess');
   const locale = useLocale();
   const isRTL = locale === 'ar';
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const steps = [
     { icon: MessageSquare, title: t('step1_title'), desc: t('step1_desc') },
@@ -47,6 +48,24 @@ export function RepairProcess() {
     }
     return () => clearInterval(interval);
   }, [isPlaying, steps.length]);
+
+  // Auto-scroll active step into view on mobile
+  useEffect(() => {
+    const activeEl = document.getElementById(`step-btn-${activeStep}`);
+    const container = scrollContainerRef.current;
+    if (activeEl && container) {
+      const containerWidth = container.offsetWidth;
+      const elementOffset = activeEl.offsetLeft;
+      const elementWidth = activeEl.offsetWidth;
+      
+      const targetScrollLeft = elementOffset - (containerWidth / 2) + (elementWidth / 2);
+      
+      container.scrollTo({
+        left: targetScrollLeft,
+        behavior: 'smooth'
+      });
+    }
+  }, [activeStep]);
 
   return (
     <section className="py-16 md:py-32 relative overflow-hidden bg-background">
@@ -81,8 +100,8 @@ export function RepairProcess() {
         <div className="max-w-6xl mx-auto">
           
           {/* Top Timeline Navigation */}
-          <div className="relative mb-10 md:mb-16">
-            <div className="flex items-center justify-between relative z-10 w-full px-4 md:px-10">
+          <div ref={scrollContainerRef} className="relative mb-10 md:mb-16 overflow-x-auto scrollbar-hide py-4 -mx-4 px-4 md:mx-0 md:px-0">
+            <div className="flex items-center justify-between relative z-10 w-full px-2 md:px-10 min-w-max md:min-w-0 gap-3 md:gap-0">
               {steps.map((step, index) => {
                 const isActive = index === activeStep;
                 const isPast = index < activeStep;
@@ -91,7 +110,7 @@ export function RepairProcess() {
                   <React.Fragment key={index}>
                     {/* Line segment before this step (except for first step) */}
                     {index > 0 && (
-                      <div className="flex-1 h-0.5 md:h-1 mx-2 md:mx-4 relative overflow-hidden bg-muted/30 rounded-full">
+                      <div className="flex-1 min-w-[20px] md:min-w-[40px] h-0.5 md:h-1 mx-1 md:mx-4 relative overflow-hidden bg-muted/30 rounded-full shrink-0">
                         <motion.div 
                           className="absolute inset-0 bg-primary"
                           initial={{ scaleX: 0 }}
@@ -103,12 +122,13 @@ export function RepairProcess() {
                     )}
 
                     <button
+                      id={`step-btn-${index}`}
                       onClick={() => {
                           setActiveStep(index);
                           setIsPlaying(false);
                       }}
                       className={cn(
-                        "group relative flex flex-col items-center transition-all duration-300 cursor-pointer",
+                        "group relative flex flex-col items-center transition-all duration-300 cursor-pointer shrink-0",
                         isActive ? "scale-110" : "scale-100 opacity-70 hover:opacity-100"
                       )}
                     >
@@ -117,12 +137,17 @@ export function RepairProcess() {
                            isActive ? "bg-primary border-primary text-primary-foreground shadow-[0_0_30px_rgba(220,38,38,0.4)]" : 
                            isPast ? "bg-background border-primary/50 text-foreground" : "bg-background border-border text-muted-foreground group-hover:border-primary/50"
                        )}>
-                          <step.icon size={20} className={cn("md:w-7 md:h-7", isActive && "animate-pulse")} />
+                          <step.icon size={26} className={cn("md:w-10 md:h-10", isActive && "animate-pulse")} />
                        </div>
                        
                        {/* Mobile title (only for active) */}
                        <span className={cn(
                          "absolute -bottom-6 text-[8px] font-bold uppercase tracking-tighter whitespace-nowrap md:hidden transition-opacity",
+                         index === 0 
+                           ? (isRTL ? "right-0 translate-x-0" : "left-0 translate-x-0")
+                           : index === steps.length - 1
+                           ? (isRTL ? "left-0 translate-x-0" : "right-0 translate-x-0")
+                           : "left-1/2 -translate-x-1/2",
                          isActive ? "opacity-100" : "opacity-0"
                        )}>
                          {step.title}
