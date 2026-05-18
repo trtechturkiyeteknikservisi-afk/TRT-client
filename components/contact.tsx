@@ -127,6 +127,30 @@ export function Contact() {
                 }
               ].map((item, idx) => {
                 const Icon = item.icon;
+
+                // Dynamic colors for ripple & glow
+                let ripple1Class = "border-primary/50 dark:border-white/50 bg-primary/10 dark:bg-white/10";
+                let ripple2Class = "border-primary/30 dark:border-white/30 bg-primary/5 dark:bg-white/5";
+                let glowClass = "bg-primary/20 dark:bg-white/15";
+
+                if (item.color === 'green-500') {
+                  ripple1Class = "border-emerald-500/50 bg-emerald-500/10";
+                  ripple2Class = "border-emerald-500/30 bg-emerald-500/5";
+                  glowClass = "bg-emerald-500/20";
+                } else if (item.color === 'red-500') {
+                  ripple1Class = "border-red-500/50 bg-red-500/10";
+                  ripple2Class = "border-red-500/30 bg-red-500/5";
+                  glowClass = "bg-red-500/20";
+                } else if (item.color === 'indigo-500') {
+                  ripple1Class = "border-indigo-500/50 bg-indigo-500/10";
+                  ripple2Class = "border-indigo-500/30 bg-indigo-500/5";
+                  glowClass = "bg-indigo-500/20";
+                } else if (item.color === 'orange-500') {
+                  ripple1Class = "border-orange-500/50 bg-orange-500/10";
+                  ripple2Class = "border-orange-500/30 bg-orange-500/5";
+                  glowClass = "bg-orange-500/20";
+                }
+
                 return (
                   <motion.div
                     key={idx}
@@ -134,7 +158,7 @@ export function Contact() {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: idx * 0.1 }}
                     viewport={{ once: true }}
-                    className="group relative p-6 rounded-xl bg-card/40 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all duration-500 hover:shadow-lg hover:shadow-primary/10 overflow-hidden cursor-pointer flex flex-col items-center text-center"
+                    className="group relative p-6 rounded-xl bg-card/40 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all duration-500 hover:shadow-lg hover:shadow-primary/10 overflow-hidden cursor-pointer flex flex-col items-center text-center animate-ripple-container"
                   >
                     <a 
                       href={item.link !== '#' ? item.link : undefined}
@@ -142,8 +166,17 @@ export function Contact() {
                       rel="noopener noreferrer"
                       className="absolute inset-0 z-20"
                     />
-                    <div className="transition-all duration-500 group-hover:scale-110 flex items-center justify-center rounded-full w-16 h-16 bg-white dark:bg-white shadow-lg border border-border/10 p-0.5 shrink-0">
-                      <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center">
+                    <div className="transition-all duration-500 group-hover:scale-110 flex items-center justify-center rounded-full w-16 h-16 bg-white dark:bg-white shadow-lg border border-border/10 p-0.5 shrink-0 relative">
+                      {/* Radiating Ripple Wave 1 (CSS Animated Outline + Fill) */}
+                      <div className={cn("absolute inset-0 rounded-full border pointer-events-none animate-ripple-1", ripple1Class)} />
+                      
+                      {/* Radiating Ripple Wave 2 (CSS Animated Outline + Fill) */}
+                      <div className={cn("absolute inset-0 rounded-full border pointer-events-none animate-ripple-2", ripple2Class)} />
+                      
+                      {/* Thick Ambient Glow */}
+                      <div className={cn("absolute -inset-2 rounded-full blur-[10px] pointer-events-none animate-breathe", glowClass)} />
+
+                      <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center z-10">
                         {item.image ? (
                           <img src={item.image} alt="" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
                         ) : (

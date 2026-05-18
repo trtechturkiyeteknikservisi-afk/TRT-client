@@ -38,6 +38,41 @@ export function RepairProcess() {
   const [activeStep, setActiveStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
 
+  // Mouse & Touch Drag-to-Scroll
+  const isDragging = useRef(false);
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    isDragging.current = true;
+    startX.current = e.pageX - (scrollContainerRef.current?.offsetLeft || 0);
+    scrollLeft.current = scrollContainerRef.current?.scrollLeft || 0;
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.style.scrollBehavior = 'auto'; // Disable smooth scroll temporarily for snappy dragging
+    }
+  };
+
+  const handleMouseLeave = () => {
+    isDragging.current = false;
+  };
+
+  const handleMouseUp = () => {
+    isDragging.current = false;
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.style.scrollBehavior = 'smooth';
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging.current) return;
+    e.preventDefault();
+    const x = e.pageX - (scrollContainerRef.current?.offsetLeft || 0);
+    const walk = (x - startX.current) * 1.5; // Drag sensitivity multiplier
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollLeft = scrollLeft.current - walk;
+    }
+  };
+
   // Auto-play functionality
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -100,7 +135,15 @@ export function RepairProcess() {
         <div className="max-w-6xl mx-auto">
           
           {/* Top Timeline Navigation */}
-          <div ref={scrollContainerRef} className="relative mb-10 md:mb-16 overflow-x-auto scrollbar-hide py-4 -mx-4 px-4 md:mx-0 md:px-0">
+          <div 
+            ref={scrollContainerRef} 
+            className="relative mb-10 md:mb-16 overflow-x-auto scrollbar-hide py-4 -mx-4 px-4 md:mx-0 md:px-0 touch-pan-x overscroll-x-contain select-none cursor-grab active:cursor-grabbing"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+            onMouseDown={handleMouseDown}
+            onMouseLeave={handleMouseLeave}
+            onMouseUp={handleMouseUp}
+            onMouseMove={handleMouseMove}
+          >
             <div className="flex items-center justify-between relative z-10 w-full px-2 md:px-10 min-w-max md:min-w-0 gap-3 md:gap-0">
               {steps.map((step, index) => {
                 const isActive = index === activeStep;

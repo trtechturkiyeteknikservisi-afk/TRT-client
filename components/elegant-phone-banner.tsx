@@ -26,8 +26,17 @@ export function ElegantPhoneBanner({ title }: ElegantPhoneBannerProps) {
         >
           <div className="flex flex-col items-center md:items-start text-center md:text-left gap-2">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white dark:bg-white shadow-md border border-border/10 p-0.5 shrink-0">
-                <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white dark:bg-white shadow-md border border-border/10 p-0.5 shrink-0 relative">
+                {/* Radiating Ripple Wave 1 (CSS Animated Outline + Fill) */}
+                <div className="absolute inset-0 rounded-full border border-primary/50 dark:border-white/50 bg-primary/10 dark:bg-white/10 pointer-events-none animate-ripple-1" />
+                
+                {/* Radiating Ripple Wave 2 (CSS Animated Outline + Fill) */}
+                <div className="absolute inset-0 rounded-full border border-primary/30 dark:border-white/30 bg-primary/5 dark:bg-white/5 pointer-events-none animate-ripple-2" />
+                
+                {/* Thick Ambient Glow */}
+                <div className="absolute -inset-2 rounded-full bg-primary/20 dark:bg-white/15 blur-[10px] pointer-events-none animate-breathe" />
+
+                <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center z-10">
                   <img src="/calling-new.webp" alt="Phone" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
                 </div>
               </div>

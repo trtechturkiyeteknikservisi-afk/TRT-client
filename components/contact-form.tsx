@@ -118,8 +118,17 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
                 href={`tel:${supportPhone.replace(/\s/g, '')}`}
                 className="flex items-center gap-3 px-5 py-3 bg-primary/10 border border-primary/20 hover:bg-primary/20 rounded-xl transition-all hover:scale-105 group"
               >
-                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white dark:bg-white shadow-md border border-border/10 p-0.5 shrink-0">
-                  <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white dark:bg-white shadow-md border border-border/10 p-0.5 shrink-0 relative">
+                  {/* Radiating Ripple Wave 1 (CSS Animated Outline + Fill) */}
+                  <div className="absolute inset-0 rounded-full border border-primary/50 dark:border-white/50 bg-primary/10 dark:bg-white/10 pointer-events-none animate-ripple-1" />
+                  
+                  {/* Radiating Ripple Wave 2 (CSS Animated Outline + Fill) */}
+                  <div className="absolute inset-0 rounded-full border border-primary/30 dark:border-white/30 bg-primary/5 dark:bg-white/5 pointer-events-none animate-ripple-2" />
+                  
+                  {/* Thick Ambient Glow */}
+                  <div className="absolute -inset-2 rounded-full bg-primary/20 dark:bg-white/15 blur-[10px] pointer-events-none animate-breathe" />
+
+                  <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center z-10">
                     <Image src="/calling-new.webp" alt="Phone" width={40} height={40} className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
                   </div>
                 </div>
