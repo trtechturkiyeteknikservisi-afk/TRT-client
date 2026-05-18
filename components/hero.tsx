@@ -40,7 +40,7 @@ export function Hero({ initialBanners }: HeroProps) {
       {
         title: t('phone_title'),
         description: t('phone_desc'),
-        image: 'https://images.unsplash.com/photo-1512428559083-a401a3389575?q=80&w=2070&auto=format&fit=crop',
+        image: 'https://images.unsplash.com/photo-1580910051074-3eb694886505?q=80&w=2070&auto=format&fit=crop',
         cta: t('cta_phone'),
         link: '/services/phone'
       },
@@ -117,7 +117,8 @@ export function Hero({ initialBanners }: HeroProps) {
                 src={banner.image}
                 alt="Banner Background"
                 fill
-                priority={true}
+                priority={index === 0}
+                fetchPriority={index === 0 ? "high" : "auto"}
                 className="object-cover"
                 sizes="100vw"
               />

@@ -79,6 +79,7 @@
   --animate-accordion-up: accordion-up 0.2s ease-out;
   --animate-pulse-slow: pulse-slow 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-bounce-slow: bounce-slow 5s ease-in-out infinite;
+  --animate-marquee: marquee 35s linear infinite;
 
   @keyframes accordion-down {
     from { height: 0; }

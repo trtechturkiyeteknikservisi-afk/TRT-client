@@ -29,7 +29,14 @@ export function NewsBar() {
     }
     
     const newsKey = `news_bar_${locale}`;
-    const newsContent = settings[newsKey] || settings['news_bar_en'] || '';
+    
+    const fallbackNews = locale === 'ar' 
+      ? 'أهلاً بكم في الموقع الرسمي لمركز TRT للصيانة الشاملة بتركيا'
+      : locale === 'tr'
+      ? 'Türkiye\'nin Kapsamlı Bakım Merkezi TRT\'nin Resmi Web Sitesine Hoş Geldiniz'
+      : 'Welcome to the Official Website of TRT Comprehensive Maintenance Center in Turkey';
+      
+    const newsContent = settings[newsKey] || settings['news_bar_en'] || fallbackNews;
     
     if (newsContent.trim()) {
       setNews(newsContent);

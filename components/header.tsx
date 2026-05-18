@@ -210,7 +210,11 @@ export function Header() {
               className="flex p-1.5 xl:p-2.5 rounded-xl hover:bg-muted text-muted-foreground transition-all active:scale-95 border border-transparent hover:border-border cursor-pointer flex-shrink-0"
               aria-label="Toggle theme"
             >
-              {theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-blue-600" />}
+              {mounted ? (
+                theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-blue-600" />
+              ) : (
+                <div className="w-5 h-5" />
+              )}
             </button>
 
               {/* Language Switcher */}
