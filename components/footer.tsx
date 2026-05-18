@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Link } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
 import { useTheme } from 'next-themes';
@@ -21,11 +22,11 @@ const socialLinks = [
   { icon: WhatsappIcon, href: 'https://wa.me/908508401505', label: 'WhatsApp', color: 'hover:bg-[#25D366]', brandColor: '#25D366' },
   { icon: InstagramIcon, href: 'https://www.instagram.com/trtservis?igsh=MXcxZ25rNjNydjYxZQ%3D%3D&utm_source=qr', label: 'Instagram', color: 'hover:bg-[#E1306C]', brandColor: '#E1306C' },
   { icon: TiktokIcon, href: 'https://www.tiktok.com/@trtservis', label: 'TikTok', color: 'hover:bg-black', brandColor: '#000000' },
-  { icon: FacebookIcon, href: 'https://www.facebook.com/share/185YU5woZA/?mibextid=wwXIfr', label: 'Facebook', color: 'hover:bg-[#1877F2]', brandColor: '#1877F2' },
+  { icon: FacebookIcon, href: 'https://www.facebook.com/TRTechServis/', label: 'Facebook', color: 'hover:bg-[#1877F2]', brandColor: '#1877F2' },
   { icon: YoutubeIcon, href: 'https://youtube.com/@trtservis?si=kb9K3XN-LX4NX-du', label: 'YouTube', color: 'hover:bg-[#FF0000]', brandColor: '#FF0000' },
   { icon: TelegramIcon, href: 'https://t.me/trtservis', label: 'Telegram', color: 'hover:bg-[#0088cc]', brandColor: '#0088cc' },
   { icon: SnapchatIcon, href: 'https://snapchat.com/t/pL3vgBfZ', label: 'Snapchat', color: 'hover:bg-[#FFFC00] hover:text-black', brandColor: '#FFFC00' },
-  { icon: LinkedinIcon, href: 'https://www.linkedin.com/in/tr-tech-44a056402?utm_source=share_via&utm_content=profile&utm_medium=member_ios', label: 'LinkedIn', color: 'hover:bg-[#0A66C2]', brandColor: '#0A66C2' },
+  { icon: LinkedinIcon, href: 'https://www.linkedin.com/company/trtservis/', label: 'LinkedIn', color: 'hover:bg-[#0A66C2]', brandColor: '#0A66C2' },
   { icon: PinterestIcon, href: 'https://tr.pinterest.com/trtservis/?invite_code=6906950e8ba94d7b8b9a3364db735f0d&sender=1122240938304289862', label: 'Pinterest', color: 'hover:bg-[#E60023]', brandColor: '#E60023' },
 ];
 
@@ -89,9 +90,11 @@ export function Footer() {
           <div className="space-y-6">
             <Link href="/" className="flex items-center">
               {mounted && (
-                <img 
+                <Image 
                   src={theme === 'dark' ? '/night-logo.png' : '/day-logo.png'} 
-                  alt="TRT Service" 
+                  alt="TRT Service"
+                  width={150}
+                  height={40}
                   className="h-10 w-auto object-contain transition-all hover:scale-105"
                 />
               )}
@@ -104,11 +107,11 @@ export function Footer() {
                 { image: '/whatsap.webp', href: 'https://wa.me/908508401505', label: 'WhatsApp' },
                 { image: '/instagram.webp', href: 'https://www.instagram.com/trtservis?igsh=MXcxZ25rNjNydjYxZQ%3D%3D&utm_source=qr', label: 'Instagram' },
                 { image: '/tiktok.webp', href: 'https://www.tiktok.com/@trtservis', label: 'TikTok' },
-                { image: '/facebook.webp', href: 'https://www.facebook.com/share/185YU5woZA/?mibextid=wwXIfr', label: 'Facebook' },
+                { image: '/facebook.webp', href: 'https://www.facebook.com/TRTechServis/', label: 'Facebook' },
                 { image: '/youtube.webp', href: 'https://youtube.com/@trtservis?si=kb9K3XN-LX4NX-du', label: 'YouTube' },
                 { image: '/telegram.webp', href: 'https://t.me/trtservis', label: 'Telegram' },
                 { image: '/snapchat.webp', href: 'https://snapchat.com/t/pL3vgBfZ', label: 'Snapchat' },
-                { image: '/linkedin.webp', href: 'https://www.linkedin.com/in/tr-tech-44a056402?utm_source=share_via&utm_content=profile&utm_medium=member_ios', label: 'LinkedIn' },
+                { image: '/linkedin.webp', href: 'https://www.linkedin.com/company/trtservis/', label: 'LinkedIn' },
                 { image: '/pinterest.webp', href: 'https://tr.pinterest.com/trtservis/?invite_code=6906950e8ba94d7b8b9a3364db735f0d&sender=1122240938304289862', label: 'Pinterest' },
               ].map((social) => (
                 <a
@@ -120,9 +123,11 @@ export function Footer() {
                   style={{ background: 'none', backgroundColor: 'transparent', boxShadow: 'none', border: 'none' }}
                   aria-label={social.label}
                 >
-                  <img 
+                  <Image 
                     src={social.image} 
-                    alt={social.label} 
+                    alt={social.label}
+                    width={32}
+                    height={32}
                     className="w-full h-full object-contain !bg-transparent !shadow-none !border-0 rounded-full mix-blend-multiply dark:mix-blend-normal" 
                     style={{ background: 'none', backgroundColor: 'transparent' }} 
                   />

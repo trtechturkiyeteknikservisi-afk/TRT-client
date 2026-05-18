@@ -5,6 +5,7 @@ import { MapPin, Send, CheckCircle, X, ShieldCheck, Truck, Phone } from 'lucide-
 import { AddressSelector } from './address-selector';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 
@@ -131,7 +132,7 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
                 className="flex items-center gap-3 px-5 py-3 bg-primary/10 border border-primary/20 hover:bg-primary/20 rounded-xl transition-all hover:scale-105 group"
               >
                 <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center shrink-0">
-                  <img src="/calling.webp" alt="Phone" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
+                  <Image src="/calling.webp" alt="Phone" width={40} height={40} className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
                 </div>
                 <div className="flex flex-col items-start leading-tight">
                   <span className="text-[9px] font-black uppercase tracking-widest text-primary/60">{t('phone_label')}</span>

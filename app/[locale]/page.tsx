@@ -1,17 +1,20 @@
+import dynamic from "next/dynamic";
 import { Hero } from "@/components/hero";
-import { Services } from "@/components/services";
-import { Portfolio } from "@/components/portfolio";
-import { Contact } from "@/components/contact";
-import { Reviews } from "@/components/reviews";
-import { FAQ } from "@/components/faq";
-import { AnimatedStats } from "@/components/animated-stats";
-import { TrustBadges } from "@/components/trust-badges";
-import { RepairProcess } from "@/components/repair-process";
-import { QuickContactBar } from "@/components/quick-contact-bar";
-import { ElegantPhoneBanner } from "@/components/elegant-phone-banner";
-import { LocationMap } from "@/components/location-map";
-import { NewsBar } from "@/components/news-bar";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+
+// Lazy-load all below-fold components to reduce initial bundle size
+const NewsBar = dynamic(() => import("@/components/news-bar").then(m => ({ default: m.NewsBar })));
+const QuickContactBar = dynamic(() => import("@/components/quick-contact-bar").then(m => ({ default: m.QuickContactBar })));
+const RepairProcess = dynamic(() => import("@/components/repair-process").then(m => ({ default: m.RepairProcess })));
+const ElegantPhoneBanner = dynamic(() => import("@/components/elegant-phone-banner").then(m => ({ default: m.ElegantPhoneBanner })));
+const TrustBadges = dynamic(() => import("@/components/trust-badges").then(m => ({ default: m.TrustBadges })));
+const AnimatedStats = dynamic(() => import("@/components/animated-stats").then(m => ({ default: m.AnimatedStats })));
+const Services = dynamic(() => import("@/components/services").then(m => ({ default: m.Services })));
+const Portfolio = dynamic(() => import("@/components/portfolio").then(m => ({ default: m.Portfolio })));
+const Contact = dynamic(() => import("@/components/contact").then(m => ({ default: m.Contact })));
+const Reviews = dynamic(() => import("@/components/reviews").then(m => ({ default: m.Reviews })));
+const FAQ = dynamic(() => import("@/components/faq").then(m => ({ default: m.FAQ })));
+const LocationMap = dynamic(() => import("@/components/location-map").then(m => ({ default: m.LocationMap })));
 
 export function generateStaticParams() {
   return [{ locale: 'en' }, { locale: 'ar' }, { locale: 'tr' }];

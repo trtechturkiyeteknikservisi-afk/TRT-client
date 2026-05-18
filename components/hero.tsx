@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import { ChevronLeft, ChevronRight, ArrowRight, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
@@ -85,10 +86,15 @@ export function Hero() {
             transition={{ duration: 1.5 }} // Smoother background fade
             className="absolute inset-0"
           >
-            <div
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-[20s] scale-105 group-hover:scale-100"
-              style={{ backgroundImage: `url(${banners[current].image})` }}
-            >
+            <div className="absolute inset-0 transition-transform duration-[20s] scale-105 group-hover:scale-100">
+              <Image 
+                src={banners[current].image}
+                alt="Banner Background"
+                fill
+                priority
+                className="object-cover"
+                sizes="100vw"
+              />
               {/* Multi-layered gradient for depth */}
               <div className={cn(
                 "absolute inset-0 bg-gradient-to-t from-background via-background/5 dark:via-background/20 to-transparent",
@@ -104,21 +110,21 @@ export function Hero() {
 
       <div className="relative container mx-auto px-4 w-full flex flex-col lg:flex-row items-center lg:justify-between gap-8 lg:gap-16 z-10">
         {/* Animated Content Section */}
-        <div className="w-full lg:flex-1 relative min-h-[450px] lg:min-h-[550px] flex items-center">
-          <AnimatePresence mode="wait">
+        <div className="w-full lg:flex-1 relative h-[500px] sm:h-[550px] lg:h-[650px] flex items-center overflow-hidden">
+          <AnimatePresence initial={false}>
             {banners[current] && (
               <motion.div
                 key={`content-${current}`}
-                initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
+                initial={{ opacity: 0, x: isRTL ? 40 : -40 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: isRTL ? -20 : 20 }}
-                transition={{ duration: 0.5 }}
+                exit={{ opacity: 0, x: isRTL ? -40 : 40 }}
+                transition={{ duration: 0.6, ease: "easeInOut" }}
                 className={cn(
-                  "w-full space-y-6 md:space-y-10", 
+                  "absolute inset-0 flex flex-col justify-center space-y-6 md:space-y-10", 
                   isRTL ? "text-right lg:border-r-4 border-primary lg:pr-10" : "text-left lg:border-l-4 border-primary lg:pl-10"
                 )}
               >
-                <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-lg">
+                <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-lg w-fit">
                   <div className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
@@ -126,7 +132,7 @@ export function Hero() {
                   <span className="text-xs font-black uppercase tracking-[0.3em] text-primary">{t('badge')}</span>
                 </div>
 
-                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-tight md:leading-[0.85] text-foreground uppercase min-h-[2.2em] md:min-h-[1.8em]">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-tight md:leading-[0.85] text-foreground uppercase">
                   {(banners[current]?.title || '').split(' ').map((word, i) => (
                     <span key={i} className={cn(i === 1 ? "text-primary italic" : "text-foreground", "inline")}>
                       {word}{' '}
@@ -134,7 +140,7 @@ export function Hero() {
                   ))}
                 </h1>
 
-                <p className="text-lg md:text-2xl text-muted-foreground font-semibold max-w-xl leading-relaxed min-h-[3em] md:min-h-[2.5em]">
+                <p className="text-lg md:text-2xl text-muted-foreground font-semibold max-w-xl leading-relaxed">
                   {banners[current]?.description}
                 </p>
 

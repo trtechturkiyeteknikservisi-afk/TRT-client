@@ -26,6 +26,14 @@ export default function middleware(request: NextRequest) {
       } else if (country === 'TR') {
         return NextResponse.redirect(new URL('/tr', request.url));
       }
+
+      // Explicit fallback for Apple/Safari devices if country headers are missing
+      const acceptLang = request.headers.get('accept-language')?.toLowerCase() || '';
+      if (acceptLang.startsWith('tr')) {
+        return NextResponse.redirect(new URL('/tr', request.url));
+      } else if (acceptLang.startsWith('ar')) {
+        return NextResponse.redirect(new URL('/ar', request.url));
+      }
       // If no specific country match, just let intlMiddleware handle it via Accept-Language (Browser preference)
     }
   }

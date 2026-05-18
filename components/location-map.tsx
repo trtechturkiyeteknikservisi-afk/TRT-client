@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Navigation } from 'lucide-react';
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 
 export function LocationMap() {
@@ -33,7 +34,7 @@ export function LocationMap() {
               >
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-xs font-black uppercase tracking-widest border border-primary/20">
                   <div className="w-6 h-6 rounded-full overflow-hidden">
-                    <img src="/location.webp" alt="Location" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
+                    <Image src="/location.webp" alt="Location" width={24} height={24} className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
                   </div>
                   <span>{t('title')}</span>
                 </div>
@@ -53,7 +54,7 @@ export function LocationMap() {
                 <div className="p-6 rounded-xl bg-card border border-border/50 shadow-xl shadow-primary/5 space-y-4">
                   <div className="flex items-start gap-4 text-start">
                     <div className="w-12 h-12 rounded-full overflow-hidden shrink-0">
-                      <img src="/location.webp" alt="Location" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
+                      <Image src="/location.webp" alt="Location" width={48} height={48} className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
                     </div>
                     <div>
                       <p className="text-xs font-black uppercase tracking-wider text-muted-foreground mb-1">

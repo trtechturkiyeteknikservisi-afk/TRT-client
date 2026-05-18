@@ -34,15 +34,29 @@ export default function AdminLayout({
 
   useEffect(() => {
     setMounted(true);
+    
+    const isLoginPage = pathname.includes('/login');
+    
+    if (isLoginPage) {
+      setUser(null);
+      return;
+    }
+
     const storedUser = localStorage.getItem('user');
     const token = localStorage.getItem('token');
     
     if (!token) {
       router.push('/trt-secure-panel-2026/login');
+      setUser(null);
     } else if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error("Error parsing user from localStorage:", e);
+        setUser(null);
+      }
     }
-  }, []);
+  }, [pathname, router]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');

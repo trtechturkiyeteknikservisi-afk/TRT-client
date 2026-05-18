@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import { Sun, Moon, X, Menu, ChevronDown, Smartphone, Laptop, Watch, Zap, Headphones, TabletIcon as Tablet, Gavel, Lock, ShieldCheck, FileText, Truck, Scale } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
@@ -17,7 +18,7 @@ export function Header() {
   const router = useRouter();
   
   const [mounted, setMounted] = useState(false);
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
@@ -75,9 +76,12 @@ export function Header() {
         <div className="flex min-h-[4rem] items-center justify-between gap-0.5 sm:gap-2 py-2 md:py-0">
           <div className="flex items-center flex-shrink-0">
             <Link href="/" className="flex flex-col items-center group">
-              <img 
-                src={mounted ? (theme === 'dark' ? '/night-logo.png' : '/day-logo.png') : '/day-logo.png'} 
-                alt={t('company_name')} 
+              <Image 
+                src={mounted ? (resolvedTheme === 'dark' ? '/night-logo.png' : '/day-logo.png') : '/day-logo.png'} 
+                alt={t('company_name')}
+                width={120}
+                height={40}
+                priority
                 className="h-8 md:h-10 w-auto min-w-[90px] md:min-w-[120px] object-contain transition-all group-hover:scale-105"
               />
               <span className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.2em] text-primary mt-1 opacity-80 group-hover:opacity-100 transition-opacity whitespace-nowrap">
@@ -124,7 +128,7 @@ export function Header() {
                           >
                             <div className="p-2 bg-primary/10 rounded-lg text-primary group-hover/item:bg-primary group-hover/item:text-primary-foreground transition-colors overflow-hidden">
                               {'customIcon' in sub && sub.customIcon ? (
-                                <img src={sub.customIcon as string} alt="" className="w-[24px] h-[24px] object-contain group-hover/item:brightness-0 group-hover/item:invert" />
+                                <Image src={sub.customIcon as string} alt="" width={24} height={24} className="w-[24px] h-[24px] object-contain group-hover/item:brightness-0 group-hover/item:invert" />
                               ) : (
                                 <sub.icon size={24} />
                               )}
@@ -182,9 +186,12 @@ export function Header() {
                       : "text-muted-foreground hover:bg-muted"
                   )}
                 >
-                  <img 
+                  <Image 
                     src={l.flag === 'tr' ? 'https://flagcdn.com/w80/tr.png' : `https://flagcdn.com/w40/${l.flag}.png`} 
                     alt=""
+                    width={16}
+                    height={16}
+                    unoptimized
                     className={cn(
                       "w-4 h-4 rounded-full object-cover border border-border/50 shadow-sm",
                       l.flag === 'tr' && "object-[35%_50%]"
@@ -232,7 +239,7 @@ export function Header() {
                         >
                           <div className={cn(locale === 'ar' ? 'ml-4' : 'mr-4', "w-7 h-7 flex items-center justify-center")}>
                             {'customIcon' in sub && sub.customIcon ? (
-                              <img src={sub.customIcon as string} alt="" className="w-full h-full object-contain" />
+                              <Image src={sub.customIcon as string} alt="" width={28} height={28} className="w-full h-full object-contain" />
                             ) : (
                               <sub.icon size={28} className="text-primary" />
                             )}

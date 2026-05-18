@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { MessageCircle, X, Phone } from 'lucide-react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
@@ -32,14 +33,14 @@ export function StickyContact() {
   if (pathname?.includes('/trt-secure-panel-2026')) return null;
 
   const socialLinks = [
-    { image: '/facebook.webp', href: 'https://www.facebook.com/share/185YU5woZA/?mibextid=wwXIfr' },
+    { image: '/facebook.webp', href: 'https://www.facebook.com/TRTechServis/' },
     { image: '/instagram.webp', href: 'https://www.instagram.com/trtservis?igsh=MXcxZ25rNjNydjYxZQ%3D%3D&utm_source=qr' },
     { image: '/whatsap.webp', href: `https://wa.me/${whatsappNumber.replace(/\D/g, '')}` },
     { image: '/tiktok.webp', href: 'https://www.tiktok.com/@trtservis' },
     { image: '/youtube.webp', href: 'https://youtube.com/@trtservis?si=kb9K3XN-LX4NX-du' },
     { image: '/telegram.webp', href: 'https://t.me/trtservis' },
     { image: '/snapchat.webp', href: 'https://snapchat.com/t/pL3vgBfZ' },
-    { image: '/linkedin.webp', href: 'https://www.linkedin.com/in/tr-tech-44a056402?utm_source=share_via&utm_content=profile&utm_medium=member_ios' },
+    { image: '/linkedin.webp', href: 'https://www.linkedin.com/company/trtservis/' },
     { image: '/pinterest.webp', href: 'https://tr.pinterest.com/trtservis/?invite_code=6906950e8ba94d7b8b9a3364db735f0d&sender=1122240938304289862' },
     { image: '/calling.webp', href: `tel:${supportPhone.replace(/\s/g, '')}` },
   ];
@@ -59,14 +60,13 @@ export function StickyContact() {
               initial={{ opacity: 0, rotate: -180 }} 
               animate={{ opacity: 1, rotate: 0 }} 
               exit={{ opacity: 0, rotate: 180 }}
-              className="relative flex items-center justify-center p-2 !bg-transparent !shadow-none"
-              style={{ background: 'none', backgroundColor: 'transparent', boxShadow: 'none' }}
+              className="relative flex items-center justify-center w-10 h-10 md:w-14 md:h-14 rounded-full bg-white dark:bg-white shadow-lg border border-border/10"
             >
               <X size={24} className="text-primary" />
             </motion.div>
           ) : (
-            <motion.div key="open" initial={{ opacity: 0, rotate: 90 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0, rotate: -90 }} className="w-full h-full rounded-full overflow-hidden">
-              <img src="/whatsap.webp" alt="Contact" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
+            <motion.div key="open" initial={{ opacity: 0, rotate: 90 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0, rotate: -90 }} className="w-full h-full rounded-full overflow-hidden relative">
+              <Image src="/whatsap.webp" alt="Contact" width={56} height={56} className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -88,8 +88,8 @@ export function StickyContact() {
                 className="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center hover:scale-110 transition-transform group cursor-pointer !bg-transparent !shadow-none !border-0"
                 style={{ background: 'none', backgroundColor: 'transparent', boxShadow: 'none', border: 'none' }}
               >
-                <div className="w-full h-full rounded-full overflow-hidden">
-                  <img src={social.image} alt="" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal rounded-full overflow-hidden" />
+                <div className="w-full h-full rounded-full overflow-hidden relative">
+                  <Image src={social.image} alt="" width={56} height={56} className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal rounded-full overflow-hidden" />
                 </div>
               </motion.a>
           ))}
