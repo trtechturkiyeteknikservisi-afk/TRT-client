@@ -103,7 +103,7 @@ export function Header() {
                 priority
                 className="h-8 md:h-10 w-auto min-w-[90px] md:min-w-[120px] object-contain transition-all group-hover:scale-105 hidden dark:block"
               />
-              <span className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.2em] text-primary mt-1 opacity-80 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.22em] text-primary bg-primary/10 border border-primary/30 px-2 py-0.5 -mt-0.5 rounded shadow-sm shadow-primary/10 transition-all duration-300 group-hover:scale-105 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-transparent whitespace-nowrap">
                 {t('cargo_service')}
               </span>
             </Link>

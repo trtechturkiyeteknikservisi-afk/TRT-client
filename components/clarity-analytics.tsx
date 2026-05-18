@@ -7,7 +7,7 @@ export function ClarityAnalytics() {
   useEffect(() => {
     const timer = setTimeout(() => {
       try {
-        Clarity.init("wt5p30d6wdd");
+        Clarity.init("wt5p30d6wd");
       } catch (e) {
         console.error("Clarity initialization failed:", e);
       }
