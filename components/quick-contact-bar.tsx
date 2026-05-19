@@ -49,7 +49,7 @@ export function QuickContactBar() {
             
             <div className="flex flex-col">
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/60 mb-1">{t('phone_label')}</span>
-              <span className="text-xl md:text-3xl font-black tracking-tighter text-primary">{displaySettings.support_phone}</span>
+              <span className="text-xl md:text-3xl font-black tracking-tighter text-primary" dir="ltr">{displaySettings.support_phone}</span>
             </div>
             
             <div className="ml-auto translate-x-0 transition-all duration-500">

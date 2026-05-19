@@ -51,7 +51,7 @@ export function NewsBar() {
   const newsItems = news.split('\n').filter(item => item.trim());
 
   return (
-    <div className="bg-primary text-primary-foreground py-1.5 overflow-hidden relative border-b border-white/10 shadow-lg cursor-pointer">
+    <div className="bg-primary text-primary-foreground py-1.5 overflow-hidden scrollbar-hide relative border-b border-white/10 shadow-lg cursor-pointer">
       {/* Glossy Overlay */}
       <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-transparent to-white/5 pointer-events-none" />
       
@@ -62,7 +62,7 @@ export function NewsBar() {
         </div>
  
         {/* Marquee Container */}
-        <div className="flex-1 overflow-hidden group">
+        <div className="flex-1 overflow-hidden scrollbar-hide group" dir="ltr">
           <Marquee speed={isMobile ? 25 : 45} pauseOnHover={true} gradient={false} autoFill={true}>
             <div className="flex items-center gap-20 mr-20">
               {newsItems.map((item, idx) => (

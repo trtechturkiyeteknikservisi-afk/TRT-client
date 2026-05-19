@@ -31,6 +31,7 @@ export function Hero({ initialBanners }: HeroProps) {
   const isRTL = locale === 'ar';
   const { settings } = useSettings();
   const [current, setCurrent] = useState(0);
+  const [loadedIndices, setLoadedIndices] = useState<number[]>([0]);
   const whatsappNumber = settings.whatsapp || "908508401505";
   const [banners, setBanners] = useState<BannerItem[]>(() => {
     if (initialBanners && initialBanners.length > 0) {
@@ -40,26 +41,32 @@ export function Hero({ initialBanners }: HeroProps) {
       {
         title: t('phone_title'),
         description: t('phone_desc'),
-        image: 'https://images.unsplash.com/photo-1580910051074-3eb694886505?q=80&w=2070&auto=format&fit=crop',
+        image: 'https://images.unsplash.com/photo-1580910051074-3eb694886505?q=70&w=1200&auto=format&fit=crop',
         cta: t('cta_phone'),
         link: '/services/phone'
       },
       {
         title: t('laptop_title'),
         description: t('laptop_desc'),
-        image: 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?q=80&w=2070&auto=format&fit=crop',
+        image: 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?q=70&w=1200&auto=format&fit=crop',
         cta: t('cta_laptop'),
         link: '/services/laptop'
       },
       {
         title: t('robot_title'),
         description: t('robot_desc'),
-        image: 'https://images.unsplash.com/photo-1518133835878-5a93cc3f89e5?q=80&w=2070&auto=format&fit=crop',
+        image: 'https://images.unsplash.com/photo-1518133835878-5a93cc3f89e5?q=70&w=1200&auto=format&fit=crop',
         cta: t('cta_robot'),
         link: '/services/robot'
       }
     ];
   });
+
+  useEffect(() => {
+    if (!loadedIndices.includes(current)) {
+      setLoadedIndices((prev) => [...prev, current]);
+    }
+  }, [current, loadedIndices]);
 
   useEffect(() => {
     if (initialBanners && initialBanners.length > 0) {
@@ -113,15 +120,17 @@ export function Hero({ initialBanners }: HeroProps) {
             style={{ pointerEvents: index === current ? 'auto' : 'none' }}
           >
             <div className="absolute inset-0 transition-transform duration-[20s] scale-105 group-hover:scale-100">
-              <Image 
-                src={banner.image}
-                alt="Banner Background"
-                fill
-                priority={index === 0}
-                fetchPriority={index === 0 ? "high" : "auto"}
-                className="object-cover"
-                sizes="100vw"
-              />
+              {loadedIndices.includes(index) && (
+                <Image 
+                  src={banner.image}
+                  alt="Banner Background"
+                  fill
+                  priority={index === 0}
+                  fetchPriority={index === 0 ? "high" : "auto"}
+                  className="object-cover"
+                  sizes="100vw"
+                />
+              )}
               {/* Multi-layered gradient for depth */}
               <div className={cn(
                 "absolute inset-0 bg-gradient-to-t from-background via-background/5 dark:via-background/20 to-transparent",

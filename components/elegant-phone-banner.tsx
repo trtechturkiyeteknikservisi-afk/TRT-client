@@ -44,7 +44,7 @@ export function ElegantPhoneBanner({ title }: ElegantPhoneBannerProps) {
                 {title || t('phone_label')}
               </span>
             </div>
-            <h2 className="text-2xl md:text-3xl font-black tracking-tighter text-foreground">
+            <h2 className="text-2xl md:text-3xl font-black tracking-tighter text-foreground" dir="ltr">
               {phone}
             </h2>
           </div>

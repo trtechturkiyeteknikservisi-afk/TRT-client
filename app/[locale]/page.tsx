@@ -37,7 +37,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
     const res = await fetch(`${API_URL}/banners?locale=${locale}`, {
       next: { revalidate: 60 },
-      signal: AbortSignal.timeout(3000)
+      signal: AbortSignal.timeout(1000)
     });
     if (res.ok) {
       initialBanners = await res.json();

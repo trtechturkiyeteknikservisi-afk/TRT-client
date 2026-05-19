@@ -158,3 +158,17 @@
     display: none;
   }
 }
+
+/* Global overrides for react-fast-marquee to prevent vertical/horizontal scrollbars */
+.rfm-marquee-container, 
+.rfm-marquee,
+.rfm-child {
+  overflow: hidden !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+.rfm-marquee-container::-webkit-scrollbar,
+.rfm-marquee::-webkit-scrollbar,
+.rfm-child::-webkit-scrollbar {
+  display: none !important;
+}

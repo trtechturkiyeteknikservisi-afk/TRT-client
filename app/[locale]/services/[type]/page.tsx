@@ -158,7 +158,7 @@ export default function ServicePage() {
               </div>
               <div className="text-right">
                 <p className="text-[10px] font-black uppercase tracking-widest text-white/60 mb-0.5">{t('contact_us')}</p>
-                <p className="text-xl font-black tracking-tight">{supportPhone}</p>
+                <p className="text-xl font-black tracking-tight" dir="ltr">{supportPhone}</p>
               </div>
             </a>
           </motion.div>

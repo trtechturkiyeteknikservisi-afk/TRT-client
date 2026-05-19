@@ -28,7 +28,7 @@ export function TopTrustBar() {
   ];
 
   return (
-    <div className="bg-[#0a0a0a] border-b border-white/5 py-2 overflow-hidden relative w-full cursor-pointer">
+    <div className="bg-[#0a0a0a] border-b border-white/5 py-2 overflow-hidden scrollbar-hide relative w-full cursor-pointer" dir="ltr">
       <Marquee speed={isMobile ? 25 : 45} pauseOnHover={true} gradient={false} autoFill={true}>
         <div className="flex items-center gap-12 md:gap-24 mx-6 md:mx-12">
           {trustItems.map((item, index) => (
