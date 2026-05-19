@@ -3,17 +3,24 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Play, ZoomIn, X } from 'lucide-react';
-import axios from 'axios';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 
-const mockWorks = [
-  { id: 1, title: 'iPhone 13 Screen Replacement', type: 'image', url: 'https://images.unsplash.com/photo-1596742572447-5790553ef448?q=80&w=2070&auto=format&fit=crop' },
-  { id: 2, title: 'MacBook Pro Battery Upgrade', type: 'image', url: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=2070&auto=format&fit=crop' },
-  { id: 3, title: 'Robot Vacuum Deep Cleaning', type: 'image', url: 'https://images.unsplash.com/photo-1563227812-0ea4c22e6cc8?q=80&w=2070&auto=format&fit=crop' },
-  { id: 4, title: 'Vintage Watch Restoration', type: 'image', url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=2070&auto=format&fit=crop' },
-  { id: 5, title: 'Samsung S22 Ultra Repair', type: 'image', url: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?q=80&w=2070&auto=format&fit=crop' },
-  { id: 6, title: 'Laptop Hinge Fix', type: 'image', url: 'https://images.unsplash.com/photo-1593642702821-c8da6771f0c6?q=80&w=2070&auto=format&fit=crop' }
+interface WorkItem {
+  id: number | string;
+  title: string;
+  type: string;
+  url: string;
+  description?: string;
+}
+
+const mockWorks: WorkItem[] = [
+  { id: 1, title: 'iPhone 13 Screen Replacement', type: 'image', url: 'https://images.unsplash.com/photo-1596742572447-5790553ef448?q=60&w=900&auto=format&fit=crop' },
+  { id: 2, title: 'MacBook Pro Battery Upgrade', type: 'image', url: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=60&w=900&auto=format&fit=crop' },
+  { id: 3, title: 'Robot Vacuum Deep Cleaning', type: 'image', url: 'https://images.unsplash.com/photo-1563227812-0ea4c22e6cc8?q=60&w=900&auto=format&fit=crop' },
+  { id: 4, title: 'Vintage Watch Restoration', type: 'image', url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=60&w=900&auto=format&fit=crop' },
+  { id: 5, title: 'Samsung S22 Ultra Repair', type: 'image', url: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?q=60&w=900&auto=format&fit=crop' },
+  { id: 6, title: 'Laptop Hinge Fix', type: 'image', url: 'https://images.unsplash.com/photo-1593642702821-c8da6771f0c6?q=60&w=900&auto=format&fit=crop' }
 ];
 
 interface PortfolioProps {
@@ -23,20 +30,23 @@ interface PortfolioProps {
 
 export function Portfolio({ limit = 6, showTitle = true }: PortfolioProps) {
   const t = useTranslations('Portfolio');
-  const [works, setWorks] = useState(mockWorks);
-  const [selectedWork, setSelectedWork] = useState<any>(null);
+  const [works, setWorks] = useState<WorkItem[]>(mockWorks);
+  const [selectedWork, setSelectedWork] = useState<WorkItem | null>(null);
 
   useEffect(() => {
     const fetchWorks = async () => {
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-        const response = await axios.get(`${API_URL}/content/portfolio`);
-        const data = response.data as any[];
+        const response = await fetch(`${API_URL}/content/portfolio`);
+        if (!response.ok) {
+          throw new Error(`Portfolio request failed: ${response.status}`);
+        }
+        const data = await response.json() as WorkItem[];
         if (data.length > 0) {
           setWorks(data);
         }
       } catch (error) {
-        console.error('Error fetching portfolio', error);
+        console.warn('Error fetching portfolio', error);
       }
     };
     fetchWorks();
@@ -73,6 +83,8 @@ export function Portfolio({ limit = 6, showTitle = true }: PortfolioProps) {
                 <img
                   src={work.url}
                   alt={work.title}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
               )}
@@ -116,6 +128,8 @@ export function Portfolio({ limit = 6, showTitle = true }: PortfolioProps) {
               <img
                 src={selectedWork.url}
                 alt={selectedWork.title}
+                loading="eager"
+                decoding="async"
                 className="w-full h-full object-contain"
               />
             )}

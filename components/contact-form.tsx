@@ -1,10 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { MapPin, Send, CheckCircle, X, ShieldCheck, Truck, Phone } from 'lucide-react';
-import { AddressSelector } from './address-selector';
-import axios from 'axios';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from 'react';
+import { Send, CheckCircle, ShieldCheck, Truck } from 'lucide-react';
+import { AddressComponents, AddressSelector } from './address-selector';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
@@ -22,28 +20,23 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
   const t = useTranslations('Contact');
   const tTrust = useTranslations('Trust');
   const { settings } = useSettings();
+  const idPrefix = React.useId();
   const supportPhone = settings.support_phone || "0850 840 15 05";
-  const whatsappNumber = settings.whatsapp || "908508401505";
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     email: '',
     city: '',
     address: '',
-    addressComponents: null as any,
+    addressComponents: null as AddressComponents | null,
     message: '',
     serviceType: initialServiceType,
     deviceModel: ''
   });
   
   const [loading, setLoading] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [kvkkAccepted, setKvkkAccepted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +45,14 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
     setLoading(true);
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-      await axios.post(`${API_URL}/contacts`, formData);
+      const response = await fetch(`${API_URL}/contacts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) {
+        throw new Error(`Contact request failed: ${response.status}`);
+      }
       setShowSuccessModal(true);
       setFormData({
         name: '',
@@ -145,10 +145,12 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
           {/* Name & Phone Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-[10px] font-black uppercase tracking-widest text-foreground ml-1">{t('full_name')}</label>
+              <label htmlFor={`${idPrefix}-name`} className="text-[10px] font-black uppercase tracking-widest text-foreground ml-1">{t('full_name')}</label>
               <input
+                id={`${idPrefix}-name`}
                 type="text"
                 required
+                autoComplete="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className={inputClasses}
@@ -156,10 +158,12 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-[10px] font-black uppercase tracking-widest text-foreground ml-1">{t('phone_number')}</label>
+              <label htmlFor={`${idPrefix}-phone`} className="text-[10px] font-black uppercase tracking-widest text-foreground ml-1">{t('phone_number')}</label>
               <input
+                id={`${idPrefix}-phone`}
                 type="tel"
                 required
+                autoComplete="tel"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 className={inputClasses}
@@ -171,9 +175,9 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
 
           {/* Address Section */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black uppercase tracking-widest text-foreground ml-1">
+            <p className="text-[10px] font-black uppercase tracking-widest text-foreground ml-1">
                {t('address')}
-            </label>
+            </p>
             <AddressSelector 
               isHeroMini={isHeroMini}
               onAddressChange={(fullAddress, components) => {
@@ -188,11 +192,13 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[10px) font-black uppercase tracking-widest text-foreground ml-1">{t('service_type')}</label>
+            <label htmlFor={`${idPrefix}-service`} className="text-[10px] font-black uppercase tracking-widest text-foreground ml-1">{t('service_type')}</label>
             {isSidebar || isHeroMini ? (
               <input
+                  id={`${idPrefix}-service`}
                   type="text"
                   required
+                  autoComplete="off"
                   value={formData.deviceModel}
                   onChange={(e) => setFormData({ ...formData, deviceModel: e.target.value })}
                   className={inputClasses}
@@ -201,6 +207,7 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
             ) : (
               <div className="relative group">
                 <select
+                    id={`${idPrefix}-service`}
                     value={formData.serviceType}
                     onChange={(e) => setFormData({ ...formData, serviceType: e.target.value })}
                     className={cn(inputClasses, "appearance-none cursor-pointer")}
@@ -217,8 +224,9 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black uppercase tracking-widest text-foreground ml-1">{t('your_message')}</label>
+            <label htmlFor={`${idPrefix}-message`} className="text-[10px] font-black uppercase tracking-widest text-foreground ml-1">{t('your_message')}</label>
             <textarea
+              id={`${idPrefix}-message`}
               rows={isHeroMini ? 2 : 3}
               value={formData.message}
               onChange={(e) => setFormData({ ...formData, message: e.target.value })}
@@ -259,28 +267,24 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
         </form>
       </div>
 
-      {/* Success Modal */}
-      <AnimatePresence>
+          {/* Success Modal */}
         {showSuccessModal && (
           <div className="fixed inset-0 z-[400] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+            <div
               onClick={() => setShowSuccessModal(false)}
-              className="absolute inset-0 bg-background/80 backdrop-blur-md"
+              className="absolute inset-0 bg-background/80 backdrop-blur-md animate-in fade-in duration-150"
             />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="relative w-full max-w-sm bg-card p-10 rounded-xl border shadow-xl text-center space-y-6"
+            <div
+              className="relative w-full max-w-sm bg-card p-10 rounded-xl border shadow-xl text-center space-y-6 animate-in fade-in zoom-in-95 duration-150"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={`${idPrefix}-success-title`}
             >
               <div className="w-20 h-20 bg-primary/10 text-primary rounded-xl flex items-center justify-center mx-auto">
                   <CheckCircle size={40} />
               </div>
               <div className="space-y-2">
-                <h3 className="text-2xl font-black">{t('success_modal_title')}</h3>
+                <h3 id={`${idPrefix}-success-title`} className="text-2xl font-black">{t('success_modal_title')}</h3>
                 <p className="text-muted-foreground font-bold text-sm">
                   {t('success_modal_desc')}
                 </p>
@@ -291,10 +295,9 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
               >
                 {t('close')}
               </button>
-            </motion.div>
+            </div>
           </div>
         )}
-      </AnimatePresence>
     </div>
   );
 }

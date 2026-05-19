@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, ChevronDown, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
@@ -20,14 +19,24 @@ interface AddressData {
   }>;
 }
 
+export interface AddressComponents {
+  city: string;
+  county: string;
+  neighborhood: string;
+  street: string;
+  building: string;
+  door: string;
+}
+
 interface AddressSelectorProps {
-  onAddressChange: (fullAddress: string, components: any) => void;
+  onAddressChange: (fullAddress: string, components: AddressComponents) => void;
   initialValue?: string;
   isHeroMini?: boolean;
 }
 
-export function AddressSelector({ onAddressChange, initialValue, isHeroMini = false }: AddressSelectorProps) {
+export function AddressSelector({ onAddressChange, isHeroMini = false }: AddressSelectorProps) {
   const t = useTranslations('Contact');
+  const idPrefix = React.useId();
   const [data, setData] = useState<AddressData[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -45,7 +54,7 @@ export function AddressSelector({ onAddressChange, initialValue, isHeroMini = fa
         const json = await res.json();
         setData(json);
       } catch (err) {
-        console.error('Failed to load address data', err);
+        console.warn('Failed to load address data', err);
       } finally {
         setLoading(false);
       }
@@ -107,11 +116,12 @@ export function AddressSelector({ onAddressChange, initialValue, isHeroMini = fa
     );
   }
 
-  const renderSelect = (label: string, value: string, items: string[], onChange: (val: string) => void, placeholder: string) => (
+  const renderSelect = (id: string, label: string, value: string, items: string[], onChange: (val: string) => void, placeholder: string) => (
     <div className="space-y-0.5 flex-1">
-      <label className="text-[9px] font-black uppercase tracking-[0.05em] text-foreground ml-0.5">{label}</label>
+      <label htmlFor={id} className="text-[9px] font-black uppercase tracking-[0.05em] text-foreground ml-0.5">{label}</label>
       <div className="relative group">
         <select
+          id={id}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className={cn(
@@ -133,33 +143,31 @@ export function AddressSelector({ onAddressChange, initialValue, isHeroMini = fa
     <div className="space-y-2">
       {/* Cascading Selects */}
       <div className="grid grid-cols-3 gap-1.5">
-        {renderSelect(t('address_il'), selectedCity, cities, (val) => {
+        {renderSelect(`${idPrefix}-city`, t('address_il'), selectedCity, cities, (val) => {
           setSelectedCity(val);
           setSelectedCounty('');
           setSelectedNeighborhood('');
         }, t('address_il'))}
 
-        {renderSelect(t('address_ilce'), selectedCounty, counties, (val) => {
+        {renderSelect(`${idPrefix}-county`, t('address_ilce'), selectedCounty, counties, (val) => {
           setSelectedCounty(val);
           setSelectedNeighborhood('');
         }, t('address_ilce'))}
 
-        {renderSelect(t('address_mahalle'), selectedNeighborhood, neighborhoods, (val) => {
+        {renderSelect(`${idPrefix}-neighborhood`, t('address_mahalle'), selectedNeighborhood, neighborhoods, (val) => {
           setSelectedNeighborhood(val);
         }, t('address_mahalle'))}
       </div>
 
       {/* Details Area */}
-      <AnimatePresence>
         {selectedNeighborhood && (
-          <motion.div
-            initial={{ opacity: 0, y: -2 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-3 gap-1.5"
+          <div
+            className="grid grid-cols-3 gap-1.5 animate-in fade-in slide-in-from-top-1 duration-150"
           >
             <div className="space-y-0.5">
-              <label className="text-[9px] font-black uppercase tracking-[0.05em] text-muted-foreground/60 ml-0.5">{t('address_sokak')}</label>
+              <label htmlFor={`${idPrefix}-street`} className="text-[9px] font-black uppercase tracking-[0.05em] text-muted-foreground/60 ml-0.5">{t('address_sokak')}</label>
               <input
+                id={`${idPrefix}-street`}
                 type="text"
                 value={street}
                 onChange={(e) => setStreet(e.target.value)}
@@ -171,8 +179,9 @@ export function AddressSelector({ onAddressChange, initialValue, isHeroMini = fa
               />
             </div>
             <div className="space-y-0.5">
-              <label className="text-[9px] font-black uppercase tracking-[0.05em] text-muted-foreground/60 ml-0.5">{t('address_no')}</label>
+              <label htmlFor={`${idPrefix}-building`} className="text-[9px] font-black uppercase tracking-[0.05em] text-muted-foreground/60 ml-0.5">{t('address_no')}</label>
               <input
+                id={`${idPrefix}-building`}
                 type="text"
                 value={building}
                 onChange={(e) => setBuilding(e.target.value)}
@@ -184,8 +193,9 @@ export function AddressSelector({ onAddressChange, initialValue, isHeroMini = fa
               />
             </div>
             <div className="space-y-0.5">
-              <label className="text-[9px] font-black uppercase tracking-[0.05em] text-muted-foreground/60 ml-0.5">{t('address_daire')}</label>
+              <label htmlFor={`${idPrefix}-door`} className="text-[9px] font-black uppercase tracking-[0.05em] text-muted-foreground/60 ml-0.5">{t('address_daire')}</label>
               <input
+                id={`${idPrefix}-door`}
                 type="text"
                 value={door}
                 onChange={(e) => setDoor(e.target.value)}
@@ -196,9 +206,8 @@ export function AddressSelector({ onAddressChange, initialValue, isHeroMini = fa
                 )}
               />
             </div>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
 
       {/* Selected Address Preview */}
       {(selectedCity || selectedCounty || selectedNeighborhood) && (

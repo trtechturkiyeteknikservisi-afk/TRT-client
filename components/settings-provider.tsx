@@ -1,7 +1,6 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
 
 interface SettingsContextType {
   settings: Record<string, string>;
@@ -18,10 +17,14 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const fetchSettings = async () => {
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-      const response = await axios.get<Record<string, string>>(`${API_URL}/settings`);
-      setSettings(response.data || {});
+      const response = await fetch(`${API_URL}/settings`);
+      if (!response.ok) {
+        throw new Error(`Settings request failed: ${response.status}`);
+      }
+      const data = await response.json() as Record<string, string>;
+      setSettings(data || {});
     } catch (error) {
-      console.error('Failed to fetch settings in SettingsProvider:', error);
+      console.warn('Failed to fetch settings in SettingsProvider:', error);
     } finally {
       setLoading(false);
     }

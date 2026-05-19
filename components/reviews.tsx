@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Star, Quote } from 'lucide-react';
-import axios from 'axios';
 import { useTranslations, useFormatter } from 'next-intl';
 
 // Swiper Imports
@@ -13,7 +12,15 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import { KVKKCheckbox } from './kvkk-checkbox';
 
-const mockReviews = [
+interface ReviewItem {
+  id: number | string;
+  customerName: string;
+  rating: number;
+  comment: string;
+  date: string;
+}
+
+const mockReviews: ReviewItem[] = [
   { id: 1, customerName: 'Ahmet Yılmaz', rating: 5, comment: 'Excellent service! My iPhone 13 screen was replaced in 30 minutes. Highly recommended.', date: '2024-03-25' },
   { id: 2, customerName: 'Zeynep Kaya', rating: 5, comment: 'Very professional team. They fixed my MacBook Pro battery issue perfectly.', date: '2024-03-20' },
   { id: 3, customerName: 'Mehmet Demir', rating: 4, comment: 'Fast and reliable service for my Xiaomi robot vacuum. Fair pricing too.', date: '2024-03-15' },
@@ -23,7 +30,7 @@ const mockReviews = [
 export function Reviews() {
   const t = useTranslations('Reviews');
   const format = useFormatter();
-  const [reviews, setReviews] = useState(mockReviews);
+  const [reviews, setReviews] = useState<ReviewItem[]>(mockReviews);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -38,13 +45,16 @@ export function Reviews() {
     const fetchReviews = async () => {
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-        const response = await axios.get(`${API_URL}/content/reviews`);
-        const data = response.data as any[];
+        const response = await fetch(`${API_URL}/content/reviews`);
+        if (!response.ok) {
+          throw new Error(`Reviews request failed: ${response.status}`);
+        }
+        const data = await response.json() as ReviewItem[];
         if (data.length > 0) {
           setReviews(data);
         }
       } catch (error) {
-        console.error('Error fetching reviews', error);
+        console.warn('Error fetching reviews', error);
       }
     };
     fetchReviews();
@@ -57,7 +67,14 @@ export function Reviews() {
     setLoading(true);
     try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-        await axios.post(`${API_URL}/content/reviews`, form);
+        const response = await fetch(`${API_URL}/content/reviews`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(form),
+        });
+        if (!response.ok) {
+          throw new Error(`Review request failed: ${response.status}`);
+        }
       setSubmitted(true);
       setForm({ customerName: '', rating: 5, comment: '' });
       setKvkkAccepted(false);
@@ -68,7 +85,7 @@ export function Reviews() {
     }
   };
 
-  const ReviewCard = ({ review, index }: { review: any; index: number }) => (
+  const ReviewCard = ({ review, index }: { review: ReviewItem; index: number }) => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
@@ -90,7 +107,7 @@ export function Reviews() {
         ))}
       </div>
       <p className="text-muted-foreground mb-6 line-clamp-4 leading-relaxed italic">
-        "{review.comment}"
+        &quot;{review.comment}&quot;
       </p>
       <div>
         <p className="font-bold text-foreground">{review.customerName}</p>

@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Phone, MessageSquare, ArrowRight } from 'lucide-react';
+import React from 'react';
+import { ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
-import { cn } from '@/lib/utils';
 import { useSettings } from './settings-provider';
 
 export function QuickContactBar() {
@@ -43,7 +42,7 @@ export function QuickContactBar() {
               <div className="absolute -inset-2 rounded-full bg-primary/20 dark:bg-white/15 blur-[10px] pointer-events-none animate-breathe" />
 
               <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center z-10">
-                <img src="/calling-new.webp" alt="Phone" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
+                <img src="/calling-new.webp" alt="Phone" width={64} height={64} loading="lazy" decoding="async" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
               </div>
             </div>
             
@@ -81,7 +80,7 @@ export function QuickContactBar() {
               <div className="absolute -inset-2 rounded-full bg-emerald-500/20 blur-[10px] pointer-events-none animate-breathe" />
 
               <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center z-10">
-                <img src="/whatsap.webp" alt="WhatsApp" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
+                <img src="/whatsap.webp" alt="WhatsApp" width={64} height={64} loading="lazy" decoding="async" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
               </div>
             </div>         
             <div className="flex flex-col">

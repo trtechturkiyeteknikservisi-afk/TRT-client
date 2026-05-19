@@ -138,6 +138,9 @@
   * {
     @apply border-border;
   }
+  html, body {
+    @apply overflow-x-clip;
+  }
   body {
     @apply bg-background text-foreground transition-colors duration-300;
   }

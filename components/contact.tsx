@@ -1,12 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Phone, Mail, MapPin, Send, MessageCircle, CheckCircle, X } from 'lucide-react';
-import axios from 'axios';
-import { motion, AnimatePresence } from 'framer-motion';
+import React from 'react';
+import { Phone, Mail, MapPin, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
-import { usePathname } from 'next/navigation';
 
 import { ContactForm } from './contact-form';
 import { useSettings } from './settings-provider';
@@ -24,21 +21,13 @@ export function Contact() {
 
   return (
     <section id="contact" className="py-12 md:py-32 bg-background relative overflow-hidden">
-      {/* Dynamic Background Elements */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[140px] -z-10 animate-pulse-slow" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[120px] -z-10" />
-      
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex flex-col lg:flex-row gap-16 lg:gap-24">
           
           {/* Contact Information & Title Section */}
           <div className="w-full lg:w-[45%] space-y-10 md:space-y-16">
             <div className="space-y-6">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-                viewport={{ once: true }}
+              <div
                 className="space-y-4"
               >
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-xs font-black uppercase tracking-widest border border-primary/20">
@@ -53,28 +42,20 @@ export function Contact() {
                     </span>
                   ))}
                 </h2>
-              </motion.div>
+              </div>
 
-              <motion.div 
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                viewport={{ once: true }}
+              <div 
                 className="flex items-center gap-4"
               >
                 <div className="w-16 h-1.5 bg-primary rounded-full" />
                 <div className="w-4 h-1.5 bg-primary/30 rounded-full" />
-              </motion.div>
+              </div>
 
-              <motion.p 
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                transition={{ duration: 1, delay: 0.3 }}
-                viewport={{ once: true }}
+              <p 
                 className="text-lg md:text-xl text-muted-foreground font-medium leading-relaxed max-w-lg"
               >
                 {t('desc')}
-              </motion.p>
+              </p>
             </div>
 
             {/* Quick Contact Cards */}
@@ -152,18 +133,15 @@ export function Contact() {
                 }
 
                 return (
-                  <motion.div
+                  <div
                     key={idx}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: idx * 0.1 }}
-                    viewport={{ once: true }}
                     className="group relative p-6 rounded-xl bg-card/40 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all duration-500 hover:shadow-lg hover:shadow-primary/10 overflow-hidden cursor-pointer flex flex-col items-center text-center animate-ripple-container"
                   >
                     <a 
                       href={item.link !== '#' ? item.link : undefined}
-                      target="_blank"
+                      target={item.link.startsWith('http') ? '_blank' : undefined}
                       rel="noopener noreferrer"
+                      aria-label={`${item.label}: ${item.value}`}
                       className="absolute inset-0 z-20"
                     />
                     <div className="transition-all duration-500 group-hover:scale-110 flex items-center justify-center rounded-full w-16 h-16 bg-white dark:bg-white shadow-lg border border-border/10 p-0.5 shrink-0 relative">
@@ -178,7 +156,7 @@ export function Contact() {
 
                       <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center z-10">
                         {item.image ? (
-                          <img src={item.image} alt="" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
+                          <img src={item.image} alt="" width={64} height={64} loading="lazy" decoding="async" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
                         ) : (
                           <Icon size={32} strokeWidth={2.5} className="text-gray-800" />
                         )}
@@ -199,26 +177,18 @@ export function Contact() {
                     
                     {/* Subtle design element */}
                     <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-primary/5 rounded-full group-hover:scale-[3] transition-transform duration-700 -z-10" />
-                  </motion.div>
+                  </div>
                 );
               })}
             </div>
           </div>
 
           {/* Contact Form Section */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
+          <div
             className="w-full lg:w-[55%] relative"
           >
             <ContactForm />
-            
-            {/* Decorative background for form */}
-            <div className="absolute -top-12 -right-12 w-24 h-24 bg-primary/20 rounded-full blur-lg -z-10 animate-bounce-slow" />
-            <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-primary/10 rounded-full blur-lg -z-10" />
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

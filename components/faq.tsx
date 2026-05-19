@@ -8,7 +8,13 @@ import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 import { useLocale } from 'next-intl';
 
-const mockFaqs = [
+interface FaqItem {
+  id: number | string;
+  question: string;
+  answer: string;
+}
+
+const mockFaqs: FaqItem[] = [
   { id: 1, question: 'How long does a typical phone repair take?', answer: 'Most phone repairs like screen or battery replacement are completed within 30-60 minutes while you wait.' },
   { id: 2, question: 'Do you use original replacement parts?', answer: 'Yes, we use original and high-quality parts for all repairs to ensure your device functions perfectly.' },
   { id: 3, question: 'Is there a warranty on your repair services?', answer: 'We provide a 6-month warranty on most repairs and parts replaced. Terms may vary based on the specific service.' },
@@ -18,7 +24,7 @@ const mockFaqs = [
 export function FAQ() {
   const t = useTranslations('FAQ');
   const locale = useLocale();
-  const [faqs, setFaqs] = useState(mockFaqs);
+  const [faqs, setFaqs] = useState<FaqItem[]>(mockFaqs);
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   useEffect(() => {
@@ -26,12 +32,12 @@ export function FAQ() {
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
         const response = await axios.get(`${API_URL}/content/faqs?locale=${locale}`);
-        const data = response.data as any[];
+        const data = response.data as FaqItem[];
         if (data.length > 0) {
           setFaqs(data);
         }
       } catch (error) {
-        console.error('Error fetching FAQs', error);
+        console.warn('Error fetching FAQs', error);
       }
     };
     fetchFaqs();

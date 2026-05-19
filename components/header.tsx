@@ -1,13 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { useTheme } from 'next-themes';
-import { Sun, Moon, X, Menu, ChevronDown, Smartphone, Laptop, Watch, Zap, Headphones, TabletIcon as Tablet, Gavel, Lock, ShieldCheck, FileText, Truck, Scale } from 'lucide-react';
+import { Sun, Moon, X, Menu, ChevronDown, Smartphone, Laptop, Watch, TabletIcon as Tablet, Gavel, Lock, ShieldCheck, FileText, Truck } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
 import { AppleHeadphonesIcon, RobotVacuumIcon } from './social-icons';
 
 export function Header() {
@@ -17,10 +16,15 @@ export function Header() {
   const pathname = usePathname();
   const router = useRouter();
   
-  const [mounted, setMounted] = useState(false);
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const effectiveTheme = resolvedTheme || theme;
+  const mounted = React.useSyncExternalStore(
+    () => () => undefined,
+    () => true,
+    () => false
+  );
 
   const services = [
     { name: t('phone_repair'), href: '/services/phone', icon: Smartphone },
@@ -66,8 +70,6 @@ export function Header() {
     router.replace(pathname, { locale: newLocale });
   };
 
-  useEffect(() => setMounted(true), []);
-
   const isLinkActive = (item: typeof navigation[0]) => {
     if (item.isDropdown) {
       return item.subItems?.some(sub => pathname === sub.href || pathname.startsWith(sub.href + '/')) ?? false;
@@ -102,14 +104,14 @@ export function Header() {
                 height={40}
                 className="h-8 md:h-10 w-auto min-w-[90px] md:min-w-[120px] object-contain transition-all group-hover:scale-105 hidden dark:block"
               />
-              <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.22em] text-primary bg-primary/10 border border-primary/30 px-2 py-0.5 -mt-0.5 rounded shadow-sm shadow-primary/10 transition-all duration-300 group-hover:scale-105 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-transparent whitespace-nowrap">
+              <span className="block text-[7.5px] md:text-[9px] font-black uppercase tracking-[0.22em] text-primary bg-primary/10 border border-primary/30 px-2 py-0.5 -mt-0.5 rounded shadow-sm shadow-primary/10 transition-all duration-300 group-hover:scale-105 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-transparent whitespace-nowrap">
                 {t('cargo_service')}
               </span>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden xl:flex items-center justify-between xl:gap-x-2.5 2xl:gap-x-5 py-1 flex-grow flex-shrink-0 ml-4 xl:ml-8 mr-4 xl:mr-6 2xl:mr-8 max-w-full">
+          <nav className="hidden xl:flex items-center justify-center gap-x-4 2xl:gap-x-3 py-1 flex-1 min-w-0 mx-2 2xl:mx-4">
             {navigation.map((item) => (
               item.isDropdown ? (
                 <div 
@@ -121,7 +123,7 @@ export function Header() {
                   <Link
                     href={item.href}
                     className={cn(
-                      "flex items-center gap-1 text-[10px] lg:text-[10.5px] xl:text-[10.5px] 2xl:text-[12.5px] font-extrabold uppercase tracking-wider transition-all active:scale-95 whitespace-nowrap relative pb-1",
+                      "flex items-center gap-1 text-[11px] 2xl:text-[11.5px] font-extrabold uppercase tracking-wider transition-all active:scale-95 whitespace-nowrap relative pb-1",
                       isLinkActive(item) 
                         ? "text-primary dark:text-white" 
                         : "text-muted-foreground hover:text-primary dark:hover:text-white"
@@ -139,15 +141,10 @@ export function Header() {
                     />
                   </Link>
                   
-                  <AnimatePresence>
-                    {activeDropdown === item.name && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        transition={{ duration: 0.2 }}
+                  {activeDropdown === item.name && (
+                      <div
                         className={cn(
-                          "absolute top-full mt-2 w-64 bg-card border border-border rounded-xl shadow-lg overflow-hidden p-2",
+                          "absolute top-full mt-2 w-64 bg-card border border-border rounded-xl shadow-lg overflow-hidden p-2 animate-in fade-in slide-in-from-top-1 duration-150",
                           locale === 'ar' ? "-right-4" : "-left-4"
                         )}
                       >
@@ -167,16 +164,16 @@ export function Header() {
                             <span className="text-sm font-bold text-muted-foreground group-hover/item:text-foreground">{sub.name}</span>
                           </Link>
                         ))}
-                      </motion.div>
+                      </div>
                     )}
-                  </AnimatePresence>
                 </div>
               ) : (
                 <Link
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-1 text-[10px] lg:text-[10.5px] xl:text-[10.5px] 2xl:text-[12.5px] font-extrabold uppercase tracking-wider transition-all relative group whitespace-nowrap pb-1",
+                    "items-center gap-1 text-[11px] 2xl:text-[11.5px] font-extrabold uppercase tracking-wider transition-all relative group whitespace-nowrap pb-1",
+                    item.soon ? "hidden 2xl:flex" : "flex",
                     isLinkActive(item) 
                       ? "text-primary dark:text-white" 
                       : "text-muted-foreground hover:text-primary dark:hover:text-white"
@@ -202,22 +199,39 @@ export function Header() {
           </nav>
 
 
-          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+          <div className="flex items-center gap-1  flex-shrink-0">
+            {/* Bize Ulaşın Button */}
+            <Link
+              href="/contact"
+              className={cn(
+                "hidden lg:flex items-center gap-1 px-2.5 py-1 border border-border rounded-lg bg-card hover:bg-muted text-foreground transition-all duration-300 active:scale-95 text-[10px] xl:text-[10px] 2xl:text-[11.5px] font-black uppercase tracking-wider cursor-pointer mr-0.5 ml-2",
+                pathname === '/contact' && "border-primary text-primary"
+              )}
+            >
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span>{t('bize_ulasin')}</span>
+            </Link>
+
             {/* Theme Toggle */}
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="flex p-1.5 xl:p-2.5 rounded-xl hover:bg-muted text-muted-foreground transition-all active:scale-95 border border-transparent hover:border-border cursor-pointer flex-shrink-0"
-              aria-label="Toggle theme"
+              className="flex p-1.5 xl:p-1.5 2xl:p-2 rounded-lg hover:bg-muted text-muted-foreground transition-all active:scale-95 border border-transparent hover:border-border cursor-pointer flex-shrink-0"
+              aria-label={!mounted ? 'Toggle theme' : effectiveTheme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
             >
-              {mounted ? (
-                theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-blue-600" />
+              {!mounted ? (
+                <span className="block w-5 h-5" aria-hidden="true" />
+              ) : effectiveTheme === 'dark' ? (
+                <Sun size={20} className="text-yellow-400" />
               ) : (
-                <div className="w-5 h-5" />
+                <Moon size={20} className="text-blue-600" />
               )}
             </button>
 
-              {/* Language Switcher */}
-            <div className="flex items-center bg-muted/50 rounded-xl p-0.5 xl:p-1 border border-border flex-shrink-0">
+            {/* Language Switcher */}
+            <div className="flex items-center bg-muted/50 rounded-lg p-0.5 border border-border flex-shrink-0">
               {[
                 { code: 'en', label: 'En', flag: 'gb' },
                 { code: 'ar', label: 'AR', flag: 'sa' },
@@ -226,8 +240,10 @@ export function Header() {
                 <button
                   key={l.code}
                   onClick={() => handleLanguageChange(l.code)}
+                  aria-label={`Switch language to ${l.label}`}
+                  aria-pressed={locale === l.code}
                   className={cn(
-                    "px-1 lg:px-1.5 xl:px-1.5 2xl:px-2 py-1 rounded-lg text-[9px] xl:text-[9.5px] 2xl:text-[10px] font-extrabold whitespace-nowrap flex items-center justify-center gap-0.5 sm:gap-1 2xl:gap-1 cursor-pointer",
+                    "px-1.5 py-1 rounded-md text-[9px] 2xl:text-[10px] font-extrabold whitespace-nowrap flex items-center justify-center gap-0.5 sm:gap-1 cursor-pointer",
                     locale === l.code 
                       ? "bg-background text-primary shadow-sm ring-1 ring-border/50" 
                       : "text-muted-foreground hover:bg-muted"
@@ -236,12 +252,12 @@ export function Header() {
                   <Image 
                     src={l.flag === 'tr' ? 'https://flagcdn.com/w80/tr.png' : `https://flagcdn.com/w40/${l.flag}.png`} 
                     alt=""
-                    width={20}
-                    height={14}
+                    width={22}
+                    height={15}
                     unoptimized
-                    className="w-4 h-2.5 sm:w-4.5 sm:h-3 xl:w-4.5 xl:h-3 2xl:w-5 2xl:h-3.5 rounded-sm object-cover border border-border/50 shadow-sm"
+                    className="w-5 h-3 sm:w-5.5 sm:h-3.5 rounded-sm object-cover border border-border/50 shadow-sm"
                   />
-                  <span className="hidden xl:inline">{l.label}</span>
+                  <span className="hidden">{l.label}</span>
                 </button>
               ))}
             </div>
@@ -250,6 +266,8 @@ export function Header() {
             <button
               className="xl:hidden p-1 rounded-lg text-muted-foreground transition-all active:scale-95 flex-shrink-0 cursor-pointer"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={isMenuOpen}
             >
               {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
@@ -258,14 +276,8 @@ export function Header() {
       </div>
 
       {/* Mobile Menu */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="xl:hidden border-t bg-background overflow-hidden"
-          >
+      {isMenuOpen && (
+          <div className="xl:hidden border-t bg-background max-h-[calc(100vh-4rem)] overflow-y-auto animate-in fade-in slide-in-from-top-1 duration-150">
             <div className="space-y-1 px-4 pb-6 pt-4">
               {navigation.map((item) => (
                 <div key={item.name}>
@@ -308,10 +320,24 @@ export function Header() {
                   )}
                 </div>
               ))}
+              
+              {/* Standalone Mobile Bize Ulaşın Button */}
+              <div className="pt-4 border-t border-border mt-4">
+                <Link
+                  href="/contact"
+                  className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-lg border border-primary text-primary hover:bg-primary hover:text-primary-foreground font-black text-sm transition-all duration-300 cursor-pointer"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <span className="relative flex h-2 w-2 shrink-0">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                  <span>{t('bize_ulasin')}</span>
+                </Link>
+              </div>
             </div>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
     </header>
   );
 }

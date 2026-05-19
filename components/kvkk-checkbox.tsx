@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from 'react';
 import { ShieldCheck, X } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useSettings } from './settings-provider';
@@ -16,6 +15,7 @@ export function KVKKCheckbox({ accepted, onChange }: KVKKCheckboxProps) {
     const tPolicies = useTranslations('Policies');
     const locale = useLocale();
     const { settings } = useSettings();
+    const id = React.useId();
     const [showModal, setShowModal] = useState(false);
     
     const key = `kvkk_${locale}`;
@@ -26,14 +26,14 @@ export function KVKKCheckbox({ accepted, onChange }: KVKKCheckboxProps) {
             <div className="flex items-start gap-3 py-2 px-1">
                 <input 
                     type="checkbox" 
-                    id="kvkk-checkbox"
+                    id={`${id}-kvkk-checkbox`}
                     required
                     checked={accepted}
                     onChange={(e) => onChange(e.target.checked)}
                     className="mt-1 h-4 w-4 rounded border-black/10 dark:border-white/10 text-primary focus:ring-primary cursor-pointer transition-all"
                 />
                 <label 
-                    htmlFor="kvkk-checkbox" 
+                    htmlFor={`${id}-kvkk-checkbox`} 
                     className="text-[11px] font-bold text-foreground/60 leading-tight cursor-pointer select-none"
                 >
                     <button 
@@ -46,34 +46,31 @@ export function KVKKCheckbox({ accepted, onChange }: KVKKCheckboxProps) {
                 </label>
             </div>
 
-            <AnimatePresence>
                 {showModal && (
                     <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
+                        <div
                             onClick={() => setShowModal(false)}
-                            className="absolute inset-0 bg-background/80 backdrop-blur-md"
+                            className="absolute inset-0 bg-background/80 backdrop-blur-md animate-in fade-in duration-150"
                         />
-                        <motion.div
-                            initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 30, scale: 0.95 }}
-                            className="relative w-full max-w-2xl bg-card border rounded-xl shadow-lg overflow-hidden flex flex-col max-h-[85vh]"
+                        <div
+                            className="relative w-full max-w-2xl bg-card border rounded-xl shadow-lg overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in slide-in-from-bottom-2 zoom-in-95 duration-150"
+                            role="dialog"
+                            aria-modal="true"
+                            aria-labelledby={`${id}-kvkk-title`}
                         >
                             <div className="p-8 border-b flex items-center justify-between bg-muted/20">
                                 <div className="flex items-center gap-4">
                                     <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                                         <ShieldCheck size={24} />
                                     </div>
-                                    <h3 className="text-xl font-black uppercase tracking-tight">
+                                    <h3 id={`${id}-kvkk-title`} className="text-xl font-black uppercase tracking-tight">
                                         {tPolicies('privacy')}
                                     </h3>
                                 </div>
                                 <button 
                                     onClick={() => setShowModal(false)}
                                     className="p-3 hover:bg-foreground/5 rounded-full transition-colors text-muted-foreground cursor-pointer"
+                                    aria-label={t('close')}
                                 >
                                     <X size={24} />
                                 </button>
@@ -94,10 +91,9 @@ export function KVKKCheckbox({ accepted, onChange }: KVKKCheckboxProps) {
                                    {t('close')}
                                  </button>
                             </div>
-                        </motion.div>
+                        </div>
                     </div>
                 )}
-            </AnimatePresence>
         </>
     );
 }

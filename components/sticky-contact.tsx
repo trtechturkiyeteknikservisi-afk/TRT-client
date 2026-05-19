@@ -1,24 +1,10 @@
 'use client';
 
 import React from 'react';
-import { MessageCircle, X, Phone } from 'lucide-react';
+import { X } from 'lucide-react';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
-import { cn } from '@/lib/utils';
-
-import { 
-  InstagramIcon, 
-  FacebookIcon, 
-  YoutubeIcon, 
-  TiktokIcon, 
-  SnapchatIcon, 
-  TelegramIcon, 
-  WhatsappIcon,
-  LinkedinIcon,
-  PinterestIcon
-} from './social-icons';
 
 import { useSettings } from './settings-provider';
 
@@ -34,39 +20,32 @@ export function StickyContact() {
   if (pathname?.includes('/trt-secure-panel-2026')) return null;
 
   const socialLinks = [
-    { image: '/maill.webp', href: `mailto:${supportEmail}` },
-    { image: '/location.png', href: 'https://maps.app.goo.gl/9kUMHWGGjDsoswFz9' },
-    { image: '/instagram.webp', href: 'https://www.instagram.com/trtservis?igsh=MXcxZ25rNjNydjYxZQ%3D%3D&utm_source=qr' },
-    { image: '/calling-new.webp', href: `tel:${supportPhone.replace(/\s/g, '')}` },
-    { image: '/whatsap.webp', href: `https://wa.me/${whatsappNumber.replace(/\D/g, '')}` },
+    { image: '/maill.webp', href: `mailto:${supportEmail}`, label: t('email_label') },
+    { image: '/location.png', href: 'https://maps.app.goo.gl/9kUMHWGGjDsoswFz9', label: t('location_label') },
+    { image: '/instagram.webp', href: 'https://www.instagram.com/trtservis?igsh=MXcxZ25rNjNydjYxZQ%3D%3D&utm_source=qr', label: 'Instagram' },
+    { image: '/calling-new.webp', href: `tel:${supportPhone.replace(/\s/g, '')}`, label: t('phone_label') },
+    { image: '/whatsap.webp', href: `https://wa.me/${whatsappNumber.replace(/\D/g, '')}`, label: t('whatsapp_label') },
   ];
 
   return (
     <div className="fixed bottom-6 left-6 z-[100] flex flex-col-reverse items-center gap-4">
-      <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+      <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center transition-all duration-500 cursor-pointer"
+        className="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
+        aria-label={isOpen ? 'Close contact shortcuts' : 'Open contact shortcuts'}
+        aria-expanded={isOpen}
       >
-        <AnimatePresence mode="wait">
           {isOpen ? (
-            <motion.div 
+            <div 
               key="close" 
-              initial={{ opacity: 0, rotate: -180 }} 
-              animate={{ opacity: 1, rotate: 0 }} 
-              exit={{ opacity: 0, rotate: 180 }}
-              className="relative flex items-center justify-center w-full h-full rounded-full bg-white dark:bg-white shadow-lg border border-border/10"
+              className="relative flex items-center justify-center w-full h-full rounded-full bg-white dark:bg-white shadow-lg border border-border/10 animate-in fade-in zoom-in duration-150"
             >
               <X size={28} className="text-primary" />
-            </motion.div>
+            </div>
           ) : (
-            <motion.div 
+            <div 
               key="open" 
-              initial={{ opacity: 0, rotate: 90 }} 
-              animate={{ opacity: 1, rotate: 0 }} 
-              exit={{ opacity: 0, rotate: -90 }} 
-              className="w-full h-full rounded-full bg-white dark:bg-white shadow-lg border border-border/10 flex items-center justify-center p-0.5 relative"
+              className="w-full h-full rounded-full bg-white dark:bg-white shadow-lg border border-border/10 flex items-center justify-center p-0.5 relative animate-in fade-in zoom-in duration-150"
             >
               {/* Radiating Ripple Wave 1 (CSS Animated Outline + Fill) */}
               <div className="absolute inset-0 rounded-full border border-primary/50 dark:border-white/50 bg-primary/10 dark:bg-white/10 pointer-events-none animate-ripple-1" />
@@ -80,32 +59,27 @@ export function StickyContact() {
               <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center z-10">
                 <Image src="/whatsap.webp" alt="Contact" width={56} height={56} className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
               </div>
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
-      </motion.button>
+      </button>
 
       {/* Social Media Icons Vertical List */}
       <div className="flex flex-col-reverse items-center gap-3">
-        <AnimatePresence>
           {isOpen && socialLinks.map((social, idx) => (
-              <motion.a
+              <a
                 key={idx}
                 href={social.href}
-                target="_blank"
+                target={social.href.startsWith('http') ? '_blank' : undefined}
                 rel="noopener noreferrer"
-                initial={{ opacity: 0, y: 20, scale: 0.5 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 20, scale: 0.5 }}
-                transition={{ delay: idx * 0.05, type: 'spring', stiffness: 260, damping: 20 }}
-                className="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center rounded-full bg-white dark:bg-white shadow-lg border border-border/10 hover:shadow-xl transition-all duration-300 p-0.5 group cursor-pointer"
+                aria-label={social.label}
+                className="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center rounded-full bg-white dark:bg-white shadow-lg border border-border/10 hover:shadow-xl transition-all duration-300 p-0.5 group cursor-pointer animate-in fade-in slide-in-from-bottom-2 zoom-in-95"
+                style={{ animationDelay: `${idx * 35}ms` }}
               >
                 <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center">
                   <Image src={social.image} alt="" width={56} height={56} className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal rounded-full overflow-hidden" />
                 </div>
-              </motion.a>
+              </a>
           ))}
-        </AnimatePresence>
       </div>
     </div>
   );

@@ -1,16 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight, ArrowRight, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { ArrowRight, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
-import axios from 'axios';
 
 import { useTranslations, useLocale } from 'next-intl';
-import { ContactForm } from './contact-form';
-import { useSettings } from './settings-provider';
 
 export interface BannerItem {
   title: string;
@@ -24,15 +21,62 @@ interface HeroProps {
   initialBanners?: BannerItem[];
 }
 
+const ContactForm = dynamic(() => import('./contact-form').then((m) => ({ default: m.ContactForm })), {
+  ssr: false,
+  loading: () => <HeroContactFallback />,
+});
+
+function optimizeHeroImage(src: string, width = 1600) {
+  if (!src) return src;
+
+  if (src.includes('res.cloudinary.com') && src.includes('/image/upload/')) {
+    return src.replace('/image/upload/', `/image/upload/f_auto,q_auto:good,c_fill,g_auto,w_${width}/`);
+  }
+
+  if (src.includes('images.unsplash.com')) {
+    try {
+      const url = new URL(src);
+      url.searchParams.set('auto', 'format');
+      url.searchParams.set('fit', 'crop');
+      url.searchParams.set('q', '60');
+      url.searchParams.set('w', String(width));
+      return url.toString();
+    } catch {
+      return src;
+    }
+  }
+
+  return src;
+}
+
+function HeroContactFallback() {
+  return (
+    <div className="bg-white/5 dark:bg-background/20 backdrop-blur-lg p-5 md:p-7 rounded-lg border border-black/10 dark:border-white/10 shadow-md min-h-[520px]">
+      <div className="space-y-5">
+        <div className="flex flex-wrap gap-2">
+          <div className="h-7 w-32 rounded-lg bg-primary/80" />
+          <div className="h-7 w-28 rounded-lg bg-primary/70" />
+        </div>
+        <div className="h-7 w-56 rounded-md bg-foreground/10" />
+        <div className="h-16 rounded-xl bg-primary/10 border border-primary/10" />
+        <div className="grid grid-cols-2 gap-4">
+          <div className="h-16 rounded-xl bg-foreground/5 border border-foreground/10" />
+          <div className="h-16 rounded-xl bg-foreground/5 border border-foreground/10" />
+        </div>
+        <div className="h-16 rounded-xl bg-foreground/5 border border-foreground/10" />
+        <div className="h-24 rounded-xl bg-foreground/5 border border-foreground/10" />
+        <div className="h-14 rounded-xl bg-primary/90" />
+      </div>
+    </div>
+  );
+}
+
 export function Hero({ initialBanners }: HeroProps) {
   const t = useTranslations('Hero');
   const tContact = useTranslations('Contact');
   const locale = useLocale();
   const isRTL = locale === 'ar';
-  const { settings } = useSettings();
   const [current, setCurrent] = useState(0);
-  const [loadedIndices, setLoadedIndices] = useState<number[]>([0]);
-  const whatsappNumber = settings.whatsapp || "908508401505";
   const [banners, setBanners] = useState<BannerItem[]>(() => {
     if (initialBanners && initialBanners.length > 0) {
       return initialBanners;
@@ -63,25 +107,20 @@ export function Hero({ initialBanners }: HeroProps) {
   });
 
   useEffect(() => {
-    if (!loadedIndices.includes(current)) {
-      setLoadedIndices((prev) => [...prev, current]);
-    }
-  }, [current, loadedIndices]);
-
-  useEffect(() => {
     if (initialBanners && initialBanners.length > 0) {
       return;
     }
     const fetchBanners = async () => {
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-        const response = await axios.get(`${API_URL}/banners?locale=${locale}`);
-        const fetchedBanners = response.data as any[];
+        const response = await fetch(`${API_URL}/banners?locale=${locale}`);
+        const fetchedBanners = await response.json() as BannerItem[];
         if (fetchedBanners && fetchedBanners.length > 0) {
           setBanners(fetchedBanners);
+          setCurrent(0);
         }
       } catch (error) {
-        console.error('Failed to fetch banners:', error);
+        console.warn('Failed to fetch banners:', error);
       }
     };
     fetchBanners();
@@ -94,41 +133,33 @@ export function Hero({ initialBanners }: HeroProps) {
     return () => clearInterval(timer);
   }, [banners.length]);
 
-  useEffect(() => {
-    if (current >= banners.length) {
-      setCurrent(0);
-    }
-  }, [banners.length, current]);
-
   return (
     <section 
       style={{ overflowAnchor: 'none' }}
-      className="relative min-h-screen w-full overflow-hidden bg-background flex flex-col pt-8 lg:justify-center pb-10 lg:pb-16"
+      className="relative min-h-screen w-full overflow-hidden bg-background flex flex-col pt-8 xl:justify-center pb-10 xl:pb-16"
     >
       {/* Dynamic Backgrounds */}
       <div className="absolute inset-0 overflow-hidden">
         {banners.map((banner, index) => (
-          <motion.div
+          <div
             key={`bg-${index}`}
-            initial={{ opacity: 0, visibility: 'hidden' }}
-            animate={{ 
-              opacity: index === current ? 1 : 0,
-              visibility: index === current ? 'visible' : 'hidden'
-            }}
-            transition={{ duration: 1.5 }} // Smoother background fade
-            className="absolute inset-0 z-0"
+            className={cn(
+              "absolute inset-0 z-0 transition-opacity duration-700 ease-out",
+              index === current ? "opacity-100 visible" : "opacity-0 invisible"
+            )}
             style={{ pointerEvents: index === current ? 'auto' : 'none' }}
           >
             <div className="absolute inset-0 transition-transform duration-[20s] scale-105 group-hover:scale-100">
-              {loadedIndices.includes(index) && (
+              {index === current && (
                 <Image 
-                  src={banner.image}
-                  alt="Banner Background"
+                  src={optimizeHeroImage(banner.image, index === 0 ? 1400 : 1200)}
+                  alt={banner.title || t('badge')}
                   fill
                   priority={index === 0}
                   fetchPriority={index === 0 ? "high" : "auto"}
                   className="object-cover"
-                  sizes="100vw"
+                  sizes="(max-width: 768px) 100vw, 100vw"
+                  quality={index === 0 ? 70 : 60}
                 />
               )}
               {/* Multi-layered gradient for depth */}
@@ -140,29 +171,23 @@ export function Hero({ initialBanners }: HeroProps) {
               )} />
               <div className="absolute inset-0 bg-black/5 dark:bg-black/20" />
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
-
-      <div className="relative container mx-auto px-4 w-full flex flex-col lg:flex-row items-center lg:justify-between gap-8 lg:gap-16 z-10">
+ 
+      <div className="relative container mx-auto px-4 w-full flex flex-col xl:flex-row items-center xl:justify-between gap-8 xl:gap-16 z-10">
         {/* Animated Content Section */}
-        <div className="w-full lg:flex-1 relative h-[600px] sm:h-[650px] lg:h-[750px] flex items-center">
+        <div className="w-full xl:flex-1 relative h-[600px] sm:h-[650px] xl:h-[750px] flex items-center">
           {banners.map((banner, index) => (
-            <motion.div
+            <div
               key={`content-${index}`}
-              initial={{ opacity: 0, x: isRTL ? 40 : -40, visibility: 'hidden' }}
-              animate={{ 
-                opacity: index === current ? 1 : 0,
-                x: index === current ? 0 : (isRTL ? -40 : 40),
-                visibility: index === current ? 'visible' : 'hidden'
-              }}
               style={{
                 pointerEvents: index === current ? 'auto' : 'none'
               }}
-              transition={{ duration: 0.6, ease: "easeInOut" }}
               className={cn(
-                "absolute inset-0 flex flex-col justify-center space-y-4 md:space-y-6 z-10", 
-                isRTL ? "text-right lg:border-r-4 border-primary lg:pr-10" : "text-left lg:border-l-4 border-primary lg:pl-10"
+                "absolute inset-0 flex flex-col justify-center space-y-4 md:space-y-6 z-10 transition-all duration-500 ease-out",
+                index === current ? "opacity-100 translate-x-0 visible" : cn("opacity-0 invisible", isRTL ? "-translate-x-8" : "translate-x-8"),
+                isRTL ? "text-right xl:border-r-4 border-primary xl:pr-10" : "text-left xl:border-l-4 border-primary xl:pl-10"
               )}
             >
               <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-lg w-fit">
@@ -172,7 +197,7 @@ export function Hero({ initialBanners }: HeroProps) {
                 </div>
                 <span className="text-xs font-black uppercase tracking-[0.3em] text-primary">{t('badge')}</span>
               </div>
-
+ 
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-tight md:leading-[0.85] text-foreground uppercase">
                 {(banner?.title || '').split(' ').map((word, i) => (
                   <span key={i} className={cn(i === 1 ? "text-primary italic" : "text-foreground", "inline")}>
@@ -180,11 +205,11 @@ export function Hero({ initialBanners }: HeroProps) {
                   </span>
                 ))}
               </h1>
-
+ 
               <p className="text-lg md:text-2xl text-muted-foreground font-semibold max-w-xl leading-relaxed">
                 {banner?.description}
               </p>
-
+ 
               <div className="flex flex-col sm:flex-row gap-6 pt-4">
                 <Link
                   href={banner?.link || '#'}
@@ -201,8 +226,8 @@ export function Hero({ initialBanners }: HeroProps) {
                   <span>{t('our_works')}</span>
                 </Link>
               </div>
-
-              <div className="hidden lg:flex flex-col sm:flex-row gap-4 sm:gap-8 pt-4 text-foreground/90">
+ 
+              <div className="hidden xl:flex flex-col sm:flex-row gap-4 sm:gap-8 pt-4 text-foreground/90">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="text-primary shrink-0" size={20} />
                   <span className="font-semibold">{t('trust_since')}</span>
@@ -212,23 +237,23 @@ export function Hero({ initialBanners }: HeroProps) {
                   <span className="font-semibold">{t('trust_experience')}</span>
                 </div>
               </div>
-
-              <div className={cn("hidden lg:flex mt-6 p-4 bg-foreground/5 backdrop-blur-lg rounded-xl border border-foreground/10 items-start gap-3 max-w-xl", isRTL && "text-right")}>
+ 
+              <div className={cn("hidden xl:flex mt-6 p-4 bg-foreground/5 backdrop-blur-lg rounded-xl border border-foreground/10 items-start gap-3 max-w-xl", isRTL && "text-right")}>
                 <ShieldCheck className="text-primary shrink-0 mt-0.5" size={20} />
                 <p className="text-sm font-bold text-foreground/80 leading-relaxed">
                   {tContact('form_note')}
                 </p>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
         
         {/* Contact Form & Trust Section */}
-        <div className="block w-full lg:w-[540px] relative z-20 space-y-6">
+        <div className="block w-full xl:w-[540px] relative z-20 space-y-6">
           <ContactForm isHeroMini={true} />
           
           {/* Mobile-only Trust Badges & Indicators (Under the form) */}
-          <div className="lg:hidden space-y-6">
+          <div className="xl:hidden space-y-6">
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 pt-4 text-foreground/90 bg-card/40 backdrop-blur-md p-6 rounded-xl border border-border/50">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="text-primary shrink-0" size={20} />
@@ -239,14 +264,14 @@ export function Hero({ initialBanners }: HeroProps) {
                 <span className="font-semibold">{t('trust_experience')}</span>
               </div>
             </div>
-
+ 
             <div className={cn("p-4 bg-foreground/5 backdrop-blur-lg rounded-xl border border-foreground/10 flex items-start gap-3", isRTL && "text-right")}>
               <ShieldCheck className="text-primary shrink-0 mt-0.5" size={20} />
               <p className="text-sm font-bold text-foreground/80 leading-relaxed">
                 {tContact('form_note')}
               </p>
             </div>
-
+ 
             <div className="flex flex-row items-center justify-center gap-8 py-4">
               <div className="flex items-center gap-4 text-white font-black text-xs tracking-widest uppercase drop-shadow-lg">
                 <span className="text-primary bg-background/50 px-2 py-1 rounded-md backdrop-blur-sm">0{current + 1}</span>
@@ -259,6 +284,8 @@ export function Hero({ initialBanners }: HeroProps) {
                   <button
                     key={index}
                     onClick={() => setCurrent(index)}
+                    aria-label={`${t('badge')} ${index + 1}`}
+                    aria-current={current === index ? 'true' : undefined}
                     className={cn(
                       "w-8 h-1 rounded-full transition-all duration-500 cursor-pointer",
                       current === index ? "bg-primary w-12" : "bg-white/20"
@@ -270,13 +297,15 @@ export function Hero({ initialBanners }: HeroProps) {
           </div>
         </div>
       </div>
-
+ 
       {/* Desktop-only Absolute Indicators */}
-      <div className={cn("hidden lg:flex absolute bottom-8 flex-col gap-4 z-[30]", isRTL ? "left-8" : "right-8")}>
+      <div className={cn("hidden xl:flex absolute bottom-8 flex-col gap-4 z-[30]", isRTL ? "left-8" : "right-8")}>
         {banners.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrent(index)}
+            aria-label={`${t('badge')} ${index + 1}`}
+            aria-current={current === index ? 'true' : undefined}
             className={cn(
               "h-12 w-1.5 rounded-full transition-all duration-500 cursor-pointer",
               current === index ? "bg-primary h-20" : "bg-white/20 hover:bg-white/40"
@@ -284,8 +313,8 @@ export function Hero({ initialBanners }: HeroProps) {
           />
         ))}
       </div>
-
-      <div className={cn("hidden lg:flex absolute bottom-8 items-center gap-4 text-white font-black text-sm tracking-widest uppercase z-[30] drop-shadow-lg", isRTL ? "right-8" : "left-8")}>
+ 
+      <div className={cn("hidden xl:flex absolute bottom-8 items-center gap-4 text-white font-black text-sm tracking-widest uppercase z-[30] drop-shadow-lg", isRTL ? "right-8" : "left-8")}>
         <span className="text-primary bg-background/50 px-2 py-1 rounded-md backdrop-blur-sm">0{current + 1}</span>
         <div className="w-12 h-px bg-white/40" />
         <span className="bg-background/50 px-2 py-1 rounded-md backdrop-blur-sm">0{banners.length}</span>

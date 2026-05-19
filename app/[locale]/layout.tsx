@@ -5,7 +5,6 @@ import "../globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
-import { MessageCircle } from 'lucide-react';
 import { StickyContact } from "@/components/sticky-contact";
 
 import { TopTrustBar } from "@/components/top-trust-bar";
@@ -82,6 +81,11 @@ export default async function RootLayout(props: {
 
   return (
     <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+        <link rel="preconnect" href="https://flagcdn.com" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+      </head>
       <body className={`${almarai.variable} font-almarai antialiased`}>
         <ClarityAnalytics />
         <Script src="https://www.googletagmanager.com/gtag/js?id=G-FGGRX4K06C" strategy="lazyOnload" />
@@ -112,9 +116,9 @@ export default async function RootLayout(props: {
                   <Header />
                 </HideOnAdmin>
               </div>
-              <main className="overflow-x-hidden">
+              <div className="overflow-x-hidden">
                 {children}
-              </main>
+              </div>
               <HideOnAdmin>
                 <Footer />
                 <ScrollToTop />
