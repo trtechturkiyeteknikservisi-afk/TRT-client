@@ -63,7 +63,7 @@ export function Header() {
       isDropdown: true,
       subItems: legalPolicies
     },
-    { name: t('contact'), href: '#contact' },
+    
   ];
 
   const handleLanguageChange = (newLocale: string) => {
@@ -85,10 +85,10 @@ export function Header() {
 
   return (
     <header className="w-full border-b bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
-      <div className="w-full container mx-auto px-2 sm:px-4 xl:px-4 ">
-        <div className="flex min-h-[4rem] items-center justify-between gap-2 py-2 md:py-0">
-          <div className="flex items-center flex-shrink-0">
-            <Link href="/" className="flex flex-col items-center group">
+      <div className="w-full container mx-auto px-1 sm:px-4 xl:px-4 ">
+        <div className="flex min-h-[4rem] items-center justify-between gap-1 sm:gap-2 py-2 md:py-0">
+          <div className="flex items-center shrink-0">
+            <Link href="/" className="flex flex-col items-center group mb-2">
               <Image 
                 src="/day-logo.png" 
                 alt={t('company_name')}
@@ -142,12 +142,13 @@ export function Header() {
                   </Link>
                   
                   {activeDropdown === item.name && (
-                      <div
-                        className={cn(
-                          "absolute top-full mt-2 w-64 bg-card border border-border rounded-xl shadow-lg overflow-hidden p-2 animate-in fade-in slide-in-from-top-1 duration-150",
-                          locale === 'ar' ? "-right-4" : "-left-4"
-                        )}
-                      >
+                    <div
+                      className={cn(
+                        "absolute top-full w-64 pt-2 z-50",
+                        locale === 'ar' ? "-right-4" : "-left-4"
+                      )}
+                    >
+                      <div className="bg-card border border-border rounded-xl shadow-lg overflow-hidden p-2 animate-in fade-in slide-in-from-top-1 duration-150">
                         {item.subItems?.map((sub) => (
                           <Link
                             key={sub.name}
@@ -165,7 +166,8 @@ export function Header() {
                           </Link>
                         ))}
                       </div>
-                    )}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <Link
@@ -199,26 +201,26 @@ export function Header() {
           </nav>
 
 
-          <div className="flex items-center gap-1  flex-shrink-0">
+          <div className="flex items-center gap-0 sm:gap-1 shrink-0">
             {/* Bize Ulaşın Button */}
             <Link
               href="/contact"
               className={cn(
-                "hidden lg:flex items-center gap-1 px-2.5 py-1 border border-border rounded-lg bg-card hover:bg-muted text-foreground transition-all duration-300 active:scale-95 text-[10px] xl:text-[10px] 2xl:text-[11.5px] font-black uppercase tracking-wider cursor-pointer mr-0.5 ml-2",
+                "hidden lg:flex items-center justify-center gap-1 px-2.5 py-2  border border-border rounded-lg bg-card hover:bg-muted text-foreground transition-all duration-300 active:scale-95 text-[10px] xl:text-[10px] 2xl:text-[11.5px] font-black uppercase tracking-wider cursor-pointer mr-0.5 ml-2",
                 pathname === '/contact' && "border-primary text-primary"
               )}
             >
-              <span className="relative flex h-2 w-2 shrink-0">
+              <span className="relative flex items-center h-2 w-2 shrink-0">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
-              <span>{t('bize_ulasin')}</span>
+              <span className="leading-none">{t('bize_ulasin')}</span>
             </Link>
 
             {/* Theme Toggle */}
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="flex p-1.5 xl:p-1.5 2xl:p-2 rounded-lg hover:bg-muted text-muted-foreground transition-all active:scale-95 border border-transparent hover:border-border cursor-pointer flex-shrink-0"
+              className="flex p-1 sm:p-1.5 xl:p-1.5 2xl:p-2 rounded-lg hover:bg-muted text-muted-foreground transition-all active:scale-95 border border-transparent hover:border-border cursor-pointer flex-shrink-0"
               aria-label={!mounted ? 'Toggle theme' : effectiveTheme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
             >
               {!mounted ? (
@@ -243,7 +245,7 @@ export function Header() {
                   aria-label={`Switch language to ${l.label}`}
                   aria-pressed={locale === l.code}
                   className={cn(
-                    "px-1.5 py-1 rounded-md text-[9px] 2xl:text-[10px] font-extrabold whitespace-nowrap flex items-center justify-center gap-0.5 sm:gap-1 cursor-pointer",
+                    "px-1 sm:px-1.5 py-1 rounded-md text-[9px] 2xl:text-[10px] font-extrabold whitespace-nowrap flex items-center justify-center gap-0.5 sm:gap-1 cursor-pointer",
                     locale === l.code 
                       ? "bg-background text-primary shadow-sm ring-1 ring-border/50" 
                       : "text-muted-foreground hover:bg-muted"
@@ -282,27 +284,42 @@ export function Header() {
               {navigation.map((item) => (
                 <div key={item.name}>
                   {item.isDropdown ? (
-                    <div className="space-y-1 my-2">
-                      <div className="px-4 py-2 text-xs font-black uppercase tracking-widest text-muted-foreground/50 border-b border-border/50 mb-2">
-                        {item.name}
-                      </div>
-                      {item.subItems?.map((sub) => (
-                        <Link
-                          key={sub.name}
-                          href={sub.href}
-                          className="flex items-center gap-4 px-4 py-3 text-base font-bold text-muted-foreground hover:bg-muted hover:text-primary rounded-xl transition-all"
-                          onClick={() => setIsMenuOpen(false)}
-                        >
-                          <div className={cn(locale === 'ar' ? 'ml-4' : 'mr-4', "w-7 h-7 flex items-center justify-center")}>
-                            {'customIcon' in sub && sub.customIcon ? (
-                              <Image src={sub.customIcon as string} alt="" width={28} height={28} className="w-full h-full object-contain" />
-                            ) : (
-                              <sub.icon size={28} className="text-primary" />
-                            )}
-                          </div>
-                          <span>{sub.name}</span>
-                        </Link>
-                      ))}
+                    <div className="my-2">
+                      <button
+                        onClick={() => setActiveDropdown(activeDropdown === item.name ? null : item.name)}
+                        className="flex items-center justify-between w-full px-4 py-3 text-base font-bold text-muted-foreground hover:bg-muted hover:text-primary rounded-xl transition-all cursor-pointer"
+                      >
+                        <span>{item.name}</span>
+                        <ChevronDown 
+                          size={18} 
+                          className={cn("transition-transform duration-200 text-muted-foreground", activeDropdown === item.name && "rotate-180 text-primary")} 
+                        />
+                      </button>
+                      
+                      {activeDropdown === item.name && (
+                        <div className="space-y-1 mt-1 pl-4 rtl:pl-0 rtl:pr-4 animate-in fade-in slide-in-from-top-1 duration-150 border-l dark:border-border/30 rtl:border-l-0 rtl:border-r">
+                          {item.subItems?.map((sub) => (
+                            <Link
+                              key={sub.name}
+                              href={sub.href}
+                              className="flex items-center gap-4 px-4 py-3 text-sm font-bold text-muted-foreground hover:bg-muted hover:text-primary rounded-xl transition-all"
+                              onClick={() => {
+                                setIsMenuOpen(false);
+                                setActiveDropdown(null);
+                              }}
+                            >
+                              <div className="w-6 h-6 flex items-center justify-center shrink-0">
+                                {'customIcon' in sub && sub.customIcon ? (
+                                  <Image src={sub.customIcon as string} alt="" width={24} height={24} className="w-full h-full object-contain" />
+                                ) : (
+                                  <sub.icon size={24} className="text-primary animate-in zoom-in-75 duration-200" />
+                                )}
+                              </div>
+                              <span>{sub.name}</span>
+                            </Link>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <Link

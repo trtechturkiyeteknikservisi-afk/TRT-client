@@ -89,14 +89,19 @@ export function RepairProcess() {
     const activeEl = document.getElementById(`step-btn-${activeStep}`);
     const container = scrollContainerRef.current;
     if (activeEl && container) {
-      const containerWidth = container.offsetWidth;
-      const elementOffset = activeEl.offsetLeft;
-      const elementWidth = activeEl.offsetWidth;
+      // Calculate position relative to viewport
+      const containerRect = container.getBoundingClientRect();
+      const activeRect = activeEl.getBoundingClientRect();
       
-      const targetScrollLeft = elementOffset - (containerWidth / 2) + (elementWidth / 2);
+      // Find the distance from the center of the container to the center of the active element
+      const activeCenter = activeRect.left + (activeRect.width / 2);
+      const containerCenter = containerRect.left + (containerRect.width / 2);
       
-      container.scrollTo({
-        left: targetScrollLeft,
+      const distanceToCenter = activeCenter - containerCenter;
+      
+      // scrollBy works perfectly in both LTR and RTL without jumping the page!
+      container.scrollBy({
+        left: distanceToCenter,
         behavior: 'smooth'
       });
     }
@@ -201,19 +206,6 @@ export function RepairProcess() {
             </div>
           </div>
 
-          {/* Controls */}
-          <div className="flex justify-center mb-8">
-              <button 
-                  onClick={() => setIsPlaying(!isPlaying)}
-                  className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors cursor-pointer"
-              >
-                  {isPlaying ? (
-                      <><Pause size={14} /> {t('pause_autoplay')}</>
-                  ) : (
-                      <><Play size={14} /> {t('resume_autoplay')}</>
-                  )}
-              </button>
-          </div>
 
           {/* Active Step Presentation */}
           <div className="relative bg-card/40 backdrop-blur-lg rounded-xl border border-primary/10 dark:border-white/5 shadow-lg overflow-hidden min-h-[600px] md:min-h-[450px] flex items-center">

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { Phone, Mail, MapPin, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
@@ -37,7 +38,7 @@ export function Contact() {
                 
                 <h2 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tighter text-foreground leading-[1] uppercase">
                   {t('title').split(' ').map((word, i) => (
-                    <span key={i} className={cn("block", i === 1 && "text-primary italic opacity-90")}>
+                    <span key={i} className={cn( i === 1 && "text-primary italic opacity-90")}>
                       {word}
                     </span>
                   ))}
@@ -70,15 +71,7 @@ export function Contact() {
                   ltr: true,
                   image: '/calling-new.webp'
                 },
-                { 
-                  icon: MessageCircle, 
-                  label: t('whatsapp_label'), 
-                  value: t('whatsapp_cta'), 
-                  color: 'green-500',
-                  link: `https://wa.me/${settings.whatsapp.replace(/\D/g, '')}`,
-                  isWa: true,
-                  image: '/whatsap.webp'
-                },
+               
                 { 
                   icon: MessageCircle, 
                   label: t('whatsapp_complaints'), 

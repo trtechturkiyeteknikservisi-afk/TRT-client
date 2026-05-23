@@ -45,7 +45,7 @@ export default function ContactPage() {
       desc: t('phone_desc'),
       action: settings.support_phone,
       link: `tel:${settings.support_phone.replace(/\s+/g, '')}`,
-      isButton: false
+      isButton: true
     },
     {
       key: 'whatsapp_complaints',
@@ -63,7 +63,7 @@ export default function ContactPage() {
       desc: t('email_desc'),
       action: settings.support_email,
       link: `mailto:${settings.support_email}`,
-      isButton: false
+      isButton: true
     },
     {
       key: 'map',

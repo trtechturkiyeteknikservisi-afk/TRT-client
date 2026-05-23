@@ -38,7 +38,8 @@ export function AddressSelector({ onAddressChange, isHeroMini = false }: Address
   const t = useTranslations('Contact');
   const idPrefix = React.useId();
   const [data, setData] = useState<AddressData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [hasRequestedData, setHasRequestedData] = useState(false);
   
   const [selectedCity, setSelectedCity] = useState<string>('');
   const [selectedCounty, setSelectedCounty] = useState<string>('');
@@ -47,20 +48,21 @@ export function AddressSelector({ onAddressChange, isHeroMini = false }: Address
   const [building, setBuilding] = useState<string>('');
   const [door, setDoor] = useState<string>('');
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch('/turkey-address.json');
-        const json = await res.json();
-        setData(json);
-      } catch (err) {
-        console.warn('Failed to load address data', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  const loadAddressData = async () => {
+    if (hasRequestedData || loading || data.length > 0) return;
+
+    setHasRequestedData(true);
+    setLoading(true);
+    try {
+      const res = await fetch('/turkey-address.json');
+      const json = await res.json() as AddressData[];
+      setData(json);
+    } catch (err) {
+      console.warn('Failed to load address data', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const cities = useMemo(() => data.map(d => d.name).sort(), [data]);
   
@@ -123,6 +125,7 @@ export function AddressSelector({ onAddressChange, isHeroMini = false }: Address
         <select
           id={id}
           value={value}
+          onFocus={loadAddressData}
           onChange={(e) => onChange(e.target.value)}
           className={cn(
             "w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-lg px-2 text-[12px] font-bold focus:ring-1 focus:ring-primary/30 focus:border-primary/40 outline-none transition-all appearance-none cursor-pointer hover:bg-black/10 dark:hover:bg-white/10 text-foreground",
@@ -140,7 +143,7 @@ export function AddressSelector({ onAddressChange, isHeroMini = false }: Address
   );
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" onPointerEnter={loadAddressData}>
       {/* Cascading Selects */}
       <div className="grid grid-cols-3 gap-1.5">
         {renderSelect(`${idPrefix}-city`, t('address_il'), selectedCity, cities, (val) => {

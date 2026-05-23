@@ -138,11 +138,15 @@
   * {
     @apply border-border;
   }
-  html, body {
-    @apply overflow-x-clip;
+  html {
+    overflow-y: scroll;
+    overflow-x: clip;
   }
   body {
     @apply bg-background text-foreground transition-colors duration-300;
+    overflow-y: visible !important;
+    overflow-x: clip !important;
+    min-height: 100%;
   }
   button {
     cursor: pointer;

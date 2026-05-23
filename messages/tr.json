@@ -97,32 +97,76 @@
     "phone": {
       "title": "Profesyonel Telefon Tamiri",
       "description": "Apple, Samsung, Huawei ve daha fazlası dahil olmak üzere tüm büyük akıllı telefon markalarını onarıyoruz. Ekran çatlaklarından anakart sorunlarına kadar her şeyi hallediyoruz.",
-      "features": ["Ekran Değişimi", "Batarya Değişimi", "Şarj Soketi Onarımı", "Mikrofon / Hoparlör Onarımı", "Anakart Onarımı", "Sıvı Teması Onarımı", "Mmc & İşlemci Onarımı"]
+      "features": [
+        "Ekran Değişimi",
+        "Batarya Değişimi",
+        "Şarj Soketi Onarımı",
+        "Mikrofon / Hoparlör Onarımı",
+        "Anakart Onarımı",
+        "Sıvı Teması Onarımı",
+        "Mmc & İşlemci Onarımı"
+      ]
     },
     "laptop": {
       "title": "Uzman Dizüstü & PC Tamiri",
       "description": "Teknisyenlerimiz, tüm dizüstü bilgisayar markaları ve özel PC'ler için donanım yükseltmeleri, ekran değiştirmeleri ve performans ayarı konularında uzmanlaşmıştır.",
-      "features": ["Klavye Değişimi", "SSD/RAM Yükseltmeleri", "Anakart Tamiri", "Ekran Değişimi", "Isınma Çözümleri"]
+      "features": [
+        "Klavye Değişimi",
+        "SSD/RAM Yükseltmeleri",
+        "Anakart Tamiri",
+        "Ekran Değişimi",
+        "Isınma Çözümleri"
+      ]
     },
     "robot": {
       "title": "Robot Süpürge Onarımı",
       "description": "Xiaomi, Roborock, Viomi ve diğer popüler robot süpürge markaları için yetkili tarzda servis. Evinizin kesintisiz temiz kalmasını sağlayın.",
-      "features": ["Tekerlek & Motor Tamiri", "Sensör Kalibrasyonu", "Batarya Değişimi", "Anakart Tamiri", "Derin Temizlik", "Lazer (LDS) Tamiri"]
+      "features": [
+        "Tekerlek & Motor Tamiri",
+        "Sensör Kalibrasyonu",
+        "Batarya Değişimi",
+        "Anakart Tamiri",
+        "Derin Temizlik",
+        "Lazer (LDS) Tamiri"
+      ]
     },
     "watch": {
       "title": "Orijinal Akıllı Saat Restorasyonu",
       "description": "Orijinal akıllı saatler için hassas onarım ve bakım. Saatlerinizi en yüksek özenle ve profesyonel araçlarla ele alıyoruz.",
-      "features": ["Mekanizma Servisi", "Cam Değişimi", "Batarya Değişimi", "Parlatma & Temizlik", "Su Geçirmezlik Testi", "Kordon Değişimi"]
+      "features": [
+        "Mekanizma Servisi",
+        "Cam Değişimi",
+        "Batarya Değişimi",
+        "Parlatma & Temizlik",
+        "Su Geçirmezlik Testi",
+        "Kordon Değişimi"
+      ]
     },
     "tablet": {
       "title": "Profesyonel Tablet ve iPad Tamiri",
       "description": "iPad, Samsung Galaxy Tab ve Microsoft Surface dahil tüm tablet markaları için uzman onarım. Ekran çatlaklarından donanım sorunlarına kadar.",
-      "features": ["Ekran Değişimi", "Batarya Değişimi", "Şarj Soketi Tamiri",  "Dokunmatik Tamiri", "Anakart Tamiri", "Kamera Onarımı", "Ses Problemleri", "Sıvı Teması Onarımı"]
+      "features": [
+        "Ekran Değişimi",
+        "Batarya Değişimi",
+        "Şarj Soketi Tamiri",
+        "Dokunmatik Tamiri",
+        "Anakart Tamiri",
+        "Kamera Onarımı",
+        "Ses Problemleri",
+        "Sıvı Teması Onarımı"
+      ]
     },
     "headphones": {
       "title": "Kulaklık ve AirPods Onarımı",
       "description": "AirPods, kulaklıklar ve tüm premium ses ekipmanları için uzman onarım. Şarj sorunlarını, ses problemlerini ve fiziksel hasarları onarıyoruz.",
-      "features": ["AirPods Batarya", "Şarj Kutusu Onarımı", "Hoparlör Değişimi", "Bağlantı Sorunları", "Temizlik ve Restorasyon", "Kafa Bandı Onarımı"]
+      "features": [
+        "AirPods Batarya",
+        "Şarj Kutusu Onarımı",
+        "Hoparlör Değişimi",
+        "Bağlantı Sorunları",
+        "Temizlik ve Restorasyon",
+        "Kafa Bandı Onarımı"
+      ]
     },
     "features_title": "Hizmet Özellikleri",
     "contact_subtitle": "Bizimle iletişime geçin, size en kısa sürede dönüş yapalım.",
@@ -528,5 +572,42 @@
     "hours_line2": "Cumartesi 10:00 - 17:00",
     "hours_line3": "Pazar: Kapalı",
     "hours_action": "Tüm Saatleri Görüntüle"
+  },
+  "Metadata": {
+    "Home": {
+      "title": "TRT | Türkiye'de Profesyonel Tamir Servisi",
+      "description": "Akıllı telefonlar, dizüstü bilgisayarlar, robot süpürgeler ve lüks saatler için uzman tamir hizmeti. 20 yılı aşkın tecrübe.",
+      "keywords": "telefon tamiri, bilgisayar tamiri, robot süpürge tamiri, saat tamiri, teknik servis, Türkiye, Bursa"
+    },
+    "AboutUs": {
+      "title": "Hakkımızda | TRT",
+      "description": "TRT teknik servisi hakkında daha fazla bilgi edinin, 20 yılı aşkın tecrübemizle en kaliteli tamir hizmetlerini sunuyoruz.",
+      "keywords": "TRT hakkında, tamir uzmanları, teknik servis tarihi"
+    },
+    "Contact": {
+      "title": "İletişim | TRT",
+      "description": "TRT teknik servisi ile iletişime geçin. Akıllı telefon, dizüstü bilgisayar, robot süpürge veya lüks saat tamirleri için buradayız.",
+      "keywords": "TRT iletişim, müşteri hizmetleri, tamir talebi"
+    },
+    "Portfolio": {
+      "title": "Çalışmalarımız | TRT",
+      "description": "Başarılı tamir portföyümüzü inceleyin. Müşterilerin neden TRT'ye güvendiğini görün.",
+      "keywords": "TRT çalışmaları, tamir işleri, başarılı tamirler, öncesi sonrası"
+    },
+    "Blog": {
+      "title": "Blog | TRT",
+      "description": "Cihazlarınızın bakımı ve tamiri hakkında TRT teknik servisinden en son ipuçlarını ve haberleri okuyun.",
+      "keywords": "tamir blogu, teknoloji ipuçları, cihaz bakımı"
+    },
+    "Services": {
+      "title": "Hizmetlerimiz | TRT",
+      "description": "Akıllı telefonlar, dizüstü bilgisayarlar, robot süpürgeler, saatler ve tabletler dahil olmak üzere geniş tamir hizmeti yelpazemizi keşfedin.",
+      "keywords": "tamir hizmetleri, TRT hizmetleri, neler tamir ediyoruz"
+    },
+    "Policies": {
+      "title": "Politikalar | TRT",
+      "description": "Gizlilik politikamızı, hizmet şartlarımızı, garanti politikamızı ve diğer önemli yasal bilgileri okuyun.",
+      "keywords": "TRT politikaları, hizmet şartları, gizlilik politikası, garanti"
+    }
   }
 }

@@ -25,7 +25,7 @@ export function FAQ() {
   const t = useTranslations('FAQ');
   const locale = useLocale();
   const [faqs, setFaqs] = useState<FaqItem[]>(mockFaqs);
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchFaqs = async () => {

@@ -95,7 +95,7 @@ export default async function PoliciesPage(props: { params: Promise<{ locale: st
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="pt-10 pb-20">
+      <div className="pt-24 md:pt-32 pb-20">
         <div className=" mx-auto px-4 lg:px-8">
           <header className="text-center max-w-2xl mx-auto mb-12 space-y-4">
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-primary/10 text-primary mb-2">
@@ -132,15 +132,16 @@ export default async function PoliciesPage(props: { params: Promise<{ locale: st
                   href={policy.href}
                   target={policy.href.startsWith('http') ? '_blank' : undefined}
                   rel={policy.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                  className="group relative bg-card border rounded-xl p-8 transition-all hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 flex flex-col items-center text-center space-y-5 overflow-hidden"
+                  className="group relative bg-card border rounded-xl p-8 transition-all hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 flex flex-col items-center   text-center space-y-5 overflow-hidden"
                 >
                   <div className="absolute top-0 right-0 w-20 h-20 bg-primary/5 blur-xl -mr-10 -mt-10 group-hover:bg-primary/10 transition-all"></div>
                   
-                  <div className={`w-14 h-14 rounded-xl ${policy.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+               
+                    <div className={`w-14 h-14 rounded-xl ${policy.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
                     <policy.icon size={24} strokeWidth={2.5} />
                   </div>
 
-                  <div className="space-y-2 flex-grow">
+                  <div className="space-y-2 flex-grow flex flex-col justify-center">
                     <h3 className="text-base font-black text-foreground leading-tight tracking-tight uppercase">
                       {policy.title}
                     </h3>
@@ -154,6 +155,7 @@ export default async function PoliciesPage(props: { params: Promise<{ locale: st
                         <ArrowRight size={16} className={locale === 'ar' ? 'rotate-180' : ''} />
                     </div>
                   </div>
+                
                 </Link>
               );
             })}

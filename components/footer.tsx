@@ -86,8 +86,8 @@ export function Footer() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[300px] bg-primary/5 blur-[80px] -z-10" />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
-          <div className="space-y-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
+          <div className="space-y-6 col-span-2 md:col-span-4 lg:col-span-1">
             <Link href="/" className="flex items-center">
               <Image 
                 src="/day-logo.png" 

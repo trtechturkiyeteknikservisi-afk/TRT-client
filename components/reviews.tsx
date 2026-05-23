@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Star, Quote } from 'lucide-react';
 import { useTranslations, useFormatter } from 'next-intl';
+import { cn } from '@/lib/utils';
 
 // Swiper Imports
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -40,6 +41,7 @@ export function Reviews() {
     rating: 5,
     comment: ''
   });
+  const [hoverRating, setHoverRating] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -141,32 +143,60 @@ export function Reviews() {
         {showForm && (
           <div className="mb-10 bg-card border p-6 rounded-xl text-left max-w-2xl mx-auto">
             <form onSubmit={handleSubmitReview} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                 <input
                   value={form.customerName}
                   onChange={(e) => setForm((prev) => ({ ...prev, customerName: e.target.value }))}
                   required
                   placeholder={t('name_placeholder')}
-                  className="px-4 py-3 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20"
+                  className="px-4 py-3 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 h-[50px] font-bold text-sm"
                 />
-                <select
-                  value={form.rating}
-                  onChange={(e) => setForm((prev) => ({ ...prev, rating: Number(e.target.value) }))}
-                  className="px-4 py-3 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20"
-                >
-                  <option value={5}>5 Stars</option>
-                  <option value={4}>4 Stars</option>
-                  <option value={3}>3 Stars</option>
-                  <option value={2}>2 Stars</option>
-                  <option value={1}>1 Star</option>
-                </select>
+                
+                <div className="flex flex-col gap-1 px-4 py-2 rounded-xl border bg-background focus-within:ring-2 focus-within:ring-primary/20 justify-center h-[50px]">
+                  {/* <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/80 mb-0.5">
+                    {t('rating') || 'Rating'}
+                  </span> */}
+                  <div 
+                    role="radiogroup" 
+                    aria-label="Rating" 
+                    className="flex items-center gap-1.5"
+                  >
+                    {[1, 2, 3, 4, 5].map((starValue) => {
+                      const isHighlighted = hoverRating !== null 
+                        ? starValue <= hoverRating 
+                        : starValue <= form.rating;
+                      return (
+                        <button
+                          key={starValue}
+                          type="button"
+                          role="radio"
+                          aria-checked={form.rating === starValue}
+                          aria-label={`${starValue} Star${starValue > 1 ? 's' : ''}`}
+                          onClick={() => setForm((prev) => ({ ...prev, rating: starValue }))}
+                          onMouseEnter={() => setHoverRating(starValue)}
+                          onMouseLeave={() => setHoverRating(null)}
+                          className="text-yellow-500 hover:scale-110 active:scale-95 transition-all duration-150 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full p-0.5"
+                        >
+                          <Star
+                            size={20}
+                            fill={isHighlighted ? 'currentColor' : 'none'}
+                            className={cn(
+                              "transition-all duration-150",
+                              isHighlighted ? "scale-110 drop-shadow-[0_0_4px_rgba(234,179,8,0.3)]" : "text-muted-foreground/30"
+                            )}
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
               
               <textarea
                 value={form.comment}
                 onChange={(e) => setForm((prev) => ({ ...prev, comment: e.target.value }))}
                 placeholder={t('comment_placeholder')}
-                className="w-full px-4 py-3 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20"
+                className="w-full px-4 py-3 rounded-xl border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
                 rows={3}
               />
 
@@ -175,7 +205,7 @@ export function Reviews() {
               <button
                 type="submit"
                 disabled={loading || !kvkkAccepted}
-                className="w-full px-4 py-4 rounded-xl bg-primary text-primary-foreground font-black uppercase tracking-widest disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                className="w-full px-4 py-4 rounded-xl bg-primary text-primary-foreground font-black uppercase tracking-widest disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed text-xs"
               >
                 {loading ? t('sending') : t('submit')}
               </button>

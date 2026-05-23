@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import { Almarai } from "next/font/google";
 import "../globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -13,7 +12,7 @@ import { ScrollToTop } from "@/components/scroll-to-top";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { SettingsProvider } from "@/components/settings-provider";
-import { ClarityAnalytics } from "@/components/clarity-analytics";
+import { DeferredAnalytics } from "@/components/deferred-analytics";
 
 const almarai = Almarai({
   subsets: ["arabic"],
@@ -87,17 +86,7 @@ export default async function RootLayout(props: {
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
       </head>
       <body className={`${almarai.variable} font-almarai antialiased`}>
-        <ClarityAnalytics />
-        <Script src="https://www.googletagmanager.com/gtag/js?id=G-FGGRX4K06C" strategy="lazyOnload" />
-        <Script id="google-analytics" strategy="lazyOnload">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-
-            gtag('config', 'G-FGGRX4K06C');
-          `}
-        </Script>
+        <DeferredAnalytics />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -116,9 +105,9 @@ export default async function RootLayout(props: {
                   <Header />
                 </HideOnAdmin>
               </div>
-              <div className="overflow-x-hidden">
+              <main className="w-full">
                 {children}
-              </div>
+              </main>
               <HideOnAdmin>
                 <Footer />
                 <ScrollToTop />

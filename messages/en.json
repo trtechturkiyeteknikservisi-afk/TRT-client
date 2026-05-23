@@ -97,32 +97,76 @@
     "phone": {
       "title": "Professional Phone Repair",
       "description": "We fix all major smartphone brands including Apple, Samsung, Huawei, and more. From screen cracks to motherboard issues, we have you covered.",
-      "features": ["Screen Replacement", "Battery Change", "Charging Port Repair", "Microphone / Speaker Repair", "Motherboard Repair", "Water Damage Repair", "MMC & CPU Repair"]
+      "features": [
+        "Screen Replacement",
+        "Battery Change",
+        "Charging Port Repair",
+        "Microphone / Speaker Repair",
+        "Motherboard Repair",
+        "Water Damage Repair",
+        "MMC & CPU Repair"
+      ]
     },
     "laptop": {
       "title": "Expert Laptop & PC Repair",
       "description": "Our technicians specialize in hardware upgrades, screen replacements, and performance tuning for all laptop brands and custom PCs.",
-      "features": ["Keyboard Replacement", "SSD/RAM Upgrades", "Motherboard Repair", "Screen Replacement", "Overheating Solutions"]
+      "features": [
+        "Keyboard Replacement",
+        "SSD/RAM Upgrades",
+        "Motherboard Repair",
+        "Screen Replacement",
+        "Overheating Solutions"
+      ]
     },
     "robot": {
       "title": "Robot Vacuum Technical Service",
       "description": "Authorized-style service for Xiaomi, Roborock, Viomi, and other popular robot vacuum brands. Keep your home clean without interruptions.",
-      "features": ["Wheel & Motor Repair", "Sensor Calibration", "Battery Replacement", "Mainboard Repair", "Deep Cleaning", "Laser (LDS) Repair"]
+      "features": [
+        "Wheel & Motor Repair",
+        "Sensor Calibration",
+        "Battery Replacement",
+        "Mainboard Repair",
+        "Deep Cleaning",
+        "Laser (LDS) Repair"
+      ]
     },
     "watch": {
       "title": "Original Watch Restoration",
       "description": "Precision repair and maintenance for luxury and original watches. We handle your timepieces with the utmost care and professional tools.",
-      "features": ["Movement Service", "Crystal Replacement", "Battery Change", "Polishing & Cleaning", "Water Resistance Test", "Strap Replacement"]
+      "features": [
+        "Movement Service",
+        "Crystal Replacement",
+        "Battery Change",
+        "Polishing & Cleaning",
+        "Water Resistance Test",
+        "Strap Replacement"
+      ]
     },
     "tablet": {
       "title": "Professional Tablet & iPad Repair",
       "description": "Expert repair for all tablet brands including iPad, Samsung Galaxy Tab, and Microsoft Surface. From cracked screens to hardware issues.",
-      "features": ["Screen Replacement", "Battery Replacement", "Charging Port Repair",  "Touch Digitizer Fix", "Motherboard Repair", "Camera Repair", "Audio Problems", "Water Damage Repair"]
+      "features": [
+        "Screen Replacement",
+        "Battery Replacement",
+        "Charging Port Repair",
+        "Touch Digitizer Fix",
+        "Motherboard Repair",
+        "Camera Repair",
+        "Audio Problems",
+        "Water Damage Repair"
+      ]
     },
     "headphones": {
       "title": "Headphones & AirPods Repair",
       "description": "Specialized repair for AirPods, headsets, and all premium audio equipment. We fix charging issues, sound problems, and physical damage.",
-      "features": ["AirPods Battery", "Charging Case Repair", "Speaker Replacement", "Connection Issues", "Cleaning & Restoration", "Headband Repair"]
+      "features": [
+        "AirPods Battery",
+        "Charging Case Repair",
+        "Speaker Replacement",
+        "Connection Issues",
+        "Cleaning & Restoration",
+        "Headband Repair"
+      ]
     },
     "features_title": "Service Features",
     "contact_us": "Contact Us",
@@ -526,5 +570,42 @@
     "hours_line2": "Saturday 10:00 - 17:00",
     "hours_line3": "Sunday: Closed",
     "hours_action": "View All Hours"
+  },
+  "Metadata": {
+    "Home": {
+      "title": "TRT | Professional Repair Service in Turkey",
+      "description": "Specialized repair for smartphones, laptops, robot vacuums, and luxury watches. 20+ years of experience in technical service.",
+      "keywords": "phone repair, laptop repair, robot vacuum repair, watch repair, technical service, Turkey, Bursa"
+    },
+    "AboutUs": {
+      "title": "About Us | TRT",
+      "description": "Learn more about TRT technical service, our 20+ years of experience, and our commitment to providing top-quality repair services.",
+      "keywords": "about TRT, repair experts, technical service history"
+    },
+    "Contact": {
+      "title": "Contact Us | TRT",
+      "description": "Get in touch with TRT technical service. We are here to help with your smartphone, laptop, robot vacuum, or luxury watch repairs.",
+      "keywords": "contact TRT, customer support, repair inquiry"
+    },
+    "Portfolio": {
+      "title": "Our Works | TRT",
+      "description": "View our portfolio of successful repairs. See why customers trust TRT for their technical service needs.",
+      "keywords": "TRT portfolio, repair works, successful repairs, before after"
+    },
+    "Blog": {
+      "title": "Blog | TRT",
+      "description": "Read the latest tips, tricks, and news from TRT technical service about maintaining and repairing your devices.",
+      "keywords": "repair blog, tech tips, device maintenance"
+    },
+    "Services": {
+      "title": "Our Services | TRT",
+      "description": "Explore our wide range of repair services including smartphones, laptops, robot vacuums, watches, and tablets.",
+      "keywords": "repair services, TRT services, what we repair"
+    },
+    "Policies": {
+      "title": "Policies | TRT",
+      "description": "Read our privacy policy, terms of service, warranty policy, and other important legal information.",
+      "keywords": "TRT policies, terms of service, privacy policy, warranty"
+    }
   }
 }

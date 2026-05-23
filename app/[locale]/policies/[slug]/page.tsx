@@ -4,6 +4,23 @@ import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server
 import { NextIntlClientProvider } from 'next-intl';
 import { notFound } from 'next/navigation';
 import { Link } from '@/i18n/routing';
+import { Metadata } from 'next';
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string, locale: string }> }): Promise<Metadata> {
+  const { slug, locale } = await params;
+  const validSlugs = ['privacy', 'terms', 'kvkk', 'warranty', 'shipping', 'custom'];
+  if (!validSlugs.includes(slug)) return { title: 'Policy | TRT' };
+  
+  const t = await getTranslations({ locale, namespace: 'Policies' });
+  const title = t(`${slug}_title` as any) || t('title');
+  
+  return {
+    title: `${title} | TRT`,
+    description: `Read TRT's ${title} document for important information regarding your rights and our services.`,
+    keywords: `${slug} policy, TRT policy, legal, terms`,
+  };
+}
+
 
 const iconMap: Record<string, any> = {
   privacy: ShieldCheck,
@@ -64,7 +81,7 @@ export default async function PolicyDetailPage(props: { params: Promise<{ locale
   return (
     <NextIntlClientProvider messages={messages} locale={locale}>
       <div className="min-h-screen bg-background">
-        <main className="pb-20 px-4 sm:px-6 lg:px-8">
+        <main className="pt-24 md:pt-32 pb-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-6xl mx-auto space-y-10">
             {/* Breadcrumb / Back Link */}
             <nav className="flex items-center gap-2">

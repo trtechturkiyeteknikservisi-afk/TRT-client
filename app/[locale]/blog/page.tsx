@@ -69,7 +69,7 @@ export default function BlogPage() {
   return (
     <main className="min-h-screen bg-background">
       
-      <section className="pb-24 bg-muted/30">
+      <section className="pt-24 md:pt-32 pb-24 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-16">
             <motion.div
@@ -95,51 +95,55 @@ export default function BlogPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {blogs.map((blog, index) => (
-              <motion.article
+              <Link
                 key={blog.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-card rounded-xl border border-border/50 overflow-hidden group hover:shadow-2xl hover:shadow-primary/5 transition-all flex flex-col h-full"
+                href={`/blog/${blog.slug}`}
+                className="block h-full cursor-pointer group"
               >
-                <div className="relative h-64 overflow-hidden">
-                  <img
-                    src={blog.image}
-                    alt={blog.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute top-6 left-6">
-                    <span className="px-5 py-2 bg-background/80 backdrop-blur-md text-foreground text-xs font-black rounded-xl uppercase tracking-widest border border-border/50">
-                      {blog.category || t('category')}
-                    </span>
-                  </div>
-                </div>
-                <div className="p-10 flex flex-col flex-grow">
-                  <div className="flex items-center space-x-4 text-xs font-bold text-muted-foreground/60 mb-6 uppercase tracking-widest">
-                    <div className="flex items-center space-x-2">
-                      <Calendar size={14} className="text-primary" />
-                      <span>{format.dateTime(new Date(blog.date), { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <User size={14} className="text-primary" />
-                      <span>{blog.author}</span>
+                <motion.article
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="bg-card rounded-xl border border-border/50 overflow-hidden group hover:shadow-2xl hover:shadow-primary/5 transition-all flex flex-col h-full"
+                >
+                  <div className="relative h-64 overflow-hidden">
+                    <img
+                      src={blog.image}
+                      alt={blog.title}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute top-6 left-6">
+                      <span className="px-5 py-2 bg-background/80 backdrop-blur-md text-foreground text-xs font-black rounded-xl uppercase tracking-widest border border-border/50">
+                        {blog.category || t('category')}
+                      </span>
                     </div>
                   </div>
-                  <h2 className="text-2xl font-black mb-4 line-clamp-2 hover:text-primary transition-colors cursor-pointer leading-tight tracking-tight">
-                    {blog.title}
-                  </h2>
-                  <p className="text-muted-foreground mb-8 line-clamp-3 leading-relaxed font-medium flex-grow">
-                    {blog.content}
-                  </p>
-                  <Link
-                    href={`/blog/${blog.slug}`}
-                    className="inline-flex items-center text-primary font-black uppercase tracking-widest group/btn hover:gap-4 transition-all"
-                  >
-                    <span>{t('read_more')}</span>
-                    <ArrowRight size={20} className="ml-2" />
-                  </Link>
-                </div>
-              </motion.article>
+                  <div className="p-10 flex flex-col flex-grow">
+                    <div className="flex items-center space-x-4 text-xs font-bold text-muted-foreground/60 mb-6 uppercase tracking-widest">
+                      <div className="flex items-center space-x-2">
+                        <Calendar size={14} className="text-primary" />
+                        <span>{format.dateTime(new Date(blog.date), { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <User size={14} className="text-primary" />
+                        <span>{blog.author}</span>
+                      </div>
+                    </div>
+                    <h2 className="text-2xl font-black mb-4 line-clamp-2 group-hover:text-primary transition-colors leading-tight tracking-tight">
+                      {blog.title}
+                    </h2>
+                    <p className="text-muted-foreground mb-8 line-clamp-3 leading-relaxed font-medium flex-grow">
+                      {blog.content}
+                    </p>
+                    <div
+                      className="inline-flex items-center text-primary font-black uppercase tracking-widest group/btn group-hover:gap-4 transition-all"
+                    >
+                      <span>{t('read_more')}</span>
+                      <ArrowRight size={20} className="ml-2 transition-transform group-hover:translate-x-1" />
+                    </div>
+                  </div>
+                </motion.article>
+              </Link>
             ))}
           </div>
         </div>

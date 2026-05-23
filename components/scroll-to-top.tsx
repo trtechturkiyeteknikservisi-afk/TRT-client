@@ -2,9 +2,30 @@
 
 import React, { useState, useEffect } from 'react';
 import { ArrowUp } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 export function ScrollToTop() {
   const [isVisible, setIsVisible] = useState(false);
+  const pathname = usePathname();
+
+  // Scroll to top on pathname changes (navigation)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Immediate scroll to top
+      if (!window.location.hash) {
+        window.scrollTo(0, 0);
+      }
+
+      // Micro-delay fallback to handle layout shifts and hydration updates
+      const timer = setTimeout(() => {
+        if (!window.location.hash) {
+          window.scrollTo(0, 0);
+        }
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
+  }, [pathname]);
 
   // Show button when page is scrolled down
   const toggleVisibility = () => {

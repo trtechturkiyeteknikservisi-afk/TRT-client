@@ -23,18 +23,18 @@ export function KVKKCheckbox({ accepted, onChange }: KVKKCheckboxProps) {
 
     return (
         <>
-            <div className="flex items-start gap-3 py-2 px-1">
+            <div className="flex items-start  gap-3 py-2 px-1">
                 <input 
                     type="checkbox" 
                     id={`${id}-kvkk-checkbox`}
                     required
                     checked={accepted}
                     onChange={(e) => onChange(e.target.checked)}
-                    className="mt-1 h-4 w-4 rounded border-black/10 dark:border-white/10 text-primary focus:ring-primary cursor-pointer transition-all"
+                    className=" h-4 w-4 rounded border-black/10 dark:border-white/10 text-primary focus:ring-primary cursor-pointer transition-all"
                 />
                 <label 
                     htmlFor={`${id}-kvkk-checkbox`} 
-                    className="text-[11px] font-bold text-foreground/60 leading-tight cursor-pointer select-none"
+                    className="text-[11px] font-bold text-foreground/60  cursor-pointer select-none"
                 >
                     <button 
                         type="button"

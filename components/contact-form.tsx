@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Send, CheckCircle, ShieldCheck, Truck } from 'lucide-react';
+import { Send, CheckCircle, ShieldCheck, Truck, Mail } from 'lucide-react';
 import { AddressComponents, AddressSelector } from './address-selector';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
@@ -22,6 +22,9 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
   const { settings } = useSettings();
   const idPrefix = React.useId();
   const supportPhone = settings.support_phone || "0850 840 15 05";
+  const whatsappNumber = settings.whatsapp || "908508401505";
+  const supportEmail = settings.support_email || "trtech@trtservis.com";
+  const whatsappLink = `https://wa.me/${whatsappNumber.replace(/\D/g, '')}`;
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -108,33 +111,56 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
             </h3>
             
             {!isHeroMini && (
-              <p className="text-[13px]  text-muted-foreground font-medium max-w-md">
+              <p className="text-[13px] text-muted-foreground font-medium max-w-md">
                 {t('contact_subtitle')}
               </p>
             )}
 
-            <div className="flex shrink-0 justify-start w-full mt-2">
+            <div className="flex flex-row gap-3 w-full mt-2">
+              {/* Phone Link */}
               <a 
                 href={`tel:${supportPhone.replace(/\s/g, '')}`}
-                className="flex items-center gap-3 px-5 py-3 bg-primary/10 border border-primary/20 hover:bg-primary/20 rounded-xl transition-all hover:scale-105 group"
+                className="flex items-center gap-2 px-3 py-2 sm:py-2.5 bg-primary/10 border border-primary/20 hover:bg-primary/20 rounded-xl transition-all hover:scale-105 group flex-1 sm:justify-start"
               >
-                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white dark:bg-white shadow-md border border-border/10 p-0.5 shrink-0 relative">
-                  {/* Radiating Ripple Wave 1 (CSS Animated Outline + Fill) */}
+                <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white dark:bg-white shadow-md border border-border/10 p-0.5 shrink-0 relative">
+                  {/* Radiating Ripple Wave 1 */}
                   <div className="absolute inset-0 rounded-full border border-primary/50 dark:border-white/50 bg-primary/10 dark:bg-white/10 pointer-events-none animate-ripple-1" />
                   
-                  {/* Radiating Ripple Wave 2 (CSS Animated Outline + Fill) */}
+                  {/* Radiating Ripple Wave 2 */}
                   <div className="absolute inset-0 rounded-full border border-primary/30 dark:border-white/30 bg-primary/5 dark:bg-white/5 pointer-events-none animate-ripple-2" />
                   
                   {/* Thick Ambient Glow */}
-                  <div className="absolute -inset-2 rounded-full bg-primary/20 dark:bg-white/15 blur-[10px] pointer-events-none animate-breathe" />
+                  <div className="absolute -inset-1 rounded-full bg-primary/20 dark:bg-white/15 blur-[5px] pointer-events-none animate-breathe" />
 
                   <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center z-10">
-                    <Image src="/calling-new.webp" alt="Phone" width={40} height={40} className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
+                    <Image src="/calling-new.webp" alt="Phone" width={28} height={28} className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
                   </div>
                 </div>
                 <div className="flex flex-col items-start leading-tight">
-                  <span className="text-[9px] font-black uppercase tracking-widest text-primary/60">{t('phone_label')}</span>
-                  <span className="text-base font-black tracking-tighter text-primary" dir="ltr">{supportPhone}</span>
+                  <span className="text-[8px] font-black uppercase tracking-widest text-primary/60">{t('phone_label')}</span>
+                  <span className="text-xs font-black tracking-tighter text-primary" dir="ltr">{supportPhone}</span>
+                </div>
+              </a>
+
+              {/* Email Link */}
+              <a 
+                href={`mailto:${supportEmail}`}
+                className="flex items-center gap-2 px-3 py-2 sm:py-2.5 bg-primary/10 border border-primary/20 hover:bg-primary/20 rounded-xl transition-all hover:scale-105 group flex-1  sm:justify-start"
+              >
+                <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white dark:bg-white shadow-md border border-border/10 p-0.5 shrink-0 relative">
+                  {/* Radiating Ripple Wave 1 */}
+                  <div className="absolute inset-0 rounded-full border border-primary/50 bg-primary/10 pointer-events-none animate-ripple-1" />
+                  
+                  {/* Thick Ambient Glow */}
+                  <div className="absolute -inset-1 rounded-full bg-primary/20 dark:bg-white/15 blur-[5px] pointer-events-none animate-breathe" />
+
+                  <div className="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center z-10">
+                    <Image src="/maill.webp" alt="Mail" width={28} height={28} className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
+                  </div>
+                </div>
+                <div className="flex flex-col items-start leading-tight min-w-0">
+                  <span className="text-[8px] font-black uppercase tracking-widest text-primary/60">Email</span>
+                  <span className="text-xs font-black tracking-tighter text-primary truncate max-w-[120px] sm:max-w-none" dir="ltr">{supportEmail}</span>
                 </div>
               </a>
             </div>

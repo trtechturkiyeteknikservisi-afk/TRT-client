@@ -28,6 +28,11 @@ interface PortfolioProps {
   showTitle?: boolean;
 }
 
+interface PortfolioProps {
+  limit?: number;
+  showTitle?: boolean;
+}
+
 export function Portfolio({ limit = 6, showTitle = true }: PortfolioProps) {
   const t = useTranslations('Portfolio');
   const [works, setWorks] = useState<WorkItem[]>(mockWorks);
@@ -51,6 +56,17 @@ export function Portfolio({ limit = 6, showTitle = true }: PortfolioProps) {
     };
     fetchWorks();
   }, []);
+
+  useEffect(() => {
+    if (selectedWork) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [selectedWork]);
 
   const displayedWorks = limit > 0 ? works.slice(0, limit) : works;
 
@@ -114,28 +130,39 @@ export function Portfolio({ limit = 6, showTitle = true }: PortfolioProps) {
 
       {/* Lightbox */}
       {selectedWork && (
-        <div className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4">
+        <div 
+          className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 cursor-pointer"
+          onClick={() => setSelectedWork(null)}
+        >
           <button
-            className="absolute top-4 right-4 p-2 text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer"
+            className="absolute top-4 right-4 p-2 text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer z-50"
             onClick={() => setSelectedWork(null)}
+            aria-label="Close lightbox"
           >
             <X size={32} />
           </button>
-          <div className="max-w-5xl w-full max-h-[80vh] overflow-hidden rounded-xl">
+          <div 
+            className="max-w-5xl w-full max-h-[90vh] md:max-h-[85vh] overflow-y-auto rounded-xl bg-card shadow-2xl relative cursor-default scrollbar-thin"
+            onClick={(e) => e.stopPropagation()}
+          >
             {selectedWork.type === 'video' ? (
-              <video src={selectedWork.url} className="w-full h-full object-contain" controls autoPlay />
+              <div className="relative aspect-video w-full bg-black">
+                <video src={selectedWork.url} className="w-full h-full object-contain" controls autoPlay />
+              </div>
             ) : (
-              <img
-                src={selectedWork.url}
-                alt={selectedWork.title}
-                loading="eager"
-                decoding="async"
-                className="w-full h-full object-contain"
-              />
+              <div className="relative w-full bg-black flex items-center justify-center min-h-[250px] md:min-h-[350px]">
+                <img
+                  src={selectedWork.url}
+                  alt={selectedWork.title}
+                  loading="eager"
+                  decoding="async"
+                  className="max-h-[60vh] object-contain w-full"
+                />
+              </div>
             )}
-            <div className="p-6 bg-card text-card-foreground">
+            <div className="p-6 text-card-foreground bg-card">
               <h3 className="text-2xl font-bold mb-2">{selectedWork.title}</h3>
-              <p className="text-muted-foreground">{selectedWork.description || t('no_description')}</p>
+              <p className="text-muted-foreground leading-relaxed font-semibold">{selectedWork.description || t('no_description')}</p>
             </div>
           </div>
         </div>
