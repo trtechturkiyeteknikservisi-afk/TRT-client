@@ -4,6 +4,7 @@ import React from 'react';
 import { Portfolio } from "@/components/portfolio";
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
+import { Briefcase } from 'lucide-react';
 
 export default function PortfolioPage() {
   const t = useTranslations('Portfolio');
@@ -16,6 +17,13 @@ export default function PortfolioPage() {
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -z-10" />
         
         <div className="container mx-auto px-4 text-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="inline-flex p-3 bg-primary/10 rounded-xl text-primary mb-6 animate-in fade-in zoom-in"
+          >
+            <Briefcase size={32} />
+          </motion.div>
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

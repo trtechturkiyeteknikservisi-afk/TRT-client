@@ -31,10 +31,10 @@ export function ServiceBrands({ type }: ServiceBrandsProps) {
          </span>
       </div>
 
-      <div className="flex select-none">
+      <div className="flex select-none [direction:ltr]" dir="ltr">
         <motion.div
           animate={{
-            x: [0, -100 * brands.length],
+            x: [0, -182 * brands.length],
           }}
           transition={{
             duration: brands.length * 3,
@@ -46,7 +46,7 @@ export function ServiceBrands({ type }: ServiceBrandsProps) {
           {duplicatedBrands.map((brand, index) => (
             <div
               key={`${brand}-${index}`}
-              className="flex items-center justify-center min-w-[150px] h-16 bg-background/40 border border-primary/10 dark:border-white/5 rounded-xl px-8 hover:border-primary/30 transition-all group/item"
+              className="flex items-center justify-center w-[150px] h-16 bg-background/40 border border-primary/10 dark:border-white/5 rounded-xl px-8 hover:border-primary/30 transition-all group/item"
             >
               <span className="text-xl font-black tracking-tighter text-muted-foreground/60 group-hover/item:text-primary transition-colors uppercase whitespace-nowrap">
                 {brand}

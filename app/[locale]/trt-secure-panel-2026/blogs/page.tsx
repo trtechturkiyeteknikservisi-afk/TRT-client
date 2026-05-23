@@ -23,7 +23,7 @@ export default function BlogsPage() {
   const [blogForm, setBlogForm] = useState({ 
     title_en: '', title_tr: '', title_ar: '',
     content_en: '', content_tr: '', content_ar: '',
-    image: '', author: 'Admin'
+    image: '', author: 'Admin', date: ''
   });
   const router = useRouter();
 
@@ -56,10 +56,20 @@ export default function BlogsPage() {
 
   const startEdit = (item: any) => {
     setEditingId(item.id);
+    // Format ISO date to YYYY-MM-DD for input
+    let formattedDate = '';
+    if (item.date) {
+      try {
+        formattedDate = new Date(item.date).toISOString().split('T')[0];
+      } catch (e) {
+        console.error('Error formatting date', e);
+      }
+    }
     setBlogForm({
       title_en: item.title_en || '', title_tr: item.title_tr || '', title_ar: item.title_ar || '',
       content_en: item.content_en || '', content_tr: item.content_tr || '', content_ar: item.content_ar || '',
-      image: item.image || '', author: item.author || 'Admin'
+      image: item.image || '', author: item.author || 'Admin',
+      date: formattedDate
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -69,7 +79,7 @@ export default function BlogsPage() {
     setBlogForm({ 
       title_en: '', title_tr: '', title_ar: '',
       content_en: '', content_tr: '', content_ar: '',
-      image: '', author: 'Admin' 
+      image: '', author: 'Admin', date: '' 
     });
   };
 
@@ -93,7 +103,7 @@ export default function BlogsPage() {
     };
 
     // Populate empty language versions with the fallback content
-    const finalizedForm = {
+    const finalizedForm: any = {
       ...blogForm,
       title_en: blogForm.title_en.trim() || fallback.title,
       content_en: blogForm.content_en.trim() || fallback.content,
@@ -102,6 +112,11 @@ export default function BlogsPage() {
       title_ar: blogForm.title_ar.trim() || fallback.title,
       content_ar: blogForm.content_ar.trim() || fallback.content,
     };
+
+    // If date is not specified, omit it so backend defaults to NOW (for create) or keeps old date (for update)
+    if (!blogForm.date.trim()) {
+      delete finalizedForm.date;
+    }
 
     const token = localStorage.getItem('token');
     setActionLoading(true);
@@ -193,7 +208,7 @@ export default function BlogsPage() {
         </div>
         
         <form onSubmit={createBlog} className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-1">
               <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Featured Image</label>
               <div className="flex gap-4">
@@ -206,7 +221,7 @@ export default function BlogsPage() {
                   value={blogForm.image}
                   onChange={(e) => setBlogForm(p => ({ ...p, image: e.target.value }))}
                   placeholder="Or Image URL..."
-                  className="w-full flex-[2] px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                  className="w-full flex-[1.5] px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
                 />
               </div>
             </div>
@@ -215,6 +230,15 @@ export default function BlogsPage() {
               <input
                 value={blogForm.author}
                 onChange={(e) => setBlogForm(p => ({ ...p, author: e.target.value }))}
+                className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Publish Date (Optional)</label>
+              <input
+                type="date"
+                value={blogForm.date}
+                onChange={(e) => setBlogForm(p => ({ ...p, date: e.target.value }))}
                 className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
               />
             </div>

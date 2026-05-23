@@ -24,7 +24,7 @@ const almarai = Almarai({
 export const metadata: Metadata = {
   title: {
     default: "TRT | Professional Repair Service in Turkey",
-    template: "%s | TRT"
+    template: "%s"
   },
   description: "Specialized repair for smartphones, laptops, robot vacuums, and luxury watches. 20+ years of experience in technical service.",
   keywords: ["phone repair", "laptop repair", "robot vacuum repair", "watch repair", "technical service", "Turkey", "Bursa"],
