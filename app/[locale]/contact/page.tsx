@@ -131,7 +131,7 @@ export default function ContactPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-muted/20 dark:bg-background py-16 md:py-24">
+    <main className="min-h-screen bg-muted/20 dark:bg-background pt-8 md:pt-12 pb-16 md:pb-24">
       <div className="container mx-auto px-4 max-w-7xl">
         
         {/* Header Section */}

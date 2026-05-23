@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react';
 
 function Counter({ value }: { value: string }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" });
+  const inView = useInView(ref, { once: true, margin: "-20px" });
   
   // Extract number and suffix (e.g., "15K+" -> 15 and "K+")
   const match = value.match(/(\d+)(.*)/);

@@ -69,7 +69,7 @@ export default function BlogPage() {
   return (
     <main className="min-h-screen bg-background">
       
-      <section className="pt-24 md:pt-32 pb-24 bg-muted/30">
+      <section className="pt-8 md:pt-12 pb-24 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-16">
             <motion.div

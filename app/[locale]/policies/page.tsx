@@ -95,7 +95,7 @@ export default async function PoliciesPage(props: { params: Promise<{ locale: st
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="pt-24 md:pt-32 pb-20">
+      <div className="pt-8 md:pt-12 pb-20">
         <div className=" mx-auto px-4 lg:px-8">
           <header className="text-center max-w-2xl mx-auto mb-12 space-y-4">
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-primary/10 text-primary mb-2">

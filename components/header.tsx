@@ -85,7 +85,7 @@ export function Header() {
 
   return (
     <header className="w-full border-b bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
-      <div className="w-full container mx-auto px-1 sm:px-4 xl:px-4 ">
+      <div className="w-full mx-auto px-4 lg:max-w-5xl xl:max-w-7xl 2xl:max-w-[1536px]">
         <div className="flex min-h-[4rem] items-center justify-between gap-1 sm:gap-2 py-2 md:py-0">
           <div className="flex items-center shrink-0">
             <Link href="/" className="flex flex-col items-center group mb-2">
@@ -95,14 +95,14 @@ export function Header() {
                 width={120}
                 height={40}
                 priority
-                className="h-8 md:h-10 w-auto min-w-[90px] md:min-w-[120px] object-contain transition-all group-hover:scale-105 dark:hidden block"
+                className="h-8 md:h-10 w-auto min-w-[90px] xl:min-w-[105px] 2xl:min-w-[120px] object-contain transition-all group-hover:scale-105 dark:hidden block"
               />
               <Image 
                 src="/night-logo.png" 
                 alt={t('company_name')}
                 width={120}
                 height={40}
-                className="h-8 md:h-10 w-auto min-w-[90px] md:min-w-[120px] object-contain transition-all group-hover:scale-105 hidden dark:block"
+                className="h-8 md:h-10 w-auto min-w-[90px] xl:min-w-[105px] 2xl:min-w-[120px] object-contain transition-all group-hover:scale-105 hidden dark:block"
               />
               <span className="block text-[7.5px] md:text-[9px] font-black uppercase tracking-[0.22em] text-primary bg-primary/10 border border-primary/30 px-2 py-0.5 -mt-0.5 rounded shadow-sm shadow-primary/10 transition-all duration-300 group-hover:scale-105 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-transparent whitespace-nowrap">
                 {t('cargo_service')}
@@ -111,11 +111,11 @@ export function Header() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden xl:flex items-center justify-center gap-x-4 2xl:gap-x-3 py-1 flex-1 min-w-0 mx-2 2xl:mx-4">
+          <nav className="hidden xl:flex items-center justify-center gap-x-2 2xl:gap-x-3 py-1 flex-1 min-w-0 mx-1 2xl:mx-4">
             {navigation.map((item) => (
               item.isDropdown ? (
                 <div 
-                  key={item.name} 
+                   key={item.name} 
                   className="relative group"
                   onMouseEnter={() => setActiveDropdown(item.name)}
                   onMouseLeave={() => setActiveDropdown(null)}
@@ -123,7 +123,7 @@ export function Header() {
                   <Link
                     href={item.href}
                     className={cn(
-                      "flex items-center gap-1 text-[11px] 2xl:text-[11.5px] font-extrabold uppercase tracking-wider transition-all active:scale-95 whitespace-nowrap relative pb-1",
+                      "flex items-center gap-1.5 text-[9px] xl:text-[9.5px] 2xl:text-[11px] font-extrabold uppercase tracking-wide 2xl:tracking-wider transition-all active:scale-95 whitespace-nowrap relative pb-1",
                       isLinkActive(item) 
                         ? "text-primary dark:text-white" 
                         : "text-muted-foreground hover:text-primary dark:hover:text-white"
@@ -174,8 +174,7 @@ export function Header() {
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    "items-center gap-1 text-[11px] 2xl:text-[11.5px] font-extrabold uppercase tracking-wider transition-all relative group whitespace-nowrap pb-1",
-                    item.soon ? "hidden 2xl:flex" : "flex",
+                    "items-center gap-1.5 text-[9px] xl:text-[9.5px] 2xl:text-[11px] font-extrabold uppercase tracking-wide 2xl:tracking-wider transition-all relative group whitespace-nowrap pb-1 flex",
                     isLinkActive(item) 
                       ? "text-primary dark:text-white" 
                       : "text-muted-foreground hover:text-primary dark:hover:text-white"
@@ -183,7 +182,7 @@ export function Header() {
                 >
                   {item.name}
                   {item.soon && (
-                    <span className="hidden 2xl:inline-block text-[8px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-md font-black uppercase tracking-tighter animate-pulse border border-primary/20">
+                    <span className="inline-block text-[7.5px] bg-primary/10 text-primary px-1 py-0.25 rounded-sm font-black uppercase tracking-tighter animate-pulse border border-primary/20">
                       {t('coming_soon')}
                     </span>
                   )}
@@ -206,7 +205,7 @@ export function Header() {
             <Link
               href="/contact"
               className={cn(
-                "hidden lg:flex items-center justify-center gap-1 px-2.5 py-2  border border-border rounded-lg bg-card hover:bg-muted text-foreground transition-all duration-300 active:scale-95 text-[10px] xl:text-[10px] 2xl:text-[11.5px] font-black uppercase tracking-wider cursor-pointer mr-0.5 ml-2",
+                "hidden lg:flex items-center justify-center gap-1 px-1.5 py-1 xl:px-1.5 xl:py-1 2xl:px-2.5 2xl:py-2 border border-border rounded-lg bg-card hover:bg-muted text-foreground transition-all duration-300 active:scale-95 text-[9px] xl:text-[9px] 2xl:text-[11px] font-black uppercase tracking-wide 2xl:tracking-wider cursor-pointer mr-0.5 ml-1 xl:ml-1 2xl:ml-2",
                 pathname === '/contact' && "border-primary text-primary"
               )}
             >

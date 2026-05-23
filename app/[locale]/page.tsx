@@ -25,7 +25,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
   const stats = [
     { label: t('stat_customers'), value: locale === 'tr' ? '15B+' : '15K+' },
     { label: t('stat_devices'), value: locale === 'tr' ? '20B+' : '20K+' },
-    { label: t('stat_experience'), value: '24+' },
+    { label: t('stat_experience'), value: `${new Date().getFullYear() - 2002}+` },
     { label: t('stat_technicians'), value: '15+' },
   ];
 

@@ -12,7 +12,7 @@ export default function PortfolioPage() {
     <main className="min-h-screen bg-background">
       
       {/* Hero Section */}
-      <section className="relative pt-24 md:pt-32 pb-20 bg-muted/30 overflow-hidden">
+      <section className="relative pt-8 md:pt-12 pb-20 bg-muted/30 overflow-hidden">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -z-10" />
         
         <div className="container mx-auto px-4 text-center">
