@@ -116,7 +116,7 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
               </p>
             )}
 
-            <div className="flex flex-row gap-3 w-full mt-2">
+            <div className="flex flex-col sm:flex-row gap-3 w-full mt-2">
               {/* Phone Link */}
               <a 
                 href={`tel:${supportPhone.replace(/\s/g, '')}`}

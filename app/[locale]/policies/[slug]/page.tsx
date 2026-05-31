@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!validSlugs.includes(slug)) return { title: 'Policy | TRT' };
   
   const t = await getTranslations({ locale, namespace: 'Policies' });
-  const title = t(`${slug}_title` as any) || t('title');
+  const title = t(slug as any) || t('title');
   
   return {
     title: `${title} | TRT`,
@@ -51,9 +51,9 @@ export default async function PolicyDetailPage(props: { params: Promise<{ locale
     if (res.ok) {
         const settings = await res.json();
         const settingKey = slug === 'terms' ? 'policy' : slug;
-        content = settings[`${settingKey}_${locale}`] || settings[`${settingKey}_en`] || content;
+        content = settings[`${settingKey}_${locale}`] || settings[`${settingKey}_tr`] || settings[`${settingKey}_en`] || content;
         
-        let path = settings[`${slug}_pdf_${locale}`] || settings[`${slug}_pdf_en`];
+        let path = settings[`${slug}_pdf_${locale}`] || settings[`${slug}_pdf_tr`] || settings[`${slug}_pdf_en`];
         if (path) {
             if (path.startsWith('http')) {
                 pdfUrl = path;

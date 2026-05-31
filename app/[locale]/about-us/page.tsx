@@ -95,8 +95,8 @@ export default function AboutUsPage() {
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 bg-primary text-primary-foreground rounded-2xl flex items-center justify-center font-black text-2xl">20+</div>
                   <div>
-                    <h4 className="font-black text-xl uppercase tracking-tighter">Years of Experience</h4>
-                    <p className="text-sm text-muted-foreground font-bold italic">Excellence in Technical Service</p>
+                    <h4 className="font-black text-xl uppercase tracking-tighter">{t('years_of_experience')}</h4>
+                    <p className="text-sm text-muted-foreground font-bold italic">{t('excellence_in_service')}</p>
                   </div>
                 </div>
               </div>

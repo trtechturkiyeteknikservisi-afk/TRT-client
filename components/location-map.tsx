@@ -13,6 +13,19 @@ export function LocationMap() {
   const mapUrl = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3047.8824147775!2d29.06041!3d40.1947622!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14ca3f006ec62c09%3A0xf2ce41e488674b1e!2sTR%20TECH!5e0!3m2!1sar!2seg!4v1715675672584!5m2!1sar!2seg";
   const directionsUrl = "https://maps.app.goo.gl/9kUMHWGGjDsoswFz9";
 
+  const titleText = t('title');
+  const words = titleText.split(' ');
+  let line1 = '';
+  let line2 = '';
+  if (words.length <= 2) {
+    line1 = words[0] || '';
+    line2 = words[1] || '';
+  } else {
+    const mid = Math.ceil(words.length / 2);
+    line1 = words.slice(0, mid).join(' ');
+    line2 = words.slice(mid).join(' ');
+  }
+
   return (
     <section className="py-12 md:py-24 relative overflow-hidden bg-background">
       {/* Background Decorative Elements */}
@@ -40,11 +53,8 @@ export function LocationMap() {
                 </div>
 
                 <h2 className="text-4xl sm:text-5xl font-black tracking-tighter text-foreground leading-tight uppercase">
-                  {t('title').split(' ').map((word, i) => (
-                    <span key={i} className={i === 1 ? "text-primary italic opacity-90 block" : "block"}>
-                      {word}
-                    </span>
-                  ))}
+                  {line1 && <span className="block">{line1}</span>}
+                  {line2 && <span className="text-primary italic opacity-90 block">{line2}</span>}
                 </h2>
 
                 <p className="text-lg text-muted-foreground font-medium leading-relaxed max-w-md mx-auto lg:mx-0">

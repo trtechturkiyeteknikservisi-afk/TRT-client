@@ -518,7 +518,9 @@
     "mission_title": "Misyonumuz",
     "mission_desc": "Müşteri memnuniyetini tam olarak sağlamak için orijinal parçalarla, adil fiyatlarla en üst düzeyde teknik servis sunmak.",
     "vision_title": "Vizyonumuz",
-    "vision_desc": "Türkiye'de ve ötesinde teknik onarım konusunda öncü ve güvenilir bir merkez olmak."
+    "vision_desc": "Türkiye'de ve ötesinde teknik onarım konusunda öncü ve güvenilir bir merkez olmak.",
+    "years_of_experience": "Yıllık Deneyim",
+    "excellence_in_service": "Teknik Serviste Mükemmellik"
   },
   "Map": {
     "title": "Haritadaki Konumumuz",
@@ -609,5 +611,37 @@
       "description": "Gizlilik politikamızı, hizmet şartlarımızı, garanti politikamızı ve diğer önemli yasal bilgileri okuyun.",
       "keywords": "TR TECH politikaları, hizmet şartları, gizlilik politikası, garanti"
     }
+  },
+  "Linktree": {
+    "title": "TRT Teknik Servis | İletişim Bağlantıları",
+    "description": "Tüm resmi sosyal kanallarımız, destek hatlarımız ve iletişim yolları tek bir yerde.",
+    "website": "Resmi Web Uygulaması",
+    "website_desc": "Web ana sayfamızı ziyaret edin ve hizmetleri inceleyin",
+    "whatsapp_support": "WhatsApp Teknik Destek Hattı",
+    "whatsapp_support_desc": "Teknik uzmanlarımızla doğrudan sohbet başlatın",
+    "whatsapp_complaints": "Şikayet & Görüş Bildirim Hattı",
+    "whatsapp_complaints_desc": "Görüş ve şikayetlerinizi doğrudan bizimle paylaşın",
+    "phone_call": "Doğrudan Telefon Çağrısı",
+    "phone_call_desc": "Destek ekibimizle telefon üzerinden doğrudan görüşün",
+    "email_us": "E-posta Gönderin",
+    "email_us_desc": "Resmi destek, iş birliği ve kurumsal iletişim adresi",
+    "location_map": "Bursa Teknik Servis Merkezi",
+    "location_map_desc": "Bursa'daki şubemizin tam konumunu Google Haritalar'da bulun",
+    "instagram": "Instagram'da Bizi Takip Edin",
+    "instagram_desc": "Onarım süreçlerimizi, güncel duyuru ve hikayelerimizi görün",
+    "tiktok": "TikTok'ta Bizi Takip Edin",
+    "tiktok_desc": "Eğlenceli onarımları, kısa video klipleri ve ipuçlarını izleyin",
+    "facebook": "Facebook'ta Bizi Takip Edin",
+    "facebook_desc": "Kurumsal haberler, gönderiler ve detaylarımızı inceleyin",
+    "youtube": "YouTube'da Abone Olun",
+    "youtube_desc": "Ayrıntılı onarım belgesellerini ve eğitimlerimizi izleyin",
+    "telegram": "Telegram Kanalımıza Katılın",
+    "telegram_desc": "Anlık bildirimler, güncellemeler ve duyurulardan haberdar olun",
+    "snapchat": "Snapchat'te Bizi Takip Edin",
+    "snapchat_desc": "Günlük hızlı güncellemelerimizi ve hikayelerimizi izleyin",
+    "pinterest": "Pinterest Panomuzu Keşfedin",
+    "pinterest_desc": "Görsel fikirlerimizi, pinleri ve teknik panolarımızı inceleyin",
+    "linkedin": "LinkedIn'de Bağlantı Kurun",
+    "linkedin_desc": "Kurumsal iş sayfamızı ziyaret edin ve ağımıza katılın"
   }
 }

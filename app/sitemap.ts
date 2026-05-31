@@ -1,5 +1,8 @@
 import { MetadataRoute } from 'next';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://trtservis.com';
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
@@ -27,6 +30,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/blog', priority: 0.8 },
     { path: '/services', priority: 0.9 },
     { path: '/policies', priority: 0.5 },
+    { path: '/linktree', priority: 0.8 },
   ];
 
   staticRoutes.forEach(route => addRoute(route.path, route.priority));
@@ -41,7 +45,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Dynamic Blogs
   try {
-    const res = await fetch(`${API_URL}/blogs`);
+    const res = await fetch(`${API_URL}/blogs`, { cache: 'no-store' });
     if (res.ok) {
       const blogs = await res.json();
       if (Array.isArray(blogs)) {

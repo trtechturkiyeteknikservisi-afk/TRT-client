@@ -7,34 +7,22 @@ const intlMiddleware = createMiddleware(routing);
 export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Manual country detection only for the root path and if no locale cookie is set
+  // Manual device language detection only for the root path and if no locale cookie is set
   if (pathname === '/') {
     const localeCookie = request.cookies.get('NEXT_LOCALE')?.value;
     
     if (!localeCookie) {
-      const country = (request.headers.get('x-vercel-ip-country') || 
-                       request.headers.get('cf-ipcountry') || 
-                       '').toUpperCase();
-
-      const arabicCountries = [
-        'DZ', 'BH', 'KM', 'DJ', 'EG', 'IQ', 'JO', 'KW', 'LB', 'LY', 
-        'MR', 'MA', 'OM', 'PS', 'QA', 'SA', 'SO', 'SD', 'SY', 'TN', 'AE', 'YE'
-      ];
-
-      if (arabicCountries.includes(country)) {
-        return NextResponse.redirect(new URL('/ar', request.url));
-      } else if (country === 'TR') {
-        return NextResponse.redirect(new URL('/tr', request.url));
-      }
-
-      // Explicit fallback for Apple/Safari devices if country headers are missing
       const acceptLang = request.headers.get('accept-language')?.toLowerCase() || '';
-      if (acceptLang.startsWith('tr')) {
-        return NextResponse.redirect(new URL('/tr', request.url));
-      } else if (acceptLang.startsWith('ar')) {
-        return NextResponse.redirect(new URL('/ar', request.url));
-      }
-      // If no specific country match, just let intlMiddleware handle it via Accept-Language (Browser preference)
+      
+      // Parse Accept-Language header in order of preference (e.g. "en-US,en;q=0.9,ar;q=0.8,tr;q=0.7")
+      // Extract the 2-letter language codes and filter for our supported locales: tr, ar, en
+      const preferredLocales = acceptLang
+        .split(',')
+        .map(lang => lang.split(';')[0].trim().substring(0, 2))
+        .filter(lang => ['tr', 'ar', 'en'].includes(lang));
+
+      const detectedLocale = preferredLocales[0] || 'tr'; // Fallback to Turkish 'tr'
+      return NextResponse.redirect(new URL(`/${detectedLocale}`, request.url));
     }
   }
 

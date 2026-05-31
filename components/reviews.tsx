@@ -98,7 +98,7 @@ export function Reviews() {
       <div className="absolute top-6 right-8 text-primary/10">
         <Quote size={40} />
       </div>
-      <div className="flex space-x-1 mb-4 text-yellow-500">
+      <div className="flex justify-center space-x-1 mb-4 text-yellow-500">
         {[...Array(5)].map((_, i) => (
           <Star
             key={i}
@@ -159,7 +159,7 @@ export function Reviews() {
                   <div 
                     role="radiogroup" 
                     aria-label="Rating" 
-                    className="flex items-center gap-1.5"
+                    className="flex items-center justify-center gap-1.5"
                   >
                     {[1, 2, 3, 4, 5].map((starValue) => {
                       const isHighlighted = hoverRating !== null 
@@ -215,7 +215,7 @@ export function Reviews() {
           </div>
         )}
 
-        {reviews.length > 4 ? (
+        {reviews.length > 3 ? (
           <Swiper
             modules={[Autoplay, Pagination]}
             spaceBetween={30}
