@@ -79,14 +79,6 @@ export function LinktreePage({ translations, locale }: LinktreePageProps) {
       vip: true
     },
     {
-      label: t('whatsapp_complaints'),
-      desc: t('whatsapp_complaints_desc'),
-      href: "https://wa.me/905067006677",
-      image: "/whatsap.webp",
-      color: "hover:border-emerald-600/40 hover:bg-emerald-600/5 hover:text-emerald-600 dark:hover:text-emerald-400 hover:shadow-emerald-600/5",
-      external: true
-    },
-    {
       label: t('phone_call'),
       desc: t('phone_call_desc'),
       href: "tel:+908508401505",
@@ -303,7 +295,7 @@ export function LinktreePage({ translations, locale }: LinktreePageProps) {
           {/* Title & Trust badge */}
           <div className="flex items-center justify-center gap-1.5 mb-2.5">
             <h1 className="text-xl font-extrabold tracking-wide text-foreground">
-              {locale === 'ar' ? 'تي آر تي للخدمات الفنية' : 'TRT Technical Service'}
+              TR TECH -trtservis
             </h1>
             <div className="relative flex items-center justify-center">
               <div className="absolute inset-0 bg-primary/20 blur-[3px] rounded-full animate-ping" />
