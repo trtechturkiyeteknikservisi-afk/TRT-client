@@ -37,6 +37,8 @@ export default async function LinktreePageContainer({ params }: { params: Promis
     email_us_desc: t('email_us_desc'),
     location_map: t('location_map'),
     location_map_desc: t('location_map_desc'),
+    google_reviews: t('google_reviews'),
+    google_reviews_desc: t('google_reviews_desc'),
     instagram: t('instagram'),
     instagram_desc: t('instagram_desc'),
     tiktok: t('tiktok'),
