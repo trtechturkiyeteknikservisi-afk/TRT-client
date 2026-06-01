@@ -1,10 +1,31 @@
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios');
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://trtservis.com';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 const locales = ['ar', 'en', 'tr'];
+
+async function fetchBlogsFromDatabase() {
+  const dbPath = path.join(__dirname, '..', '..', 'database.sqlite');
+  if (!fs.existsSync(dbPath)) {
+    throw new Error(`Database file not found at ${dbPath}`);
+  }
+  
+  const sqlite3 = require('sqlite3').verbose();
+  return new Promise((resolve, reject) => {
+    const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READONLY, (err) => {
+      if (err) return reject(err);
+    });
+    
+    db.all("SELECT slug FROM blogs", [], (err, rows) => {
+      db.close();
+      if (err) return reject(err);
+      resolve(rows || []);
+    });
+  });
+}
 
 async function generateSitemap() {
   const urls = [];
@@ -29,6 +50,7 @@ async function generateSitemap() {
     { path: '/blog', priority: 0.8 },
     { path: '/services', priority: 0.9 },
     { path: '/policies', priority: 0.5 },
+    { path: '/linktree', priority: 0.8 },
   ];
 
   staticRoutes.forEach(route => addRoute(route.path, route.priority));
@@ -42,21 +64,32 @@ async function generateSitemap() {
   policies.forEach(policy => addRoute(`/policies/${policy}`, 0.5));
 
   // Dynamic Blogs
+  let blogs = [];
   try {
-    const res = await fetch(`${API_URL}/blogs`);
-    if (res.ok) {
-      const blogs = await res.json();
-      if (Array.isArray(blogs)) {
-        blogs.forEach((blog) => {
-          if (blog.slug) {
-            addRoute(`/blog/${blog.slug}`, 0.7);
-          }
-        });
-      }
+    console.log(`Sitemap Generator: Fetching blogs from API (${API_URL}/blogs)...`);
+    const res = await axios.get(`${API_URL}/blogs`, { timeout: 5000 });
+    if (res.status === 200 && Array.isArray(res.data)) {
+      blogs = res.data;
+      console.log(`Sitemap Generator: Successfully fetched ${blogs.length} blogs from API.`);
+    } else {
+      throw new Error(`API returned status ${res.status}`);
     }
   } catch (error) {
-    console.error('Sitemap Generator: Failed to fetch blogs from API', error.message);
+    console.warn(`Sitemap Generator: API request failed (${error.message}). Attempting database fallback...`);
+    try {
+      blogs = await fetchBlogsFromDatabase();
+      console.log(`Sitemap Generator: Successfully loaded ${blogs.length} blogs directly from SQLite database fallback.`);
+    } catch (dbError) {
+      console.error('Sitemap Generator: Database fallback also failed:', dbError.message);
+    }
   }
+
+  // Add blog routes
+  blogs.forEach((blog) => {
+    if (blog.slug) {
+      addRoute(`/blog/${blog.slug}`, 0.7);
+    }
+  });
 
   // Construct XML
   let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
