@@ -85,7 +85,7 @@ export function LinktreePage({ translations, locale }: LinktreePageProps) {
     {
       label: t('whatsapp_support'),
       desc: t('whatsapp_support_desc'),
-      href: "https://wa.me/908508401505",
+      href: "https://wa.me/905067006677",
       image: "/whatsap.webp",
       color: "hover:border-emerald-500/40 hover:bg-emerald-500/5 hover:text-emerald-500 dark:hover:text-emerald-400 hover:shadow-emerald-500/5 border-emerald-500/30 bg-emerald-500/5 dark:bg-emerald-950/5",
       external: true,
@@ -127,7 +127,7 @@ export function LinktreePage({ translations, locale }: LinktreePageProps) {
     {
       label: t('website'),
       desc: t('website_desc'),
-      href: `/${locale}`,
+      href: "/",
       image: "/globe.svg",
       color: "hover:border-primary/40 hover:bg-primary/5 hover:text-primary dark:hover:text-white hover:shadow-primary/5",
       external: false
@@ -151,7 +151,7 @@ export function LinktreePage({ translations, locale }: LinktreePageProps) {
     {
       label: t('email_us'),
       desc: t('email_us_desc'),
-      href: "mailto:trtech@trtservis.com",
+      href: "mailto:info@trtservis.com",
       image: "/maill.webp",
       color: "hover:border-orange-500/40 hover:bg-orange-500/5 hover:text-orange-500 dark:hover:text-orange-400 hover:shadow-orange-500/5",
       external: true
