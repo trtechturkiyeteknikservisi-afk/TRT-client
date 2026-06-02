@@ -62,6 +62,27 @@ const nextConfig = {
       },
     ];
   },
+
+  // Global Redirects for sitemaps and portfolio paths
+  async redirects() {
+    return [
+      {
+        source: '/:locale(ar|en|tr)/sitemap.xml',
+        destination: '/sitemap.xml',
+        permanent: true,
+      },
+      {
+        source: '/portfolio',
+        destination: '/our-works',
+        permanent: true,
+      },
+      {
+        source: '/:locale(ar|en|tr)/portfolio',
+        destination: '/:locale/our-works',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default withNextIntl(nextConfig);
