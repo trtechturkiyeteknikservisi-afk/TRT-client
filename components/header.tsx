@@ -53,7 +53,7 @@ export function Header() {
       isDropdown: true,
       subItems: services
     },
-    { name: t('works'), href: '/portfolio' },
+    { name: t('works'), href: '/our-works' },
     { name: t('blog'), href: '/blog' },
     { name: t('merchants'), href: '#', soon: true },
     { name: t('track_shipment'), href: '#', soon: true },

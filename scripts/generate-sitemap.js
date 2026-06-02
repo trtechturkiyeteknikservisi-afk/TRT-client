@@ -46,7 +46,7 @@ async function generateSitemap() {
     { path: '', priority: 1.0 },
     { path: '/about-us', priority: 0.8 },
     { path: '/contact', priority: 0.9 },
-    { path: '/portfolio', priority: 0.8 },
+    { path: '/our-works', priority: 0.8 },
     { path: '/blog', priority: 0.8 },
     { path: '/services', priority: 0.9 },
     { path: '/policies', priority: 0.5 },

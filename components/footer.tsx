@@ -53,7 +53,7 @@ export function Footer() {
       title: t('company'),
       links: [
         { name: t('about_us'), href: '/about-us' },
-        { name: t('works'), href: '/portfolio' },
+        { name: t('works'), href: '/our-works' },
         { name: t('blog'), href: '/blog' },
         { name: t('policy'), href: '/policies' },
         { name: t('contact'), href: '/#contact' },

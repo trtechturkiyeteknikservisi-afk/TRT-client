@@ -119,7 +119,7 @@ export function Portfolio({ limit = 6, showTitle = true }: PortfolioProps) {
         {limit > 0 && works.length > limit && (
           <div className="mt-16 text-center">
             <Link
-              href="/portfolio"
+              href="/our-works"
               className="inline-flex items-center justify-center px-8 py-4 bg-primary text-primary-foreground rounded-xl font-bold uppercase tracking-widest text-sm hover:bg-primary/90 transition-all active:scale-95 shadow-md shadow-primary/10"
             >
               {t('view_more')}

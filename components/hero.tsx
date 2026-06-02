@@ -198,7 +198,7 @@ export function Hero({ initialBanners }: HeroProps) {
                   </Link>
                   
                   <Link
-                    href="/portfolio"
+                    href="/our-works"
                     className="inline-flex items-center justify-center gap-3 bg-white/5 backdrop-blur-lg text-foreground px-6 py-4 md:px-12 md:py-6 rounded-xl font-black text-base md:text-xl hover:bg-white/10 transition-all border border-white/10 hover:border-primary/50 uppercase tracking-widest"
                   >
                     <span>{t('our_works')}</span>
