@@ -252,7 +252,14 @@
     "kvkk_text": "لقد قرأت وفهمت نص الإفصاح الخاص بـ KVKK.",
     "sticky_contact_cta": "تواصل معنا",
     "contact_subtitle": "سوف نتواصل معك في غضون ساعتي عمل",
-    "cargo_service": "خدمة شحن لكافة أنحاء تركيا"
+    "cargo_service": "خدمة شحن لكافة أنحاء تركيا",
+    "email_placeholder": "example@email.com",
+    "error_phone_or_email": "الرجاء إدخال رقم الهاتف أو البريد الإلكتروني (أحدهما على الأقل).",
+    "error_phone_invalid": "الرجاء إدخال رقم هاتف كامل وصحيح (على الأقل 10 أرقام).",
+    "error_phone_turkey_start": "الرقم غير صحيح، يجب أن يبدأ رقم الهاتف التركي بـ 5.",
+    "error_phone_turkey_length": "الرقم غير صحيح، يجب أن يتكون الرقم من 10 أرقام.",
+    "error_phone_country_length": "الرقم غير صحيح، يجب أن يتكون الرقم من {digits} أرقام.",
+    "error_email_invalid": "الرجاء إدخال بريد إلكتروني صحيح."
   },
   "Blog": {
     "title": "رؤى وأخبار تقنية",

@@ -35,7 +35,7 @@ interface PortfolioProps {
 
 export function Portfolio({ limit = 6, showTitle = true }: PortfolioProps) {
   const t = useTranslations('Portfolio');
-  const [works, setWorks] = useState<WorkItem[]>(mockWorks);
+  const [works, setWorks] = useState<WorkItem[]>([]);
   const [selectedWork, setSelectedWork] = useState<WorkItem | null>(null);
 
   useEffect(() => {
@@ -47,9 +47,7 @@ export function Portfolio({ limit = 6, showTitle = true }: PortfolioProps) {
           throw new Error(`Portfolio request failed: ${response.status}`);
         }
         const data = await response.json() as WorkItem[];
-        if (data.length > 0) {
-          setWorks(data);
-        }
+        setWorks(data);
       } catch (error) {
         console.warn('Error fetching portfolio', error);
       }

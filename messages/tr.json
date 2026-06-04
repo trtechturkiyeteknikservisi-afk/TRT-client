@@ -254,7 +254,14 @@
     "kvkk_text": "KVKK Aydınlatma Metni’ni ve Servis Şartları’nı okudum, anladım ve kabul ediyorum.",
     "sticky_contact_cta": "Bize Ulaşın",
     "contact_subtitle": "2 iş saati içerisinde sizinle iletişime geçeceğiz",
-    "cargo_service": "Kargo ile Türkiye Geneli Servis"
+    "cargo_service": "Kargo ile Türkiye Geneli Servis",
+    "email_placeholder": "ornek@eposta.com",
+    "error_phone_or_email": "Lütfen telefon numarası veya e-posta adresinden en az birini girin.",
+    "error_phone_invalid": "Lütfen geçerli ve tam bir telefon numarası girin (en az 10 hane).",
+    "error_phone_turkey_start": "Geçersiz numara, Türkiye telefon numarası 5 ile başlamalıdır.",
+    "error_phone_turkey_length": "Geçersiz numara, tam olarak 10 hane olmalıdır.",
+    "error_phone_country_length": "Geçersiz numara, tam olarak {digits} hane olmalıdır.",
+    "error_email_invalid": "Lütfen geçerli bir e-posta adresi girin."
   },
   "Blog": {
     "title": "Teknik Bilgiler ve Haberler",

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { 
-  Trash2, Upload, Plus, Image as ImageIcon, Languages, Film, PlayCircle
+  Trash2, Upload, Plus, Image as ImageIcon, Languages, Film, PlayCircle, Edit3
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
@@ -24,7 +24,39 @@ export default function PortfolioPage() {
     type: 'image', url: '' 
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const router = useRouter();
+
+  const startEdit = (item: any) => {
+    setEditingId(item.id);
+    setUploadForm({
+      title_en: item.title_en || '',
+      title_tr: item.title_tr || '',
+      title_ar: item.title_ar || '',
+      description_en: item.description_en || '',
+      description_tr: item.description_tr || '',
+      description_ar: item.description_ar || '',
+      type: item.type || 'image',
+      url: item.url || ''
+    });
+    setSelectedFile(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setUploadForm({
+      title_en: '',
+      title_tr: '',
+      title_ar: '',
+      description_en: '',
+      description_tr: '',
+      description_ar: '',
+      type: 'image',
+      url: ''
+    });
+    setSelectedFile(null);
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -83,21 +115,31 @@ export default function PortfolioPage() {
         url: finalUrl
       };
 
-      // 3. Post to portfolio endpoint
-      await axios.post(`${API_BASE}/content/portfolio`, payload, {
-        headers: { 
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      setUploadForm({ 
-        title_en: '', title_tr: '', title_ar: '',
-        description_en: '', description_tr: '', description_ar: '',
-        type: 'image', url: '' 
-      });
-      setSelectedFile(null);
-      toast.success('Work added successfully to portfolio!');
+      // 3. Save/Update portfolio item
+      if (editingId) {
+        await axios.put(`${API_BASE}/content/portfolio/${editingId}`, payload, {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        toast.success('Work updated successfully!');
+        cancelEdit();
+      } else {
+        await axios.post(`${API_BASE}/content/portfolio`, payload, {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        setUploadForm({ 
+          title_en: '', title_tr: '', title_ar: '',
+          description_en: '', description_tr: '', description_ar: '',
+          type: 'image', url: '' 
+        });
+        setSelectedFile(null);
+        toast.success('Work added successfully to portfolio!');
+      }
       fetchData();
     } catch (err) {
       console.error('Error uploading to portfolio', err);
@@ -142,9 +184,9 @@ export default function PortfolioPage() {
       <div className="bg-card border rounded-lg p-8 shadow-sm">
         <div className="flex items-center space-x-3 mb-8">
             <div className="w-10 h-10 bg-primary/10 text-primary rounded-md flex items-center justify-center">
-                <Plus size={20} strokeWidth={3} />
+                {editingId ? <Edit3 size={20} strokeWidth={3} /> : <Plus size={20} strokeWidth={3} />}
             </div>
-            <h3 className="text-2xl font-black tracking-tight uppercase">{t('save_work')}</h3>
+            <h3 className="text-2xl font-black tracking-tight uppercase">{editingId ? 'Edit Portfolio Item' : t('save_work')}</h3>
         </div>
         
         <form onSubmit={handleCreate} className="space-y-8">
@@ -258,13 +300,24 @@ export default function PortfolioPage() {
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={actionLoading}
-            className="w-full px-6 py-4 rounded-md bg-primary text-primary-foreground font-black text-sm shadow-xl shadow-primary/30 hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50 uppercase tracking-widest"
-          >
-            {actionLoading ? t('loading') : t('save_work')}
-          </button>
+          <div className="flex gap-4">
+              <button
+                type="submit"
+                disabled={actionLoading}
+                className="flex-grow px-6 py-4 rounded-md bg-primary text-primary-foreground font-black text-sm shadow-xl shadow-primary/30 hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50 uppercase tracking-widest cursor-pointer"
+              >
+                {actionLoading ? t('loading') : (editingId ? 'Update Work' : t('save_work'))}
+              </button>
+              {editingId && (
+                <button
+                    type="button"
+                    onClick={cancelEdit}
+                    className="px-6 py-4 rounded-md bg-muted text-foreground font-black text-sm hover:bg-muted/80 transition-all active:scale-[0.98] uppercase tracking-widest cursor-pointer"
+                >
+                    Cancel Edit
+                </button>
+              )}
+          </div>
         </form>
       </div>
 
@@ -307,13 +360,24 @@ export default function PortfolioPage() {
                             {item.type}
                         </span>
                     </div>
-                    <button
-                        onClick={() => deleteItem(item.id)}
-                        disabled={actionLoading}
-                        className="absolute top-3 right-3 p-2.5 rounded-md bg-red-500 text-white shadow-xl opacity-0 group-hover:opacity-100 transition-all active:scale-90"
-                    >
-                        <Trash2 size={16} />
-                    </button>
+                    <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                        <button
+                            onClick={() => startEdit(item)}
+                            disabled={actionLoading}
+                            className="p-2.5 rounded-md bg-blue-600 text-white shadow-xl active:scale-90 cursor-pointer"
+                            title="Edit Work"
+                        >
+                            <Edit3 size={16} />
+                        </button>
+                        <button
+                            onClick={() => deleteItem(item.id)}
+                            disabled={actionLoading}
+                            className="p-2.5 rounded-md bg-red-500 text-white shadow-xl active:scale-90 cursor-pointer"
+                            title="Delete Work"
+                        >
+                            <Trash2 size={16} />
+                        </button>
+                    </div>
                 </div>
 
                 <div className="p-6 space-y-6">

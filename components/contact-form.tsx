@@ -10,6 +10,21 @@ import { useTranslations } from 'next-intl';
 import { KVKKCheckbox } from './kvkk-checkbox';
 import { useSettings } from './settings-provider';
 
+const COUNTRIES = [
+  { code: '+90', flag: 'tr', name: 'Turkey / Türkiye', digits: 10, placeholder: '532 123 45 67' },
+  { code: '+966', flag: 'sa', name: 'Saudi Arabia / السعودية', digits: 9, placeholder: '50 123 4567' },
+  { code: '+971', flag: 'ae', name: 'UAE / الإمارات', digits: 9, placeholder: '50 123 4567' },
+  { code: '+20', flag: 'eg', name: 'Egypt / مصر', digits: 10, placeholder: '10 1234 5678' },
+  { code: '+962', flag: 'jo', name: 'Jordan / الأردن', digits: 9, placeholder: '7 9123 4567' },
+  { code: '+963', flag: 'sy', name: 'Syria / سوريا', digits: 9, placeholder: '93 123 4567' },
+  { code: '+964', flag: 'iq', name: 'Iraq / العراق', digits: 10, placeholder: '770 123 4567' },
+  { code: '+965', flag: 'kw', name: 'Kuwait / الكويت', digits: 8, placeholder: '5123 4567' },
+  { code: '+974', flag: 'qa', name: 'Qatar / قطر', digits: 8, placeholder: '5123 4567' },
+  { code: '+973', flag: 'bh', name: 'Bahrain / البحرين', digits: 8, placeholder: '3123 4567' },
+  { code: '+968', flag: 'om', name: 'Oman / عُمان', digits: 8, placeholder: '9123 4567' },
+  { code: '+961', flag: 'lb', name: 'Lebanon / لبنان', digits: 8, placeholder: '3 123 456' },
+];
+
 interface ContactFormProps {
   initialServiceType?: string;
   isSidebar?: boolean;
@@ -40,18 +55,123 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
   const [loading, setLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [kvkkAccepted, setKvkkAccepted] = useState(false);
+  const [errors, setErrors] = useState({ phone: '', email: '', general: '' });
+
+  const [localPhone, setLocalPhone] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const validatePhoneLive = (phoneVal: string, country: typeof COUNTRIES[0]) => {
+    const stripped = phoneVal.replace(/\D/g, '');
+    if (stripped.length === 0) {
+      return '';
+    }
+
+    if (country.code === '+90') {
+      if (!stripped.startsWith('5')) {
+        return t('error_phone_turkey_start') || 'Turkish phone number must start with 5.';
+      }
+      if (stripped.length !== 10) {
+        return t('error_phone_turkey_length') || 'Turkish phone number must be exactly 10 digits.';
+      }
+    } else {
+      if (stripped.length !== country.digits) {
+        return t('error_phone_country_length', { digits: country.digits }) || `Phone number must be exactly ${country.digits} digits.`;
+      }
+    }
+    return '';
+  };
+
+  const handlePhoneChange = (val: string, country: typeof COUNTRIES[0]) => {
+    let cleanVal = val.replace(/[^\d\s-]/g, '');
+
+    if (country.code === '+90') {
+      const tempDigits = cleanVal.replace(/\D/g, '');
+      if (tempDigits.startsWith('0')) {
+        cleanVal = cleanVal.replace(/^[0\s-]+/, '');
+      }
+    }
+
+    const tempDigits = cleanVal.replace(/\D/g, '');
+    if (tempDigits.length > country.digits) {
+      let digitCount = 0;
+      let truncated = '';
+      for (let char of cleanVal) {
+        if (/\d/.test(char)) {
+          if (digitCount < country.digits) {
+            truncated += char;
+            digitCount++;
+          }
+        } else {
+          truncated += char;
+        }
+      }
+      cleanVal = truncated;
+    }
+
+    setLocalPhone(cleanVal);
+
+    const err = validatePhoneLive(cleanVal, country);
+    setErrors(prev => ({ ...prev, phone: err, general: '' }));
+  };
+
+  const handleCountryChange = (country: typeof COUNTRIES[0]) => {
+    setSelectedCountry(country);
+    setDropdownOpen(false);
+
+    const err = validatePhoneLive(localPhone, country);
+    setErrors(prev => ({ ...prev, phone: err, general: '' }));
+  };
+
+  const validate = () => {
+    let isValid = true;
+    const newErrors = { phone: '', email: '', general: '' };
+
+    const phoneVal = localPhone.trim();
+    const emailVal = formData.email.trim();
+
+    if (!phoneVal && !emailVal) {
+      newErrors.general = t('error_phone_or_email') || 'Please enter either a phone number or an email address.';
+      isValid = false;
+    }
+
+    if (phoneVal) {
+      const liveErr = validatePhoneLive(phoneVal, selectedCountry);
+      if (liveErr) {
+        newErrors.phone = liveErr;
+        isValid = false;
+      }
+    }
+
+    if (emailVal) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(emailVal)) {
+        newErrors.email = t('error_email_invalid') || 'Please enter a valid email address.';
+        isValid = false;
+      }
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!kvkkAccepted) return;
+    if (!validate()) return;
 
     setLoading(true);
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      const fullPhone = localPhone.trim() ? `${selectedCountry.code} ${localPhone.trim()}` : '';
+
       const response = await fetch(`${API_URL}/contacts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          phone: fullPhone
+        }),
       });
       if (!response.ok) {
         throw new Error(`Contact request failed: ${response.status}`);
@@ -68,6 +188,9 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
         serviceType: initialServiceType,
         deviceModel: ''
       });
+      setLocalPhone('');
+      setSelectedCountry(COUNTRIES[0]);
+      setErrors({ phone: '', email: '', general: '' });
       setKvkkAccepted(false);
     } catch (error) {
       console.error('Error submitting form', error);
@@ -168,34 +291,108 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Name & Phone Row */}
+          {/* Name Row */}
+          <div className="space-y-1.5">
+            <label htmlFor={`${idPrefix}-name`} className="text-[10px] font-black uppercase tracking-widest text-foreground ml-1">{t('full_name')}</label>
+            <input
+              id={`${idPrefix}-name`}
+              type="text"
+              required
+              autoComplete="name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className={inputClasses}
+              placeholder={t('name_placeholder')}
+            />
+          </div>
+
+          {/* Phone & Email Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label htmlFor={`${idPrefix}-name`} className="text-[10px] font-black uppercase tracking-widest text-foreground ml-1">{t('full_name')}</label>
-              <input
-                id={`${idPrefix}-name`}
-                type="text"
-                required
-                autoComplete="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className={inputClasses}
-                placeholder={t('name_placeholder')}
-              />
+              <label htmlFor={`${idPrefix}-phone`} className="text-[10px] font-black uppercase tracking-widest text-foreground ml-1">
+                {t('phone_number')}
+              </label>
+              <div 
+                dir="ltr"
+                className={cn(
+                  "relative flex items-center h-11 w-full rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 focus-within:bg-black/10 dark:focus-within:bg-white/10 focus-within:ring-2 focus-within:ring-primary/20 outline-none transition-all font-bold text-sm text-foreground overflow-visible",
+                  errors.phone && "border-red-500 focus-within:ring-red-500/20"
+                )}
+              >
+                {/* Country Code Dropdown */}
+                <div className="relative h-full shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                    className="flex items-center gap-2 h-full px-3 hover:bg-black/5 dark:hover:bg-white/5 border-r border-black/10 dark:border-white/10 rounded-l-xl transition-colors cursor-pointer"
+                  >
+                    <img 
+                      src={`https://flagcdn.com/w40/${selectedCountry.flag}.png`} 
+                      alt="" 
+                      className="w-5 h-3.5 object-cover rounded-sm shrink-0 border border-black/10 dark:border-white/10 select-none"
+                    />
+                    <span className="text-xs font-black select-none" dir="ltr">{selectedCountry.code}</span>
+                    <span className="text-[8px] opacity-60 select-none">▼</span>
+                  </button>
+                  
+                  {dropdownOpen && (
+                    <>
+                      {/* Backdrop to close dropdown on click outside */}
+                      <div className="fixed inset-0 z-[100]" onClick={() => setDropdownOpen(false)} />
+                      {/* Dropdown menu */}
+                      <div className="absolute left-0 mt-1 w-52 max-h-60 overflow-y-auto bg-card border border-black/10 dark:border-white/10 rounded-xl shadow-xl z-[101] py-1">
+                        {COUNTRIES.map((c) => (
+                          <button
+                            key={c.code}
+                            type="button"
+                            onClick={() => handleCountryChange(c)}
+                            className="flex items-center gap-2.5 w-full px-3 py-2 text-left hover:bg-black/5 dark:hover:bg-white/5 font-bold transition-colors cursor-pointer text-xs text-foreground"
+                          >
+                            <img 
+                              src={`https://flagcdn.com/w40/${c.flag}.png`} 
+                              alt="" 
+                              className="w-5 h-3.5 object-cover rounded-sm shrink-0 border border-black/10 dark:border-white/10"
+                            />
+                            <span className="shrink-0 font-mono" dir="ltr">{c.code}</span>
+                            <span className="text-muted-foreground text-[10px] font-medium truncate">{c.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Real Phone Input */}
+                <input
+                  id={`${idPrefix}-phone`}
+                  type="tel"
+                  autoComplete="tel"
+                  value={localPhone}
+                  onChange={(e) => handlePhoneChange(e.target.value, selectedCountry)}
+                  className="flex-1 h-full px-3 bg-transparent outline-none border-none font-bold text-sm text-foreground placeholder:text-muted-foreground/35"
+                  placeholder={selectedCountry.placeholder}
+                  dir="ltr"
+                />
+              </div>
+              {errors.phone && <p className="text-red-500 text-[10px] font-bold mt-1 ml-1">{errors.phone}</p>}
             </div>
             <div className="space-y-1.5">
-              <label htmlFor={`${idPrefix}-phone`} className="text-[10px] font-black uppercase tracking-widest text-foreground ml-1">{t('phone_number')}</label>
+              <label htmlFor={`${idPrefix}-email`} className="text-[10px] font-black uppercase tracking-widest text-foreground ml-1">
+                {t('email_label') || 'Email'}
+              </label>
               <input
-                id={`${idPrefix}-phone`}
-                type="tel"
-                required
-                autoComplete="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className={inputClasses}
-                placeholder="+90"
-                dir="ltr"
+                id={`${idPrefix}-email`}
+                type="email"
+                autoComplete="email"
+                value={formData.email}
+                onChange={(e) => {
+                  setFormData({ ...formData, email: e.target.value });
+                  setErrors(prev => ({ ...prev, email: '', general: '' }));
+                }}
+                className={cn(inputClasses, errors.email && "border-red-500 focus:ring-red-500/20")}
+                placeholder={t('email_placeholder') || 'example@email.com'}
               />
+              {errors.email && <p className="text-red-500 text-[10px] font-bold mt-1 ml-1">{errors.email}</p>}
             </div>
           </div>
 
@@ -269,6 +466,12 @@ export function ContactForm({ initialServiceType = 'phone', isSidebar = false, i
               {t('form_note')}
             </p>
           </div>
+
+          {errors.general && (
+            <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold rounded-xl text-center">
+              {errors.general}
+            </div>
+          )}
 
           <button
             type="submit"

@@ -8,38 +8,6 @@ import axios from 'axios';
 import { Link } from '@/i18n/routing';
 import { useLocale, useTranslations, useFormatter } from 'next-intl';
 
-const mockBlogs = [
-  {
-    id: 1,
-    title: 'How to Extend Your Phone Battery Life',
-    content: 'Battery life is one of the most important aspects of any smartphone. Here are some tips to make it last longer...\n\nFirst, you should reduce your screen brightness. The screen is often the biggest battery drain on modern smartphones.\n\nSecond, turn off background app refresh for apps you don\'t use often. Many apps constantly wake up your phone to check for new data.',
-    image: 'https://images.unsplash.com/photo-1512428559083-a401a3389575?q=80&w=2070&auto=format&fit=crop',
-    author: 'Admin',
-    date: '2024-03-28',
-    slug: 'phone-battery-life-tips',
-    category: 'Phone Repair'
-  },
-  {
-    id: 2,
-    title: 'Maintenance Tips for Your Robot Vacuum',
-    content: 'To keep your robot vacuum running smoothly for years, regular maintenance is key. Learn what to check and clean...\n\nAlways empty the dustbin after every cleaning cycle. A full bin reduces suction power significantly.\n\nCheck the main brush and side brushes for tangled hair or debris once a week.',
-    image: 'https://images.unsplash.com/photo-1518133835878-5a93cc3f89e5?q=80&w=2070&auto=format&fit=crop',
-    author: 'Admin',
-    date: '2024-03-25',
-    slug: 'robot-vacuum-maintenance',
-    category: 'Robot Vacuum'
-  },
-  {
-    id: 3,
-    title: 'Common Laptop Overheating Issues',
-    content: 'Is your laptop getting too hot? It might be time for a professional cleaning or thermal paste replacement...\n\nDust accumulation in the cooling fans is the most common cause of laptop overheating.\n\nIf you hear the fans spinning loudly all the time and the bottom feels extremely hot, do not ignore it. Overheating can damage your motherboard.',
-    image: 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?q=80&w=2070&auto=format&fit=crop',
-    author: 'Admin',
-    date: '2024-03-20',
-    slug: 'laptop-overheating-solutions',
-    category: 'Laptop Repair'
-  }
-];
 
 export default function BlogPostPage() {
   const params = useParams();
@@ -62,11 +30,7 @@ export default function BlogPostPage() {
           throw new Error("No data returned");
         }
       } catch (error) {
-        console.error('Error fetching blog post from API, using fallback', error);
-        const fallbackBlog = mockBlogs.find(b => b.slug === slug);
-        if (fallbackBlog) {
-          setBlog(fallbackBlog);
-        }
+        console.error('Error fetching blog post from API', error);
       } finally {
         setLoading(false);
       }

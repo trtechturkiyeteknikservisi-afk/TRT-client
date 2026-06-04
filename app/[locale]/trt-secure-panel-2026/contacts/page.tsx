@@ -247,16 +247,18 @@ export default function ContactsPage() {
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="flex items-center space-x-2">
-                                        <span className="font-black text-muted-foreground font-mono text-xs">{item.phone}</span>
-                                        <button 
-                                            onClick={() => copyToClipboard(item.phone, item.id)}
-                                            className={cn(
-                                                "p-1.5 rounded-md transition-all shadow-sm",
-                                                copiedId === item.id ? "bg-emerald-500 text-white" : "bg-background border hover:bg-primary/10 hover:text-primary"
-                                            )}
-                                        >
-                                            {copiedId === item.id ? <Check size={12} /> : <Copy size={12} />}
-                                        </button>
+                                        <span className="font-black text-muted-foreground font-mono text-xs">{item.phone || '---'}</span>
+                                        {item.phone && (
+                                            <button 
+                                                onClick={() => copyToClipboard(item.phone, item.id)}
+                                                className={cn(
+                                                    "p-1.5 rounded-md transition-all shadow-sm",
+                                                    copiedId === item.id ? "bg-emerald-500 text-white" : "bg-background border hover:bg-primary/10 hover:text-primary"
+                                                )}
+                                            >
+                                                {copiedId === item.id ? <Check size={12} /> : <Copy size={12} />}
+                                            </button>
+                                        )}
                                     </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-muted-foreground">
@@ -413,18 +415,20 @@ export default function ContactsPage() {
                                     <span className="text-[9px] font-black uppercase tracking-widest">Phone</span>
                                 </div>
                                 <div className="p-4 rounded-lg bg-muted/30 border border-muted/50 flex items-center justify-between hover:bg-muted/50 transition-all">
-                                    <p className="text-lg font-black font-mono tracking-tighter">{selectedMessage.phone}</p>
-                                    <div className="flex space-x-1">
-                                        <button 
-                                            onClick={() => copyToClipboard(selectedMessage.phone, selectedMessage.id)}
-                                            className="p-2 rounded-lg bg-background border hover:bg-primary hover:text-white transition-all shadow-sm"
-                                        >
-                                            {copiedId === selectedMessage.id ? <Check size={14} /> : <Copy size={14} />}
-                                        </button>
-                                        <a href={`tel:${selectedMessage.phone}`} className="p-2 rounded-lg bg-primary text-white shadow-sm active:scale-90">
-                                            <Phone size={14} />
-                                        </a>
-                                    </div>
+                                    <p className="text-lg font-black font-mono tracking-tighter">{selectedMessage.phone || 'N/A'}</p>
+                                    {selectedMessage.phone && (
+                                        <div className="flex space-x-1">
+                                            <button 
+                                                onClick={() => copyToClipboard(selectedMessage.phone, selectedMessage.id)}
+                                                className="p-2 rounded-lg bg-background border hover:bg-primary hover:text-white transition-all shadow-sm"
+                                            >
+                                                {copiedId === selectedMessage.id ? <Check size={14} /> : <Copy size={14} />}
+                                            </button>
+                                            <a href={`tel:${selectedMessage.phone}`} className="p-2 rounded-lg bg-primary text-white shadow-sm active:scale-90">
+                                                <Phone size={14} />
+                                            </a>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 

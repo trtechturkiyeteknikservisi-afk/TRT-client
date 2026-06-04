@@ -252,7 +252,14 @@
     "kvkk_text": "I have read and understood the KVKK Disclosure Text.",
     "sticky_contact_cta": "Contact Us",
     "contact_subtitle": "We will get in touch with you within 2 business hours",
-    "cargo_service": "Nationwide Service via Cargo"
+    "cargo_service": "Nationwide Service via Cargo",
+    "email_placeholder": "example@email.com",
+    "error_phone_or_email": "Please enter either a phone number or an email address (at least one).",
+    "error_phone_invalid": "Please enter a complete and valid phone number (at least 10 digits).",
+    "error_phone_turkey_start": "Invalid number, Turkish phone number must start with 5.",
+    "error_phone_turkey_length": "Invalid number, must be exactly 10 digits.",
+    "error_phone_country_length": "Invalid number, must be exactly {digits} digits.",
+    "error_email_invalid": "Please enter a valid email address."
   },
   "Blog": {
     "title": "Technical Insights & News",

@@ -44,7 +44,7 @@ export default function BlogPage() {
   const t = useTranslations('Blog');
   const locale = useLocale();
   const format = useFormatter();
-  const [blogs, setBlogs] = useState(mockBlogs);
+  const [blogs, setBlogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -54,9 +54,7 @@ export default function BlogPage() {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
         const response = await axios.get(`${API_URL}/blogs?locale=${locale}`);
         const data = response.data as any[];
-        if (data.length > 0) {
-          setBlogs(data);
-        }
+        setBlogs(data);
       } catch (error) {
         console.error('Error fetching blogs', error);
       } finally {
