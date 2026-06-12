@@ -11,11 +11,21 @@ import { cn } from '@/lib/utils';
 import { useRouter } from '@/i18n/routing';
 import toast from 'react-hot-toast';
 
+import dynamic from 'next/dynamic';
+
+const JoditEditor = dynamic(() => import('@/components/JoditEditor'), { ssr: false });
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+const stripHtml = (html: string) => {
+  if (!html) return '';
+  return html.replace(/<[^>]*>/g, '');
+};
 export default function BlogsPage() {
   const t = useTranslations('Admin');
   const locale = useLocale();
   const format = useFormatter();
+  const [activeTab, setActiveTab] = useState<'en' | 'tr' | 'ar'>('en');
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -221,7 +231,7 @@ export default function BlogsPage() {
                   value={blogForm.image}
                   onChange={(e) => setBlogForm(p => ({ ...p, image: e.target.value }))}
                   placeholder="Or Image URL..."
-                  className="w-full flex-[1.5] px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                  className="w-full flex-[1.5] px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs text-foreground"
                 />
               </div>
             </div>
@@ -230,7 +240,7 @@ export default function BlogsPage() {
               <input
                 value={blogForm.author}
                 onChange={(e) => setBlogForm(p => ({ ...p, author: e.target.value }))}
-                className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs text-foreground"
               />
             </div>
             <div className="space-y-1">
@@ -239,80 +249,120 @@ export default function BlogsPage() {
                 type="date"
                 value={blogForm.date}
                 onChange={(e) => setBlogForm(p => ({ ...p, date: e.target.value }))}
-                className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs text-foreground"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* English */}
-            <div className="space-y-4 p-5 bg-muted/20 rounded-lg border border-dashed border-primary/20">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">🇺🇸</span>
-                <h4 className="font-black text-xs uppercase tracking-wider">English Version</h4>
-              </div>
+          {/* Language Tabs Selection */}
+          <div className="flex border-b border-border/50 pb-px gap-2">
+            <button
+              type="button"
+              onClick={() => setActiveTab('en')}
+              className={cn(
+                "flex items-center gap-2 px-6 py-3 border-b-2 font-black text-xs uppercase tracking-widest transition-all cursor-pointer",
+                activeTab === 'en' 
+                  ? "border-primary text-primary bg-primary/5 rounded-t-md" 
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <span className="text-base">🇺🇸</span>
+              <span>English</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('tr')}
+              className={cn(
+                "flex items-center gap-2 px-6 py-3 border-b-2 font-black text-xs uppercase tracking-widest transition-all cursor-pointer",
+                activeTab === 'tr' 
+                  ? "border-primary text-primary bg-primary/5 rounded-t-md" 
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <span className="text-base">🇹🇷</span>
+              <span>Türkçe</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('ar')}
+              className={cn(
+                "flex items-center gap-2 px-6 py-3 border-b-2 font-black text-xs uppercase tracking-widest transition-all cursor-pointer",
+                activeTab === 'ar' 
+                  ? "border-primary text-primary bg-primary/5 rounded-t-md" 
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <span className="text-base">🇸🇦</span>
+              <span>العربية</span>
+            </button>
+          </div>
+
+          <div className="w-full">
+            {/* English Version */}
+            <div className={cn("space-y-4 p-5 bg-muted/20 rounded-lg border border-dashed border-primary/20", activeTab === 'en' ? "block" : "hidden")}>
               <div className="space-y-1">
                 <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Title</label>
                 <input
                   value={blogForm.title_en}
                   onChange={(e) => setBlogForm(p => ({ ...p, title_en: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs text-foreground"
+                  placeholder="English title..."
                 />
               </div>
               <div className="space-y-1">
                 <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Content</label>
-                <textarea
+                <JoditEditor
                   value={blogForm.content_en}
-                  onChange={(e) => setBlogForm(p => ({ ...p, content_en: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-32"
+                  onChange={(val) => setBlogForm(p => ({ ...p, content_en: val }))}
+                  placeholder="English content..."
+                  direction="ltr"
+                  language="en"
                 />
               </div>
             </div>
 
-            {/* Turkish */}
-            <div className="space-y-4 p-5 bg-muted/20 rounded-lg border border-dashed border-primary/20">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">🇹🇷</span>
-                <h4 className="font-black text-xs uppercase tracking-wider">Türkçe Versiyon</h4>
-              </div>
+            {/* Turkish Version */}
+            <div className={cn("space-y-4 p-5 bg-muted/20 rounded-lg border border-dashed border-primary/20", activeTab === 'tr' ? "block" : "hidden")}>
               <div className="space-y-1">
                 <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Başlık</label>
                 <input
                   value={blogForm.title_tr}
                   onChange={(e) => setBlogForm(p => ({ ...p, title_tr: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs text-foreground"
+                  placeholder="Türkçe başlık..."
                 />
               </div>
               <div className="space-y-1">
                 <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">İçerik</label>
-                <textarea
+                <JoditEditor
                   value={blogForm.content_tr}
-                  onChange={(e) => setBlogForm(p => ({ ...p, content_tr: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-32"
+                  onChange={(val) => setBlogForm(p => ({ ...p, content_tr: val }))}
+                  placeholder="Türkçe içerik..."
+                  direction="ltr"
+                  language="tr"
                 />
               </div>
             </div>
 
-            {/* Arabic */}
-            <div className="space-y-4 p-5 bg-muted/20 rounded-lg border border-dashed border-primary/20" dir="rtl">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">🇸🇦</span>
-                <h4 className="font-black text-xs uppercase tracking-wider">النسخة العربية</h4>
-              </div>
+            {/* Arabic Version */}
+            <div className={cn("space-y-4 p-5 bg-muted/20 rounded-lg border border-dashed border-primary/20", activeTab === 'ar' ? "block" : "hidden")} dir="rtl">
               <div className="space-y-1">
                 <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mr-1">العنوان</label>
                 <input
                   value={blogForm.title_ar}
                   onChange={(e) => setBlogForm(p => ({ ...p, title_ar: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs text-foreground"
+                  placeholder="العنوان بالعربية..."
                 />
               </div>
               <div className="space-y-1">
                 <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mr-1">المحتوى</label>
-                <textarea
+                <JoditEditor
                   value={blogForm.content_ar}
-                  onChange={(e) => setBlogForm(p => ({ ...p, content_ar: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-32"
+                  onChange={(val) => setBlogForm(p => ({ ...p, content_ar: val }))}
+                  placeholder="المحتوى بالعربية..."
+                  direction="rtl"
+                  language="ar"
                 />
               </div>
             </div>
@@ -392,17 +442,17 @@ export default function BlogsPage() {
                             <div className="space-y-1">
                                 <span className="text-[9px] font-black text-primary uppercase tracking-widest">🇺🇸 EN</span>
                                 <h4 className="font-bold text-xs truncate">{item.title_en}</h4>
-                                <p className="text-muted-foreground text-[10px] line-clamp-2">{item.content_en}</p>
+                                <p className="text-muted-foreground text-[10px] line-clamp-2">{stripHtml(item.content_en)}</p>
                             </div>
                             <div className="space-y-1 border-x border-muted/20 px-6">
                                 <span className="text-[9px] font-black text-primary uppercase tracking-widest">🇹🇷 TR</span>
                                 <h4 className="font-bold text-xs truncate">{item.title_tr}</h4>
-                                <p className="text-muted-foreground text-[10px] line-clamp-2">{item.content_tr}</p>
+                                <p className="text-muted-foreground text-[10px] line-clamp-2">{stripHtml(item.content_tr)}</p>
                             </div>
                             <div className="space-y-1" dir="rtl">
                                 <span className="text-[9px] font-black text-primary uppercase tracking-widest block">🇸🇦 AR</span>
                                 <h4 className="font-bold text-xs truncate">{item.title_ar}</h4>
-                                <p className="text-muted-foreground text-[10px] line-clamp-2">{item.content_ar}</p>
+                                <p className="text-muted-foreground text-[10px] line-clamp-2">{stripHtml(item.content_ar)}</p>
                             </div>
                         </div>
                     </div>

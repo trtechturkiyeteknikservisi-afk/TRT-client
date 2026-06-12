@@ -14,6 +14,7 @@
     "axios": "^1.14.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
+    "jodit": "^4.12.22",
     "lucide-react": "^1.7.0",
     "next": "16.2.2",
     "next-intl": "^4.9.0",

@@ -8,9 +8,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const res = await fetch(`${API_URL}/blogs/${slug}?locale=${locale}`, { cache: 'no-store' });
     if (res.ok) {
       const blog = await res.json();
+      const cleanDescription = blog.content ? blog.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...' : '';
       return {
         title: `${blog.title} | TRT`,
-        description: blog.content ? blog.content.substring(0, 150) + '...' : '',
+        description: cleanDescription,
         keywords: `${blog.category || 'repair'}, TRT blog, ${blog.title.split(' ').join(', ')}`,
       };
     }

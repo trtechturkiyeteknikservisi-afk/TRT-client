@@ -7,6 +7,11 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import { useLocale, useTranslations, useFormatter } from 'next-intl';
 
+const stripHtml = (html: string) => {
+  if (!html) return '';
+  return html.replace(/<[^>]*>/g, '');
+};
+
 const mockBlogs = [
   {
     id: 1,
@@ -131,7 +136,7 @@ export default function BlogPage() {
                       {blog.title}
                     </h2>
                     <p className="text-muted-foreground mb-8 line-clamp-3 leading-relaxed font-medium flex-grow">
-                      {blog.content}
+                      {stripHtml(blog.content)}
                     </p>
                     <div
                       className="inline-flex items-center text-primary font-black uppercase tracking-widest group/btn group-hover:gap-4 transition-all"

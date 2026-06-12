@@ -65,37 +65,30 @@ export default function BlogPostPage() {
   return (
     <main className="min-h-screen bg-background">
       
-      {/* Hero Header */}
-      <section className="relative h-[60vh] min-h-[400px] flex items-end justify-center overflow-hidden">
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${blog.image})` }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-        </div>
-        
-        <div className="relative container mx-auto px-4 pb-16 text-center max-w-4xl">
+      {/* Article Header */}
+      <section className="pt-20 pb-12 bg-muted/20 border-b border-border/30">
+        <div className="container mx-auto px-4 max-w-4xl text-center">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             className="flex items-center justify-center gap-4 text-xs font-black uppercase tracking-[0.2em] text-primary mb-6"
           >
-            <span className="px-4 py-1 bg-primary/20 backdrop-blur-md rounded-full border border-primary/20">
+            <span className="px-4 py-1.5 bg-primary/10 rounded-full border border-primary/20">
               {blog.category || 'Technical Info'}
             </span>
           </motion.div>
           
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-4xl md:text-6xl font-black mb-8 tracking-tighter text-foreground uppercase leading-[1.1]"
+            className="text-3xl md:text-5xl font-black mb-8 tracking-tight text-foreground uppercase leading-[1.2]"
           >
             {blog.title}
           </motion.h1>
           
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
             className="flex flex-wrap items-center justify-center gap-6 text-sm font-bold text-muted-foreground uppercase tracking-widest"
@@ -117,27 +110,34 @@ export default function BlogPostPage() {
       </section>
 
       {/* Content Section */}
-      <section className="py-20 relative overflow-hidden">
+      <section className="py-16 relative overflow-hidden">
         <div className="container mx-auto px-4 max-w-4xl relative">
           {/* Back Button */}
           <Link 
             href="/blog" 
-            className="inline-flex items-center gap-2 text-sm font-black text-muted-foreground hover:text-primary transition-colors mb-12 uppercase tracking-widest"
+            className="inline-flex items-center gap-2 text-sm font-black text-muted-foreground hover:text-primary transition-colors mb-10 uppercase tracking-widest"
           >
             <ArrowLeft size={16} />
             <span>{t('title') || 'Back to Blog'}</span>
           </Link>
 
-          <article className="prose prose-lg prose-invert max-w-none">
-            <div className="space-y-8 text-lg md:text-xl text-muted-foreground leading-relaxed font-medium">
-                {blog.content.split('\n').map((paragraph: string, idx: number) => (
-                    paragraph.trim() ? (
-                        <p key={idx} className="mb-6 first-letter:text-5xl first-letter:font-black first-letter:text-primary first-letter:mr-3 first-letter:float-left">
-                            {paragraph}
-                        </p>
-                    ) : <br key={idx} />
-                ))}
-            </div>
+          {/* Featured Cover Image */}
+          {blog.image && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.3 }}
+              className="relative w-full aspect-[16/9] md:aspect-[21/9] overflow-hidden rounded-2xl border border-border shadow-xl mb-12 bg-muted/10"
+            >
+              <img src={blog.image} className="w-full h-full object-cover" alt={blog.title} />
+            </motion.div>
+          )}
+
+          <article className="max-w-none">
+            <div 
+              className="blog-content" 
+              dangerouslySetInnerHTML={{ __html: blog.content }} 
+            />
           </article>
 
           {/* Sidebar-like interactions */}
