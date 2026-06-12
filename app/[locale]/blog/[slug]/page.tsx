@@ -136,7 +136,11 @@ export default function BlogPostPage() {
           <article className="max-w-none">
             <div 
               className="blog-content" 
-              dangerouslySetInnerHTML={{ __html: blog.content }} 
+              dangerouslySetInnerHTML={{ 
+                __html: blog.content 
+                  ? blog.content.replace(/color:\s*(?:rgb\(0,\s*0,\s*0\)|#000000|#000|black)\s*;?/gi, 'color: inherit;') 
+                  : '' 
+              }} 
             />
           </article>
 
@@ -154,7 +158,7 @@ export default function BlogPostPage() {
             
             <div className="flex items-center gap-4">
                 <Link href="/#contact" className="px-6 py-3 bg-primary text-primary-foreground rounded-xl font-black text-sm uppercase tracking-widest hover:scale-105 transition-all">
-                    Repair Now
+                    {t('repair_now') || 'Repair Now'}
                 </Link>
             </div>
           </div>

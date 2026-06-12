@@ -266,7 +266,8 @@
     "desc": "Discover tips, maintenance guides, and the latest technology news from our experts.",
     "read_more": "Read Full Article",
     "category": "Repair",
-    "no_blogs": "No blog posts available at the moment."
+    "no_blogs": "No blog posts available at the moment.",
+    "repair_now": "Repair Now"
   },
   "Policies": {
     "title": "Legal Policies",

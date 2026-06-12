@@ -268,7 +268,8 @@
     "desc": "Uzmanlarımızdan ipuçlarını, bakım kılavuzlarını ve en son teknoloji haberlerini keşfedin.",
     "read_more": "Tam Makaleyi Oku",
     "category": "Onarım",
-    "no_blogs": "Şu anda blog yazısı bulunmamaktadır."
+    "no_blogs": "Şu anda blog yazısı bulunmamaktadır.",
+    "repair_now": "Şimdi Onar"
   },
   "Policies": {
     "title": "Yasal Politikalar",
