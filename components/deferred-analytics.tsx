@@ -15,8 +15,9 @@ export function DeferredAnalytics() {
 
       if (!document.querySelector(`script[data-gtag="${GA_ID}"]`)) {
         window.dataLayer = window.dataLayer || [];
-        window.gtag = function (...args: unknown[]) {
-          window.dataLayer?.push(args);
+        window.gtag = function () {
+          // eslint-disable-next-line prefer-rest-params
+          window.dataLayer?.push(arguments);
         };
 
         const ga = document.createElement('script');
@@ -62,7 +63,7 @@ type ClarityFunction = ((...args: unknown[]) => void) & { q?: unknown[][] };
 declare global {
   interface Window {
     clarity?: ClarityFunction;
-    dataLayer?: unknown[][];
-    gtag?: (...args: unknown[]) => void;
+    dataLayer?: any[];
+    gtag?: (...args: any[]) => void;
   }
 }
