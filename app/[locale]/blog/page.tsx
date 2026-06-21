@@ -109,7 +109,7 @@ export default function BlogPage() {
                   transition={{ delay: index * 0.1 }}
                   className="bg-card rounded-xl border border-border/50 overflow-hidden group hover:shadow-2xl hover:shadow-primary/5 transition-all flex flex-col h-full"
                 >
-                  <div className="relative h-64 overflow-hidden">
+                  <div className="relative w-full aspect-video overflow-hidden">
                     <img
                       src={blog.image}
                       alt={blog.title}
