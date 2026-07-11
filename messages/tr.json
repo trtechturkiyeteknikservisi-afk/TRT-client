@@ -180,10 +180,18 @@
     "original_parts_desc": "Sadece orijinal veya birinci sınıf parçalar kullanıyoruz."
   },
   "Portfolio": {
-    "title": "Son Çalışmalarımız",
+    "title": "GERÇEK ONARIMLARIMIZ",
     "desc": "Profesyonel onarım projelerimize göz atın.",
     "no_description": "Açıklama mevcut değil.",
-    "category_all": "Tüm Projeler",
+    "category_all": "Tümü",
+    "category_phone": "Telefon Onarımları",
+    "category_laptop": "Laptop Onarımları",
+    "category_watch": "Akıllı Saat Onarımları",
+    "category_robot": "Robot Süpürge Onarımları",
+    "category_headphones": "Kulaklık Onarımları",
+    "once": "ÖNCE",
+    "sonra": "SONRA",
+    "view_details": "Detayları Gör",
     "view_more": "Daha Fazla İş Gör"
   },
   "Reviews": {

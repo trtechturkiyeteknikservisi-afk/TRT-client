@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { 
-  Trash2, Upload, Plus, Image as ImageIcon, Languages, Film, PlayCircle, Edit3
+  Trash2, Upload, Plus, Image as ImageIcon, Languages, Film, PlayCircle, Edit3, Check, X, AlertTriangle
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
@@ -18,44 +18,91 @@ export default function PortfolioPage() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  
   const [uploadForm, setUploadForm] = useState({ 
     title_en: '', title_tr: '', title_ar: '',
     description_en: '', description_tr: '', description_ar: '',
     type: 'image', url: '' 
   });
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  
+  const [beforeFile, setBeforeFile] = useState<File | null>(null);
+  const [afterFile, setAfterFile] = useState<File | null>(null);
+  
+  const [points, setPoints] = useState({
+    tr1: '', tr2: '', tr3: '',
+    en1: '', en2: '', en3: '',
+    ar1: '', ar2: '', ar3: ''
+  });
+
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
   const router = useRouter();
 
   const startEdit = (item: any) => {
     setEditingId(item.id);
+    
+    // Parse description for points and details
+    const parseDesc = (desc: string) => {
+      let p1 = '', p2 = '', p3 = '', d = desc || '';
+      if (desc && desc.includes('---')) {
+        const parts = desc.split('---');
+        const lines = parts[0].split('\n').map(l => l.trim().replace(/^[-*✓]\s*/, '')).filter(Boolean);
+        p1 = lines[0] || '';
+        p2 = lines[1] || '';
+        p3 = lines[2] || '';
+        d = parts[1].trim();
+      } else if (desc && desc.includes('\n')) {
+        const lines = desc.split('\n').map(l => l.trim()).filter(Boolean);
+        if (lines.length > 1) {
+          p1 = lines[0].replace(/^[-*✓]\s*/, '');
+          p2 = lines[1].replace(/^[-*✓]\s*/, '');
+          p3 = lines[2] || '';
+          d = lines.slice(3).join('\n');
+        }
+      }
+      return { p1, p2, p3, d };
+    };
+
+    const tr = parseDesc(item.description_tr);
+    const en = parseDesc(item.description_en);
+    const ar = parseDesc(item.description_ar);
+
     setUploadForm({
       title_en: item.title_en || '',
       title_tr: item.title_tr || '',
       title_ar: item.title_ar || '',
-      description_en: item.description_en || '',
-      description_tr: item.description_tr || '',
-      description_ar: item.description_ar || '',
+      description_en: en.d,
+      description_tr: tr.d,
+      description_ar: ar.d,
       type: item.type || 'image',
       url: item.url || ''
     });
-    setSelectedFile(null);
+
+    setPoints({
+      tr1: tr.p1, tr2: tr.p2, tr3: tr.p3,
+      en1: en.p1, en2: en.p2, en3: en.p3,
+      ar1: ar.p1, ar2: ar.p2, ar3: ar.p3
+    });
+
+    setBeforeFile(null);
+    setAfterFile(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const cancelEdit = () => {
     setEditingId(null);
     setUploadForm({
-      title_en: '',
-      title_tr: '',
-      title_ar: '',
-      description_en: '',
-      description_tr: '',
-      description_ar: '',
-      type: 'image',
-      url: ''
+      title_en: '', title_tr: '', title_ar: '',
+      description_en: '', description_tr: '', description_ar: '',
+      type: 'image', url: ''
     });
-    setSelectedFile(null);
+    setPoints({
+      tr1: '', tr2: '', tr3: '',
+      en1: '', en2: '', en3: '',
+      ar1: '', ar2: '', ar3: ''
+    });
+    setBeforeFile(null);
+    setAfterFile(null);
   };
 
   const fetchData = async () => {
@@ -82,40 +129,88 @@ export default function PortfolioPage() {
     const token = localStorage.getItem('token');
     setActionLoading(true);
     try {
-      let finalUrl = uploadForm.url;
+      let finalBeforeUrl = '';
+      let finalAfterUrl = '';
+      
+      // Parse existing url if edit
+      if (editingId && uploadForm.url) {
+        if (uploadForm.url.includes('|')) {
+          const parts = uploadForm.url.split('|');
+          finalBeforeUrl = parts[0].trim();
+          finalAfterUrl = parts[1].trim();
+        } else {
+          finalAfterUrl = uploadForm.url.trim();
+        }
+      }
 
-      // 1. Upload file if selected
-      if (selectedFile) {
+      // 1. Upload before file if selected
+      if (beforeFile) {
         const formData = new FormData();
-        formData.append('image', selectedFile);
+        formData.append('image', beforeFile);
         const uploadRes = await axios.post(`${API_BASE}/upload`, formData, {
           headers: { 
             Authorization: `Bearer ${token}`,
             'Content-Type': 'multipart/form-data'
           }
         });
-        finalUrl = (uploadRes.data as any).url;
+        finalBeforeUrl = (uploadRes.data as any).url;
+      }
+
+      // 2. Upload after file if selected
+      if (afterFile) {
+        const formData = new FormData();
+        formData.append('image', afterFile);
+        const uploadRes = await axios.post(`${API_BASE}/upload`, formData, {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        finalAfterUrl = (uploadRes.data as any).url;
+      }
+
+      // Combine URL
+      let finalUrl = '';
+      if (uploadForm.type === 'video') {
+        finalUrl = finalAfterUrl;
+      } else {
+        if (finalBeforeUrl && finalAfterUrl) {
+          finalUrl = `${finalBeforeUrl} | ${finalAfterUrl}`;
+        } else if (finalAfterUrl) {
+          finalUrl = finalAfterUrl;
+        } else if (finalBeforeUrl) {
+          finalUrl = finalBeforeUrl;
+        }
       }
 
       if (!finalUrl) {
-        toast.error('Please provide a file or a direct URL');
+        toast.error('Please upload at least one image or provide a URL');
         setActionLoading(false);
         return;
       }
 
-      // 2. Prepare JSON data
+      // Combine description and checklist points
+      const combineDesc = (desc: string, p1: string, p2: string, p3: string) => {
+        if (!p1 && !p2 && !p3) return desc;
+        const pts = [p1, p2, p3].filter(Boolean).map(p => `- ${p}`).join('\n');
+        return `${pts}\n---\n${desc}`;
+      };
+
+      const description_tr = combineDesc(uploadForm.description_tr, points.tr1, points.tr2, points.tr3);
+      const description_en = combineDesc(uploadForm.description_en, points.en1, points.en2, points.en3);
+      const description_ar = combineDesc(uploadForm.description_ar, points.ar1, points.ar2, points.ar3);
+
       const payload = {
         title_en: uploadForm.title_en,
         title_tr: uploadForm.title_tr,
         title_ar: uploadForm.title_ar,
-        description_en: uploadForm.description_en,
-        description_tr: uploadForm.description_tr,
-        description_ar: uploadForm.description_ar,
+        description_en,
+        description_tr,
+        description_ar,
         type: uploadForm.type,
         url: finalUrl
       };
 
-      // 3. Save/Update portfolio item
       if (editingId) {
         await axios.put(`${API_BASE}/content/portfolio/${editingId}`, payload, {
           headers: { 
@@ -132,29 +227,24 @@ export default function PortfolioPage() {
             'Content-Type': 'application/json'
           }
         });
-        setUploadForm({ 
-          title_en: '', title_tr: '', title_ar: '',
-          description_en: '', description_tr: '', description_ar: '',
-          type: 'image', url: '' 
-        });
-        setSelectedFile(null);
+        cancelEdit();
         toast.success('Work added successfully to portfolio!');
       }
       fetchData();
     } catch (err) {
-      console.error('Error uploading to portfolio', err);
-      toast.error('Failed to save work. Please check the console for details.');
+      console.error('Error saving portfolio item', err);
+      toast.error('Failed to save work.');
     } finally {
       setActionLoading(false);
     }
   };
 
-  const deleteItem = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this work?')) return;
+  const confirmDelete = async () => {
+    if (deleteId === null) return;
     const token = localStorage.getItem('token');
     setActionLoading(true);
     try {
-      await axios.delete(`${API_BASE}/content/portfolio/${id}`, {
+      await axios.delete(`${API_BASE}/content/portfolio/${deleteId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('Portfolio item deleted successfully!');
@@ -164,6 +254,7 @@ export default function PortfolioPage() {
       toast.error('Failed to delete portfolio item.');
     } finally {
       setActionLoading(false);
+      setDeleteId(null);
     }
   };
 
@@ -198,29 +289,55 @@ export default function PortfolioPage() {
                         onChange={(e) => setUploadForm((prev) => ({ ...prev, type: e.target.value }))}
                         className="w-full px-3 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
                     >
-                        <option value="image">Image</option>
+                        <option value="image">Image (Before & After)</option>
                         <option value="video">Video</option>
                     </select>
                </div>
                
-               <div className="space-y-1">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1 mb-1 block">File Upload</label>
-                    <label className="flex items-center justify-center px-4 py-2.5 rounded-md border-2 border-dashed border-primary/20 bg-primary/5 cursor-pointer hover:bg-primary/10 transition-all text-[10px] font-black uppercase tracking-widest text-primary gap-2">
-                        <Upload size={14} />
-                        <span>{selectedFile ? selectedFile.name : "Choose File"}</span>
-                        <input type="file" className="hidden" onChange={(e) => setSelectedFile(e.target.files?.[0] || null)} />
-                    </label>
-               </div>
-
-                <div className="space-y-1">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1 mb-1 block">Or Direct URL</label>
-                    <input
-                        value={uploadForm.url}
-                        onChange={(e) => setUploadForm((prev) => ({ ...prev, url: e.target.value }))}
-                        placeholder="https://..."
-                        className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
-                    />
-               </div>
+               {uploadForm.type === 'image' ? (
+                 <>
+                   <div className="space-y-1">
+                        <label className="text-[9px] font-black uppercase tracking-widest text-red-500 ml-1 mb-1 block">Before Image (صورة قبل)</label>
+                        <label className={cn(
+                            "flex items-center justify-center px-4 py-2.5 rounded-md border-2 border-dashed transition-all text-[10px] font-black uppercase tracking-widest gap-2 cursor-pointer",
+                            beforeFile 
+                              ? "border-green-500/30 bg-green-500/5 text-green-600 hover:bg-green-500/10" 
+                              : "border-red-500/20 bg-red-500/5 text-red-500 hover:bg-red-500/10"
+                        )}>
+                            {beforeFile ? <Check size={14} /> : <Upload size={14} />}
+                            <span className="truncate max-w-[180px]">{beforeFile ? beforeFile.name : "Choose Before Image"}</span>
+                            <input type="file" className="hidden" onChange={(e) => setBeforeFile(e.target.files?.[0] || null)} />
+                        </label>
+                   </div>
+                   <div className="space-y-1">
+                        <label className="text-[9px] font-black uppercase tracking-widest text-green-600 ml-1 mb-1 block">After Image (صورة بعد)</label>
+                        <label className={cn(
+                            "flex items-center justify-center px-4 py-2.5 rounded-md border-2 border-dashed transition-all text-[10px] font-black uppercase tracking-widest gap-2 cursor-pointer",
+                            afterFile 
+                              ? "border-green-500/30 bg-green-500/5 text-green-600 hover:bg-green-500/10" 
+                              : "border-green-500/20 bg-green-500/5 text-green-600 hover:bg-green-500/10"
+                        )}>
+                            {afterFile ? <Check size={14} /> : <Upload size={14} />}
+                            <span className="truncate max-w-[180px]">{afterFile ? afterFile.name : "Choose After Image"}</span>
+                            <input type="file" className="hidden" onChange={(e) => setAfterFile(e.target.files?.[0] || null)} />
+                        </label>
+                   </div>
+                 </>
+               ) : (
+                 <div className="space-y-1 col-span-2">
+                      <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1 mb-1 block">Video File</label>
+                      <label className={cn(
+                          "flex items-center justify-center px-4 py-2.5 rounded-md border-2 border-dashed transition-all text-[10px] font-black uppercase tracking-widest gap-2 cursor-pointer",
+                          afterFile 
+                            ? "border-green-500/30 bg-green-500/5 text-green-600 hover:bg-green-500/10" 
+                            : "border-primary/20 bg-primary/5 text-primary hover:bg-primary/10"
+                      )}>
+                          {afterFile ? <Check size={14} /> : <Upload size={14} />}
+                          <span className="truncate max-w-[360px]">{afterFile ? afterFile.name : "Choose Video File"}</span>
+                          <input type="file" className="hidden" onChange={(e) => setAfterFile(e.target.files?.[0] || null)} />
+                      </label>
+                 </div>
+               )}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -240,10 +357,34 @@ export default function PortfolioPage() {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Description</label>
+                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Checklist Points</label>
+                <div className="space-y-2">
+                  <input
+                    value={points.en1}
+                    onChange={(e) => setPoints(p => ({ ...p, en1: e.target.value }))}
+                    placeholder="Point 1 (e.g. Original OLED Screen)"
+                    className="w-full px-4 py-2 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                  />
+                  <input
+                    value={points.en2}
+                    onChange={(e) => setPoints(p => ({ ...p, en2: e.target.value }))}
+                    placeholder="Point 2 (e.g. 45-Minute Delivery)"
+                    className="w-full px-4 py-2 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                  />
+                  <input
+                    value={points.en3}
+                    onChange={(e) => setPoints(p => ({ ...p, en3: e.target.value }))}
+                    placeholder="Point 3 (e.g. Face ID Tested)"
+                    className="w-full px-4 py-2 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Description Details</label>
                 <textarea
                   value={uploadForm.description_en}
                   onChange={(e) => setUploadForm(p => ({ ...p, description_en: e.target.value }))}
+                  placeholder="Detailed description showing in modal..."
                   className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-24"
                 />
               </div>
@@ -265,10 +406,34 @@ export default function PortfolioPage() {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Açıklama</label>
+                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Özellik Listesi</label>
+                <div className="space-y-2">
+                  <input
+                    value={points.tr1}
+                    onChange={(e) => setPoints(p => ({ ...p, tr1: e.target.value }))}
+                    placeholder="1. Özellik (Örn: Orijinal OLED Ekran)"
+                    className="w-full px-4 py-2 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                  />
+                  <input
+                    value={points.tr2}
+                    onChange={(e) => setPoints(p => ({ ...p, tr2: e.target.value }))}
+                    placeholder="2. Özellik (Örn: 45 Dakikada Teslim)"
+                    className="w-full px-4 py-2 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                  />
+                  <input
+                    value={points.tr3}
+                    onChange={(e) => setPoints(p => ({ ...p, tr3: e.target.value }))}
+                    placeholder="3. Özellik (Örn: Face ID Test Edildi)"
+                    className="w-full px-4 py-2 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Detaylı Açıklama</label>
                 <textarea
                   value={uploadForm.description_tr}
                   onChange={(e) => setUploadForm(p => ({ ...p, description_tr: e.target.value }))}
+                  placeholder="Detaylar tıklandığında görünecek açıklama..."
                   className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-24"
                 />
               </div>
@@ -290,10 +455,34 @@ export default function PortfolioPage() {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mr-1">الوصف</label>
+                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mr-1">نقاط التحقق</label>
+                <div className="space-y-2">
+                  <input
+                    value={points.ar1}
+                    onChange={(e) => setPoints(p => ({ ...p, ar1: e.target.value }))}
+                    placeholder="النقطة 1 (مثال: شاشة OLED أصلية)"
+                    className="w-full px-4 py-2 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                  />
+                  <input
+                    value={points.ar2}
+                    onChange={(e) => setPoints(p => ({ ...p, ar2: e.target.value }))}
+                    placeholder="النقطة 2 (مثال: تسليم خلال 45 دقيقة)"
+                    className="w-full px-4 py-2 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                  />
+                  <input
+                    value={points.ar3}
+                    onChange={(e) => setPoints(p => ({ ...p, ar3: e.target.value }))}
+                    placeholder="النقطة 3 (مثال: تم فحص بصمة الوجه)"
+                    className="w-full px-4 py-2 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mr-1">الوصف التفصيلي</label>
                 <textarea
                   value={uploadForm.description_ar}
                   onChange={(e) => setUploadForm(p => ({ ...p, description_ar: e.target.value }))}
+                  placeholder="الوصف التفصيلي الذي يظهر في النافذة المنبثقة..."
                   className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs h-24"
                 />
               </div>
@@ -335,7 +524,8 @@ export default function PortfolioPage() {
                 <div className="aspect-video relative overflow-hidden bg-muted">
                     {item.type === 'image' ? (
                         <img 
-                            src={item.url.startsWith('http') ? item.url : (() => {
+                            src={(item.url && item.url.includes('|') ? item.url.split('|')[1].trim() : item.url).startsWith('http') ? (item.url && item.url.includes('|') ? item.url.split('|')[1].trim() : item.url) : (() => {
+                                const activeUrl = item.url && item.url.includes('|') ? item.url.split('|')[1].trim() : item.url;
                                 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
                                 let normalizedApiUrl = API_URL;
                                 if (!API_URL.startsWith('http') && !API_URL.startsWith('/')) {
@@ -343,8 +533,8 @@ export default function PortfolioPage() {
                                     normalizedApiUrl = `https://${cleanUrl}`;
                                 }
                                 const SERVER_URL = normalizedApiUrl.replace(/\/api\/?$/, '');
-                                if (item.url.startsWith('.')) return `https://${item.url.substring(1)}`;
-                                return `${SERVER_URL}${item.url.startsWith('/') ? item.url : `/${item.url}`}`;
+                                if (activeUrl.startsWith('.')) return `https://${activeUrl.substring(1)}`;
+                                return `${SERVER_URL}${activeUrl.startsWith('/') ? activeUrl : `/${activeUrl}`}`;
                             })()} 
                             alt={item.title_en} 
                             className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" 
@@ -370,7 +560,7 @@ export default function PortfolioPage() {
                             <Edit3 size={16} />
                         </button>
                         <button
-                            onClick={() => deleteItem(item.id)}
+                            onClick={() => setDeleteId(item.id)}
                             disabled={actionLoading}
                             className="p-2.5 rounded-md bg-red-500 text-white shadow-xl active:scale-90 cursor-pointer"
                             title="Delete Work"
@@ -403,6 +593,45 @@ export default function PortfolioPage() {
           ))
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteId !== null && (
+        <div className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-card border rounded-2xl p-6 max-w-md w-full shadow-2xl relative space-y-6"
+          >
+            <div className="flex items-center gap-3 text-red-500">
+              <div className="p-3 bg-red-500/10 rounded-full">
+                <AlertTriangle size={24} />
+              </div>
+              <h3 className="text-xl font-black uppercase tracking-tight">Delete Confirmation</h3>
+            </div>
+            
+            <p className="text-muted-foreground text-sm font-semibold leading-relaxed">
+              Are you sure you want to permanently delete this portfolio item? This action cannot be undone.
+            </p>
+            
+            <div className="flex gap-3 justify-end pt-2">
+              <button
+                onClick={() => setDeleteId(null)}
+                disabled={actionLoading}
+                className="px-5 py-2.5 rounded-md bg-muted text-foreground font-black text-xs uppercase tracking-widest hover:bg-muted/80 transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                disabled={actionLoading}
+                className="px-5 py-2.5 rounded-md bg-red-500 text-white font-black text-xs uppercase tracking-widest hover:bg-red-500/90 transition-all shadow-lg shadow-red-500/20 active:scale-95 cursor-pointer flex items-center gap-2"
+              >
+                {actionLoading ? "Deleting..." : "Yes, Delete"}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

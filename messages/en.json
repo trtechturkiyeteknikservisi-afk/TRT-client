@@ -178,10 +178,18 @@
     "original_parts_desc": "We use only original or premium grade parts."
   },
   "Portfolio": {
-    "title": "Our Recent Works",
-    "desc": "See some of our professional repair projects.",
+    "title": "OUR REAL REPAIRS",
+    "desc": "Check out our professional repair projects.",
     "no_description": "No description available.",
-    "category_all": "All Projects",
+    "category_all": "All",
+    "category_phone": "Phone Repairs",
+    "category_laptop": "Laptop Repairs",
+    "category_watch": "Smart Watch Repairs",
+    "category_robot": "Robot Vacuum Repairs",
+    "category_headphones": "Headphones Repairs",
+    "once": "BEFORE",
+    "sonra": "AFTER",
+    "view_details": "View Details",
     "view_more": "View More Works"
   },
   "Reviews": {

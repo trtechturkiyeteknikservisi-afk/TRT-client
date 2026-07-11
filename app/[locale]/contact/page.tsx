@@ -75,6 +75,24 @@ export default function ContactPage() {
       isButton: true
     },
     {
+      key: 'instagram',
+      icon: '/instagram.webp',
+      title: t('instagram_title'),
+      desc: t('instagram_desc'),
+      action: t('instagram_action'),
+      link: 'https://www.instagram.com/trtservis?igsh=MXcxZ25rNjNydjYxZQ%3D%3D&utm_source=qr',
+      isButton: true
+    },
+    {
+      key: 'tiktok',
+      icon: '/tiktok.webp',
+      title: t('tiktok_title'),
+      desc: t('tiktok_desc'),
+      action: t('tiktok_action'),
+      link: 'https://www.tiktok.com/@trtservis',
+      isButton: true
+    },
+    {
       key: 'youtube',
       icon: '/youtube.webp',
       title: t('youtube_title'),
