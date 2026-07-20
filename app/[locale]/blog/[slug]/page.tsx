@@ -256,9 +256,9 @@ export default function BlogPostPage() {
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3 }}
-              className="relative w-full aspect-[16/9] md:aspect-[21/9] overflow-hidden rounded-2xl border border-border shadow-xl mb-12 bg-muted/10"
+              className="relative w-full overflow-hidden rounded-2xl border border-border shadow-xl mb-12 bg-muted/10"
             >
-              <img src={blog.image} className="w-full h-full object-cover" alt={blog.title} />
+              <img src={blog.image} className="w-full h-auto block" alt={blog.title} />
             </motion.div>
           )}
 
