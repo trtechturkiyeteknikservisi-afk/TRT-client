@@ -7,7 +7,60 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import { Link } from '@/i18n/routing';
 import { useLocale, useTranslations, useFormatter } from 'next-intl';
-
+const cleanBlogContent = (html: string) => {
+  if (!html) return '';
+  return html.replace(/color\s*:\s*([^;"]+)/gi, (match, colorVal) => {
+    const color = colorVal.trim().toLowerCase();
+    
+    // Common dark color names
+    const darkNames = ['black', 'darkgray', 'dimgray', 'gray', 'slategray', 'darkslategray'];
+    if (darkNames.includes(color)) {
+      return 'color: inherit';
+    }
+    
+    // Hex colors
+    const hexMatch = color.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/);
+    if (hexMatch) {
+      const hex = hexMatch[1];
+      let r = 0, g = 0, b = 0;
+      if (hex.length === 3) {
+        r = parseInt(hex[0] + hex[0], 16);
+        g = parseInt(hex[1] + hex[1], 16);
+        b = parseInt(hex[2] + hex[2], 16);
+      } else {
+        r = parseInt(hex.substring(0, 2), 16);
+        g = parseInt(hex.substring(2, 4), 16);
+        b = parseInt(hex.substring(4, 6), 16);
+      }
+      const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      const saturation = max === 0 ? 0 : (max - min) / max;
+      
+      if (brightness < 150 && (saturation < 0.3 || brightness < 80)) {
+        return 'color: inherit';
+      }
+    }
+    
+    // RGB/RGBA colors
+    const rgbMatch = color.match(/^rgba?\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*[\d.]+)?\)$/);
+    if (rgbMatch) {
+      const r = parseInt(rgbMatch[1], 10);
+      const g = parseInt(rgbMatch[2], 10);
+      const b = parseInt(rgbMatch[3], 10);
+      const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      const saturation = max === 0 ? 0 : (max - min) / max;
+      
+      if (brightness < 150 && (saturation < 0.3 || brightness < 80)) {
+        return 'color: inherit';
+      }
+    }
+    
+    return match;
+  });
+};
 
 export default function BlogPostPage() {
   const params = useParams();
@@ -68,15 +121,7 @@ export default function BlogPostPage() {
       {/* Article Header */}
       <section className="pt-20 pb-12 bg-muted/20 border-b border-border/30">
         <div className="container mx-auto px-4 max-w-4xl text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-center gap-4 text-xs font-black uppercase tracking-[0.2em] text-primary mb-6"
-          >
-            <span className="px-4 py-1.5 bg-primary/10 rounded-full border border-primary/20">
-              {blog.category || 'Technical Info'}
-            </span>
-          </motion.div>
+
           
           <motion.h1
             initial={{ opacity: 0, y: 15 }}
@@ -137,9 +182,7 @@ export default function BlogPostPage() {
             <div 
               className="blog-content" 
               dangerouslySetInnerHTML={{ 
-                __html: blog.content 
-                  ? blog.content.replace(/color:\s*(?:rgb\(0,\s*0,\s*0\)|#000000|#000|black)\s*;?/gi, 'color: inherit;') 
-                  : '' 
+                __html: cleanBlogContent(blog.content) 
               }} 
             />
           </article>

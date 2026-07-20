@@ -258,8 +258,8 @@
 }
 
 .blog-content img {
-  max-width: 100%;
-  height: auto;
+  max-width: 100% !important;
+  height: auto !important;
   border-radius: 1rem;
   margin: 2.5rem auto;
   display: block;

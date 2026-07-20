@@ -115,11 +115,7 @@ export default function BlogPage() {
                       alt={blog.title}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
-                    <div className="absolute top-6 left-6">
-                      <span className="px-5 py-2 bg-background/80 backdrop-blur-md text-foreground text-xs font-black rounded-xl uppercase tracking-widest border border-border/50">
-                        {blog.category || t('category')}
-                      </span>
-                    </div>
+
                   </div>
                   <div className="p-10 flex flex-col flex-grow">
                     <div className="flex items-center space-x-4 text-xs font-bold text-muted-foreground/60 mb-6 uppercase tracking-widest">
