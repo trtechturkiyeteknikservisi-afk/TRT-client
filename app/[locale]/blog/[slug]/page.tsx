@@ -8,58 +8,137 @@ import axios from 'axios';
 import { Link } from '@/i18n/routing';
 import { useLocale, useTranslations, useFormatter } from 'next-intl';
 const cleanBlogContent = (html: string) => {
-  if (!html) return '';
-  return html.replace(/color\s*:\s*([^;"]+)/gi, (match, colorVal) => {
-    const color = colorVal.trim().toLowerCase();
+  if (typeof window === 'undefined' || !html) return html || '';
+  
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
     
-    // Common dark color names
-    const darkNames = ['black', 'darkgray', 'dimgray', 'gray', 'slategray', 'darkslategray'];
-    if (darkNames.includes(color)) {
-      return 'color: inherit';
-    }
-    
-    // Hex colors
-    const hexMatch = color.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/);
-    if (hexMatch) {
-      const hex = hexMatch[1];
-      let r = 0, g = 0, b = 0;
-      if (hex.length === 3) {
-        r = parseInt(hex[0] + hex[0], 16);
-        g = parseInt(hex[1] + hex[1], 16);
-        b = parseInt(hex[2] + hex[2], 16);
-      } else {
-        r = parseInt(hex.substring(0, 2), 16);
-        g = parseInt(hex.substring(2, 4), 16);
-        b = parseInt(hex.substring(4, 6), 16);
-      }
-      const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-      const max = Math.max(r, g, b);
-      const min = Math.min(r, g, b);
-      const saturation = max === 0 ? 0 : (max - min) / max;
+    const isColorLight = (colorStr: string): boolean => {
+      const color = colorStr.trim().toLowerCase();
+      if (!color) return false;
       
-      if (brightness < 150 && (saturation < 0.3 || brightness < 80)) {
-        return 'color: inherit';
-      }
-    }
-    
-    // RGB/RGBA colors
-    const rgbMatch = color.match(/^rgba?\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*[\d.]+)?\)$/);
-    if (rgbMatch) {
-      const r = parseInt(rgbMatch[1], 10);
-      const g = parseInt(rgbMatch[2], 10);
-      const b = parseInt(rgbMatch[3], 10);
-      const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-      const max = Math.max(r, g, b);
-      const min = Math.min(r, g, b);
-      const saturation = max === 0 ? 0 : (max - min) / max;
+      const lightNames = [
+        'white', 'yellow', 'lightyellow', 'lightgray', 'lightgrey', 'azure', 
+        'aliceblue', 'ghostwhite', 'honeydew', 'ivory', 'beige', 'lightcyan',
+        'lightgreen', 'lightblue', 'lightpink', 'lightsalmon', 'lavender', 'floralwhite'
+      ];
+      if (lightNames.includes(color)) return true;
       
-      if (brightness < 150 && (saturation < 0.3 || brightness < 80)) {
-        return 'color: inherit';
+      const hexMatch = color.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/);
+      if (hexMatch) {
+        const hex = hexMatch[1];
+        let r = 0, g = 0, b = 0;
+        if (hex.length === 3) {
+          r = parseInt(hex[0] + hex[0], 16);
+          g = parseInt(hex[1] + hex[1], 16);
+          b = parseInt(hex[2] + hex[2], 16);
+        } else {
+          r = parseInt(hex.substring(0, 2), 16);
+          g = parseInt(hex.substring(2, 4), 16);
+          b = parseInt(hex.substring(4, 6), 16);
+        }
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        return brightness > 150;
       }
-    }
+      
+      const rgbMatch = color.match(/^rgba?\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*[\d.]+)?\)$/);
+      if (rgbMatch) {
+        const r = parseInt(rgbMatch[1], 10);
+        const g = parseInt(rgbMatch[2], 10);
+        const b = parseInt(rgbMatch[3], 10);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        return brightness > 150;
+      }
+      
+      const hslMatch = color.match(/^hsla?\((\d+)\s*,\s*(\d+)%\s*,\s*(\d+)%(?:\s*,\s*[\d.]+)?\)$/);
+      if (hslMatch) {
+        const lightness = parseInt(hslMatch[3], 10);
+        return lightness > 60;
+      }
+      
+      return false;
+    };
+
+    const isColorDark = (colorStr: string): boolean => {
+      const color = colorStr.trim().toLowerCase();
+      if (!color) return false;
+      
+      const darkNames = ['black', 'darkgray', 'dimgray', 'gray', 'slategray', 'darkslategray', 'navy', 'darkblue', 'purple', 'indigo'];
+      if (darkNames.includes(color)) return true;
+      
+      const hexMatch = color.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/);
+      if (hexMatch) {
+        const hex = hexMatch[1];
+        let r = 0, g = 0, b = 0;
+        if (hex.length === 3) {
+          r = parseInt(hex[0] + hex[0], 16);
+          g = parseInt(hex[1] + hex[1], 16);
+          b = parseInt(hex[2] + hex[2], 16);
+        } else {
+          r = parseInt(hex.substring(0, 2), 16);
+          g = parseInt(hex.substring(2, 4), 16);
+          b = parseInt(hex.substring(4, 6), 16);
+        }
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        const saturation = max === 0 ? 0 : (max - min) / max;
+        return brightness < 150 && (saturation < 0.3 || brightness < 80);
+      }
+      
+      const rgbMatch = color.match(/^rgba?\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*[\d.]+)?\)$/);
+      if (rgbMatch) {
+        const r = parseInt(rgbMatch[1], 10);
+        const g = parseInt(rgbMatch[2], 10);
+        const b = parseInt(rgbMatch[3], 10);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        const saturation = max === 0 ? 0 : (max - min) / max;
+        return brightness < 150 && (saturation < 0.3 || brightness < 80);
+      }
+      
+      return false;
+    };
+
+    const traverse = (element: HTMLElement, parentHasLightBg: boolean) => {
+      let currentHasLightBg = parentHasLightBg;
+      
+      // Check inline background color
+      const bg = element.style.backgroundColor || element.style.background;
+      if (bg && isColorLight(bg)) {
+        currentHasLightBg = true;
+        // Force the element's base text color to black/dark so children default to dark
+        element.style.color = '#000000';
+      }
+      
+      // Check inline text color
+      const fg = element.style.color;
+      if (fg) {
+        if (isColorDark(fg)) {
+          if (!currentHasLightBg) {
+            // We are on dark page background, so this dark text should adapt (inherit page foreground)
+            element.style.color = 'inherit';
+          } else {
+            // We are inside a light background container, force it to be black/dark
+            element.style.color = '#000000';
+          }
+        }
+      }
+      
+      // Recursively traverse children
+      for (let i = 0; i < element.children.length; i++) {
+        traverse(element.children[i] as HTMLElement, currentHasLightBg);
+      }
+    };
     
-    return match;
-  });
+    traverse(doc.body, false);
+    return doc.body.innerHTML;
+  } catch (error) {
+    console.error('Error parsing/cleaning blog content', error);
+    return html;
+  }
 };
 
 export default function BlogPostPage() {
@@ -71,6 +150,11 @@ export default function BlogPostPage() {
   
   const [blog, setBlog] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const fetchBlog = async () => {
@@ -182,7 +266,7 @@ export default function BlogPostPage() {
             <div 
               className="blog-content" 
               dangerouslySetInnerHTML={{ 
-                __html: cleanBlogContent(blog.content) 
+                __html: mounted ? cleanBlogContent(blog.content) : blog.content 
               }} 
             />
           </article>
