@@ -278,9 +278,7 @@
   max-width: 100% !important;
   margin: 2rem 0;
   border-collapse: collapse;
-  display: block;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  table-layout: auto !important;
 }
 
 .blog-content iframe,
@@ -295,6 +293,18 @@
   border: 1px solid var(--color-border);
   padding: 0.75rem 1rem;
   text-align: left;
+  word-break: break-word !important;
+  white-space: normal !important;
+}
+
+@media (max-width: 768px) {
+  .blog-content table {
+    margin: 1rem 0 !important;
+  }
+  .blog-content th, .blog-content td {
+    padding: 0.4rem 0.5rem !important;
+    font-size: 0.8rem !important;
+  }
 }
 
 .blog-content th {
