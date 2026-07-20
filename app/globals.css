@@ -184,6 +184,12 @@
 .blog-content {
   font-size: 1.125rem;
   line-height: 1.8;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+.blog-content * {
+  max-width: 100% !important;
+  box-sizing: border-box;
 }
 .blog-content h1, .blog-content h2, .blog-content h3, .blog-content h4 {
   color: var(--color-foreground);
@@ -268,9 +274,21 @@
 }
 
 .blog-content table {
-  width: 100%;
+  width: 100% !important;
+  max-width: 100% !important;
   margin: 2rem 0;
   border-collapse: collapse;
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.blog-content iframe,
+.blog-content video {
+  max-width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 16/9;
+  border-radius: 1rem;
 }
 
 .blog-content th, .blog-content td {
