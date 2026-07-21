@@ -102,38 +102,82 @@ const cleanBlogContent = (html: string) => {
       return false;
     };
 
-    const traverse = (element: HTMLElement, parentHasLightBg: boolean) => {
+    const traverse = (element: HTMLElement, parentHasLightBg: boolean, isInsideQuickAnswer: boolean) => {
+      const isQuickAnswer = element.classList.contains('quick-answer');
+      const currentIsQuickAnswer = isInsideQuickAnswer || isQuickAnswer;
       let currentHasLightBg = parentHasLightBg;
+
+      // 1. Strip troublesome MS Word inline layout & typography properties that break responsiveness
+      element.style.removeProperty('position');
+      element.style.removeProperty('transform');
+      element.style.removeProperty('top');
+      element.style.removeProperty('bottom');
+      element.style.removeProperty('left');
+      element.style.removeProperty('right');
+      element.style.removeProperty('font-size');
+      element.style.removeProperty('font-family');
+      element.style.removeProperty('line-height');
+      element.style.removeProperty('min-width');
+      element.style.removeProperty('min-height');
       
-      // Check inline background color
-      const bg = element.style.backgroundColor || element.style.background;
-      if (bg && isColorLight(bg)) {
-        currentHasLightBg = true;
-        // Force the element's base text color to black/dark so children default to dark
-        element.style.color = '#000000';
+      // Strip negative margins or fixed margins from MS Word text
+      const marginTop = element.style.marginTop;
+      if (marginTop && (marginTop.startsWith('-') || parseInt(marginTop) > 50)) {
+        element.style.removeProperty('margin-top');
+      }
+      const marginBottom = element.style.marginBottom;
+      if (marginBottom && (marginBottom.startsWith('-') || parseInt(marginBottom) > 50)) {
+        element.style.removeProperty('margin-bottom');
+      }
+
+      // Strip fixed width/height on non-table elements (let CSS handle 100% max-width)
+      const tagName = element.tagName.toLowerCase();
+      if (tagName !== 'table' && tagName !== 'iframe' && tagName !== 'video') {
+        if (element.style.width && !element.style.width.endsWith('%')) {
+          element.style.removeProperty('width');
+        }
+        if (element.style.height && !element.style.height.endsWith('%')) {
+          element.style.removeProperty('height');
+        }
       }
       
-      // Check inline text color
-      const fg = element.style.color;
-      if (fg) {
-        if (isColorDark(fg)) {
-          if (!currentHasLightBg) {
-            // We are on dark page background, so this dark text should adapt (inherit page foreground)
-            element.style.color = 'inherit';
+      if (!currentIsQuickAnswer) {
+        // Check inline background color
+        const bg = element.style.backgroundColor || element.style.background;
+        if (bg && isColorLight(bg)) {
+          // If it's a text element like span/p/h1/h2 with inline white background pasted from Word, strip it!
+          if (['span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong', 'em', 'b', 'i', 'a'].includes(tagName)) {
+            element.style.removeProperty('background-color');
+            element.style.removeProperty('background');
           } else {
-            // We are inside a light background container, force it to be black/dark
+            currentHasLightBg = true;
             element.style.color = '#000000';
           }
         }
+        
+        // Check inline text color
+        const fg = element.style.color;
+        if (fg) {
+          if (isColorDark(fg)) {
+            if (!currentHasLightBg) {
+              element.style.color = 'inherit';
+            } else {
+              element.style.color = '#000000';
+            }
+          }
+        }
+      } else {
+        // Inside quick answer box: ensure text is white/light
+        element.style.color = '#ffffff';
       }
       
       // Recursively traverse children
       for (let i = 0; i < element.children.length; i++) {
-        traverse(element.children[i] as HTMLElement, currentHasLightBg);
+        traverse(element.children[i] as HTMLElement, currentHasLightBg, currentIsQuickAnswer);
       }
     };
     
-    traverse(doc.body, false);
+    traverse(doc.body, false, false);
     return doc.body.innerHTML;
   } catch (error) {
     console.error('Error parsing/cleaning blog content', error);

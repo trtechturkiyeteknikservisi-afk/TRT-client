@@ -28,7 +28,7 @@ export function StickyContact() {
   ];
 
   return (
-    <div className="fixed bottom-6 left-6 z-[100] flex flex-col-reverse items-center gap-4">
+    <div className="floating-whatsapp fixed bottom-6 left-6 z-[100] flex flex-col-reverse items-center gap-4">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
