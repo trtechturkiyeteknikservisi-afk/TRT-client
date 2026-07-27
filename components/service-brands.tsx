@@ -8,7 +8,7 @@ const brandsData: Record<string, string[]> = {
   phone: ['Apple', 'Samsung', 'Xiaomi', 'Huawei', 'Oppo', 'Vivo', 'Realme', 'Google', 'OnePlus', 'Motorola', 'Sony', 'Asus'],
   laptop: ['Apple', 'Dell', 'HP', 'Lenovo', 'Asus', 'Acer', 'MSI', 'Toshiba', 'Microsoft', 'Razer', 'Gigabyte', 'Alienware'],
   robot: ['Xiaomi', 'Roborock', 'Viomi', 'Dreame', 'Ecovacs', 'iRobot', 'Samsung', 'Lydsto', 'Proscenic', 'Roidmi'],
-  watch: ['Rolex', 'Omega', 'Tissot', 'Seiko', 'Casio', 'Apple', 'Samsung', 'Huawei', 'Garmin', 'Fossil', 'Tag Heuer', 'Cartier'],
+  watch: ['Apple', 'Samsung', 'Huawei', 'Garmin', 'Xiaomi', 'Honor', 'Oppo', 'Google Pixel', 'OnePlus', 'Amazfit', 'Fitbit', 'Suunto', 'Polar'],
   tablet: ['Apple', 'Samsung', 'Huawei', 'Lenovo', 'Microsoft', 'Xiaomi', 'Amazon', 'Google', 'Honor'],
   headphones: ['Apple', 'Sony', 'Bose', 'JBL', 'Sennheiser', 'Beats', 'Marshall', 'Harman Kardon', 'Audio-Technica', 'Skullcandy']
 };
