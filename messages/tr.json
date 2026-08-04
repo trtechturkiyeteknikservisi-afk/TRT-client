@@ -275,6 +275,8 @@
     "title": "Teknik Bilgiler ve Haberler",
     "desc": "Uzmanlarımızdan ipuçlarını, bakım kılavuzlarını ve en son teknoloji haberlerini keşfedin.",
     "read_more": "Tam Makaleyi Oku",
+    "load_more": "Daha Fazla Göster",
+    "loading_more": "Daha fazla makale yükleniyor...",
     "category": "Onarım",
     "no_blogs": "Şu anda blog yazısı bulunmamaktadır.",
     "repair_now": "Şimdi Onar"

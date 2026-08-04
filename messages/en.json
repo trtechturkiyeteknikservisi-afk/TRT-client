@@ -273,6 +273,8 @@
     "title": "Technical Insights & News",
     "desc": "Discover tips, maintenance guides, and the latest technology news from our experts.",
     "read_more": "Read Full Article",
+    "load_more": "Load More",
+    "loading_more": "Loading more articles...",
     "category": "Repair",
     "no_blogs": "No blog posts available at the moment.",
     "repair_now": "Repair Now"

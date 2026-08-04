@@ -386,6 +386,60 @@
   color: #ffffff !important;
 }
 
+/* Dark mode contrast adaptations for blog content */
+.dark .blog-content h1 {
+  color: var(--color-foreground);
+}
+
+.dark .blog-content h2 {
+  color: #C084FC;
+}
+
+.dark .blog-content h3, 
+.dark .blog-content h4 {
+  color: #E5E7EB;
+}
+
+.dark .blog-content p,
+.dark .blog-content li,
+.dark .blog-content p strong,
+.dark .blog-content strong {
+  color: var(--color-foreground);
+}
+
+.dark .blog-content a {
+  color: #60A5FA;
+}
+
+.dark .blog-content blockquote {
+  background-color: rgba(91, 33, 182, 0.25);
+  color: #E5E7EB;
+  border-left-color: #C084FC;
+}
+
+.dark .blog-content th, 
+.dark .blog-content td {
+  border-color: var(--color-border);
+}
+
+/* Map dark inline text colors to high-contrast light colors in dark mode */
+.dark .blog-content [style*="color: #000000"],
+.dark .blog-content [style*="color: #000"],
+.dark .blog-content [style*="color: rgb(0, 0, 0)"],
+.dark .blog-content [style*="color: black"] {
+  color: #FFFFFF !important;
+}
+
+.dark .blog-content [style*="color: #374151"],
+.dark .blog-content [style*="color: rgb(55, 65, 81)"] {
+  color: #E5E7EB !important;
+}
+
+.dark .blog-content [style*="color: #5B21B6"],
+.dark .blog-content [style*="color: rgb(91, 33, 182)"] {
+  color: #C084FC !important;
+}
+
 @media (max-width: 768px) {
   .blog-content {
     padding: 0 16px;
