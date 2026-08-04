@@ -41,7 +41,12 @@ export default function JoditEditor({ value, onChange, placeholder, direction = 
           toolbarAdaptive: false,
           askBeforePasteHTML: false,
           askBeforePasteFromWord: false,
-          defaultActionOnPaste: 'insert_clear_html' as any,
+          defaultActionOnPaste: (Jodit.constants ? Jodit.constants.INSERT_AS_HTML : 'insert_as_html') as any,
+          cleanHTML: {
+            fillEmptyParagraph: false,
+            replaceOldTags: false as const,
+            removeEmptyElements: false
+          },
           buttons: [
             'source', '|',
             'bold', 'italic', 'underline', 'strikethrough', '|',

@@ -13,7 +13,7 @@ const cleanBlogContent = (html: string) => {
   try {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
-    
+
     const isColorLight = (colorStr: string): boolean => {
       const color = colorStr.trim().toLowerCase();
       if (!color) return false;
@@ -39,7 +39,7 @@ const cleanBlogContent = (html: string) => {
           b = parseInt(hex.substring(4, 6), 16);
         }
         const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-        return brightness > 150;
+        return brightness > 220;
       }
       
       const rgbMatch = color.match(/^rgba?\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*[\d.]+)?\)$/);
@@ -48,66 +48,26 @@ const cleanBlogContent = (html: string) => {
         const g = parseInt(rgbMatch[2], 10);
         const b = parseInt(rgbMatch[3], 10);
         const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-        return brightness > 150;
-      }
-      
-      const hslMatch = color.match(/^hsla?\((\d+)\s*,\s*(\d+)%\s*,\s*(\d+)%(?:\s*,\s*[\d.]+)?\)$/);
-      if (hslMatch) {
-        const lightness = parseInt(hslMatch[3], 10);
-        return lightness > 60;
+        return brightness > 220;
       }
       
       return false;
     };
 
-    const isColorDark = (colorStr: string): boolean => {
-      const color = colorStr.trim().toLowerCase();
-      if (!color) return false;
-      
-      const darkNames = ['black', 'darkgray', 'dimgray', 'gray', 'slategray', 'darkslategray', 'navy', 'darkblue', 'purple', 'indigo'];
-      if (darkNames.includes(color)) return true;
-      
-      const hexMatch = color.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/);
-      if (hexMatch) {
-        const hex = hexMatch[1];
-        let r = 0, g = 0, b = 0;
-        if (hex.length === 3) {
-          r = parseInt(hex[0] + hex[0], 16);
-          g = parseInt(hex[1] + hex[1], 16);
-          b = parseInt(hex[2] + hex[2], 16);
-        } else {
-          r = parseInt(hex.substring(0, 2), 16);
-          g = parseInt(hex.substring(2, 4), 16);
-          b = parseInt(hex.substring(4, 6), 16);
-        }
-        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-        const max = Math.max(r, g, b);
-        const min = Math.min(r, g, b);
-        const saturation = max === 0 ? 0 : (max - min) / max;
-        return brightness < 150 && (saturation < 0.3 || brightness < 80);
-      }
-      
-      const rgbMatch = color.match(/^rgba?\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*[\d.]+)?\)$/);
-      if (rgbMatch) {
-        const r = parseInt(rgbMatch[1], 10);
-        const g = parseInt(rgbMatch[2], 10);
-        const b = parseInt(rgbMatch[3], 10);
-        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-        const max = Math.max(r, g, b);
-        const min = Math.min(r, g, b);
-        const saturation = max === 0 ? 0 : (max - min) / max;
-        return brightness < 150 && (saturation < 0.3 || brightness < 80);
-      }
-      
-      return false;
-    };
-
-    const traverse = (element: HTMLElement, parentHasLightBg: boolean, isInsideQuickAnswer: boolean) => {
+    const traverse = (element: HTMLElement, isInsideQuickAnswer: boolean) => {
       const isQuickAnswer = element.classList.contains('quick-answer');
       const currentIsQuickAnswer = isInsideQuickAnswer || isQuickAnswer;
-      let currentHasLightBg = parentHasLightBg;
 
-      // 1. Strip troublesome MS Word inline layout & typography properties that break responsiveness
+      // Convert legacy <font color="..."> attributes to inline style color
+      if (element.hasAttribute('color')) {
+        const fontColor = element.getAttribute('color');
+        if (fontColor && !element.style.color) {
+          element.style.color = fontColor;
+        }
+        element.removeAttribute('color');
+      }
+
+      // Strip troublesome MS Word inline layout properties that break responsiveness
       element.style.removeProperty('position');
       element.style.removeProperty('transform');
       element.style.removeProperty('top');
@@ -130,9 +90,9 @@ const cleanBlogContent = (html: string) => {
         element.style.removeProperty('margin-bottom');
       }
 
-      // Strip fixed width/height on non-table elements (let CSS handle 100% max-width)
+      // Strip fixed width/height on non-table elements (let CSS handle max-width)
       const tagName = element.tagName.toLowerCase();
-      if (tagName !== 'table' && tagName !== 'iframe' && tagName !== 'video') {
+      if (tagName !== 'table' && tagName !== 'iframe' && tagName !== 'video' && tagName !== 'td' && tagName !== 'th') {
         if (element.style.width && !element.style.width.endsWith('%')) {
           element.style.removeProperty('width');
         }
@@ -142,30 +102,15 @@ const cleanBlogContent = (html: string) => {
       }
       
       if (!currentIsQuickAnswer) {
-        // Check inline background color
+        // Strip white text-highlight shading on text runs (spans, p, bold, etc.) pasted from Word
         const bg = element.style.backgroundColor || element.style.background;
         if (bg && isColorLight(bg)) {
-          // If it's a text element like span/p/h1/h2 with inline white background pasted from Word, strip it!
-          if (['span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong', 'em', 'b', 'i', 'a'].includes(tagName)) {
+          if (['span', 'p', 'strong', 'em', 'b', 'i', 'font'].includes(tagName)) {
             element.style.removeProperty('background-color');
             element.style.removeProperty('background');
-          } else {
-            currentHasLightBg = true;
-            element.style.color = '#000000';
           }
         }
-        
-        // Check inline text color
-        const fg = element.style.color;
-        if (fg) {
-          if (isColorDark(fg)) {
-            if (!currentHasLightBg) {
-              element.style.color = 'inherit';
-            } else {
-              element.style.color = '#000000';
-            }
-          }
-        }
+        // Note: Inline font text colors (element.style.color) are KEPT AS-IS!
       } else {
         // Inside quick answer box: ensure text is white/light
         element.style.color = '#ffffff';
@@ -173,11 +118,11 @@ const cleanBlogContent = (html: string) => {
       
       // Recursively traverse children
       for (let i = 0; i < element.children.length; i++) {
-        traverse(element.children[i] as HTMLElement, currentHasLightBg, currentIsQuickAnswer);
+        traverse(element.children[i] as HTMLElement, currentIsQuickAnswer);
       }
     };
     
-    traverse(doc.body, false, false);
+    traverse(doc.body, false);
     return doc.body.innerHTML;
   } catch (error) {
     console.error('Error parsing/cleaning blog content', error);
