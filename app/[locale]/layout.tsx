@@ -22,14 +22,18 @@ const almarai = Almarai({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://trtservis.com'),
   title: {
     default: "TRT | Professional Repair Service in Turkey",
     template: "%s"
   },
-  description: "Specialized repair for smartphones, laptops, robot vacuums, and luxury watches. 20+ years of experience in technical service.",
-  keywords: ["phone repair", "laptop repair", "robot vacuum repair", "watch repair", "technical service", "Turkey", "Bursa"],
+  description: "Specialized repair for smartphones, laptops, robot vacuums, and smart watches. 20+ years of experience in technical service.",
+  keywords: ["telefon tamiri", "laptop tamiri", "robot süpürge tamiri", "akıllı saat tamiri", "tablet tamiri", "phone repair", "laptop repair", "teknik servis", "Turkey", "Bursa", "iPhone tamiri", "Android tamiri"],
   authors: [{ name: "TRT Team" }],
   creator: "TRT",
+  alternates: {
+    canonical: '/',
+  },
 };
 
 export const viewport: Viewport = {
@@ -55,14 +59,15 @@ export default async function RootLayout(props: {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     "name": "TRT Technical Service",
-    "image": "https://trt-service.com/logo.png",
-    "@id": "https://trt-service.com",
-    "url": "https://trt-service.com",
+    "image": "https://trtservis.com/day-logo.png",
+    "@id": "https://trtservis.com",
+    "url": "https://trtservis.com",
     "telephone": "+908508401505",
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "Bursa, Turkey",
-      "addressLocality": "Bursa",
+      "streetAddress": "Ulu, Kıbrıs Şehitleri Cd. DANACIOGLU APT NO: 73A",
+      "addressLocality": "Osmangazi/Bursa",
+      "postalCode": "16220",
       "addressCountry": "TR"
     },
     "geo": {
@@ -75,7 +80,12 @@ export default async function RootLayout(props: {
       "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
       "opens": "09:00",
       "closes": "19:00"
-    }
+    },
+    "sameAs": [
+      "https://www.instagram.com/trtservis",
+      "https://www.tiktok.com/@trtservis",
+      "https://www.youtube.com/@TRTech"
+    ]
   };
 
   return (

@@ -10,9 +10,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       const blog = await res.json();
       const cleanDescription = blog.content ? blog.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...' : '';
       return {
-        title: `${blog.title} | TRT`,
+        title: `${blog.title} | TRT Teknik Servis`,
         description: cleanDescription,
-        keywords: `${blog.category || 'repair'}, TRT blog, ${blog.title.split(' ').join(', ')}`,
+        keywords: `${blog.category || 'tamir'}, TRT blog, ${blog.title}`,
+        alternates: {
+          canonical: `/${locale}/blog/${slug}`,
+        },
       };
     }
   } catch (error) {

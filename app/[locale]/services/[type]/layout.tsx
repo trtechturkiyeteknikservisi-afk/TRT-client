@@ -8,10 +8,16 @@ export async function generateMetadata({ params }: { params: Promise<{ type: str
   
   const t = await getTranslations({ locale, namespace: 'ServiceDetails' });
   
+  const serviceTitle = t(`${serviceKey}.title`);
+  const serviceDesc = t(`${serviceKey}.description`);
+  
   return {
-    title: `${t(`${serviceKey}.title`)} | TRT`,
-    description: t(`${serviceKey}.description`),
-    keywords: `${serviceKey} repair, ${t(`${serviceKey}.title`)}, TRT services`,
+    title: `${serviceTitle} | TRT Teknik Servis`,
+    description: serviceDesc,
+    keywords: `${serviceTitle}, ${serviceKey} tamiri, ${serviceKey} repair, TRT teknik servis, Bursa`,
+    alternates: {
+      canonical: `/${locale}/services/${type}`,
+    },
   };
 }
 
