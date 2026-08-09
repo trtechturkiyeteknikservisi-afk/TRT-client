@@ -252,12 +252,14 @@ export default function BlogPostPage() {
           )}
 
           <article className="max-w-none">
-            <div 
-              className="blog-content" 
-              dangerouslySetInnerHTML={{ 
-                __html: mounted ? cleanBlogContent(blog.content) : blog.content 
-              }} 
-            />
+            <div className="blog-article-card bg-white text-black rounded-2xl p-6 md:p-10 shadow-xl border border-gray-200/80 my-8">
+              <div 
+                className="blog-content" 
+                dangerouslySetInnerHTML={{ 
+                  __html: mounted ? cleanBlogContent(blog.content) : blog.content 
+                }} 
+              />
+            </div>
           </article>
 
           {/* Sidebar-like interactions */}

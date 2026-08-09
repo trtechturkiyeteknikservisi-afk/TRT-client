@@ -180,7 +180,20 @@
   display: none !important;
 }
 
-/* Blog content styles for rendering WYSIWYG HTML */
+/* Blog article fixed white reading card & content styles */
+.blog-article-card,
+.blog-content {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+  box-sizing: border-box;
+}
+
+.dark .blog-article-card,
+.dark .blog-content {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+}
+
 .blog-content {
   width: 100%;
   max-width: 960px;
@@ -189,6 +202,8 @@
   box-sizing: border-box;
   overflow-wrap: anywhere;
   word-wrap: break-word;
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
 }
 
 .blog-content * {
@@ -205,7 +220,7 @@
   margin-right: auto;
   border-radius: 1rem;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  border: 1px solid var(--color-border);
+  border: 1px solid #E5E7EB;
 }
 
 .blog-content .article-cover,
@@ -226,7 +241,7 @@
   margin: 20px 0 12px !important;
   line-height: 1.4;
   text-align: center;
-  color: var(--color-primary);
+  color: #5B21B6 !important;
   font-weight: 700;
 }
 
@@ -235,7 +250,7 @@
   line-height: 1.25;
   text-align: center;
   overflow-wrap: anywhere;
-  color: #000000;
+  color: #000000 !important;
   font-weight: 850;
   margin-top: 2rem;
   margin-bottom: 1.5rem;
@@ -245,7 +260,7 @@
 .blog-content h2 {
   font-size: clamp(24px, 3vw, 34px);
   line-height: 1.35;
-  color: #5B21B6;
+  color: #5B21B6 !important;
   font-weight: 850;
   margin-top: 2rem;
   margin-bottom: 1rem;
@@ -256,7 +271,7 @@
 .blog-content h3 {
   font-size: clamp(20px, 2.5vw, 26px);
   line-height: 1.4;
-  color: #374151;
+  color: #374151 !important;
   font-weight: 800;
   margin-top: 1.75rem;
   margin-bottom: 0.75rem;
@@ -265,7 +280,7 @@
 .blog-content h4 {
   font-size: clamp(18px, 2vw, 22px);
   line-height: 1.4;
-  color: #374151;
+  color: #374151 !important;
   font-weight: 800;
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;
@@ -275,7 +290,7 @@
 .blog-content li {
   font-size: clamp(17px, 1.5vw, 20px);
   line-height: 1.9;
-  color: #000000;
+  color: #000000 !important;
 }
 
 .blog-content p {
@@ -284,8 +299,9 @@
 }
 
 .blog-content p strong, 
-.blog-content strong {
-  color: #000000;
+.blog-content strong,
+.blog-content b {
+  color: #000000 !important;
   font-weight: 700;
 }
 
@@ -293,6 +309,7 @@
   margin-top: 0;
   margin-bottom: 1.5rem;
   padding-left: 1.75rem;
+  color: #000000 !important;
 }
 
 .blog-content ul {
@@ -306,10 +323,11 @@
 .blog-content li {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
+  color: #000000 !important;
 }
 
 .blog-content li::marker {
-  color: #D9232E;
+  color: #D9232E !important;
   font-weight: bold;
 }
 
@@ -318,16 +336,16 @@
   border-left: 4px solid #5B21B6;
   padding-left: 1.25rem;
   margin: 2rem 0;
-  color: #374151;
-  background-color: #F3E8FF;
+  color: #374151 !important;
+  background-color: #F3E8FF !important;
   border-radius: 0 0.5rem 0.5rem 0;
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
 }
 
 .blog-content a {
-  color: #0563C1;
-  text-decoration: underline;
+  color: #0563C1 !important;
+  text-decoration: underline !important;
   font-weight: 600;
   transition: opacity 0.2s;
 }
@@ -342,33 +360,36 @@
   margin: 2rem 0;
   border-collapse: collapse;
   table-layout: auto !important;
-}
-
-.blog-content iframe,
-.blog-content video {
-  max-width: 100% !important;
-  height: auto !important;
-  aspect-ratio: 16/9;
-  border-radius: 1rem;
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
 }
 
 .blog-content th, .blog-content td {
-  border: 1px solid #E5E7EB;
+  border: 1px solid #E5E7EB !important;
   padding: 0.75rem 1rem;
   text-align: left;
   word-break: break-word !important;
   white-space: normal !important;
+  color: #000000;
 }
 
 .blog-content th {
-  background-color: #5B21B6;
-  color: #FFFFFF;
+  background-color: #5B21B6 !important;
+  color: #FFFFFF !important;
   font-weight: 700;
+}
+
+.blog-content th * {
+  color: #FFFFFF !important;
+}
+
+.blog-content td {
+  color: #000000;
 }
 
 .blog-content hr {
   border: 0;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid #E5E7EB;
   margin: 3rem 0;
 }
 
@@ -386,58 +407,21 @@
   color: #ffffff !important;
 }
 
-/* Dark mode contrast adaptations for blog content */
-.dark .blog-content h1 {
-  color: var(--color-foreground);
-}
-
-.dark .blog-content h2 {
-  color: #C084FC;
-}
-
-.dark .blog-content h3, 
-.dark .blog-content h4 {
-  color: #E5E7EB;
-}
-
-.dark .blog-content p,
-.dark .blog-content li,
-.dark .blog-content p strong,
-.dark .blog-content strong {
-  color: var(--color-foreground);
-}
-
-.dark .blog-content a {
-  color: #60A5FA;
-}
-
-.dark .blog-content blockquote {
-  background-color: rgba(91, 33, 182, 0.25);
-  color: #E5E7EB;
-  border-left-color: #C084FC;
-}
-
-.dark .blog-content th, 
-.dark .blog-content td {
-  border-color: var(--color-border);
-}
-
-/* Map dark inline text colors to high-contrast light colors in dark mode */
-.dark .blog-content [style*="color: #000000"],
-.dark .blog-content [style*="color: #000"],
-.dark .blog-content [style*="color: rgb(0, 0, 0)"],
-.dark .blog-content [style*="color: black"] {
-  color: #FFFFFF !important;
-}
-
-.dark .blog-content [style*="color: #374151"],
-.dark .blog-content [style*="color: rgb(55, 65, 81)"] {
-  color: #E5E7EB !important;
-}
-
-.dark .blog-content [style*="color: #5B21B6"],
-.dark .blog-content [style*="color: rgb(91, 33, 182)"] {
-  color: #C084FC !important;
+/* Ensure global dark mode rules do NOT turn blog article content white */
+.dark .blog-article-card p,
+.dark .blog-article-card span,
+.dark .blog-article-card div,
+.dark .blog-article-card td,
+.dark .blog-article-card li,
+.dark .blog-article-card h1,
+.dark .blog-article-card h3,
+.dark .blog-article-card h4,
+.dark .blog-article-card strong,
+.dark .blog-article-card b,
+.dark .blog-article-card i,
+.dark .blog-article-card em {
+  /* Prevent dark mode global rules from forcing white text */
+  color: inherit;
 }
 
 @media (max-width: 768px) {
