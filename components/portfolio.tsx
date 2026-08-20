@@ -187,9 +187,14 @@ const richPredefinedWorks = [
 interface PortfolioProps {
   limit?: number;
   showTitle?: boolean;
+  initialWorks?: any[];
 }
 
-export function Portfolio({ limit = 6, showTitle = true }: PortfolioProps) {
+export function Portfolio({
+  limit = 6,
+  showTitle = true,
+  initialWorks = [],
+}: PortfolioProps) {
   const t = useTranslations('Portfolio');
   const locale = useLocale();
   const isRTL = locale === 'ar';
