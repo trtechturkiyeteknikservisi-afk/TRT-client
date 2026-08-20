@@ -11,35 +11,83 @@ type BlogPost = BlogPostData & {
   description?: string;
 };
 
+function isBlogPost(data: unknown): data is BlogPost {
+  return Boolean(
+    data &&
+      typeof data === 'object' &&
+      'title' in data &&
+      typeof data.title === 'string' &&
+      'content' in data &&
+      typeof data.content === 'string'
+  );
+}
+
+function hasBlogList(
+  data: unknown
+): data is { blogs: unknown[] } {
+  return Boolean(
+    data &&
+      typeof data === 'object' &&
+      'blogs' in data &&
+      Array.isArray(data.blogs)
+  );
+}
+
 async function getBlog(
   slug: string,
   locale: string
 ): Promise<BlogPost | null> {
-  const response = await fetch(
-    `${API_URL}/blogs/${encodeURIComponent(slug)}?locale=${locale}`,
-    {
-      next: { revalidate: 300 },
-      signal: AbortSignal.timeout(5000),
-    }
-  );
-
-  if (response.status === 404) {
-    return null;
-  }
-
-  if (!response.ok) {
-    throw new Error(
-      `Blog request failed with status ${response.status}`
+  try {
+    const response = await fetch(
+      `${API_URL}/blogs/${encodeURIComponent(slug)}?locale=${locale}`,
+      {
+        next: { revalidate: 300 },
+        signal: AbortSignal.timeout(5000),
+      }
     );
+
+    if (response.ok) {
+      const data = await response.json();
+
+      if (isBlogPost(data)) {
+        return data;
+      }
+    }
+  } catch (error) {
+    console.error('Failed to fetch blog by slug', error);
   }
 
-  const data = await response.json();
+  try {
+    const response = await fetch(
+      `${API_URL}/blogs?locale=${locale}`,
+      {
+        next: { revalidate: 300 },
+        signal: AbortSignal.timeout(5000),
+      }
+    );
 
-  if (!data || !data.title) {
-    return null;
+    if (!response.ok) {
+      throw new Error(
+        `Blogs fallback request failed with status ${response.status}`
+      );
+    }
+
+    const data: unknown = await response.json();
+    const blogs: unknown[] = Array.isArray(data)
+      ? data
+      : hasBlogList(data)
+        ? data.blogs
+        : [];
+
+    return (
+      blogs.find(
+        (blog): blog is BlogPost =>
+          isBlogPost(blog) && blog.slug === slug
+      ) || null
+    );
+  } catch (error) {
+    throw new Error('Failed to fetch blog post', { cause: error });
   }
-
-  return data;
 }
 
 function createDescription(blog: BlogPost): string {
