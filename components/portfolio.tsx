@@ -187,14 +187,9 @@ const richPredefinedWorks = [
 interface PortfolioProps {
   limit?: number;
   showTitle?: boolean;
-  initialWorks?: any[];
 }
 
-export function Portfolio({
-  limit = 6,
-  showTitle = true,
-  initialWorks = [],
-}: PortfolioProps) {
+export function Portfolio({ limit = 6, showTitle = true }: PortfolioProps) {
   const t = useTranslations('Portfolio');
   const locale = useLocale();
   const isRTL = locale === 'ar';
@@ -214,27 +209,7 @@ export function Portfolio({
   ];
 
   useEffect(() => {
-  const fetchWorks = async () => {
-    try {
-      const API_URL =
-        process.env.NEXT_PUBLIC_API_URL ||
-        "http://localhost:5000/api";
-
-      let data = initialWorks;
-
-      if (!data || data.length === 0) {
-        const response = await fetch(
-          `${API_URL}/content/portfolio?locale=${locale}`
-        );
-
-        if (!response.ok) {
-          throw new Error(
-            `Portfolio request failed: ${response.status}`
-          );
-        }
-
-        data = await response.json();
-      }
+    const fetchWorks = async () => {
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
         const response = await fetch(`${API_URL}/content/portfolio?locale=${locale}`);
@@ -355,11 +330,12 @@ export function Portfolio({
         // Set works directly from the database response
         setWorks(parsedWorks || []);
       } catch (error) {
-  console.warn('Error fetching portfolio database', error);
-}
+        console.warn('Error fetching portfolio database', error);
+        setWorks([]);
+      }
     };
     fetchWorks();
-  }, [locale, initialWorks]);
+  }, [locale]);
 
   // Utility to convert rich predefined data based on active locale
   const getPredefinedWorksLocal = (): WorkItem[] => {
