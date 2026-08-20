@@ -14,6 +14,8 @@ import { Footer } from "@/components/footer";
 import { SettingsProvider } from "@/components/settings-provider";
 import { DeferredAnalytics } from "@/components/deferred-analytics";
 
+const SITE_URL = "https://www.trtservis.com";
+
 const almarai = Almarai({
   subsets: ["arabic"],
   weight: ["300", "400", "700", "800"],
@@ -23,7 +25,7 @@ const almarai = Almarai({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://trtservis.com'),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "TRT | Professional Repair Service in Turkey",
     template: "%s"
@@ -32,9 +34,6 @@ export const metadata: Metadata = {
   keywords: ["telefon tamiri", "laptop tamiri", "robot süpürge tamiri", "akıllı saat tamiri", "tablet tamiri", "phone repair", "laptop repair", "teknik servis", "Turkey", "Bursa", "iPhone tamiri", "Android tamiri"],
   authors: [{ name: "TRT Team" }],
   creator: "TRT",
-  alternates: {
-    canonical: '/',
-  },
 };
 
 export const viewport: Viewport = {
@@ -60,9 +59,9 @@ export default async function RootLayout(props: {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     "name": "TRT Technical Service",
-    "image": "https://trtservis.com/day-logo.png",
-    "@id": "https://trtservis.com",
-    "url": "https://trtservis.com",
+    "image": `${SITE_URL}/day-logo.png`,
+    "@id": SITE_URL,
+    "url": SITE_URL,
     "telephone": "+908508401505",
     "address": {
       "@type": "PostalAddress",
