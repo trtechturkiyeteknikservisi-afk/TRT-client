@@ -187,7 +187,7 @@ const richPredefinedWorks = [
 interface PortfolioProps {
   limit?: number;
   showTitle?: boolean;
-  initialWorks?: any[];
+  initialWorks?: WorkItem[];
 }
 
 export function Portfolio({
@@ -199,7 +199,7 @@ export function Portfolio({
   const locale = useLocale();
   const isRTL = locale === 'ar';
   
-  const [works, setWorks] = useState<WorkItem[]>([]);
+  const [works, setWorks] = useState<WorkItem[]>(initialWorks);
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [selectedWork, setSelectedWork] = useState<WorkItem | null>(null);
 
