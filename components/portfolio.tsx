@@ -335,9 +335,8 @@ export function Portfolio({
         // Set works directly from the database response
         setWorks(parsedWorks || []);
       } catch (error) {
-        console.warn('Error fetching portfolio database', error);
-        setWorks([]);
-      }
+  console.warn('Error fetching portfolio database', error);
+}
     };
     fetchWorks();
   }, [locale]);
