@@ -33,13 +33,23 @@ function hasBlogList(
   );
 }
 
+function normalizeSlug(slug: string): string {
+  try {
+    return decodeURIComponent(slug);
+  } catch {
+    return slug;
+  }
+}
+
 async function getBlog(
   slug: string,
   locale: string
 ): Promise<BlogPost | null> {
+  const normalizedSlug = normalizeSlug(slug);
+
   try {
     const response = await fetch(
-      `${API_URL}/blogs/${encodeURIComponent(slug)}?locale=${locale}`,
+      `${API_URL}/blogs/${encodeURIComponent(normalizedSlug)}?locale=${locale}`,
       {
         next: { revalidate: 300 },
         signal: AbortSignal.timeout(5000),
@@ -82,7 +92,7 @@ async function getBlog(
     return (
       blogs.find(
         (blog): blog is BlogPost =>
-          isBlogPost(blog) && blog.slug === slug
+          isBlogPost(blog) && blog.slug === normalizedSlug
       ) || null
     );
   } catch (error) {
@@ -118,7 +128,8 @@ export async function generateMetadata({
     slug: string;
   }>;
 }): Promise<Metadata> {
-  const { locale, slug } = await params;
+  const { locale, slug: rawSlug } = await params;
+  const slug = normalizeSlug(rawSlug);
   const blog = await getBlog(slug, locale);
 
   if (!blog) {
@@ -180,7 +191,8 @@ export default async function BlogPostPage({
     slug: string;
   }>;
 }) {
-  const { locale, slug } = await params;
+  const { locale, slug: rawSlug } = await params;
+  const slug = normalizeSlug(rawSlug);
 
   const blog = await getBlog(slug, locale);
 
