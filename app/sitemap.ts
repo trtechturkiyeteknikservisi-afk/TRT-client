@@ -16,7 +16,6 @@ const STATIC_ROUTES: Array<{
   { path: '/our-works', priority: 0.8, changefreq: 'weekly' },
   { path: '/blog', priority: 0.8, changefreq: 'daily' },
   { path: '/policies', priority: 0.5, changefreq: 'yearly' },
-  { path: '/linktree', priority: 0.8, changefreq: 'monthly' },
 ];
 
 const SERVICE_TYPES = [
