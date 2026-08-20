@@ -187,7 +187,7 @@ const richPredefinedWorks = [
 interface PortfolioProps {
   limit?: number;
   showTitle?: boolean;
-  initialWorks?: WorkItem[];
+  initialWorks?: any[];
 }
 
 export function Portfolio({
@@ -199,7 +199,7 @@ export function Portfolio({
   const locale = useLocale();
   const isRTL = locale === 'ar';
   
-  const [works, setWorks] = useState<WorkItem[]>(initialWorks);
+  const [works, setWorks] = useState<WorkItem[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [selectedWork, setSelectedWork] = useState<WorkItem | null>(null);
 
@@ -214,7 +214,27 @@ export function Portfolio({
   ];
 
   useEffect(() => {
-    const fetchWorks = async () => {
+  const fetchWorks = async () => {
+    try {
+      const API_URL =
+        process.env.NEXT_PUBLIC_API_URL ||
+        "http://localhost:5000/api";
+
+      let data = initialWorks;
+
+      if (!data || data.length === 0) {
+        const response = await fetch(
+          `${API_URL}/content/portfolio?locale=${locale}`
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Portfolio request failed: ${response.status}`
+          );
+        }
+
+        data = await response.json();
+      }
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
         const response = await fetch(`${API_URL}/content/portfolio?locale=${locale}`);
@@ -339,7 +359,7 @@ export function Portfolio({
 }
     };
     fetchWorks();
-  }, [locale]);
+  }, [locale, initialWorks]);
 
   // Utility to convert rich predefined data based on active locale
   const getPredefinedWorksLocal = (): WorkItem[] => {
