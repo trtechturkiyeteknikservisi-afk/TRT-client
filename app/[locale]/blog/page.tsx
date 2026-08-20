@@ -1,200 +1,248 @@
-import React from 'react';
-import { Link } from '@/i18n/routing';
-import { Calendar, User, ArrowRight, Newspaper } from 'lucide-react';
-import {
-  getTranslations,
-  getFormatter,
-  setRequestLocale,
-} from 'next-intl/server';
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import BlogPostClient, { BlogPostData } from './blog-post-client';
 
-type BlogItem = {
-  id: number | string;
-  slug: string;
-  title: string;
-  content: string;
-  image?: string;
-  date: string;
-  author?: string;
+const SITE_URL = 'https://www.trtservis.com';
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+type BlogPost = BlogPostData & {
+  updatedAt?: string;
+  description?: string;
 };
 
-const stripHtml = (html: string) => {
-  if (!html) return '';
+function isBlogPost(data: unknown): data is BlogPost {
+  return Boolean(
+    data &&
+      typeof data === 'object' &&
+      'title' in data &&
+      typeof data.title === 'string' &&
+      'content' in data &&
+      typeof data.content === 'string'
+  );
+}
 
-  return html
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/\s+/g, ' ')
-    .trim();
-};
+function hasBlogList(
+  data: unknown
+): data is { blogs: unknown[] } {
+  return Boolean(
+    data &&
+      typeof data === 'object' &&
+      'blogs' in data &&
+      Array.isArray(data.blogs)
+  );
+}
 
-async function fetchBlogs(locale: string): Promise<BlogItem[]> {
-  const API_URL =
-    process.env.NEXT_PUBLIC_API_URL ||
-    'http://localhost:5000/api';
-
+async function getBlog(
+  slug: string,
+  locale: string
+): Promise<BlogPost | null> {
   try {
-    const res = await fetch(
-      `${API_URL}/blogs?locale=${locale}`,
+    const response = await fetch(
+      `${API_URL}/blogs/${encodeURIComponent(slug)}?locale=${locale}`,
       {
         next: { revalidate: 300 },
-        signal: AbortSignal.timeout(10000),
+        signal: AbortSignal.timeout(5000),
       }
     );
 
-    if (!res.ok) {
+    if (response.ok) {
+      const data = await response.json();
+
+      if (isBlogPost(data)) {
+        return data;
+      }
+    }
+  } catch (error) {
+    console.error('Failed to fetch blog by slug', error);
+  }
+
+  try {
+    const response = await fetch(
+      `${API_URL}/blogs?locale=${locale}`,
+      {
+        next: { revalidate: 300 },
+        signal: AbortSignal.timeout(5000),
+      }
+    );
+
+    if (!response.ok) {
       throw new Error(
-        `Blogs request failed with status ${res.status}`
+        `Blogs fallback request failed with status ${response.status}`
       );
     }
 
-    const data = await res.json();
+    const data: unknown = await response.json();
+    const blogs: unknown[] = Array.isArray(data)
+      ? data
+      : hasBlogList(data)
+        ? data.blogs
+        : [];
 
-    let blogs: BlogItem[];
-
-    if (data && Array.isArray(data.blogs)) {
-      blogs = data.blogs;
-    } else if (Array.isArray(data)) {
-      blogs = data;
-    } else {
-      throw new Error('Unexpected blogs response format');
-    }
-
-    return blogs.filter(
-      (blog) =>
-        blog &&
-        blog.slug &&
-        blog.title &&
-        !['test', 'fgrt'].includes(
-          blog.slug.toLowerCase()
-        )
+    return (
+      blogs.find(
+        (blog): blog is BlogPost =>
+          isBlogPost(blog) && blog.slug === slug
+      ) || null
     );
   } catch (error) {
-    console.error(
-      'Error fetching blogs for server rendering',
-      error
-    );
-
-    throw error;
+    throw new Error('Failed to fetch blog post', { cause: error });
   }
 }
 
-export default async function BlogPage({
+function createDescription(blog: BlogPost): string {
+  if (blog.description) {
+    return blog.description.trim().slice(0, 160);
+  }
+
+  if (!blog.content) {
+    return blog.title;
+  }
+
+  return blog.content
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 160);
+}
+
+export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ locale: string }>;
+  params: Promise<{
+    locale: string;
+    slug: string;
+  }>;
+}): Promise<Metadata> {
+  const { locale, slug } = await params;
+  const blog = await getBlog(slug, locale);
+
+  if (!blog) {
+    return {
+      title: 'Post Not Found | TRT Teknik Servis',
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+
+  const description = createDescription(blog);
+  const canonicalPath = `/${locale}/blog/${slug}`;
+
+  return {
+    title: `${blog.title} | TRT Teknik Servis`,
+    description,
+
+    alternates: {
+      canonical: canonicalPath,
+      languages: {
+        tr: `/tr/blog/${slug}`,
+        en: `/en/blog/${slug}`,
+        ar: `/ar/blog/${slug}`,
+        'x-default': `/tr/blog/${slug}`,
+      },
+    },
+
+    openGraph: {
+      type: 'article',
+      title: blog.title,
+      description,
+      url: `${SITE_URL}${canonicalPath}`,
+      images: blog.image
+        ? [
+            {
+              url: blog.image,
+              alt: blog.title,
+            },
+          ]
+        : undefined,
+    },
+
+    twitter: {
+      card: 'summary_large_image',
+      title: blog.title,
+      description,
+      images: blog.image ? [blog.image] : undefined,
+    },
+  };
+}
+
+export default async function BlogPostPage({
+  params,
+}: {
+  params: Promise<{
+    locale: string;
+    slug: string;
+  }>;
 }) {
-  const { locale } = await params;
+  const { locale, slug } = await params;
 
-  setRequestLocale(locale);
+  const blog = await getBlog(slug, locale);
 
-  const t = await getTranslations('Blog');
-  const format = await getFormatter();
+  if (!blog) {
+    notFound();
+  }
 
-  const blogs = await fetchBlogs(locale);
+  const canonicalUrl =
+    `${SITE_URL}/${locale}/blog/${slug}`;
+
+  const articleJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: blog.title,
+    description: createDescription(blog),
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': canonicalUrl,
+    },
+    url: canonicalUrl,
+    ...(blog.image
+      ? {
+          image: [blog.image],
+        }
+      : {}),
+    ...(blog.date
+      ? {
+          datePublished: blog.date,
+        }
+      : {}),
+    ...(blog.updatedAt
+      ? {
+          dateModified: blog.updatedAt,
+        }
+      : {}),
+    author: {
+      '@type': 'Organization',
+      name: blog.author || 'TRT Team',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'TRT Technical Service',
+      logo: {
+        '@type': 'ImageObject',
+        url: `${SITE_URL}/day-logo.png`,
+      },
+    },
+  };
 
   return (
-    <main className="min-h-screen bg-background">
-      <section className="pt-8 md:pt-12 pb-24 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center mb-16">
-            <div className="inline-flex p-3 bg-primary/10 rounded-xl text-primary mb-6">
-              <Newspaper size={32} />
-            </div>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(articleJsonLd).replace(
+            /</g,
+            '\\u003c'
+          ),
+        }}
+      />
 
-            <h1 className="text-4xl md:text-5xl font-black mb-6 tracking-tighter text-foreground uppercase">
-              {t('title')}
-            </h1>
-
-            <p className="text-lg text-muted-foreground leading-relaxed font-medium">
-              {t('desc')}
-            </p>
-          </div>
-
-          {blogs.length === 0 ? (
-            <div className="text-center py-20 bg-card rounded-xl border border-border/50">
-              <p className="text-muted-foreground font-bold">
-                {t('no_blogs')}
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {blogs.map((blog, index) => (
-                <Link
-                  key={`${blog.id}-${index}`}
-                  href={`/blog/${blog.slug}`}
-                  className="block h-full cursor-pointer group"
-                >
-                  <article className="bg-card rounded-xl border border-border/50 overflow-hidden group hover:shadow-2xl hover:shadow-primary/5 transition-all flex flex-col h-full">
-                    <div className="relative w-full aspect-video overflow-hidden">
-                      {blog.image && (
-                        <img
-                          src={blog.image}
-                          alt={blog.title}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                          loading={
-                            index < 3 ? 'eager' : 'lazy'
-                          }
-                        />
-                      )}
-                    </div>
-
-                    <div className="p-10 flex flex-col flex-grow">
-                      <div className="flex items-center space-x-4 text-xs font-bold text-muted-foreground/60 mb-6 uppercase tracking-widest">
-                        <div className="flex items-center space-x-2">
-                          <Calendar
-                            size={14}
-                            className="text-primary"
-                          />
-
-                          <span>
-                            {format.dateTime(
-                              new Date(blog.date),
-                              {
-                                day: 'numeric',
-                                month: 'long',
-                                year: 'numeric',
-                              }
-                            )}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center space-x-2">
-                          <User
-                            size={14}
-                            className="text-primary"
-                          />
-
-                          <span>
-                            {blog.author || 'TRT Team'}
-                          </span>
-                        </div>
-                      </div>
-
-                      <h2 className="text-2xl font-black mb-4 line-clamp-2 group-hover:text-primary transition-colors leading-tight tracking-tight">
-                        {blog.title}
-                      </h2>
-
-                      <p className="text-muted-foreground mb-8 line-clamp-3 leading-relaxed font-medium flex-grow">
-                        {stripHtml(blog.content)}
-                      </p>
-
-                      <div className="inline-flex items-center text-primary font-black uppercase tracking-widest group/btn group-hover:gap-4 transition-all">
-                        <span>{t('read_more')}</span>
-
-                        <ArrowRight
-                          size={20}
-                          className="ml-2 transition-transform group-hover:translate-x-1"
-                        />
-                      </div>
-                    </div>
-                  </article>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-    </main>
+      <BlogPostClient blog={blog} />
+    </>
   );
 }
