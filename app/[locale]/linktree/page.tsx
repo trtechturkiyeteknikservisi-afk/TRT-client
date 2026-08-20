@@ -1,27 +1,58 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { LinktreePage } from "@/components/linktree-page";
 
 export function generateStaticParams() {
-  return [{ locale: 'en' }, { locale: 'ar' }, { locale: 'tr' }];
+  return [
+    { locale: 'en' },
+    { locale: 'ar' },
+    { locale: 'tr' }
+  ];
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'Linktree' });
+
+  const t = await getTranslations({
+    locale,
+    namespace: 'Linktree'
+  });
+
   return {
     title: t('title'),
     description: t('description'),
-    keywords: ["TRT", "technical service", "repair links", "TRT Servis", "smartphone repair", "laptop repair", "robot vacuum repair", "luxury watch repair"],
+    keywords: [
+      "TRT",
+      "technical service",
+      "repair links",
+      "TRT Servis",
+      "smartphone repair",
+      "laptop repair",
+      "robot vacuum repair",
+      "luxury watch repair",
+    ],
+    robots: {
+      index: false,
+      follow: true,
+    },
   };
 }
 
-export default async function LinktreePageContainer({ params }: { params: Promise<{ locale: string }> }) {
+export default async function LinktreePageContainer({
+  params
+}: {
+  params: Promise<{ locale: string }>;
+}) {
   const { locale } = await params;
+
   setRequestLocale(locale);
+
   const t = await getTranslations('Linktree');
 
-  // Statically compile translations into an object to pass down to our interactive client page
   const translations = {
     title: t('title'),
     description: t('description'),
@@ -57,5 +88,10 @@ export default async function LinktreePageContainer({ params }: { params: Promis
     linkedin_desc: t('linkedin_desc'),
   };
 
-  return <LinktreePage translations={translations} locale={locale} />;
+  return (
+    <LinktreePage
+      translations={translations}
+      locale={locale}
+    />
+  );
 }
