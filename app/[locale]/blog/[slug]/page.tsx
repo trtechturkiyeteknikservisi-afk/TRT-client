@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import BlogPostClient, { BlogPostData } from './blog-post-client';
 
 const SITE_URL = 'https://www.trtservis.com';
+
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -41,6 +42,18 @@ function normalizeSlug(slug: string): string {
   }
 }
 
+/**
+ * Builds the absolute URL for a blog post.
+ * Example:
+ * https://www.trtservis.com/tr/blog/example-post
+ */
+function buildBlogUrl(
+  locale: string,
+  slug: string
+): string {
+  return `${SITE_URL}/${locale}/blog/${slug}`;
+}
+
 async function getBlog(
   slug: string,
   locale: string
@@ -49,7 +62,9 @@ async function getBlog(
 
   try {
     const response = await fetch(
-      `${API_URL}/blogs/${encodeURIComponent(normalizedSlug)}?locale=${locale}`,
+      `${API_URL}/blogs/${encodeURIComponent(
+        normalizedSlug
+      )}?locale=${locale}`,
       {
         next: { revalidate: 300 },
         signal: AbortSignal.timeout(5000),
@@ -64,7 +79,10 @@ async function getBlog(
       }
     }
   } catch (error) {
-    console.error('Failed to fetch blog by slug', error);
+    console.error(
+      'Failed to fetch blog by slug',
+      error
+    );
   }
 
   try {
@@ -83,6 +101,7 @@ async function getBlog(
     }
 
     const data: unknown = await response.json();
+
     const blogs: unknown[] = Array.isArray(data)
       ? data
       : hasBlogList(data)
@@ -92,17 +111,25 @@ async function getBlog(
     return (
       blogs.find(
         (blog): blog is BlogPost =>
-          isBlogPost(blog) && blog.slug === normalizedSlug
+          isBlogPost(blog) &&
+          blog.slug === normalizedSlug
       ) || null
     );
   } catch (error) {
-    throw new Error('Failed to fetch blog post', { cause: error });
+    throw new Error(
+      'Failed to fetch blog post',
+      { cause: error }
+    );
   }
 }
 
-function createDescription(blog: BlogPost): string {
+function createDescription(
+  blog: BlogPost
+): string {
   if (blog.description) {
-    return blog.description.trim().slice(0, 160);
+    return blog.description
+      .trim()
+      .slice(0, 160);
   }
 
   if (!blog.content) {
@@ -128,13 +155,23 @@ export async function generateMetadata({
     slug: string;
   }>;
 }): Promise<Metadata> {
-  const { locale, slug: rawSlug } = await params;
+  const {
+    locale,
+    slug: rawSlug,
+  } = await params;
+
   const slug = normalizeSlug(rawSlug);
-  const blog = await getBlog(slug, locale);
+
+  const blog = await getBlog(
+    slug,
+    locale
+  );
 
   if (!blog) {
     return {
-      title: 'Post Not Found | TRT Teknik Servis',
+      title:
+        'Post Not Found | TRT Teknik Servis',
+
       robots: {
         index: false,
         follow: false,
@@ -142,28 +179,57 @@ export async function generateMetadata({
     };
   }
 
-  const description = createDescription(blog);
-  const canonicalPath = `/${locale}/blog/${slug}`;
+  const description =
+    createDescription(blog);
+
+  /*
+   * IMPORTANT:
+   * Use absolute URLs for canonical and hreflang.
+   *
+   * For example, the Turkish page:
+   *
+   * https://www.trtservis.com/tr/blog/...
+   *
+   * explicitly declares itself as canonical.
+   */
+  const canonicalUrl =
+    buildBlogUrl(locale, slug);
+
+  const turkishUrl =
+    buildBlogUrl('tr', slug);
+
+  const englishUrl =
+    buildBlogUrl('en', slug);
+
+  const arabicUrl =
+    buildBlogUrl('ar', slug);
 
   return {
-    title: `${blog.title} | TRT Teknik Servis`,
+    title:
+      `${blog.title} | TRT Teknik Servis`,
+
     description,
 
     alternates: {
-      canonical: canonicalPath,
+      canonical: canonicalUrl,
+
       languages: {
-        tr: `/tr/blog/${slug}`,
-        en: `/en/blog/${slug}`,
-        ar: `/ar/blog/${slug}`,
-        'x-default': `/tr/blog/${slug}`,
+        tr: turkishUrl,
+        en: englishUrl,
+        ar: arabicUrl,
+        'x-default': turkishUrl,
       },
     },
 
     openGraph: {
       type: 'article',
+
       title: blog.title,
+
       description,
-      url: `${SITE_URL}${canonicalPath}`,
+
+      url: canonicalUrl,
+
       images: blog.image
         ? [
             {
@@ -176,9 +242,14 @@ export async function generateMetadata({
 
     twitter: {
       card: 'summary_large_image',
+
       title: blog.title,
+
       description,
-      images: blog.image ? [blog.image] : undefined,
+
+      images: blog.image
+        ? [blog.image]
+        : undefined,
     },
   };
 }
@@ -191,53 +262,98 @@ export default async function BlogPostPage({
     slug: string;
   }>;
 }) {
-  const { locale, slug: rawSlug } = await params;
-  const slug = normalizeSlug(rawSlug);
+  const {
+    locale,
+    slug: rawSlug,
+  } = await params;
 
-  const blog = await getBlog(slug, locale);
+  const slug =
+    normalizeSlug(rawSlug);
+
+  const blog = await getBlog(
+    slug,
+    locale
+  );
 
   if (!blog) {
     notFound();
   }
 
+  /*
+   * Keep structured data URL identical
+   * to the canonical URL.
+   */
   const canonicalUrl =
-    `${SITE_URL}/${locale}/blog/${slug}`;
+    buildBlogUrl(locale, slug);
 
   const articleJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    headline: blog.title,
-    description: createDescription(blog),
+    '@context':
+      'https://schema.org',
+
+    '@type':
+      'BlogPosting',
+
+    headline:
+      blog.title,
+
+    description:
+      createDescription(blog),
+
     mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': canonicalUrl,
+      '@type':
+        'WebPage',
+
+      '@id':
+        canonicalUrl,
     },
-    url: canonicalUrl,
+
+    url:
+      canonicalUrl,
+
     ...(blog.image
       ? {
-          image: [blog.image],
+          image: [
+            blog.image,
+          ],
         }
       : {}),
+
     ...(blog.date
       ? {
-          datePublished: blog.date,
+          datePublished:
+            blog.date,
         }
       : {}),
+
     ...(blog.updatedAt
       ? {
-          dateModified: blog.updatedAt,
+          dateModified:
+            blog.updatedAt,
         }
       : {}),
+
     author: {
-      '@type': 'Organization',
-      name: blog.author || 'TRT Team',
+      '@type':
+        'Organization',
+
+      name:
+        blog.author ||
+        'TRT Team',
     },
+
     publisher: {
-      '@type': 'Organization',
-      name: 'TRT Technical Service',
+      '@type':
+        'Organization',
+
+      name:
+        'TRT Technical Service',
+
       logo: {
-        '@type': 'ImageObject',
-        url: `${SITE_URL}/day-logo.png`,
+        '@type':
+          'ImageObject',
+
+        url:
+          `${SITE_URL}/day-logo.png`,
       },
     },
   };
@@ -247,14 +363,19 @@ export default async function BlogPostPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(articleJsonLd).replace(
-            /</g,
-            '\\u003c'
-          ),
+          __html:
+            JSON.stringify(
+              articleJsonLd
+            ).replace(
+              /</g,
+              '\\u003c'
+            ),
         }}
       />
 
-      <BlogPostClient blog={blog} />
+      <BlogPostClient
+        blog={blog}
+      />
     </>
   );
 }
