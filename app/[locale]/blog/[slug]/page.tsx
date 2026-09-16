@@ -7,9 +7,6 @@ const SITE_URL = 'https://www.trtservis.com';
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
-/*
- * Cache/revalidate the rendered page and API data every 5 minutes.
- */
 export const revalidate = 300;
 
 type BlogPost = BlogPostData & {
@@ -54,14 +51,6 @@ function buildBlogUrl(
   return `${SITE_URL}/${locale}/blog/${slug}`;
 }
 
-/*
- * Fetch a single blog post.
- *
- * IMPORTANT:
- * We intentionally do NOT use AbortSignal.timeout(5000) here.
- * A temporary API response slower than 5 seconds should not
- * automatically kill the page render and cause a 5xx response.
- */
 async function getBlog(
   slug: string,
   locale: string
@@ -70,7 +59,7 @@ async function getBlog(
 
   /*
    * First attempt:
-   * Direct blog endpoint.
+   * Fetch the requested blog directly by slug.
    */
   try {
     const response = await fetch(
@@ -115,10 +104,10 @@ async function getBlog(
 
   /*
    * Fallback:
-   * Fetch the blog list and locate the post by slug.
+   * Fetch the blog list and find the requested slug.
    *
-   * This is especially useful for older/special slugs
-   * containing characters such as ":".
+   * This also helps with older URLs containing
+   * special characters such as ":".
    */
   try {
     const response = await fetch(
@@ -147,6 +136,7 @@ async function getBlog(
     const blog = blogs.find(
       (item): item is BlogPost =>
         isBlogPost(item) &&
+        typeof item.slug === 'string' &&
         normalizeSlug(item.slug) === normalizedSlug
     );
 
@@ -159,13 +149,6 @@ async function getBlog(
       error
     );
 
-    /*
-     * Do not convert a temporary API/server failure
-     * into a false 404.
-     *
-     * Throwing here correctly tells Next.js that
-     * there is a server-side problem.
-     */
     throw new Error(
       'Failed to fetch blog post from API',
       {
@@ -215,11 +198,8 @@ export async function generateMetadata({
   const slug = normalizeSlug(rawSlug);
 
   /*
-   * Build SEO URLs independently from the API.
-   *
-   * This ensures canonical/hreflang can still
-   * be generated correctly even if the API
-   * temporarily has a problem.
+   * Build canonical and hreflang URLs independently
+   * from the API response.
    */
   const canonicalUrl =
     buildBlogUrl(locale, slug);
@@ -253,8 +233,8 @@ export async function generateMetadata({
     );
   } catch (error) {
     /*
-     * Metadata generation must not be the reason
-     * the entire page fails with 5xx.
+     * Do not allow a temporary API problem during
+     * metadata generation to crash the entire page.
      */
     console.error(
       'Metadata blog fetch failed:',
@@ -360,11 +340,6 @@ export default async function BlogPostPage({
       locale
     );
 
-  /*
-   * Only return a real 404 when the API
-   * successfully responds but the article
-   * genuinely does not exist.
-   */
   if (!blog) {
     notFound();
   }
