@@ -1,45 +1,103 @@
-import { NextRequest, NextResponse } from 'next/server';
-import createMiddleware from 'next-intl/middleware';
-import { routing } from './i18n/routing';
+import createNextIntlPlugin from 'next-intl/plugin';
 
-const intlMiddleware = createMiddleware(routing);
+const withNextIntl = createNextIntlPlugin();
 
-export default function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  compress: true,
 
-  // Redirect old portfolio paths to our-works for SEO and backward compatibility
-  const portfolioMatch = pathname.match(/^\/(ar|en|tr)\/portfolio\/?$/);
-  if (portfolioMatch) {
-    const locale = portfolioMatch[1];
-    return NextResponse.redirect(new URL(`/${locale}/our-works`, request.url), 301);
-  }
-  if (pathname === '/portfolio' || pathname === '/portfolio/') {
-    return NextResponse.redirect(new URL(`/our-works`, request.url), 301);
-  }
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'flagcdn.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+    ],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256],
+    qualities: [70, 75],
+    minimumCacheTTL: 86400,
+  },
 
-  // Manual device language detection only for the root path and if no locale cookie is set
-  if (pathname === '/') {
-    const localeCookie = request.cookies.get('NEXT_LOCALE')?.value;
-    
-    if (!localeCookie) {
-      const acceptLang = request.headers.get('accept-language')?.toLowerCase() || '';
-      
-      // Parse Accept-Language header in order of preference (e.g. "en-US,en;q=0.9,ar;q=0.8,tr;q=0.7")
-      // Extract the 2-letter language codes and filter for our supported locales: tr, ar, en
-      const preferredLocales = acceptLang
-        .split(',')
-        .map(lang => lang.split(';')[0].trim().substring(0, 2))
-        .filter(lang => ['tr', 'ar', 'en'].includes(lang));
+  experimental: {
+    optimizePackageImports: [
+      'framer-motion',
+      'lucide-react',
+      'swiper',
+    ],
+  },
 
-      const detectedLocale = preferredLocales[0] || 'tr'; // Fallback to Turkish 'tr'
-      return NextResponse.redirect(new URL(`/${detectedLocale}`, request.url));
-    }
-  }
+  async headers() {
+    return [
+      {
+        source: '/(.*)\\.(webp|png|jpg|jpeg|gif|svg|ico)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/(.*)\\.(woff|woff2|ttf|otf)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ];
+  },
 
-  return intlMiddleware(request);
-}
-
-export const config = {
-  // Matcher for all paths except static files and internal Next.js paths
-  matcher: ['/((?!api|trpc|_next|_vercel|.*\\..*).*)']
+  async redirects() {
+    return [
+      {
+        source: '/:locale(ar|en|tr)/sitemap.xml',
+        destination: '/sitemap.xml',
+        permanent: true,
+      },
+      {
+        source: '/blog',
+        destination: '/tr/blog',
+        permanent: true,
+      },
+      {
+        source: '/blog/:slug*',
+        destination: '/tr/blog/:slug*',
+        permanent: true,
+      },
+      {
+        source: '/portfolio',
+        destination: '/our-works',
+        permanent: true,
+      },
+      {
+        source: '/:locale(ar|en|tr)/portfolio',
+        destination: '/:locale/our-works',
+        permanent: true,
+      },
+      {
+        source: '/:locale(ar|en|tr)/privacy',
+        destination: '/:locale/policies/privacy',
+        permanent: true,
+      },
+      {
+        source: '/:locale(ar|en|tr)/terms',
+        destination: '/:locale/policies/terms',
+        permanent: true,
+      },
+    ];
+  },
 };
+
+export default withNextIntl(nextConfig);
