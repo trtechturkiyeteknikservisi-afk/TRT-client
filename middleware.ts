@@ -1,103 +1,56 @@
-import createNextIntlPlugin from 'next-intl/plugin';
+import { NextRequest, NextResponse } from 'next/server';
+import createMiddleware from 'next-intl/middleware';
+import { routing } from './i18n/routing';
 
-const withNextIntl = createNextIntlPlugin();
+const intlMiddleware = createMiddleware(routing);
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  compress: true,
+export default function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
 
-  images: {
-    formats: ['image/avif', 'image/webp'],
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'flagcdn.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'res.cloudinary.com',
-      },
-    ],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256],
-    qualities: [70, 75],
-    minimumCacheTTL: 86400,
-  },
+  // Redirect old portfolio paths to our-works for SEO and backward compatibility
+  const portfolioMatch = pathname.match(/^\/(ar|en|tr)\/portfolio\/?$/);
 
-  experimental: {
-    optimizePackageImports: [
-      'framer-motion',
-      'lucide-react',
-      'swiper',
-    ],
-  },
+  if (portfolioMatch) {
+    const locale = portfolioMatch[1];
 
-  async headers() {
-    return [
-      {
-        source: '/(.*)\\.(webp|png|jpg|jpeg|gif|svg|ico)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-      {
-        source: '/(.*)\\.(woff|woff2|ttf|otf)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-    ];
-  },
+    return NextResponse.redirect(
+      new URL(`/${locale}/our-works`, request.url),
+      301
+    );
+  }
 
-  async redirects() {
-    return [
-      {
-        source: '/:locale(ar|en|tr)/sitemap.xml',
-        destination: '/sitemap.xml',
-        permanent: true,
-      },
-      {
-        source: '/blog',
-        destination: '/tr/blog',
-        permanent: true,
-      },
-      {
-        source: '/blog/:slug*',
-        destination: '/tr/blog/:slug*',
-        permanent: true,
-      },
-      {
-        source: '/portfolio',
-        destination: '/our-works',
-        permanent: true,
-      },
-      {
-        source: '/:locale(ar|en|tr)/portfolio',
-        destination: '/:locale/our-works',
-        permanent: true,
-      },
-      {
-        source: '/:locale(ar|en|tr)/privacy',
-        destination: '/:locale/policies/privacy',
-        permanent: true,
-      },
-      {
-        source: '/:locale(ar|en|tr)/terms',
-        destination: '/:locale/policies/terms',
-        permanent: true,
-      },
-    ];
-  },
+  if (pathname === '/portfolio' || pathname === '/portfolio/') {
+    return NextResponse.redirect(
+      new URL('/our-works', request.url),
+      301
+    );
+  }
+
+  // Manual device language detection only for the root path
+  // and only if no locale cookie is set
+  if (pathname === '/') {
+    const localeCookie = request.cookies.get('NEXT_LOCALE')?.value;
+
+    if (!localeCookie) {
+      const acceptLang =
+        request.headers.get('accept-language')?.toLowerCase() || '';
+
+      const preferredLocales = acceptLang
+        .split(',')
+        .map((lang) => lang.split(';')[0].trim().substring(0, 2))
+        .filter((lang) => ['tr', 'ar', 'en'].includes(lang));
+
+      const detectedLocale = preferredLocales[0] || 'tr';
+
+      return NextResponse.redirect(
+        new URL(`/${detectedLocale}`, request.url)
+      );
+    }
+  }
+
+  return intlMiddleware(request);
+}
+
+export const config = {
+  matcher: ['/((?!api|trpc|_next|_vercel|.*\\..*).*)'],
 };
-
-export default withNextIntl(nextConfig);
