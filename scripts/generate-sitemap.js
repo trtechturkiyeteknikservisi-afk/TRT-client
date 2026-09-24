@@ -49,6 +49,8 @@ async function generateSitemap() {
     { path: '/our-works', priority: 0.8 },
     { path: '/blog', priority: 0.8 },
     { path: '/services', priority: 0.9 },
+    { path: '/pricing', priority: 0.95 },
+    { path: '/tamir-fiyatlari', priority: 0.95 },
     { path: '/policies', priority: 0.5 },
     { path: '/linktree', priority: 0.8 },
   ];

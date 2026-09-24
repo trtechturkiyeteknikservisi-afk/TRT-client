@@ -3,13 +3,13 @@
 import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Link } from '@/i18n/routing';
-import { Smartphone, Laptop, Watch, Zap, CheckCircle2, ShieldCheck, Clock, Award, TabletIcon as Tablet, Headphones, Phone } from 'lucide-react';
+import { Smartphone, Laptop, Watch, Zap, CheckCircle2, ShieldCheck, Clock, Award, TabletIcon as Tablet, Headphones, Phone, Sparkles, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { TrustBadges } from "@/components/trust-badges";
 import { ContactForm } from "@/components/contact-form";
 import { ServiceBrands } from "@/components/service-brands";
 import axios from 'axios';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { AppleHeadphonesIcon, RobotVacuumIcon } from '@/components/social-icons';
 
 const serviceAssets: Record<string, any> = {
@@ -41,16 +41,19 @@ const serviceAssets: Record<string, any> = {
 
 export default function ServicePage() {
   const t = useTranslations('ServiceDetails');
+  const locale = useLocale();
   const params = useParams() as any;
   const type = params.type as string;
   const [customImage, setCustomImage] = useState<string | null>(null);
+  const [dynamicService, setDynamicService] = useState<any>(null);
   const [supportPhone, setSupportPhone] = useState<string>("0850 840 15 05");
   const assets = serviceAssets[type] || serviceAssets.phone;
 
   React.useEffect(() => {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+
     const fetchBanner = async () => {
       try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
         const response = await axios.get(`${API_URL}/banners`);
         const fetchedBanners = response.data as any[];
         const match = fetchedBanners.find(b => b.link && b.link.includes(type));
@@ -71,9 +74,22 @@ export default function ServicePage() {
         console.error("Failed to fetch settings", err);
       }
     };
+    const fetchServiceData = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/content/services/${type}?locale=${locale}`);
+        const serviceData = res?.data as any;
+        if (serviceData) {
+          setDynamicService(serviceData);
+          if (serviceData.image) setCustomImage(serviceData.image);
+        }
+      } catch (err) {
+        // Fallback safely to defaults
+      }
+    };
     fetchBanner();
     fetchSettings();
-  }, [type]);
+    fetchServiceData();
+  }, [type, locale]);
 
   // Type-safe translation access
   const validKeys = ['phone', 'laptop', 'robot', 'watch', 'tablet', 'headphones'];
@@ -86,6 +102,12 @@ export default function ServicePage() {
   } catch (e) {
     console.error('Failed to load features:', e);
   }
+
+  const displayTitle = dynamicService?.title || t(`${serviceKey}.title`);
+  const displayDescription = dynamicService?.description || t(`${serviceKey}.description`);
+  const displayFeatures = (dynamicService?.features && dynamicService.features.length > 0)
+    ? dynamicService.features
+    : features;
 
   return (
     <main className="min-h-screen bg-background">
@@ -121,7 +143,7 @@ export default function ServicePage() {
             transition={{ delay: 0.1 }}
             className="text-4xl md:text-5xl font-black mb-4 uppercase tracking-tighter"
           >
-            {t(`${serviceKey}.title`)}
+            {displayTitle}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -129,7 +151,7 @@ export default function ServicePage() {
             transition={{ delay: 0.2 }}
             className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto font-medium"
           >
-            {t(`${serviceKey}.description`)}
+            {displayDescription}
           </motion.p>
 
           <motion.div
@@ -166,6 +188,33 @@ export default function ServicePage() {
       </section>
       <ServiceBrands type={serviceKey} />
       
+      {/* Repair Price List CTA Banner */}
+      <section className="py-8 bg-card/40 border-b border-border/50">
+        <div className="container mx-auto px-4">
+          <div className="p-6 md:p-8 rounded-2xl bg-gradient-to-r from-primary/15 via-card to-card border-2 border-primary/20 flex flex-col md:flex-row items-center justify-between gap-6 shadow-lg">
+            <div className="space-y-2 text-center md:text-left">
+              <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-primary bg-primary/10 px-3 py-1 rounded-full">
+                <Sparkles size={14} />
+                <span>2026 GÜNCEL FİYAT LİSTESİ</span>
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-black tracking-tight">
+                {type === 'phone' ? 'iPhone & Akıllı Telefon Ekran ve Tamir Fiyatları' : 'Cihazınız İçin Güncel Tamir Fiyatlarını İnceleyin'}
+              </h3>
+              <p className="text-sm text-muted-foreground font-semibold max-w-xl">
+                Orijinal parça garantisi, 30 dakikada hızlı servis ve şeffaf fiyat tablomuzu şimdi keşfedin.
+              </p>
+            </div>
+            <Link
+              href="/tamir-fiyatlari"
+              className="shrink-0 px-6 py-3.5 rounded-xl bg-primary text-primary-foreground font-black text-xs uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md flex items-center gap-2"
+            >
+              <span>Fiyat Listesini Gör</span>
+              <ArrowRight size={16} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <section className="py-24">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
@@ -174,7 +223,7 @@ export default function ServicePage() {
               <div>
                 <h2 className="text-3xl font-bold mb-8">{t('features_title')}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {features.map((feature: string, index: number) => (
+                  {displayFeatures.map((feature: string, index: number) => (
                     <motion.div
                       key={feature}
                       initial={{ opacity: 0, x: -20 }}

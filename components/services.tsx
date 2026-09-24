@@ -1,12 +1,16 @@
 'use client';
 
-import React from 'react';
-import { Smartphone, Laptop, Watch, Zap, ArrowRight, TabletIcon as Tablet, Headphones } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { 
+  Smartphone, Laptop, Watch, Zap, ArrowRight, TabletIcon as Tablet, Headphones,
+  Tv, Camera, Gamepad2, Printer, Server, Wrench, ShieldCheck, Cpu, HardDrive, Battery, Speaker
+} from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useTranslations, useLocale } from 'next-intl';
 import { AppleHeadphonesIcon, RobotVacuumIcon } from './social-icons';
+import axios from 'axios';
 
 interface ServiceItem {
   title: string;
@@ -17,12 +21,34 @@ interface ServiceItem {
   customIcon?: string;
 }
 
+const serviceIconMap: Record<string, any> = {
+  Smartphone,
+  Laptop,
+  RobotVacuumIcon,
+  Watch,
+  Tablet,
+  AppleHeadphonesIcon,
+  Headphones,
+  Zap,
+  Tv,
+  Camera,
+  Gamepad2,
+  Printer,
+  Server,
+  Wrench,
+  ShieldCheck,
+  Cpu,
+  HardDrive,
+  Battery,
+  Speaker
+};
+
 export function Services() {
   const t = useTranslations('Services');
   const locale = useLocale();
   const isRTL = locale === 'ar';
   
-  const services: ServiceItem[] = [
+  const defaultServices: ServiceItem[] = [
     {
       title: t('phone'),
       description: t('phone_desc'),
@@ -66,6 +92,33 @@ export function Services() {
       link: '/services/kulaklik'
     }
   ];
+
+  const [services, setServices] = useState<ServiceItem[]>(defaultServices);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchServices = async () => {
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+        const res = await axios.get(`${API_URL}/content/services?locale=${locale}`);
+        if (mounted && Array.isArray(res.data)) {
+          const mapped: ServiceItem[] = res.data.map((item: any) => ({
+            title: item.title,
+            description: item.description,
+            icon: serviceIconMap[item.icon] || (item.icon === 'RobotVacuumIcon' ? RobotVacuumIcon : item.icon === 'AppleHeadphonesIcon' ? AppleHeadphonesIcon : Smartphone),
+            customIcon: item.custom_icon,
+            color: item.color || 'bg-primary/10 text-primary',
+            link: item.link || `/services/${item.slug}`
+          }));
+          setServices(mapped);
+        }
+      } catch (err) {
+        // Fallback safely to defaultServices
+      }
+    };
+    fetchServices();
+    return () => { mounted = false; };
+  }, [locale]);
 
   return (
     <section id="services" className="py-16 md:py-32 bg-background relative overflow-hidden">

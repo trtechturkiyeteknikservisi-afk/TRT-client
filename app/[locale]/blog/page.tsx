@@ -12,12 +12,11 @@ async function fetchBlogs(locale: string) {
   try {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
     const res = await fetch(`${API_URL}/blogs?locale=${locale}`, {
-      next: { revalidate: 300 }, // Revalidate every 5 minutes
+      next: { revalidate: 300 }, 
       signal: AbortSignal.timeout(5000),
     });
     if (res.ok) {
       const data = await res.json();
-      // Handle both paginated and flat responses
       if (data && Array.isArray(data.blogs)) {
         return data.blogs;
       } else if (Array.isArray(data)) {

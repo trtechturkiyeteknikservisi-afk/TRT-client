@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Link } from '@/i18n/routing';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useTheme } from 'next-themes';
+import axios from 'axios';
 import { cn } from '@/lib/utils';
 import { 
   InstagramIcon, 
@@ -32,22 +33,50 @@ const socialLinks = [
 
 export function Footer() {
   const t = useTranslations('Footer');
+  const locale = useLocale();
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => setMounted(true), []);
+  const defaultServiceLinks = [
+    { name: t('phone_repair'), href: '/services/phone' },
+    { name: t('laptop_repair'), href: '/services/laptop' },
+    { name: t('tablet_repair'), href: '/services/tablet' },
+    { name: t('robot_repair'), href: '/services/robot' },
+    { name: t('watch_repair'), href: '/services/watch' },
+    { name: t('headphones_repair'), href: '/services/kulaklik' },
+    { name: t('pricing_list') || 'Tamir Fiyat Listesi', href: '/tamir-fiyatlari' },
+  ];
+
+  const [serviceLinks, setServiceLinks] = useState(defaultServiceLinks);
+
+  useEffect(() => {
+    setMounted(true);
+    let isMounted = true;
+    const fetchServices = async () => {
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+        const res = await axios.get(`${API_URL}/content/services?locale=${locale}`);
+        if (isMounted && Array.isArray(res.data)) {
+          const links = res.data.map((item: any) => ({
+            name: item.title,
+            href: item.link || `/services/${item.slug}`
+          }));
+          links.push({
+            name: t('pricing_list') || 'Tamir Fiyat Listesi',
+            href: '/tamir-fiyatlari'
+          });
+          setServiceLinks(links);
+        }
+      } catch (e) {}
+    };
+    fetchServices();
+    return () => { isMounted = false; };
+  }, [locale, t]);
 
   const footerLinks = [
     {
       title: t('services'),
-      links: [
-        { name: t('phone_repair'), href: '/services/phone' },
-        { name: t('laptop_repair'), href: '/services/laptop' },
-        { name: t('tablet_repair'), href: '/services/tablet' },
-        { name: t('robot_repair'), href: '/services/robot' },
-        { name: t('watch_repair'), href: '/services/watch' },
-        { name: t('headphones_repair'), href: '/services/kulaklik' },
-      ],
+      links: serviceLinks,
     },
     {
       title: t('company'),

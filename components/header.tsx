@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import axios from 'axios';
 import { useTheme } from 'next-themes';
-import { Sun, Moon, X, Menu, ChevronDown, Smartphone, Laptop, Watch, TabletIcon as Tablet, Gavel, Lock, ShieldCheck, FileText, Truck } from 'lucide-react';
+import { Sun, Moon, X, Menu, ChevronDown, Smartphone, Laptop, Watch, TabletIcon as Tablet, Gavel, Lock, ShieldCheck, FileText, Truck, Wrench, Layers } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
@@ -26,14 +27,59 @@ export function Header() {
     () => false
   );
 
-  const services = [
+  const defaultServices = [
     { name: t('phone_repair'), href: '/services/phone', icon: Smartphone },
     { name: t('laptop_repair'), href: '/services/laptop', icon: Laptop },
     { name: t('robot_repair'), href: '/services/robot', icon: RobotVacuumIcon },
     { name: t('watch_repair'), href: '/services/watch', icon: Watch },
     { name: t('tablet_repair'), href: '/services/tablet', icon: Tablet },
     { name: t('headphones_repair'), href: '/services/kulaklik', icon: AppleHeadphonesIcon },
+    { name: t('pricing'), href: '/tamir-fiyatlari', icon: Wrench },
   ];
+
+  const [services, setServices] = useState<any[]>(defaultServices);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchServices = async () => {
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+        const res = await axios.get(`${API_URL}/content/services?locale=${locale}`);
+        if (isMounted && Array.isArray(res.data)) {
+          const serviceIconMap: Record<string, any> = {
+            Smartphone,
+            Laptop,
+            RobotVacuumIcon,
+            Watch,
+            Tablet,
+            AppleHeadphonesIcon,
+            Wrench
+          };
+
+          const activeList = res.data.map((item: any) => ({
+            name: item.title,
+            href: item.link || `/services/${item.slug}`,
+            icon: serviceIconMap[item.icon] || Layers,
+            customIcon: item.custom_icon || undefined
+          }));
+
+          // Append pricing at the end of the services dropdown
+          activeList.push({
+            name: t('pricing'),
+            href: '/tamir-fiyatlari',
+            icon: Wrench,
+            customIcon: undefined
+          });
+
+          setServices(activeList);
+        }
+      } catch (err) {
+        // Fallback to defaultServices on error
+      }
+    };
+    fetchServices();
+    return () => { isMounted = false; };
+  }, [locale, t]);
 
   const legalPolicies = [
     { name: tFooter('kvkk'), href: '/policies/kvkk', icon: Gavel },
@@ -53,6 +99,7 @@ export function Header() {
       isDropdown: true,
       subItems: services
     },
+    { name: t('pricing'), href: '/tamir-fiyatlari' },
     { name: t('works'), href: '/our-works' },
     { name: t('blog'), href: '/blog' },
     { name: t('merchants'), href: '#', soon: true },
@@ -157,7 +204,7 @@ export function Header() {
                           >
                             <div className="p-2 bg-primary/10 rounded-lg text-primary group-hover/item:bg-primary group-hover/item:text-primary-foreground transition-colors overflow-hidden">
                               {'customIcon' in sub && sub.customIcon ? (
-                                  <Image src={sub.customIcon as string} alt="" width={24} height={24} className="w-[24px] h-[24px] object-contain group-hover/item:brightness-0 group-hover/item:invert" />
+                                  <img src={sub.customIcon as string} alt="" className="w-6 h-6 object-contain group-hover/item:brightness-0 group-hover/item:invert" />
                                 ) : (
                                   <sub.icon size={24} />
                                 )}
@@ -309,7 +356,7 @@ export function Header() {
                             >
                               <div className="w-6 h-6 flex items-center justify-center shrink-0">
                                 {'customIcon' in sub && sub.customIcon ? (
-                                  <Image src={sub.customIcon as string} alt="" width={24} height={24} className="w-full h-full object-contain" />
+                                  <img src={sub.customIcon as string} alt="" className="w-full h-full object-contain" />
                                 ) : (
                                   <sub.icon size={24} className="text-primary animate-in zoom-in-75 duration-200" />
                                 )}

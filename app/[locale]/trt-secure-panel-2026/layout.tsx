@@ -6,7 +6,7 @@ import {
   MessageSquare, BookOpen, Star, HelpCircle, 
   Image as ImageIcon, LogOut, User as UserIcon, 
   Search, Settings, Sun, Moon, BarChart3, ShieldCheck, Images,
-  Menu, X
+  Menu, X, Wrench, Layers
 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useTheme } from 'next-themes';
@@ -79,6 +79,8 @@ export default function AdminLayout({
     { id: 'banners', href: '/trt-secure-panel-2026/banners', name: t('menu_banners') || 'Banners', icon: Images, permission: 'MANAGE_BANNERS' },
     { id: 'verification', href: '/trt-secure-panel-2026/verification', name: t('menu_verification') || 'Official Requests', icon: ShieldCheck, permission: 'MANAGE_VERIFICATIONS' },
     { id: 'policy-terms', href: '/trt-secure-panel-2026/policy-terms', name: t('menu_policy') || 'Policy & Terms', icon: BookOpen, permission: 'MANAGE_SETTINGS' },
+    { id: 'services', href: '/trt-secure-panel-2026/services', name: t('menu_services') || 'Services', icon: Layers, permission: 'MANAGE_SETTINGS' },
+    { id: 'pricing', href: '/trt-secure-panel-2026/pricing', name: t('menu_pricing') || 'Tamir Fiyatları', icon: Wrench, permission: 'MANAGE_SETTINGS' },
     { id: 'settings', href: '/trt-secure-panel-2026/settings', name: t('menu_settings'), icon: Settings, permission: 'MANAGE_SETTINGS' },
   ];
 
@@ -137,7 +139,7 @@ export default function AdminLayout({
       )}
 
       <aside className={cn(
-        "fixed lg:sticky top-0 h-screen w-72 lg:w-64 bg-card border-r border-border/50 flex flex-col shadow-2xl lg:shadow-xl z-50 transition-transform duration-300 ease-in-out lg:translate-x-0",
+        "fixed lg:sticky top-0 h-screen w-72 shrink-0 flex-shrink-0 bg-card border-border/50 rtl:border-l rtl:border-r-0 ltr:border-r flex flex-col shadow-2xl lg:shadow-xl z-50 transition-transform duration-300 ease-in-out lg:translate-x-0",
         locale === 'ar' ? "right-0" : "left-0",
         isSidebarOpen 
           ? "translate-x-0" 
@@ -146,11 +148,11 @@ export default function AdminLayout({
         <div className="p-6 border-b border-border/30">
           <div className="flex items-center justify-between lg:block">
             <Link href="/trt-secure-panel-2026/analytics" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 bg-primary rounded-md flex items-center justify-center shadow-lg shadow-primary/30 group-hover:rotate-6 transition-all duration-500">
+              <div className="w-10 h-10 bg-primary rounded-md flex items-center justify-center shadow-lg shadow-primary/30 group-hover:rotate-6 transition-all duration-500 shrink-0">
                 <span className="text-primary-foreground font-black text-xl">T</span>
               </div>
-              <div className="flex flex-col">
-                <h1 className="text-xl font-black tracking-tighter text-foreground leading-none uppercase">{t('title')}</h1>
+              <div className="flex flex-col min-w-0">
+                <h1 className="text-xl font-black tracking-tighter text-foreground leading-none uppercase truncate">{t('title')}</h1>
                 <p className="text-[8px] font-black uppercase tracking-[0.3em] text-primary mt-1">{t('subtitle')}</p>
               </div>
             </Link>
@@ -181,7 +183,7 @@ export default function AdminLayout({
                 <img 
                   src={`https://flagcdn.com/w40/${l.flag}.png`} 
                   alt={l.code}
-                  className="w-[18px] h-[12px] rounded-sm object-cover border border-border/50 shadow-sm"
+                  className="w-[18px] h-[12px] rounded-sm object-cover border border-border/50 shadow-sm shrink-0"
                 />
                 <span>{l.code}</span>
               </button>
@@ -200,24 +202,29 @@ export default function AdminLayout({
                 key={item.id}
                 href={item.href}
                 className={cn(
-                  "w-full flex items-center justify-between px-4 py-2.5 rounded-md font-bold text-[13px] transition-all duration-300 relative group overflow-hidden",
+                  "w-full flex items-center justify-between px-3.5 py-2.5 rounded-md font-bold text-[13px] transition-all duration-300 relative group overflow-hidden",
                   active 
                     ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" 
                     : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                 )}
               >
-                <div className="flex items-center gap-3 relative z-10">
-                  <item.icon size={18} strokeWidth={active ? 3 : 2.5} className={cn("transition-transform duration-300 group-hover:scale-110", active ? "text-primary-foreground" : "text-muted-foreground group-hover:text-primary")} />
-                  <span className="tracking-tight uppercase">{item.name}</span>
+                <div className="flex items-center gap-3 relative z-10 min-w-0">
+                  <item.icon size={18} strokeWidth={active ? 3 : 2.5} className={cn("shrink-0 transition-transform duration-300 group-hover:scale-110", active ? "text-primary-foreground" : "text-muted-foreground group-hover:text-primary")} />
+                  <span className="tracking-tight uppercase truncate">{item.name}</span>
                 </div>
                 {active && (
                   <motion.div 
                     layoutId="active-nav-dot"
-                    className="w-1.5 h-1.5 rounded-full bg-primary-foreground shadow-sm relative z-10" 
+                    className="w-1.5 h-1.5 rounded-full bg-primary-foreground shadow-sm relative z-10 shrink-0" 
                   />
                 )}
                 {!active && (
-                  <div className="absolute inset-y-0 left-0 w-1 bg-primary -translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
+                  <div className={cn(
+                    "absolute inset-y-0 w-1 bg-primary transition-transform duration-300",
+                    locale === 'ar'
+                      ? "right-0 translate-x-full group-hover:translate-x-0"
+                      : "left-0 -translate-x-full group-hover:translate-x-0"
+                  )} />
                 )}
               </Link>
              );
@@ -228,8 +235,8 @@ export default function AdminLayout({
               href="/"
               className="w-full flex items-center gap-3 px-4 py-3 rounded-md font-black text-[11px] text-primary bg-primary/5 hover:bg-primary hover:text-white transition-all duration-300 uppercase tracking-widest group shadow-sm border border-primary/10"
             >
-              <LogOut className={cn("w-4 h-4 transition-transform group-hover:-translate-x-1", locale === 'ar' ? 'rotate-180 group-hover:translate-x-1' : '')} />
-              <span>{t('back_to_site')}</span>
+              <LogOut className={cn("w-4 h-4 shrink-0 transition-transform group-hover:-translate-x-1", locale === 'ar' ? 'rotate-180 group-hover:translate-x-1' : '')} />
+              <span className="truncate">{t('back_to_site')}</span>
             </Link>
           </div>
         </nav>
@@ -239,9 +246,9 @@ export default function AdminLayout({
             <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0 group hover:rotate-6 transition-transform">
               <UserIcon size={16} strokeWidth={2.5} />
             </div>
-            <div className="flex-grow overflow-hidden">
+            <div className="flex-grow min-w-0 overflow-hidden">
               <p className="text-xs font-black truncate uppercase tracking-tight">{user?.username || t('admin_fallback')}</p>
-              <p className="text-[9px] font-bold text-primary uppercase tracking-[0.1em]">
+              <p className="text-[9px] font-bold text-primary uppercase tracking-[0.1em] truncate">
                 {user?.role === 'admin' ? t('admin_role') : (t('employee_role') || 'Staff')}
               </p>
             </div>
@@ -266,8 +273,8 @@ export default function AdminLayout({
         </div>
       </aside>
 
-      <main className="flex-grow p-4 sm:p-6 lg:p-8 overflow-y-auto">
-        <div className=" mx-auto">
+      <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+        <div className="mx-auto w-full">
            {children}
         </div>
       </main>

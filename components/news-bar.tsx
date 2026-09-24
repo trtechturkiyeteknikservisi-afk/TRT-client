@@ -23,7 +23,7 @@ export function NewsBar() {
   }, []);
 
   useEffect(() => {
-    if (pathname?.includes('/trt-secure-panel-2026')) {
+    if (pathname?.includes('/trt-secure-panel-2026') || settings['news_bar_enabled'] === 'false') {
       setIsVisible(false);
       return;
     }
@@ -36,7 +36,7 @@ export function NewsBar() {
       ? 'Türkiye\'nin Kapsamlı Bakım Merkezi TRT\'nin Resmi Web Sitesine Hoş Geldiniz'
       : 'Welcome to the Official Website of TRT Comprehensive Maintenance Center in Turkey';
       
-    const newsContent = settings[newsKey] || settings['news_bar_en'] || fallbackNews;
+    const newsContent = (settings[newsKey] && settings[newsKey].trim()) ? settings[newsKey] : fallbackNews;
     
     if (newsContent.trim()) {
       setNews(newsContent);
@@ -49,6 +49,9 @@ export function NewsBar() {
   if (!isVisible) return null;
 
   const newsItems = news.split('\n').filter(item => item.trim());
+  const speedSetting = parseInt(settings['news_bar_speed'] || '', 10);
+  const baseSpeed = !isNaN(speedSetting) && speedSetting > 0 ? speedSetting : 45;
+  const currentSpeed = isMobile ? Math.max(20, Math.round(baseSpeed * 0.6)) : baseSpeed;
 
   return (
     <div className="bg-primary text-primary-foreground py-1.5 overflow-hidden scrollbar-hide relative border-b border-white/10 shadow-lg cursor-pointer">
@@ -63,7 +66,7 @@ export function NewsBar() {
  
         {/* Marquee Container */}
         <div className="flex-1 overflow-hidden scrollbar-hide group" dir="ltr">
-          <Marquee speed={isMobile ? 25 : 45} pauseOnHover={true} gradient={false} autoFill={true}>
+          <Marquee speed={currentSpeed} pauseOnHover={true} gradient={false} autoFill={true}>
             <div className="flex items-center gap-20 mr-20">
               {newsItems.map((item, idx) => (
                 <span key={idx} className="text-[10px] font-black uppercase tracking-[0.15em] leading-none flex items-center gap-3">
