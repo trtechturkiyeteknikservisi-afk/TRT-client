@@ -12,7 +12,6 @@ export default function PortfolioPage() {
   return (
     <main className="min-h-screen bg-background">
       
-      {/* Hero Section */}
       <section className="relative pt-8 md:pt-12 pb-20 bg-muted/30 overflow-hidden">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -z-10" />
         
@@ -24,6 +23,7 @@ export default function PortfolioPage() {
           >
             <Briefcase size={32} />
           </motion.div>
+
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -31,11 +31,13 @@ export default function PortfolioPage() {
           >
             {t('title')}
           </motion.h1>
+
           <motion.div 
             initial={{ width: 0 }}
             animate={{ width: 80 }}
             className="h-1.5 bg-primary mx-auto rounded-full mb-8"
           />
+
           <motion.p 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -47,7 +49,6 @@ export default function PortfolioPage() {
         </div>
       </section>
 
-      {/* Full Works Gallery */}
       <Portfolio limit={0} showTitle={false} />
 
     </main>

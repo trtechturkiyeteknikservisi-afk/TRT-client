@@ -4,10 +4,8 @@ const withNextIntl = createNextIntlPlugin();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable compression
   compress: true,
 
-  // Image optimization
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
@@ -30,7 +28,6 @@ const nextConfig = {
     minimumCacheTTL: 86400,
   },
 
-  // Tree-shake heavy packages
   experimental: {
     optimizePackageImports: [
       'framer-motion',
@@ -39,7 +36,6 @@ const nextConfig = {
     ],
   },
 
-  // Cache headers for static assets
   async headers() {
     return [
       {
@@ -63,12 +59,21 @@ const nextConfig = {
     ];
   },
 
-  // Global Redirects for sitemaps and portfolio paths
   async redirects() {
     return [
       {
         source: '/:locale(ar|en|tr)/sitemap.xml',
         destination: '/sitemap.xml',
+        permanent: true,
+      },
+      {
+        source: '/blog',
+        destination: '/tr/blog',
+        permanent: true,
+      },
+      {
+        source: '/blog/:slug*',
+        destination: '/tr/blog/:slug*',
         permanent: true,
       },
       {
@@ -79,6 +84,16 @@ const nextConfig = {
       {
         source: '/:locale(ar|en|tr)/portfolio',
         destination: '/:locale/our-works',
+        permanent: true,
+      },
+      {
+        source: '/:locale(ar|en|tr)/privacy',
+        destination: '/:locale/policies/privacy',
+        permanent: true,
+      },
+      {
+        source: '/:locale(ar|en|tr)/terms',
+        destination: '/:locale/policies/terms',
         permanent: true,
       },
     ];
