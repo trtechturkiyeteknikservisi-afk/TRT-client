@@ -44,7 +44,7 @@ export function Footer() {
     { name: t('robot_repair'), href: '/services/robot' },
     { name: t('watch_repair'), href: '/services/watch' },
     { name: t('headphones_repair'), href: '/services/kulaklik' },
-    { name: t('pricing_list') || 'Tamir Fiyat Listesi', href: '/tamir-fiyatlari' },
+    { name: t('pricing_list') || 'Ürünler ve Fiyatlar', href: '/tamir-fiyatlari' },
   ];
 
   const [serviceLinks, setServiceLinks] = useState(defaultServiceLinks);
@@ -62,7 +62,7 @@ export function Footer() {
             href: item.link || `/services/${item.slug}`
           }));
           links.push({
-            name: t('pricing_list') || 'Tamir Fiyat Listesi',
+            name: t('pricing_list') || 'Ürünler ve Fiyatlar',
             href: '/tamir-fiyatlari'
           });
           setServiceLinks(links);

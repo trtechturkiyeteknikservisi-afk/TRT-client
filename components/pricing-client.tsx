@@ -5,7 +5,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, Wrench, ShieldCheck, Clock, CheckCircle2, ChevronDown, ChevronUp,
-  Phone, Truck, Database, Award, X, Sparkles, SlidersHorizontal,
+  Phone, Truck, Database, Award, X, SlidersHorizontal,
   LayoutGrid, Table as TableIcon, AlertCircle, Check, Smartphone, Laptop,
   Watch, Tablet, Headphones, Layers, ChevronRight, Calendar, ArrowRight,
   Filter, RotateCcw, CheckSquare, Square, ExternalLink
@@ -41,6 +41,9 @@ interface PricingItem {
   id: number;
   brand: string;
   device_type: string;
+  category_name_tr?: string;
+  category_name_en?: string;
+  category_name_ar?: string;
   series: string;
   model_name: string;
   service_slug: string;
@@ -166,50 +169,53 @@ export function PricingClient() {
     fetchData();
   }, [locale]);
 
-  // Category Tabs Configuration (Dynamically generated ONLY from services present in actual pricing items)
+  // Category / Main Branch Tabs Configuration (Dynamically generated ONLY from branches present in actual pricing items)
   const categoryTabs = useMemo(() => {
     // If no pricing items have been added to the database yet, do NOT show any category tabs
     if (!items || items.length === 0) return [];
 
-    // Find unique categories / service slugs that actually exist in the DB items
-    const presentCats = new Set<string>();
+    const tabsMap = new Map<string, { id: string; label: string; icon: any }>();
+
     items.forEach(item => {
-      if (item.device_type) presentCats.add(item.device_type.toLowerCase().trim());
-      if (item.service_slug) presentCats.add(item.service_slug.toLowerCase().trim());
+      const slug = (item.device_type || '').toLowerCase().trim();
+      if (!slug || tabsMap.has(slug)) return;
+
+      // 1. Check if matches a system service branch
+      const sysService = systemServices.find(s => {
+        const sSlug = (s.slug || '').toLowerCase().trim();
+        return sSlug === slug ||
+          (slug.includes('phone') && (sSlug.includes('phone') || sSlug.includes('telefon'))) ||
+          (slug.includes('laptop') && (sSlug.includes('laptop') || sSlug.includes('bilgisayar'))) ||
+          (slug.includes('robot') && (sSlug.includes('robot') || sSlug.includes('supurge'))) ||
+          (slug.includes('watch') && (sSlug.includes('watch') || sSlug.includes('saat'))) ||
+          (slug.includes('tablet') && (sSlug.includes('tablet') || sSlug.includes('ipad'))) ||
+          (slug.includes('kulaklik') && (sSlug.includes('kulaklik') || sSlug.includes('headphone')));
+      });
+
+      if (sysService) {
+        const label = locale === 'ar' ? (sysService.title_ar || sysService.title) : locale === 'en' ? (sysService.title_en || sysService.title) : (sysService.title_tr || sysService.title);
+        tabsMap.set(sysService.slug, {
+          id: sysService.slug,
+          label,
+          icon: getServiceIcon(sysService.slug, sysService.icon)
+        });
+      } else {
+        // 2. Custom branch from item category_name_*
+        const label = locale === 'ar' 
+          ? (item.category_name_ar || item.category_name_tr || slug) 
+          : locale === 'en' 
+          ? (item.category_name_en || item.category_name_tr || slug) 
+          : (item.category_name_tr || item.category_name_ar || slug);
+        tabsMap.set(slug, {
+          id: slug,
+          label,
+          icon: getServiceIcon(slug)
+        });
+      }
     });
 
-    // Match with system services
-    const dynamicTabs = systemServices
-      .filter(s => {
-        const slug = (s.slug || '').toLowerCase().trim();
-        return (
-          presentCats.has(slug) ||
-          (slug.includes('phone') && (presentCats.has('phone') || presentCats.has('telefon'))) ||
-          (slug.includes('laptop') && (presentCats.has('laptop') || presentCats.has('bilgisayar') || presentCats.has('macbook'))) ||
-          (slug.includes('robot') && (presentCats.has('robot') || presentCats.has('supurge'))) ||
-          (slug.includes('watch') && (presentCats.has('watch') || presentCats.has('saat'))) ||
-          (slug.includes('tablet') && (presentCats.has('tablet') || presentCats.has('ipad'))) ||
-          (slug.includes('kulaklik') && (presentCats.has('kulaklik') || presentCats.has('headphone') || presentCats.has('airpods')))
-        );
-      })
-      .map(s => ({
-        id: s.slug,
-        label: locale === 'ar' ? (s.title_ar || s.title) : locale === 'en' ? (s.title_en || s.title) : (s.title_tr || s.title),
-        icon: getServiceIcon(s.slug, s.icon)
-      }));
-
-    if (dynamicTabs.length === 0) {
-      const uniqueTypes = Array.from(new Set(items.map(i => i.device_type).filter(Boolean)));
-      if (uniqueTypes.length > 0) {
-        const itemTabs = uniqueTypes.map(type => ({
-          id: type,
-          label: type,
-          icon: getServiceIcon(type)
-        }));
-        return [{ id: 'all', label: t('tab_all'), icon: Layers }, ...itemTabs];
-      }
-      return [];
-    }
+    const dynamicTabs = Array.from(tabsMap.values());
+    if (dynamicTabs.length === 0) return [];
 
     const allTab = { id: 'all', label: t('tab_all'), icon: Layers };
     return [allTab, ...dynamicTabs];
@@ -230,11 +236,17 @@ export function PricingClient() {
   // Derived filter collections
   const categoryFilteredItems = useMemo(() => {
     if (selectedCategory === 'all') return items;
-    const cat = selectedCategory.toLowerCase();
+    const cat = selectedCategory.toLowerCase().trim();
     return items.filter(item => {
-      const dt = (item.device_type || '').toLowerCase();
-      const sSlug = (item.service_slug || '').toLowerCase();
-      return dt === cat || sSlug === cat || (cat === 'phone' && (dt.includes('phone') || dt.includes('telefon')));
+      const dt = (item.device_type || '').toLowerCase().trim();
+      const sSlug = (item.service_slug || '').toLowerCase().trim();
+      return dt === cat || sSlug === cat || 
+             (cat === 'phone' && (dt.includes('phone') || dt.includes('telefon'))) ||
+             (cat === 'laptop' && (dt.includes('laptop') || dt.includes('bilgisayar'))) ||
+             (cat === 'robot' && (dt.includes('robot') || dt.includes('supurge'))) ||
+             (cat === 'watch' && (dt.includes('watch') || dt.includes('saat'))) ||
+             (cat === 'tablet' && (dt.includes('tablet') || dt.includes('ipad'))) ||
+             (cat === 'kulaklik' && (dt.includes('kulaklik') || dt.includes('headphone')));
     });
   }, [items, selectedCategory]);
 
@@ -562,7 +574,7 @@ export function PricingClient() {
             ) : (
               <div className="flex items-center gap-2">
                 <span className="text-xs sm:text-sm font-black tracking-wide text-white uppercase">
-                  {locale === 'ar' ? 'TR TECH | أسعار خدمات الصيانة وقطع الغيار' : locale === 'en' ? 'TR TECH | Repair & Parts Pricing' : 'TR TECH | Tamir ve Parça Fiyatları'}
+                  {locale === 'ar' ? 'TR TECH | المنتجات والأسعار' : locale === 'en' ? 'TR TECH | Products & Pricing' : 'TR TECH | Ürünler ve Fiyatlar'}
                 </span>
               </div>
             )}
@@ -646,7 +658,7 @@ export function PricingClient() {
           </Link>
           <ChevronRight size={13} className={cn("text-zinc-600", isRTL ? "rotate-180" : "")} />
           <span className="text-zinc-400">
-            {locale === 'ar' ? 'أسعار الصيانة' : locale === 'en' ? 'Repair Pricing' : 'Tamir Fiyatları'}
+            {locale === 'ar' ? 'المنتجات والأسعار' : locale === 'en' ? 'Products & Pricing' : 'Ürünler ve Fiyatlar'}
           </span>
           {items.length > 0 && selectedCategory !== 'all' && (
             <>
@@ -872,21 +884,23 @@ export function PricingClient() {
               {/* Banner Text Content */}
               <div className="relative z-10 p-6 sm:p-8 md:p-10 max-w-xl space-y-3">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#E11D48]/20 border border-[#E11D48]/30 text-[#E11D48] text-[10px] font-black uppercase tracking-widest">
-                  <Sparkles size={12} />
+                  <ShieldCheck size={12} />
                   <span>
-                    {locale === 'ar' ? 'قائمة أسعار TR TECH لعام 2026' : locale === 'en' ? 'TR TECH 2026 PRICING LIST' : 'TR TECH 2026 GÜNCEL LİSTE'}
+                    {locale === 'ar' ? 'قائمة المنتجات والأسعار لعام 2026' : locale === 'en' ? 'TR TECH 2026 PRODUCTS & PRICING' : 'TR TECH 2026 ÜRÜNLER VE FİYATLAR'}
                   </span>
                 </div>
 
                 <h1 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-white leading-tight">
                   {activeBanner?.title || (
-                    items.length > 0 && selectedCategory !== 'all' && systemServices.find(s => s.slug === selectedCategory)
-                      ? (locale === 'ar' 
-                          ? (systemServices.find(s => s.slug === selectedCategory)?.title_ar || systemServices.find(s => s.slug === selectedCategory)?.title)
-                          : locale === 'en' 
-                          ? (systemServices.find(s => s.slug === selectedCategory)?.title_en || systemServices.find(s => s.slug === selectedCategory)?.title)
-                          : (systemServices.find(s => s.slug === selectedCategory)?.title_tr || systemServices.find(s => s.slug === selectedCategory)?.title))
-                      : (locale === 'ar' ? 'أسعار الصيانة وقطع الغيار' : locale === 'en' ? 'Repair & Spare Parts Pricing' : 'Tamir ve Yedek Parça Fiyatları')
+                    items.length > 0 && selectedCategory !== 'all'
+                      ? (systemServices.find(s => s.slug === selectedCategory)
+                          ? (locale === 'ar' 
+                              ? (systemServices.find(s => s.slug === selectedCategory)?.title_ar || systemServices.find(s => s.slug === selectedCategory)?.title)
+                              : locale === 'en' 
+                              ? (systemServices.find(s => s.slug === selectedCategory)?.title_en || systemServices.find(s => s.slug === selectedCategory)?.title)
+                              : (systemServices.find(s => s.slug === selectedCategory)?.title_tr || systemServices.find(s => s.slug === selectedCategory)?.title))
+                          : categoryTabs.find(c => c.id === selectedCategory)?.label || (locale === 'ar' ? 'المنتجات والأسعار' : locale === 'en' ? 'Products & Pricing' : 'Ürünler ve Fiyatlar'))
+                      : (locale === 'ar' ? 'المنتجات والأسعار' : locale === 'en' ? 'Products & Pricing' : 'Ürünler ve Fiyatlar')
                   )}
                 </h1>
 
@@ -899,10 +913,10 @@ export function PricingClient() {
                           ? (systemServices.find(s => s.slug === selectedCategory)?.description_en || systemServices.find(s => s.slug === selectedCategory)?.description_tr)
                           : systemServices.find(s => s.slug === selectedCategory)?.description_tr)
                       : (locale === 'ar' 
-                          ? 'قائمة أسعار واضحة ومحدثة لجميع خدمات صيانة الأجهزة الإلكترونية وقطع الغيار مع ضمان معتمد.' 
+                          ? 'قائمة واضحة ومحدثة لجميع المنتجات وقطع الغيار وخدمات الصيانة مع ضمان معتمد.' 
                           : locale === 'en' 
-                          ? 'Transparent and up-to-date pricing for all device repairs and spare parts with official warranty.' 
-                          : 'Tüm cihaz tamirleri ve yedek parçalar için güncel, şeffaf fiyat listesi ve resmi garanti.')
+                          ? 'Transparent and up-to-date pricing for all products, spare parts, and services with official warranty.' 
+                          : 'Tüm ürünler, yedek parçalar ve servis hizmetleri için güncel, şeffaf fiyat listesi ve resmi garanti.')
                   )}
                 </p>
 
@@ -1020,7 +1034,7 @@ export function PricingClient() {
               <div className="flex items-center justify-between gap-3 pt-2">
                 <div className="flex items-center gap-2">
                   <h2 className="text-sm sm:text-base font-black uppercase text-white tracking-wide">
-                    {selectedBrand !== 'all' ? selectedBrand : (locale === 'ar' ? 'قائمة الأسعار' : locale === 'en' ? 'Pricing List' : 'Ürünler')}
+                    {selectedBrand !== 'all' ? selectedBrand : (locale === 'ar' ? 'المنتجات والأسعار' : locale === 'en' ? 'Products & Pricing' : 'Ürünler ve Fiyatlar')}
                   </h2>
                   <span className="text-xs font-bold text-zinc-500">
                     ({filteredItems.length})
@@ -1088,16 +1102,16 @@ export function PricingClient() {
                 <div className="space-y-2">
                   <h3 className="text-xl sm:text-2xl font-black text-white">
                     {items.length === 0
-                      ? (locale === 'ar' ? 'قائمة الأسعار قيد التحديث' : locale === 'en' ? 'Pricing Catalog Being Updated' : 'Fiyat Listesi Güncelleniyor')
+                      ? (locale === 'ar' ? 'قائمة المنتجات والأسعار قيد التحديث' : locale === 'en' ? 'Products & Pricing Catalog Being Updated' : 'Ürünler ve Fiyat Listesi Güncelleniyor')
                       : t('no_results')}
                   </h3>
                   <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed max-w-md mx-auto">
                     {items.length === 0
                       ? (locale === 'ar' 
-                          ? 'يتم حالياً تجهيز وتحديث قائمة أسعار وموديلات الصيانة وقطع الغيار. يمكنك التواصل معنا مباشرة للحصول على تسعيرة فورية ومخصصة لجهازك.' 
+                          ? 'يتم حالياً تجهيز وتحديث قائمة المنتجات والأسعار والموديلات. يمكنك التواصل معنا مباشرة للحصول على تسعيرة فورية ومخصصة لجهازك.' 
                           : locale === 'en' 
-                          ? 'The pricing catalog is currently being updated. You can contact us directly for an instant custom quote for your device and original parts.' 
-                          : 'Fiyat listemiz şu anda güncellenmektedir. Cihazınız ve orijinal parçalar için doğrudan WhatsApp veya telefon üzerinden anında fiyat alabilirsiniz.')
+                          ? 'The products and pricing catalog is currently being updated. You can contact us directly for an instant custom quote.' 
+                          : 'Ürün ve fiyat listemiz şu anda güncellenmektedir. Doğrudan WhatsApp veya telefon üzerinden anında fiyat alabilirsiniz.')
                       : t('no_results_desc')}
                   </p>
                 </div>
@@ -1187,7 +1201,7 @@ export function PricingClient() {
                         {item.is_popular && (
                           <div className="absolute bottom-2.5 end-3 z-10">
                             <span className="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded bg-amber-500/90 text-black shadow-xs flex items-center gap-1">
-                              <Sparkles size={10} />
+                              <Award size={10} />
                               {locale === 'ar' ? 'الأكثر طلباً' : locale === 'en' ? 'Popular' : 'Popüler'}
                             </span>
                           </div>

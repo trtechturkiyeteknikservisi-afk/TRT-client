@@ -20,7 +20,7 @@
     "headphones_repair": "Headphones Repair",
     "cargo_service": "Nationwide Service via Cargo",
     "bize_ulasin": "Contact Us",
-    "pricing": "Repair Pricing"
+    "pricing": "Products & Pricing"
   },
   "Footer": {
     "description": "Premium technical service for all your electronic devices in Türkiye. Expert repairs with quality parts and guarantee.",
@@ -51,7 +51,7 @@
     "shipping_terms": "Shipping & Delivery Terms",
     "official_doc": "All Legal Documents (PDF)",
     "copyright": "© {year} TR TECH. All rights reserved.",
-    "pricing_list": "Repair Price List"
+    "pricing_list": "Products & Pricing"
   },
   "Home": {
     "stat_customers": "Happy Customers",
@@ -424,7 +424,7 @@
     "policy_warranty": "Warranty Conditions",
     "policy_shipping": "Shipping & Delivery",
     "policy_custom": "Tüm Yasal Belgeler (PDF)",
-    "menu_pricing": "Repair Pricing",
+    "menu_pricing": "Products & Pricing",
     "trust_bar_management": "Trust & Marquee Bar Management (Header & Footer)",
     "trust_items_label": "Ticker Items",
     "add_trust_item": "Add Ticker Item +",
@@ -722,9 +722,9 @@
       "keywords": "TR TECH policies, terms of service, privacy policy, warranty"
     },
     "Pricing": {
-      "title": "Repair Pricing & Screen Replacement 2026 Price List | TR TECH",
-      "description": "Official 2026 screen replacement and repair price list for iPhone, Samsung, and Xiaomi. Certified original parts, 30-minute quick service, and zero data loss.",
-      "keywords": "screen replacement price list, iPhone screen repair, phone repair prices, original screen, TR TECH pricing"
+      "title": "Products & Pricing 2026 Price List | TR TECH",
+      "description": "Official 2026 products, spare parts, and repair price list for iPhone, Samsung, and Xiaomi. Certified original parts, 30-minute quick service, and zero data loss.",
+      "keywords": "products and pricing, repair price list, screen replacement, phone repair prices, original parts, TR TECH pricing"
     }
   },
   "Linktree": {
@@ -762,7 +762,7 @@
     "linkedin_desc": "View our corporate business profile and network."
   },
   "Pricing": {
-    "title": "Repair Pricing & Screen Replacement",
+    "title": "Products & Pricing",
     "subtitle": "Up-to-date transparent repair and genuine screen replacement price list for your smartphones and electronics.",
     "search_placeholder": "Search device or model (e.g. iPhone 16 Pro, S24 Ultra, 13 Pro)...",
     "view_cards": "Series & Card View",

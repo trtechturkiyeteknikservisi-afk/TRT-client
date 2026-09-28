@@ -20,7 +20,7 @@
     "headphones_repair": "Kulaklık Tamiri",
     "cargo_service": "Kargo ile Türkiye Geneli Servis",
     "bize_ulasin": "Bize Ulaşın",
-    "pricing": "Tamir Fiyatları"
+    "pricing": "Ürünler ve Fiyatlar"
   },
   "Footer": {
     "description": "Türkiye'deki tüm elektronik cihazlarınız için birinci sınıf teknik servis. Kaliteli parçalar ve garanti ile uzman tamirler.",
@@ -51,7 +51,7 @@
     "shipping_terms": "Kargo ve Teslimat Şartları",
     "official_doc": "Tüm Yasal Belgeler (PDF)",
     "copyright": "© {year} TR TECH. Tüm hakları saklıdır.",
-    "pricing_list": "Tamir Fiyat Listesi"
+    "pricing_list": "Ürünler ve Fiyatlar"
   },
   "Home": {
     "stat_customers": "Mutlu Müşteri",
@@ -426,7 +426,7 @@
     "policy_warranty": "Garanti Koşulları",
     "policy_shipping": "Kargo ve Teslimat Şartları",
     "policy_custom": "Tüm Yasal Belgeler (PDF)",
-    "menu_pricing": "Tamir Fiyatları",
+    "menu_pricing": "Ürünler ve Fiyatlar",
     "trust_bar_management": "Güven ve Şerit Çubuğu Yönetimi (Üst & Alt)",
     "trust_items_label": "Şerit Maddeleri",
     "add_trust_item": "Yeni Madde Ekle +",
@@ -724,9 +724,9 @@
       "keywords": "TR TECH politikaları, hizmet şartları, gizlilik politikası, garanti"
     },
     "Pricing": {
-      "title": "Tamir Fiyatları & Ekran Değişimi 2026 Güncel Liste | TR TECH",
-      "description": "iPhone, Samsung ve Xiaomi ekran değişimi 2026 güncel fiyat listesi. Orijinal parça garantisi, 30 dakikada hızlı tamir ve veri kaybı olmadan profesyonel servis.",
-      "keywords": "ekran değişimi fiyatları, iPhone ekran değişimi, tamir fiyat listesi, telefon tamir fiyatları, orijinal ekran, TR TECH fiyatları"
+      "title": "Ürünler ve Fiyatlar 2026 Güncel Liste | TR TECH",
+      "description": "2026 güncel ürünler ve fiyat listesi. Orijinal parça garantisi, 30 dakikada hızlı tamir ve veri kaybı olmadan profesyonel servis.",
+      "keywords": "ürünler ve fiyatlar, tamir fiyat listesi, ekran değişimi fiyatları, telefon tamir fiyatları, orijinal ekran, TR TECH fiyatları"
     }
   },
   "Linktree": {
@@ -764,7 +764,7 @@
     "linkedin_desc": "Kurumsal profilimizi ve profesyonel ağımızı inceleyin."
   },
   "Pricing": {
-    "title": "Tamir Fiyatları & Ekran Değişimi",
+    "title": "Ürünler ve Fiyatlar",
     "subtitle": "Akıllı telefon ve elektronik cihazlarınız için 2026 güncel, şeffaf servis ve orijinal ekran değişim fiyatları.",
     "search_placeholder": "Cihaz veya model ara (örn: iPhone 16 Pro, S24 Ultra, 13 Pro)...",
     "view_cards": "Seri & Kart Görünümü",

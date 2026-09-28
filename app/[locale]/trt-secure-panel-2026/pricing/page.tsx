@@ -5,7 +5,7 @@ import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Wrench, Plus, Search, Trash2, Edit3, X, Check, 
-  Smartphone, Shield, ShieldCheck, Clock, Sparkles, RefreshCw, Layers,
+  Smartphone, Shield, ShieldCheck, Clock, RefreshCw, Layers,
   Upload, Image as ImageIcon, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight
 } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
@@ -28,6 +28,9 @@ interface PricingItem {
   id: number;
   brand: string;
   device_type: string;
+  category_name_tr?: string;
+  category_name_en?: string;
+  category_name_ar?: string;
   series: string;
   model_name: string;
   service_slug: string;
@@ -51,17 +54,19 @@ interface PricingItem {
 const dict = {
   ar: {
     dashboard_overview: "نظرة عامة",
-    page_title: "إدارة أسعار الصيانة وتبديل الشاشات",
+    page_title: "إدارة المنتجات والأسعار",
     records_count: "سجل",
     load_defaults: "تحميل القوالب الافتراضية",
     load_defaults_tooltip: "تحميل وتثبيت قائمة أسعار الكتالوج الشاملة لجميع موديلات iPhone و Samsung",
-    add_new_model: "إضافة موديل جديد +",
+    add_new_model: "إضافة منتج جديد +",
     search_placeholder: "ابحث باسم الموديل أو الفئة أو الماركة (مثال: iPhone 16, S24, 15 Pro)...",
     all_brands: "جميع الماركات",
+    all_branches: "جميع الفروع والأقسام",
     all_services: "جميع الخدمات",
     th_model_series: "الموديل والفئة والصورة",
     th_brand: "الماركة",
-    th_service: "نوع الخدمة",
+    th_branch: "الفرع الرئيسي",
+    th_service: "الخدمة / القطعة",
     th_base_price: "السعر الأساسي",
     th_qualities: "خيارات الجودة والقطع",
     th_warranty: "الضمان الرسمي",
@@ -71,30 +76,39 @@ const dict = {
     in_stock: "متوفر بالمخزون",
     out_of_stock: "نفد من المخزون",
     single_price: "سعر موحد",
-    edit_tooltip: "تعديل الموديل والأسعار",
-    delete_tooltip: "حذف الموديل",
-    loading_data: "جاري تحميل بيانات وقائمة الأسعار...",
+    edit_tooltip: "تعديل المنتج والأسعار",
+    delete_tooltip: "حذف المنتج",
+    loading_data: "جاري تحميل بيانات قائمة المنتجات والأسعار...",
     no_records: "لم يتم العثور على أي سجلات مطابقة للبحث.",
-    modal_edit_title: "تعديل بيانات وتسعيرة الموديل",
-    modal_add_title: "إضافة تسعيرة موديل جديد",
-    image_section_title: "صورة الجهاز (اختياري)",
-    image_section_sub: "يمكنك رفع صورة الجهاز أو وضع رابط مباشر للصورة لإظهارها في قائمة الأسعار",
+    modal_edit_title: "تعديل بيانات وتسعيرة المنتج",
+    modal_add_title: "إضافة منتج وتسعيرة جديدة",
+    image_section_title: "صورة المنتج (اختياري)",
+    image_section_sub: "يمكنك رفع صورة المنتج أو وضع رابط مباشر للصورة لإظهارها في قائمة المنتجات والأسعار",
     upload_image_btn: "رفع صورة من الجهاز",
     uploading_image: "جاري رفع الصورة...",
     remove_image: "إزالة الصورة",
     image_url_placeholder: "أو الصق رابط الصورة مباشرة (URL)...",
+    label_main_branch: "الفرع الرئيسي / القسم العام",
+    select_branch_placeholder: "-- اختر الفرع الرئيسي للخدمة --",
+    new_branch_option: "+ إنشاء فرع رئيسي جديد",
+    custom_branch_box_title: "بيانات الفرع الرئيسي الجديد",
+    label_branch_ar: "اسم الفرع (عربي)",
+    label_branch_tr: "اسم الفرع (تركي)",
+    label_branch_en: "اسم الفرع (إنجليزي)",
+    placeholder_branch_ar: "مثال: صيانة الهواتف، صيانة اللابتوب، المكانس، شاشات...",
+    placeholder_branch_tr: "Örn: Telefon Tamiri, Laptop Tamiri, Süpürge...",
+    placeholder_branch_en: "e.g. Phone Repair, Laptop Repair, Vacuums...",
+    branch_name_required: "يرجى تحديد أو كتابة اسم الفرع الرئيسي.",
     label_brand: "الماركة",
     placeholder_brand: "مثال: Apple, Samsung, Xiaomi",
     label_series: "اسم الفئة",
     placeholder_series: "مثال: فئة iPhone 16",
     label_model: "اسم الموديل",
     placeholder_model: "مثال: iPhone 16 Pro Max",
-    label_service_type: "نوع الخدمة (من خدمات الموقع)",
-    select_service_placeholder: "-- اختر الخدمة لإكمال البيانات تلقائياً --",
-    custom_service_option: "خدمة مخصصة أخرى...",
-    label_service_tr: "اسم الخدمة (تركي - TR)",
-    label_service_en: "اسم الخدمة (إنجليزي - EN)",
-    label_service_ar: "اسم الخدمة (عربي - AR)",
+    label_service_type: "اسم الخدمة أو نوع العطل / المنتج",
+    label_service_tr: "اسم الخدمة / المنتج (تركي - TR)",
+    label_service_en: "اسم الخدمة / المنتج (إنجليزي - EN)",
+    label_service_ar: "اسم الخدمة / المنتج (عربي - AR)",
     label_base_price: "السعر الأساسي (₺)",
     label_duration: "مدة الصيانة",
     placeholder_duration: "مثال: 30 دقيقة",
@@ -148,17 +162,19 @@ const dict = {
   },
   en: {
     dashboard_overview: "Overview",
-    page_title: "Repair & Screen Replacement Pricing Management",
+    page_title: "Products & Pricing Management",
     records_count: "Records",
     load_defaults: "Load Default Catalog",
     load_defaults_tooltip: "Loads and initializes default prices for iPhone, Samsung, and other models",
-    add_new_model: "Add New Model +",
+    add_new_model: "Add New Product +",
     search_placeholder: "Search by model name, series or brand (e.g. 15 Pro, S24, iPhone 16)...",
     all_brands: "All Brands",
+    all_branches: "All Main Branches",
     all_services: "All Services",
     th_model_series: "Model, Series & Photo",
     th_brand: "Brand",
-    th_service: "Service Type",
+    th_branch: "Main Branch",
+    th_service: "Service / Operation",
     th_base_price: "Starting Price",
     th_qualities: "Quality Options",
     th_warranty: "Official Warranty",
@@ -168,27 +184,36 @@ const dict = {
     in_stock: "In Stock",
     out_of_stock: "Out of Stock",
     single_price: "Single Price",
-    edit_tooltip: "Edit Model & Pricing",
-    delete_tooltip: "Delete Model",
-    loading_data: "Loading pricing data...",
+    edit_tooltip: "Edit Product & Pricing",
+    delete_tooltip: "Delete Product",
+    loading_data: "Loading products & pricing data...",
     no_records: "No records found matching your search.",
-    modal_edit_title: "Edit Model & Pricing",
-    modal_add_title: "Add New Model Pricing",
-    image_section_title: "Device Photo (Optional)",
-    image_section_sub: "Upload device photo or provide an external image URL to display on the pricing list",
+    modal_edit_title: "Edit Product & Pricing",
+    modal_add_title: "Add New Product Pricing",
+    image_section_title: "Product Photo (Optional)",
+    image_section_sub: "Upload product photo or provide an external image URL to display on the pricing list",
     upload_image_btn: "Upload Photo from Device",
     uploading_image: "Uploading image...",
     remove_image: "Remove Photo",
     image_url_placeholder: "Or paste image direct URL...",
+    label_main_branch: "Main Branch / Category",
+    select_branch_placeholder: "-- Select Main Branch --",
+    new_branch_option: "+ Create New Main Branch",
+    custom_branch_box_title: "New Main Branch Details",
+    label_branch_ar: "Branch Name (AR)",
+    label_branch_tr: "Branch Name (TR)",
+    label_branch_en: "Branch Name (EN)",
+    placeholder_branch_ar: "e.g. Phone Repair, Laptop Repair, Vacuums...",
+    placeholder_branch_tr: "Örn: Telefon Tamiri, Laptop Tamiri, Süpürge...",
+    placeholder_branch_en: "e.g. Phone Repair, Laptop Repair, Vacuums...",
+    branch_name_required: "Please select or enter the main branch name.",
     label_brand: "Brand",
     placeholder_brand: "e.g. Apple, Samsung, Xiaomi",
     label_series: "Series Name",
     placeholder_series: "e.g. iPhone 16 Series",
     label_model: "Model Name",
     placeholder_model: "e.g. iPhone 16 Pro Max",
-    label_service_type: "Service Type (From Website Services)",
-    select_service_placeholder: "-- Select Service to Auto-fill --",
-    custom_service_option: "Other Custom Service...",
+    label_service_type: "Service / Operation / Product Name",
     label_service_tr: "Service Name (TR)",
     label_service_en: "Service Name (EN)",
     label_service_ar: "Service Name (AR)",
@@ -245,17 +270,19 @@ const dict = {
   },
   tr: {
     dashboard_overview: "Genel Bakış",
-    page_title: "Tamir Fiyatları Yönetimi",
+    page_title: "Ürünler ve Fiyatlar Yönetimi",
     records_count: "Kayıt",
     load_defaults: "Varsayılanları Yükle",
     load_defaults_tooltip: "iPhone 16, 15, 14, 13, Samsung S24 gibi modelleri hazır yükler",
-    add_new_model: "Yeni Model Ekle +",
+    add_new_model: "Yeni Ürün / Model Ekle +",
     search_placeholder: "Model adı, seri veya marka ile ara (örn: 15 Pro, S24, iPhone 16)...",
     all_brands: "Tüm Markalar",
+    all_branches: "Tüm Ana Branşlar",
     all_services: "Tüm Hizmetler",
     th_model_series: "Model, Seri & Görsel",
     th_brand: "Marka",
-    th_service: "Hizmet Türü",
+    th_branch: "Ana Branş",
+    th_service: "Hizmet / İşlem",
     th_base_price: "Başlangıç Fiyatı",
     th_qualities: "Kalite Seçenekleri",
     th_warranty: "Resmi Garanti",
@@ -269,26 +296,35 @@ const dict = {
     delete_tooltip: "Sil",
     loading_data: "Fiyat verileri yükleniyor...",
     no_records: "Aramaya uygun kayıt bulunamadı.",
-    modal_edit_title: "Model & Fiyat Düzenle",
-    modal_add_title: "Yeni Model Fiyatı Ekle",
+    modal_edit_title: "Ürün ve Fiyat Düzenle",
+    modal_add_title: "Yeni Ürün ve Fiyat Ekle",
     image_section_title: "Cihaz Görseli (İsteğe Bağlı)",
     image_section_sub: "Fiyat listesinde cihazın fotoğrafını göstermek için yükleyin veya URL girin",
     upload_image_btn: "Cihazdan Resim Yükle",
     uploading_image: "Resim yükleniyor...",
     remove_image: "Görseli Kaldır",
     image_url_placeholder: "Veya doğrudan resim bağlantısını yapıştırın (URL)...",
+    label_main_branch: "Ana Branş / Genel Kategori",
+    select_branch_placeholder: "-- Ana Branş Seçin --",
+    new_branch_option: "+ Yeni Ana Branş Oluştur",
+    custom_branch_box_title: "Yeni Ana Branş Bilgileri",
+    label_branch_ar: "Branş Adı (AR)",
+    label_branch_tr: "Branş Adı (TR)",
+    label_branch_en: "Branş Adı (EN)",
+    placeholder_branch_ar: "Örn: صيانة الهواتف، صيانة اللابتوب، المكانس...",
+    placeholder_branch_tr: "Örn: Telefon Tamiri, Laptop Tamiri, Süpürge...",
+    placeholder_branch_en: "e.g. Phone Repair, Laptop Repair, Vacuums...",
+    branch_name_required: "Lütfen bir ana branş seçin veya girin.",
     label_brand: "Marka",
     placeholder_brand: "Örn: Apple, Samsung",
     label_series: "Seri Adı",
     placeholder_series: "Örn: iPhone 16 Serisi",
     label_model: "Model Adı",
     placeholder_model: "Örn: iPhone 16 Pro Max",
-    label_service_type: "Hizmet Türü (Web Sitesi Hizmetlerinden)",
-    select_service_placeholder: "-- Otomatik doldurmak için Hizmet Seçin --",
-    custom_service_option: "Diğer Özel Hizmet...",
-    label_service_tr: "Hizmet Adı (TR)",
+    label_service_type: "Hizmet / İşlem / Ürün Adı",
+    label_service_tr: "Hizmet / Ürün Adı (TR)",
     label_service_en: "Service Name (EN)",
-    label_service_ar: "اسم الخدمة (AR)",
+    label_service_ar: "اسم الخدمة / المنتج (AR)",
     label_base_price: "Başlangıç Fiyatı (₺)",
     label_duration: "Tamir Süresi",
     placeholder_duration: "Örn: 30 Dakika",
@@ -354,12 +390,21 @@ export default function AdminPricingPage() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('all');
+  const [selectedBranch, setSelectedBranch] = useState('all');
   const [selectedService, setSelectedService] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isClearAllModalOpen, setIsClearAllModalOpen] = useState(false);
   const [isSeedModalOpen, setIsSeedModalOpen] = useState(false);
   const [deletingItem, setDeletingItem] = useState<PricingItem | null>(null);
   const [editingItem, setEditingItem] = useState<PricingItem | null>(null);
+
+  // Branch customization states
+  const [isCustomBranch, setIsCustomBranch] = useState(false);
+  const [customBranch, setCustomBranch] = useState({
+    ar: '',
+    tr: '',
+    en: ''
+  });
 
   // Pagination states for high performance
   const [currentPage, setCurrentPage] = useState(1);
@@ -368,6 +413,9 @@ export default function AdminPricingPage() {
   const [form, setForm] = useState({
     brand: 'Apple',
     device_type: 'phone',
+    category_name_tr: '',
+    category_name_en: '',
+    category_name_ar: '',
     series: '',
     model_name: '',
     service_slug: '',
@@ -423,6 +471,78 @@ export default function AdminPricingPage() {
     }
   };
 
+  // Available Branches (Categories)
+  const availableBranches = useMemo(() => {
+    const list: { slug: string; name_ar: string; name_tr: string; name_en: string; icon?: string }[] = [];
+    const seen = new Set<string>();
+
+    // 1. From system services
+    systemServices.forEach(s => {
+      const slug = (s.slug || '').toLowerCase().trim();
+      if (slug && !seen.has(slug)) {
+        seen.add(slug);
+        list.push({
+          slug,
+          name_ar: s.title_ar || s.title || s.title_tr,
+          name_tr: s.title_tr || s.title,
+          name_en: s.title_en || s.title,
+          icon: s.icon
+        });
+      }
+    });
+
+    // 2. From items (in case of previously saved custom branches)
+    items.forEach(item => {
+      const slug = (item.device_type || '').toLowerCase().trim();
+      if (slug && !seen.has(slug)) {
+        seen.add(slug);
+        list.push({
+          slug,
+          name_ar: item.category_name_ar || item.category_name_tr || slug,
+          name_tr: item.category_name_tr || item.category_name_ar || slug,
+          name_en: item.category_name_en || item.category_name_tr || slug,
+        });
+      }
+    });
+
+    // 3. Fallback standard list
+    const defaults = [
+      { slug: 'phone', name_ar: 'صيانة الهواتف', name_tr: 'Telefon Tamiri', name_en: 'Phone Repair', icon: 'Smartphone' },
+      { slug: 'laptop', name_ar: 'اللابتوب والكمبيوتر', name_tr: 'Laptop Tamiri', name_en: 'Laptop & PC Repair', icon: 'Laptop' },
+      { slug: 'robot', name_ar: 'المكانس الروبوتية', name_tr: 'Robot Süpürge', name_en: 'Robot Vacuum', icon: 'Robot' },
+      { slug: 'watch', name_ar: 'الساعات الفاخرة', name_tr: 'Akıllı Saat', name_en: 'Smart Watch', icon: 'Watch' },
+      { slug: 'tablet', name_ar: 'التابلت والآيباد', name_tr: 'Tablet Tamiri', name_en: 'Tablet & iPad', icon: 'Tablet' },
+      { slug: 'kulaklik', name_ar: 'السماعات', name_tr: 'Kulaklık', name_en: 'Headphones', icon: 'Headphones' },
+    ];
+    defaults.forEach(d => {
+      if (!seen.has(d.slug)) {
+        seen.add(d.slug);
+        list.push(d);
+      }
+    });
+
+    return list;
+  }, [systemServices, items]);
+
+  const getLocalizedBranchName = (item: PricingItem) => {
+    const slug = (item.device_type || '').toLowerCase().trim();
+    if (locale === 'ar') {
+      if (item.category_name_ar) return item.category_name_ar;
+      const found = availableBranches.find(b => b.slug === slug);
+      if (found?.name_ar) return found.name_ar;
+    } else if (locale === 'en') {
+      if (item.category_name_en) return item.category_name_en;
+      const found = availableBranches.find(b => b.slug === slug);
+      if (found?.name_en) return found.name_en;
+    } else {
+      if (item.category_name_tr) return item.category_name_tr;
+      const found = availableBranches.find(b => b.slug === slug);
+      if (found?.name_tr) return found.name_tr;
+    }
+    const found = availableBranches.find(b => b.slug === slug);
+    return found ? (locale === 'ar' ? found.name_ar : locale === 'en' ? found.name_en : found.name_tr) : slug;
+  };
+
   useEffect(() => {
     fetchItems();
     fetchSystemServices();
@@ -431,71 +551,27 @@ export default function AdminPricingPage() {
   // Reset pagination on filter change
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, selectedBrand, selectedService, pageSize]);
-
-  const handleServiceSelect = (selectedSlug: string) => {
-    if (selectedSlug === 'custom') {
-      setForm(prev => ({
-        ...prev,
-        service_slug: 'custom-service',
-        service_name_ar: '',
-        service_name_tr: '',
-        service_name_en: ''
-      }));
-      return;
-    }
-
-    // Dynamic services from database
-    const sys = systemServices.find(s => s.slug === selectedSlug);
-    if (sys) {
-      const arName = sys.title_ar || sys.title || '';
-      const trName = sys.title_tr || sys.title || '';
-      const enName = sys.title_en || sys.title || '';
-      let devType = sys.slug;
-      if (sys.slug.includes('phone') || sys.slug.includes('telefon')) devType = 'phone';
-      else if (sys.slug.includes('laptop') || sys.slug.includes('macbook')) devType = 'laptop';
-      else if (sys.slug.includes('robot')) devType = 'robot';
-      else if (sys.slug.includes('watch') || sys.slug.includes('saat')) devType = 'watch';
-      else if (sys.slug.includes('tablet') || sys.slug.includes('ipad')) devType = 'tablet';
-      else if (sys.slug.includes('kulaklik') || sys.slug.includes('headphone')) devType = 'headphones';
-      else if (sys.slug.includes('parca') || sys.slug.includes('part')) devType = 'parts';
-
-      setForm(prev => ({
-        ...prev,
-        service_slug: sys.slug,
-        service_name_ar: arName,
-        service_name_tr: trName,
-        service_name_en: enName,
-        device_type: devType
-      }));
-    }
-  };
+  }, [search, selectedBrand, selectedBranch, selectedService, pageSize]);
 
   const handleOpenAdd = () => {
     setEditingItem(null);
-    const firstService = systemServices[0];
-    const initialSlug = firstService?.slug || 'phone';
-    const initialAr = firstService?.title_ar || firstService?.title || 'صيانة الهواتف';
-    const initialTr = firstService?.title_tr || firstService?.title || 'Telefon Tamiri';
-    const initialEn = firstService?.title_en || firstService?.title || 'Phone Repair';
-    let devType = initialSlug;
-    if (initialSlug.includes('phone') || initialSlug.includes('telefon')) devType = 'phone';
-    else if (initialSlug.includes('laptop') || initialSlug.includes('macbook')) devType = 'laptop';
-    else if (initialSlug.includes('robot')) devType = 'robot';
-    else if (initialSlug.includes('watch') || initialSlug.includes('saat')) devType = 'watch';
-    else if (initialSlug.includes('tablet') || initialSlug.includes('ipad')) devType = 'tablet';
-    else if (initialSlug.includes('kulaklik') || initialSlug.includes('headphone')) devType = 'headphones';
-    else if (initialSlug.includes('parca') || initialSlug.includes('part')) devType = 'parts';
+    setIsCustomBranch(false);
+    setCustomBranch({ ar: '', tr: '', en: '' });
+
+    const firstBranch = availableBranches[0] || { slug: 'phone', name_ar: 'صيانة الهواتف', name_tr: 'Telefon Tamiri', name_en: 'Phone Repair' };
 
     setForm({
       brand: 'Apple',
-      device_type: devType,
+      device_type: firstBranch.slug,
+      category_name_tr: firstBranch.name_tr,
+      category_name_en: firstBranch.name_en,
+      category_name_ar: firstBranch.name_ar,
       series: '',
       model_name: '',
-      service_slug: initialSlug,
-      service_name_tr: initialTr,
-      service_name_en: initialEn,
-      service_name_ar: initialAr,
+      service_slug: '',
+      service_name_tr: '',
+      service_name_en: '',
+      service_name_ar: '',
       base_price: 1000,
       currency: '₺',
       duration: locale === 'ar' ? '30 دقيقة' : locale === 'en' ? '30 Minutes' : '30 Dakika',
@@ -514,9 +590,30 @@ export default function AdminPricingPage() {
 
   const handleOpenEdit = (item: PricingItem) => {
     setEditingItem(item);
+    const slug = (item.device_type || 'phone').toLowerCase();
+    const isKnown = availableBranches.some(b => b.slug === slug);
+    if (!isKnown) {
+      setIsCustomBranch(true);
+      setCustomBranch({
+        ar: item.category_name_ar || '',
+        tr: item.category_name_tr || '',
+        en: item.category_name_en || ''
+      });
+    } else {
+      setIsCustomBranch(false);
+      setCustomBranch({
+        ar: item.category_name_ar || '',
+        tr: item.category_name_tr || '',
+        en: item.category_name_en || ''
+      });
+    }
+
     setForm({
       brand: item.brand,
-      device_type: item.device_type,
+      device_type: item.device_type || 'phone',
+      category_name_tr: item.category_name_tr || '',
+      category_name_en: item.category_name_en || '',
+      category_name_ar: item.category_name_ar || '',
       series: item.series,
       model_name: item.model_name,
       service_slug: item.service_slug,
@@ -584,20 +681,113 @@ export default function AdminPricingPage() {
       return;
     }
 
+    const trName = (form.service_name_tr || '').trim();
+    const arName = (form.service_name_ar || '').trim();
+    const enName = (form.service_name_en || '').trim();
+
+    if (!trName && !arName && !enName) {
+      toast.error(
+        locale === 'ar' 
+          ? 'يرجى كتابة اسم الخدمة أو نوع القطعة / المنتج' 
+          : locale === 'en' 
+          ? 'Please enter the service or product name' 
+          : 'Lütfen hizmet veya ürün adını giriniz'
+      );
+      return;
+    }
+
+    // Branch resolution
+    let branchSlug = form.device_type;
+    let branchNameAr = form.category_name_ar;
+    let branchNameTr = form.category_name_tr;
+    let branchNameEn = form.category_name_en;
+
+    if (isCustomBranch) {
+      const cAr = customBranch.ar.trim();
+      const cTr = customBranch.tr.trim();
+      const cEn = customBranch.en.trim();
+
+      if (!cAr && !cTr && !cEn) {
+        toast.error(d.branch_name_required);
+        return;
+      }
+
+      branchNameAr = cAr || cTr || cEn;
+      branchNameTr = cTr || cAr || cEn;
+      branchNameEn = cEn || cTr || cAr;
+
+      const baseForBranchSlug = cEn || cTr || cAr;
+      branchSlug = baseForBranchSlug
+        .toLowerCase()
+        .replace(/[^a-z0-9\u0600-\u06FF]+/g, '-')
+        .replace(/^-+|-+$/g, '') || 'branch';
+    } else {
+      const foundBranch = availableBranches.find(b => b.slug === branchSlug);
+      if (foundBranch) {
+        branchNameAr = foundBranch.name_ar;
+        branchNameTr = foundBranch.name_tr;
+        branchNameEn = foundBranch.name_en;
+      }
+    }
+
+    // Auto-generate slug from whichever name is provided
+    let slug = (form.service_slug || '').trim();
+    if (!slug) {
+      const baseForSlug = enName || trName || arName || 'service';
+      slug = baseForSlug
+        .toLowerCase()
+        .replace(/[^a-z0-9\u0600-\u06FF]+/g, '-')
+        .replace(/^-+|-+$/g, '') || 'service';
+    }
+
+    const payload = {
+      ...form,
+      device_type: branchSlug,
+      category_name_ar: branchNameAr,
+      category_name_tr: branchNameTr,
+      category_name_en: branchNameEn,
+      service_slug: slug,
+      service_name_tr: trName || arName || enName || 'Ürün / Hizmet',
+      service_name_en: enName || trName || arName || 'Product / Service',
+      service_name_ar: arName || trName || enName || 'منتج / خدمة',
+    };
+
     const token = localStorage.getItem('token');
     setActionLoading(true);
     try {
       if (editingItem) {
-        await axios.put(`${API_BASE}/pricing/${editingItem.id}`, form, {
+        await axios.put(`${API_BASE}/pricing/${editingItem.id}`, payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
         toast.success(d.update_success);
       } else {
-        await axios.post(`${API_BASE}/pricing`, form, {
+        await axios.post(`${API_BASE}/pricing`, payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
         toast.success(d.add_success);
       }
+
+      // If a custom branch was created, optionally save it as a system service
+      if (isCustomBranch) {
+        try {
+          await axios.post(`${API_BASE}/content/services`, {
+            slug: branchSlug,
+            title_ar: branchNameAr,
+            title_tr: branchNameTr,
+            title_en: branchNameEn,
+            description_ar: `خدمات ومنتجات قسم ${branchNameAr}`,
+            description_tr: `${branchNameTr} hizmetleri ve ürünleri`,
+            description_en: `${branchNameEn} services and products`,
+            icon: 'Layers',
+            is_active: true,
+            sort_order: availableBranches.length + 1
+          }, {
+            headers: { Authorization: `Bearer ${token}` }
+          }).catch(() => {});
+          fetchSystemServices();
+        } catch (e) {}
+      }
+
       setIsModalOpen(false);
       fetchItems();
     } catch (err) {
@@ -756,20 +946,23 @@ export default function AdminPricingPage() {
 
   const filteredItems = useMemo(() => {
     return items.filter(item => {
+      if (selectedBranch !== 'all' && item.device_type !== selectedBranch) return false;
       if (selectedBrand !== 'all' && item.brand !== selectedBrand) return false;
       if (selectedService !== 'all' && item.service_slug !== selectedService) return false;
       if (search.trim()) {
         const q = search.toLowerCase();
         const serviceName = (locale === 'ar' ? (item.service_name_ar || item.service_name_tr) : locale === 'en' ? (item.service_name_en || item.service_name_tr) : item.service_name_tr).toLowerCase();
+        const branchName = getLocalizedBranchName(item).toLowerCase();
         const match = item.model_name.toLowerCase().includes(q) ||
                       item.series.toLowerCase().includes(q) ||
                       item.brand.toLowerCase().includes(q) ||
-                      serviceName.includes(q);
+                      serviceName.includes(q) ||
+                      branchName.includes(q);
         if (!match) return false;
       }
       return true;
     });
-  }, [items, selectedBrand, selectedService, search, locale]);
+  }, [items, selectedBranch, selectedBrand, selectedService, search, locale, availableBranches]);
 
   // High performance pagination calculations
   const totalPages = Math.max(1, Math.ceil(filteredItems.length / pageSize));
@@ -853,6 +1046,20 @@ export default function AdminPricingPage() {
           </div>
 
           <div className="flex gap-2 shrink-0 overflow-x-auto pb-1 md:pb-0">
+            {/* Filter by Main Branch */}
+            <select
+              value={selectedBranch}
+              onChange={(e) => setSelectedBranch(e.target.value)}
+              className="px-3 py-2 rounded-lg border bg-background text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+            >
+              <option value="all">{d.all_branches} ({availableBranches.length})</option>
+              {availableBranches.map(b => (
+                <option key={b.slug} value={b.slug}>
+                  {locale === 'ar' ? b.name_ar : locale === 'en' ? b.name_en : b.name_tr}
+                </option>
+              ))}
+            </select>
+
             <select
               value={selectedBrand}
               onChange={(e) => setSelectedBrand(e.target.value)}
@@ -900,6 +1107,7 @@ export default function AdminPricingPage() {
               <tr className="bg-muted/40 border-b text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                 <th className="py-3.5 px-4 text-start min-w-[280px] sm:min-w-[320px]">{d.th_model_series}</th>
                 <th className="py-3.5 px-4 text-start">{d.th_brand}</th>
+                <th className="py-3.5 px-4 text-start">{d.th_branch}</th>
                 <th className="py-3.5 px-4 text-start">{d.th_service}</th>
                 <th className="py-3.5 px-4 text-start">{d.th_base_price}</th>
                 <th className="py-3.5 px-4 text-start">{d.th_qualities}</th>
@@ -911,7 +1119,7 @@ export default function AdminPricingPage() {
             <tbody className="divide-y text-xs">
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="text-center py-12 text-muted-foreground">
+                  <td colSpan={9} className="text-center py-12 text-muted-foreground">
                     <div className="flex items-center justify-center gap-2">
                       <RefreshCw size={16} className="animate-spin text-primary" />
                       <span>{d.loading_data}</span>
@@ -920,7 +1128,7 @@ export default function AdminPricingPage() {
                 </tr>
               ) : paginatedItems.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="text-center py-12 text-muted-foreground">
+                  <td colSpan={9} className="text-center py-12 text-muted-foreground">
                     <p className="font-bold text-sm">{d.no_records}</p>
                   </td>
                 </tr>
@@ -953,11 +1161,6 @@ export default function AdminPricingPage() {
                             </div>
                             <div className="text-[11px] text-muted-foreground font-semibold flex items-center gap-1.5 flex-wrap">
                               <span>{getLocalizedSeries(item.series)}</span>
-                              {item.device_type && item.device_type !== 'phone' && (
-                                <span className="text-[9px] px-1.5 py-0.2 rounded bg-primary/10 text-primary uppercase font-bold">
-                                  {item.device_type}
-                                </span>
-                              )}
                             </div>
                           </div>
                         </div>
@@ -965,6 +1168,12 @@ export default function AdminPricingPage() {
                       <td className="py-3 px-4">
                         <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-muted border">
                           {item.brand}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 whitespace-nowrap">
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-primary/10 text-primary border border-primary/20">
+                          <Layers size={11} className="shrink-0" />
+                          <span>{getLocalizedBranchName(item)}</span>
                         </span>
                       </td>
                       <td className="py-3 px-4 font-bold text-foreground">
@@ -1209,40 +1418,172 @@ export default function AdminPricingPage() {
                   </div>
                 </div>
 
-                {/* 2. Service Selection (Dynamic from System Services & Repair Operations) */}
-                <div className="p-3.5 bg-primary/5 border border-primary/20 rounded-md space-y-2">
+                {/* 1. Main Branch / Department (الفرع الرئيسي / القسم العام) */}
+                <div className="p-3.5 bg-muted/20 border rounded-md space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-black uppercase tracking-wider text-primary flex items-center gap-1.5">
+                      <Layers size={14} />
+                      <span>{d.label_main_branch}</span>
+                    </label>
+                    <span className="text-[10px] font-semibold text-muted-foreground">
+                      {locale === 'ar' ? 'حدد الفرع الرئيسي الذي تتبع له هذه الخدمة أو أنشئ فرعاً جديداً' : locale === 'en' ? 'Select main branch or add new' : 'Ana branşı seçin veya yeni ekleyin'}
+                    </span>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                      <select
+                        value={isCustomBranch ? 'custom_new' : form.device_type}
+                        onChange={(e) => {
+                          if (e.target.value === 'custom_new') {
+                            setIsCustomBranch(true);
+                          } else {
+                            setIsCustomBranch(false);
+                            const branch = availableBranches.find(b => b.slug === e.target.value);
+                            if (branch) {
+                              setForm(prev => ({
+                                ...prev,
+                                device_type: branch.slug,
+                                category_name_ar: branch.name_ar,
+                                category_name_tr: branch.name_tr,
+                                category_name_en: branch.name_en,
+                              }));
+                            }
+                          }
+                        }}
+                        className="flex-1 px-3 py-2 rounded-md border bg-background text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                      >
+                        <optgroup label={locale === 'ar' ? 'الفروع والأقسام المتاحة' : locale === 'en' ? 'Available Branches' : 'Mevcut Branşlar'}>
+                          {availableBranches.map((b) => {
+                            const bName = locale === 'ar' ? b.name_ar : locale === 'en' ? b.name_en : b.name_tr;
+                            return (
+                              <option key={b.slug} value={b.slug}>
+                                {bName}
+                              </option>
+                            );
+                          })}
+                        </optgroup>
+                        <option value="custom_new" className="font-black text-primary">
+                          {d.new_branch_option}
+                        </option>
+                      </select>
+
+                      <button
+                        type="button"
+                        onClick={() => setIsCustomBranch(!isCustomBranch)}
+                        className={cn(
+                          "px-3 py-2 rounded-md text-xs font-bold border transition-all cursor-pointer whitespace-nowrap flex items-center justify-center gap-1.5",
+                          isCustomBranch 
+                            ? "bg-primary text-primary-foreground border-primary" 
+                            : "bg-background hover:bg-muted text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        <Plus size={14} />
+                        <span>{locale === 'ar' ? 'فرع جديد' : locale === 'en' ? 'New Branch' : 'Yeni Branş'}</span>
+                      </button>
+                    </div>
+
+                    {/* New Branch Custom Inputs */}
+                    {isCustomBranch && (
+                      <div className="p-3 bg-background border border-primary/30 rounded-md space-y-2.5 animate-in fade-in duration-200">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-black text-primary flex items-center gap-1.5">
+                            <Layers size={13} />
+                            <span>{d.custom_branch_box_title}</span>
+                          </span>
+                          <span className="text-[10px] text-muted-foreground">
+                            {locale === 'ar' ? 'سيتم حفظ هذا الفرع تلقائياً' : locale === 'en' ? 'Will be saved automatically' : 'Otomatik kaydedilecek'}
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-black uppercase text-muted-foreground">{d.label_branch_ar}</label>
+                            <input
+                              value={customBranch.ar}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setCustomBranch(prev => ({
+                                  ...prev,
+                                  ar: val,
+                                  tr: prev.tr || val,
+                                  en: prev.en || val
+                                }));
+                              }}
+                              placeholder={d.placeholder_branch_ar}
+                              className="w-full px-2.5 py-1.5 rounded-md border bg-muted/20 text-xs font-bold"
+                              dir="rtl"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-black uppercase text-muted-foreground">{d.label_branch_tr}</label>
+                            <input
+                              value={customBranch.tr}
+                              onChange={(e) => setCustomBranch(prev => ({ ...prev, tr: e.target.value }))}
+                              placeholder={d.placeholder_branch_tr}
+                              className="w-full px-2.5 py-1.5 rounded-md border bg-muted/20 text-xs font-bold"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-black uppercase text-muted-foreground">{d.label_branch_en}</label>
+                            <input
+                              value={customBranch.en}
+                              onChange={(e) => setCustomBranch(prev => ({ ...prev, en: e.target.value }))}
+                              placeholder={d.placeholder_branch_en}
+                              className="w-full px-2.5 py-1.5 rounded-md border bg-muted/20 text-xs font-bold"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 2. Service / Operation Name Inputs (Free text - no select dropdown) */}
+                <div className="p-3.5 bg-muted/20 border rounded-md space-y-3">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-black uppercase tracking-wider text-primary flex items-center gap-1.5">
                       <Wrench size={14} />
                       <span>{d.label_service_type}</span>
                     </label>
                     <span className="text-[10px] font-semibold text-muted-foreground">
-                      {locale === 'ar' ? 'يتم ملء وتحديث الأسماء تلقائياً عند الاختيار' : 'Seçildiğinde alanlar otomatik güncellenir'}
+                      {locale === 'ar' ? 'اكتب اسم الخدمة أو نوع العطل/القطعة بحرية' : locale === 'en' ? 'Type service or operation name freely' : 'Hizmet veya işlem adını serbestçe yazın'}
                     </span>
                   </div>
 
-                  <select
-                    value={form.service_slug}
-                    onChange={(e) => handleServiceSelect(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-md border bg-background text-xs font-black text-foreground outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer shadow-xs"
-                  >
-                    <option value="" disabled>{d.select_service_placeholder}</option>
-                    
-                    {/* Dynamic Services from Website System */}
-                    {systemServices.map(s => {
-                      const label = locale === 'ar' ? (s.title_ar || s.title) : locale === 'en' ? (s.title_en || s.title) : (s.title_tr || s.title);
-                      return (
-                        <option key={s.slug} value={s.slug}>
-                          {label} ({s.slug})
-                        </option>
-                      );
-                    })}
-
-                    <option value="custom">{d.custom_service_option}</option>
-                  </select>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{d.label_service_ar}</label>
+                      <input
+                        value={form.service_name_ar}
+                        onChange={(e) => setForm(prev => ({ ...prev, service_name_ar: e.target.value }))}
+                        placeholder="مثال: تبديل الشاشة، تغيير بطارية..."
+                        className="w-full px-3 py-2 rounded-md border bg-background text-xs font-bold"
+                        dir="rtl"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{d.label_service_tr}</label>
+                      <input
+                        value={form.service_name_tr}
+                        onChange={(e) => setForm(prev => ({ ...prev, service_name_tr: e.target.value }))}
+                        placeholder="Örn: Ekran Değişimi, Batarya Değişimi..."
+                        className="w-full px-3 py-2 rounded-md border bg-background text-xs font-bold"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{d.label_service_en}</label>
+                      <input
+                        value={form.service_name_en}
+                        onChange={(e) => setForm(prev => ({ ...prev, service_name_en: e.target.value }))}
+                        placeholder="e.g. Screen Replacement, Battery..."
+                        className="w-full px-3 py-2 rounded-md border bg-background text-xs font-bold"
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                {/* 3. Brand & Series & Model & Category */}
+                {/* 3. Brand & Series & Model */}
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                   <div className="space-y-1">
                     <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{d.label_brand}</label>
@@ -1271,39 +1612,6 @@ export default function AdminPricingPage() {
                       onChange={(e) => setForm(prev => ({ ...prev, model_name: e.target.value }))}
                       placeholder={d.placeholder_model}
                       className="w-full px-3 py-2 rounded-md border bg-background text-xs font-bold"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* 3. Service Details (Multilingual) */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{d.label_service_ar}</label>
-                    <input
-                      value={form.service_name_ar}
-                      onChange={(e) => setForm(prev => ({ ...prev, service_name_ar: e.target.value }))}
-                      placeholder="تبديل الشاشة"
-                      className="w-full px-3 py-2 rounded-lg border bg-background text-xs font-bold"
-                      dir="rtl"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{d.label_service_en}</label>
-                    <input
-                      value={form.service_name_en}
-                      onChange={(e) => setForm(prev => ({ ...prev, service_name_en: e.target.value }))}
-                      placeholder="Screen Replacement"
-                      className="w-full px-3 py-2 rounded-lg border bg-background text-xs font-bold"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{d.label_service_tr}</label>
-                    <input
-                      value={form.service_name_tr}
-                      onChange={(e) => setForm(prev => ({ ...prev, service_name_tr: e.target.value }))}
-                      placeholder="Ekran Değişimi"
-                      className="w-full px-3 py-2 rounded-lg border bg-background text-xs font-bold"
                       required
                     />
                   </div>

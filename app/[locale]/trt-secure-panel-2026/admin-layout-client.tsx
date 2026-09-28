@@ -80,7 +80,7 @@ export default function AdminLayoutClient({
     { id: 'verification', href: '/trt-secure-panel-2026/verification', name: t('menu_verification') || 'Official Requests', icon: ShieldCheck, permission: 'MANAGE_VERIFICATIONS' },
     { id: 'policy-terms', href: '/trt-secure-panel-2026/policy-terms', name: t('menu_policy') || 'Policy & Terms', icon: BookOpen, permission: 'MANAGE_SETTINGS' },
     { id: 'services', href: '/trt-secure-panel-2026/services', name: t('menu_services') || 'Services', icon: Layers, permission: 'MANAGE_SETTINGS' },
-    { id: 'pricing', href: '/trt-secure-panel-2026/pricing', name: t('menu_pricing') || 'Tamir Fiyatları', icon: Wrench, permission: 'MANAGE_SETTINGS' },
+    { id: 'pricing', href: '/trt-secure-panel-2026/pricing', name: t('menu_pricing') || 'Ürünler ve Fiyatlar', icon: Wrench, permission: 'MANAGE_SETTINGS' },
     { id: 'settings', href: '/trt-secure-panel-2026/settings', name: t('menu_settings'), icon: Settings, permission: 'MANAGE_SETTINGS' },
   ];
 
