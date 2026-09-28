@@ -14,14 +14,21 @@ import toast from 'react-hot-toast';
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 const PREDEFINED_LINKS = [
-  { label: 'Smartphones Repair', value: '/services/phone' },
-  { label: 'Laptops Repair', value: '/services/laptop' },
-  { label: 'Tablets Repair', value: '/services/tablet' },
-  { label: 'Robot Vacuums', value: '/services/robot' },
-  { label: 'Luxury Watch', value: '/services/watch' },
-  { label: 'Portfolio', value: '/portfolio' },
-  { label: 'Blog', value: '/blog' },
-  { label: 'Contact', value: '/contact' },
+  { label: 'صفحة أسعار الصيانة (عامة) - Repair Pricing (All)', value: '/tamir-fiyatlari' },
+  { label: 'أسعار صيانة الهواتف - Phone Repairs Pricing', value: '/tamir-fiyatlari?category=phone' },
+  { label: 'أسعار صيانة اللابتوب - Laptop Repairs Pricing', value: '/tamir-fiyatlari?category=laptop' },
+  { label: 'أسعار صيانة مكانس الروبوت - Robot Vacuums Pricing', value: '/tamir-fiyatlari?category=robot' },
+  { label: 'أسعار صيانة الساعات - Smart Watch Pricing', value: '/tamir-fiyatlari?category=watch' },
+  { label: 'أسعار صيانة التابلت - Tablet Repair Pricing', value: '/tamir-fiyatlari?category=tablet' },
+  { label: 'أسعار قطع الغيار - Spare Parts Pricing', value: '/tamir-fiyatlari?category=parts' },
+  { label: 'خدمة الهواتف - Smartphones Service', value: '/services/phone' },
+  { label: 'خدمة اللابتوب - Laptops Service', value: '/services/laptop' },
+  { label: 'خدمة التابلت - Tablets Service', value: '/services/tablet' },
+  { label: 'خدمة مكانس الروبوت - Robot Vacuums Service', value: '/services/robot' },
+  { label: 'خدمة الساعات - Luxury Watch Service', value: '/services/watch' },
+  { label: 'معرض الأعمال - Portfolio', value: '/portfolio' },
+  { label: 'المدونة - Blog', value: '/blog' },
+  { label: 'اتصل بنا - Contact', value: '/contact' },
 ];
 
 export default function BannersPage() {
@@ -306,16 +313,28 @@ export default function BannersPage() {
             {/* Link Selection */}
             <div className="space-y-4">
               <div className="space-y-1">
-                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1 mb-1 block">Button Action (Link)</label>
+                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1 mb-1 block">Button Action (Target Page / Link)</label>
                 <select
-                  value={bannerForm.link}
-                  onChange={(e) => setBannerForm(p => ({ ...p, link: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
+                  value={PREDEFINED_LINKS.some(l => l.value === bannerForm.link) ? bannerForm.link : 'custom'}
+                  onChange={(e) => {
+                    if (e.target.value !== 'custom') {
+                      setBannerForm(p => ({ ...p, link: e.target.value }));
+                    }
+                  }}
+                  className="w-full px-4 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
                 >
                   {PREDEFINED_LINKS.map(link => (
-                    <option key={link.value} value={link.value}>{link.label} ({link.value})</option>
+                    <option key={link.value} value={link.value}>{link.label}</option>
                   ))}
+                  <option value="custom">رابط مخصص آخر / Custom URL...</option>
                 </select>
+
+                <input
+                  value={bannerForm.link}
+                  onChange={(e) => setBannerForm(p => ({ ...p, link: e.target.value }))}
+                  placeholder="/tamir-fiyatlari veya özel bağlantı..."
+                  className="w-full px-4 py-2 rounded-md border bg-background/50 outline-none focus:ring-2 focus:ring-primary/20 font-mono text-xs text-muted-foreground mt-1.5"
+                />
               </div>
             </div>
 

@@ -37,6 +37,7 @@ const VerificationAdmin = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [showSettings, setShowSettings] = useState(false);
     const [copiedId, setCopiedId] = useState<string | null>(null);
+    const [updatingStatusId, setUpdatingStatusId] = useState<number | null>(null);
     const [settings, setSettings] = useState({
         VERIFICATION_EMAIL_SUBJECT: '',
         VERIFICATION_EMAIL_BODY: '',
@@ -162,6 +163,33 @@ const VerificationAdmin = () => {
         setTimeout(() => setCopiedId(null), 2000);
     };
 
+    const updateStatusApi = async (id: number, newStatus: 'pending' | 'sent', silent: boolean = false) => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        setUpdatingStatusId(id);
+        try {
+            await axios.patch(`${API_BASE}/${id}/status`, { status: newStatus }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setLeads(prev => prev.map(l => l.id === id ? { ...l, status: newStatus } : l));
+            if (!silent) {
+                toast.success(newStatus === 'sent' ? (t('status_marked_sent') || 'تم تحويل الطلب إلى مكتمل بنجاح') : (t('status_marked_pending') || 'تمت إعادة الطلب إلى قيد الانتظار'));
+            }
+        } catch (err) {
+            console.error('Error updating status:', err);
+            if (!silent) {
+                toast.error(t('status_update_error') || 'فشل تحديث حالة الطلب');
+            }
+        } finally {
+            setUpdatingStatusId(null);
+        }
+    };
+
+    const handleToggleStatus = (lead: any) => {
+        const nextStatus = lead.status === 'sent' ? 'pending' : 'sent';
+        updateStatusApi(lead.id, nextStatus);
+    };
+
     const handleWhatsAppAction = (lead: any) => {
         const phone = lead.whatsapp || lead.phone;
         if (!phone) return;
@@ -181,6 +209,11 @@ const VerificationAdmin = () => {
         
         const finalMessage = pdfUrl ? `${message}\n\n${t('official_doc') || 'Document'}: ${pdfUrl}` : message;
         window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(finalMessage)}`, '_blank');
+
+        // Automatically mark as sent/completed if currently pending
+        if (lead.status === 'pending') {
+            updateStatusApi(lead.id, 'sent', false);
+        }
     };
 
     return (
@@ -409,14 +442,26 @@ const VerificationAdmin = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-center">
-                                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${
-                                            lead.status === 'sent' 
-                                                ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' 
-                                                : 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
-                                        }`}>
-                                            {lead.status === 'sent' ? <CheckCircle size={10} /> : <Clock size={10} />}
-                                            {lead.status === 'sent' ? t('status_sent') : t('status_pending')}
-                                        </span>
+                                        <button
+                                            type="button"
+                                            disabled={updatingStatusId === lead.id}
+                                            onClick={() => handleToggleStatus(lead)}
+                                            title={lead.status === 'sent' ? (t('mark_pending_tooltip') || 'اضغط للإعادة إلى قيد الانتظار') : (t('mark_completed_tooltip') || 'اضغط للتحويل إلى مكتمل')}
+                                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all border shadow-sm cursor-pointer active:scale-95 ${
+                                                lead.status === 'sent' 
+                                                    ? 'bg-emerald-500/15 text-emerald-600 border-emerald-500/30 hover:bg-emerald-500 hover:text-white dark:hover:text-white' 
+                                                    : 'bg-amber-500/15 text-amber-600 border-amber-500/30 hover:bg-amber-500 hover:text-white dark:hover:text-white'
+                                            } ${updatingStatusId === lead.id ? 'opacity-60 cursor-not-allowed' : ''}`}
+                                        >
+                                            {updatingStatusId === lead.id ? (
+                                                <Loader2 size={11} className="animate-spin" />
+                                            ) : lead.status === 'sent' ? (
+                                                <CheckCircle size={11} />
+                                            ) : (
+                                                <Clock size={11} />
+                                            )}
+                                            <span>{lead.status === 'sent' ? t('status_sent') : t('status_pending')}</span>
+                                        </button>
                                     </td>
                                     <td className="px-6 py-4 text-center">
                                         <div className="flex flex-col">

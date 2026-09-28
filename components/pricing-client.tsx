@@ -5,15 +5,28 @@ import { useTranslations, useLocale } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, Wrench, ShieldCheck, Clock, CheckCircle2, ChevronDown, ChevronUp,
-  Phone, Truck, Database, Award, X, Sparkles,
-  LayoutGrid, Table as TableIcon, AlertCircle, Check, Smartphone, Layers,
-  ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight
+  Phone, Truck, Database, Award, X, Sparkles, SlidersHorizontal,
+  LayoutGrid, Table as TableIcon, AlertCircle, Check, Smartphone, Laptop,
+  Watch, Tablet, Headphones, Layers, ChevronRight, Calendar, ArrowRight,
+  Filter, RotateCcw, CheckSquare, Square, ExternalLink
 } from 'lucide-react';
 import axios from 'axios';
 import { cn } from '@/lib/utils';
 import { useSettings } from './settings-provider';
 import toast from 'react-hot-toast';
-import { WhatsappIcon } from './social-icons';
+import { WhatsappIcon, RobotVacuumIcon, AppleHeadphonesIcon } from './social-icons';
+import { BrandIcon } from './brand-icons';
+import { Link } from '@/i18n/routing';
+
+interface DynamicBanner {
+  id: number;
+  title: string;
+  description: string;
+  cta?: string;
+  link?: string;
+  image: string;
+  active: boolean;
+}
 
 interface QualityOption {
   quality_tr: string;
@@ -50,23 +63,50 @@ interface PricingItem {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
+
+const getServiceIcon = (slug: string, iconName?: string) => {
+  const s = (slug || '').toLowerCase();
+  if (s.includes('phone') || s.includes('telefon')) return Smartphone;
+  if (s.includes('laptop') || s.includes('macbook') || s.includes('bilgisayar')) return Laptop;
+  if (s.includes('robot') || s.includes('supurge')) return RobotVacuumIcon;
+  if (s.includes('watch') || s.includes('saat')) return Watch;
+  if (s.includes('tablet') || s.includes('ipad')) return Tablet;
+  if (s.includes('kulaklik') || s.includes('headphone') || s.includes('airpods')) return AppleHeadphonesIcon;
+  if (s.includes('parca') || s.includes('part')) return Wrench;
+  return Layers;
+};
+
 export function PricingClient() {
   const t = useTranslations('Pricing');
   const locale = useLocale() as 'ar' | 'en' | 'tr';
+  const isRTL = locale === 'ar';
   const { settings } = useSettings();
 
   const [items, setItems] = useState<PricingItem[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Filters State
   const [search, setSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedBrand, setSelectedBrand] = useState('all');
   const [selectedService, setSelectedService] = useState('all');
+  const [selectedQuality, setSelectedQuality] = useState<'all' | 'original' | 'oem' | 'compat'>('all');
   const [selectedSeries, setSelectedSeries] = useState('all');
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
+  const [maxDbPrice, setMaxDbPrice] = useState(100000);
+  const [sortBy, setSortBy] = useState<'featured' | 'price_asc' | 'price_desc'>('featured');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [expandedCards, setExpandedCards] = useState<Record<number, boolean>>({});
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
-  // Table View Pagination for peak performance
+  // Table View Pagination
   const [tablePage, setTablePage] = useState(1);
   const TABLE_PAGE_SIZE = 15;
+
+  // Dynamic Banners from Admin Panel
+  const [apiBanners, setApiBanners] = useState<DynamicBanner[]>([]);
+  // Dynamic Services from Database
+  const [systemServices, setSystemServices] = useState<any[]>([]);
 
   // Appointment Modal State
   const [bookingModalItem, setBookingModalItem] = useState<PricingItem | null>(null);
@@ -84,46 +124,176 @@ export function PricingClient() {
   const cleanWhatsapp = rawWhatsapp.replace(/\D/g, '');
 
   useEffect(() => {
-    const fetchPricing = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`${API_BASE}/pricing`);
-        const data = res.data as PricingItem[];
-        setItems(data);
-        setExpandedCards({});
+        const [pricingRes, bannersRes, servicesRes] = await Promise.allSettled([
+          axios.get(`${API_BASE}/pricing`),
+          axios.get(`${API_BASE}/banners?locale=${locale}`),
+          axios.get(`${API_BASE}/content/services?locale=${locale}`)
+        ]);
+
+        // 1. Process Pricing Items (Database is single source of truth)
+        if (pricingRes.status === 'fulfilled') {
+          const data = (pricingRes.value.data as PricingItem[]) || [];
+          setItems(data);
+          if (data.length > 0) {
+            const highest = Math.max(...data.map(i => i.base_price || 0));
+            const ceiling = Math.ceil(highest / 1000) * 1000 || 50000;
+            setMaxDbPrice(ceiling);
+            setPriceRange([0, ceiling]);
+          } else {
+            setMaxDbPrice(0);
+            setPriceRange([0, 0]);
+          }
+        }
+
+        // 2. Process Dynamic Banners
+        if (bannersRes.status === 'fulfilled' && Array.isArray(bannersRes.value.data)) {
+          setApiBanners(bannersRes.value.data.filter((b: any) => b.active));
+        }
+
+        // 3. Process Dynamic Services
+        if (servicesRes.status === 'fulfilled' && Array.isArray(servicesRes.value.data)) {
+          setSystemServices(servicesRes.value.data.filter((s: any) => s.is_active));
+        }
       } catch (err) {
-        console.error('Failed to load pricing items:', err);
+        console.error('Failed to load catalog data:', err);
       } finally {
         setLoading(false);
       }
     };
-    fetchPricing();
-  }, []);
+    fetchData();
+  }, [locale]);
 
-  // Reset pagination and series filter on filter change
+  // Category Tabs Configuration (Dynamically generated ONLY from services present in actual pricing items)
+  const categoryTabs = useMemo(() => {
+    // If no pricing items have been added to the database yet, do NOT show any category tabs
+    if (!items || items.length === 0) return [];
+
+    // Find unique categories / service slugs that actually exist in the DB items
+    const presentCats = new Set<string>();
+    items.forEach(item => {
+      if (item.device_type) presentCats.add(item.device_type.toLowerCase().trim());
+      if (item.service_slug) presentCats.add(item.service_slug.toLowerCase().trim());
+    });
+
+    // Match with system services
+    const dynamicTabs = systemServices
+      .filter(s => {
+        const slug = (s.slug || '').toLowerCase().trim();
+        return (
+          presentCats.has(slug) ||
+          (slug.includes('phone') && (presentCats.has('phone') || presentCats.has('telefon'))) ||
+          (slug.includes('laptop') && (presentCats.has('laptop') || presentCats.has('bilgisayar') || presentCats.has('macbook'))) ||
+          (slug.includes('robot') && (presentCats.has('robot') || presentCats.has('supurge'))) ||
+          (slug.includes('watch') && (presentCats.has('watch') || presentCats.has('saat'))) ||
+          (slug.includes('tablet') && (presentCats.has('tablet') || presentCats.has('ipad'))) ||
+          (slug.includes('kulaklik') && (presentCats.has('kulaklik') || presentCats.has('headphone') || presentCats.has('airpods')))
+        );
+      })
+      .map(s => ({
+        id: s.slug,
+        label: locale === 'ar' ? (s.title_ar || s.title) : locale === 'en' ? (s.title_en || s.title) : (s.title_tr || s.title),
+        icon: getServiceIcon(s.slug, s.icon)
+      }));
+
+    if (dynamicTabs.length === 0) {
+      const uniqueTypes = Array.from(new Set(items.map(i => i.device_type).filter(Boolean)));
+      if (uniqueTypes.length > 0) {
+        const itemTabs = uniqueTypes.map(type => ({
+          id: type,
+          label: type,
+          icon: getServiceIcon(type)
+        }));
+        return [{ id: 'all', label: t('tab_all'), icon: Layers }, ...itemTabs];
+      }
+      return [];
+    }
+
+    const allTab = { id: 'all', label: t('tab_all'), icon: Layers };
+    return [allTab, ...dynamicTabs];
+  }, [items, systemServices, locale, t]);
+
+  // Auto-reset selectedCategory if the selected category is no longer present in categoryTabs
+  useEffect(() => {
+    if (selectedCategory !== 'all' && !categoryTabs.some(c => c.id === selectedCategory)) {
+      setSelectedCategory('all');
+    }
+  }, [categoryTabs, selectedCategory]);
+
+  // Reset pagination on filter change
   useEffect(() => {
     setTablePage(1);
-    setSelectedSeries('all');
-  }, [search, selectedBrand, selectedService]);
+  }, [search, selectedCategory, selectedBrand, selectedService, selectedQuality, selectedSeries, priceRange, sortBy]);
 
-  // Filter items
+  // Derived filter collections
+  const categoryFilteredItems = useMemo(() => {
+    if (selectedCategory === 'all') return items;
+    const cat = selectedCategory.toLowerCase();
+    return items.filter(item => {
+      const dt = (item.device_type || '').toLowerCase();
+      const sSlug = (item.service_slug || '').toLowerCase();
+      return dt === cat || sSlug === cat || (cat === 'phone' && (dt.includes('phone') || dt.includes('telefon')));
+    });
+  }, [items, selectedCategory]);
+
   const brands = useMemo(() => {
-    return Array.from(new Set(items.map(i => i.brand))).filter(Boolean);
-  }, [items]);
+    return Array.from(new Set(categoryFilteredItems.map(i => i.brand))).filter(Boolean);
+  }, [categoryFilteredItems]);
 
   const services = useMemo(() => {
     const map = new Map<string, string>();
-    items.forEach(i => {
-      const name = locale === 'ar' ? (i.service_name_ar || i.service_name_tr) : locale === 'en' ? (i.service_name_en || i.service_name_tr) : i.service_name_tr;
-      map.set(i.service_slug, name);
+    // Only from categoryFilteredItems (actual items added in DB)!
+    categoryFilteredItems.forEach(i => {
+      if (i.service_slug) {
+        const name = locale === 'ar' ? (i.service_name_ar || i.service_name_tr) : locale === 'en' ? (i.service_name_en || i.service_name_tr) : i.service_name_tr;
+        map.set(i.service_slug, name);
+      }
     });
     return Array.from(map.entries()).map(([slug, name]) => ({ slug, name }));
-  }, [items, locale]);
+  }, [categoryFilteredItems, locale]);
 
+  const availableQualities = useMemo(() => {
+    let hasOrig = false;
+    let hasOem = false;
+    let hasCompat = false;
+    categoryFilteredItems.forEach(item => {
+      item.quality_options?.forEach(q => {
+        const name = ((q.quality_tr || '') + ' ' + (q.quality_ar || '') + ' ' + (q.quality_en || '')).toLowerCase();
+        if (name.includes('orijinal') || name.includes('servis') || name.includes('وكالة') || name.includes('original')) hasOrig = true;
+        if (name.includes('a+') || name.includes('oem') || name.includes('نخب')) hasOem = true;
+        if (name.includes('muadil') || name.includes('incell') || name.includes('revize') || name.includes('اقتصادي') || name.includes('تجاري')) hasCompat = true;
+      });
+    });
+    return { hasAny: hasOrig || hasOem || hasCompat, hasOrig, hasOem, hasCompat };
+  }, [categoryFilteredItems]);
+
+  // Filter items based on all criteria
   const filteredItems = useMemo(() => {
-    return items.filter(item => {
+    return categoryFilteredItems.filter(item => {
       if (selectedBrand !== 'all' && item.brand !== selectedBrand) return false;
       if (selectedService !== 'all' && item.service_slug !== selectedService) return false;
+      if (selectedSeries !== 'all' && item.series !== selectedSeries) return false;
+
+      // Price filter
+      if (maxDbPrice > 0 && (item.base_price < priceRange[0] || item.base_price > priceRange[1])) return false;
+
+      // Quality filter
+      if (selectedQuality !== 'all') {
+        if (selectedQuality === 'original') {
+          const hasOrig = item.quality_options?.some(q => (q.quality_tr || '').toLowerCase().includes('orijinal') || (q.quality_tr || '').toLowerCase().includes('servis')) || item.notes_tr?.toLowerCase().includes('orijinal');
+          if (!hasOrig && item.quality_options?.length > 0) return false;
+        } else if (selectedQuality === 'oem') {
+          const hasOem = item.quality_options?.some(q => (q.quality_tr || '').toLowerCase().includes('a+') || (q.quality_tr || '').toLowerCase().includes('oem'));
+          if (!hasOem && item.quality_options?.length > 0) return false;
+        } else if (selectedQuality === 'compat') {
+          const hasCompat = item.quality_options?.some(q => (q.quality_tr || '').toLowerCase().includes('muadil') || (q.quality_tr || '').toLowerCase().includes('incell') || (q.quality_tr || '').toLowerCase().includes('revize'));
+          if (!hasCompat && item.quality_options?.length > 0) return false;
+        }
+      }
+
+      // Search filter
       if (search.trim()) {
         const q = search.toLowerCase().trim();
         const serviceName = (locale === 'ar' ? (item.service_name_ar || item.service_name_tr) : locale === 'en' ? (item.service_name_en || item.service_name_tr) : item.service_name_tr).toLowerCase();
@@ -134,8 +304,25 @@ export function PricingClient() {
         if (!match) return false;
       }
       return true;
+    }).sort((a, b) => {
+      if (sortBy === 'price_asc') return a.base_price - b.base_price;
+      if (sortBy === 'price_desc') return b.base_price - a.base_price;
+      if (a.is_popular && !b.is_popular) return -1;
+      if (!a.is_popular && b.is_popular) return 1;
+      return a.sort_order - b.sort_order;
     });
-  }, [items, selectedBrand, selectedService, search, locale]);
+  }, [categoryFilteredItems, selectedBrand, selectedService, selectedSeries, selectedQuality, priceRange, maxDbPrice, search, sortBy, locale]);
+
+  // Series List for Horizontal Chips
+  const seriesList = useMemo(() => {
+    const set = new Set<string>();
+    categoryFilteredItems.forEach(item => {
+      if (selectedBrand === 'all' || item.brand === selectedBrand) {
+        if (item.series && item.series.trim()) set.add(item.series.trim());
+      }
+    });
+    return Array.from(set);
+  }, [categoryFilteredItems, selectedBrand]);
 
   // Table pagination calculations
   const totalTablePages = Math.max(1, Math.ceil(filteredItems.length / TABLE_PAGE_SIZE));
@@ -143,40 +330,6 @@ export function PricingClient() {
     const start = (tablePage - 1) * TABLE_PAGE_SIZE;
     return filteredItems.slice(start, start + TABLE_PAGE_SIZE);
   }, [filteredItems, tablePage, TABLE_PAGE_SIZE]);
-
-  const tableStartIndex = filteredItems.length === 0 ? 0 : (tablePage - 1) * TABLE_PAGE_SIZE + 1;
-  const tableEndIndex = Math.min(tablePage * TABLE_PAGE_SIZE, filteredItems.length);
-
-  // Group by series for Feza Teknik style card presentation
-  const seriesGroups = useMemo(() => {
-    const groups: Record<string, PricingItem[]> = {};
-    filteredItems.forEach(item => {
-      const key = item.series || (locale === 'ar' ? 'موديلات أخرى' : locale === 'en' ? 'Other Models' : 'Diğer Modeller');
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(item);
-    });
-    return groups;
-  }, [filteredItems, locale]);
-
-  // Unique series list for quick pills navigation
-  const seriesList = useMemo(() => {
-    const set = new Set<string>();
-    filteredItems.forEach(item => {
-      const key = item.series || (locale === 'ar' ? 'موديلات أخرى' : locale === 'en' ? 'Other Models' : 'Diğer Modeller');
-      if (key) set.add(key);
-    });
-    return Array.from(set);
-  }, [filteredItems, locale]);
-
-  // Displayed groups (either all or filtered by selected series)
-  const displayedSeriesGroups = useMemo(() => {
-    if (selectedSeries === 'all') return seriesGroups;
-    const singleGroup: Record<string, PricingItem[]> = {};
-    if (seriesGroups[selectedSeries]) {
-      singleGroup[selectedSeries] = seriesGroups[selectedSeries];
-    }
-    return singleGroup;
-  }, [seriesGroups, selectedSeries]);
 
   const toggleExpand = (id: number) => {
     setExpandedCards(prev => ({
@@ -249,60 +402,13 @@ export function PricingClient() {
     }
     if (locale === 'en') {
       if (badge === 'En İyi Seçim') return 'Best Choice';
-      if (badge === 'Ekonomik') return 'Budget';
+      if (badge === 'Ekonomik') return 'Economy';
       if (badge === 'Popüler') return 'Popular';
       if (badge === 'Orijinal') return 'Original';
       if (badge === 'Tavsiye Edilen') return 'Recommended';
       return badge;
     }
     return badge;
-  };
-
-  const getLocalizedSeries = (series: string) => {
-    if (!series) {
-      return locale === 'ar' ? 'موديلات أخرى' : locale === 'en' ? 'Other Models' : 'Diğer Modeller';
-    }
-    if (locale === 'ar') {
-      if (series.toLowerCase().includes('diğer') || series.toLowerCase().includes('other')) {
-        return 'موديلات أخرى';
-      }
-      if (series.includes('Serisi')) {
-        return `فئة ${series.replace(/Serisi/i, '').trim()}`;
-      }
-      if (series.startsWith('سلسلة')) {
-        return series.replace(/^سلسلة\s*/, 'فئة ');
-      }
-      return series;
-    }
-    if (locale === 'en') {
-      if (series.toLowerCase().includes('diğer')) {
-        return 'Other Models';
-      }
-      if (series.includes('Serisi')) {
-        return `${series.replace(/Serisi/i, '').trim()} Series`;
-      }
-      return series;
-    }
-    return series;
-  };
-
-  const getLocalizedDuration = (duration: string) => {
-    if (!duration) return locale === 'ar' ? '30 دقيقة' : locale === 'en' ? '30 Minutes' : '30 Dakika';
-    if (locale === 'ar') {
-      return duration
-        .replace(/(\d+)\s*Dakika/gi, '$1 دقيقة')
-        .replace(/(\d+)\s*Saat/gi, '$1 ساعة')
-        .replace(/Aynı Gün Teslim/gi, 'تسليم بنفس اليوم')
-        .replace(/Hemen Teslim/gi, 'تسليم فوري');
-    }
-    if (locale === 'en') {
-      return duration
-        .replace(/(\d+)\s*Dakika/gi, '$1 Minutes')
-        .replace(/(\d+)\s*Saat/gi, '$1 Hours')
-        .replace(/Aynı Gün Teslim/gi, 'Same Day Delivery')
-        .replace(/Hemen Teslim/gi, 'Immediate Delivery');
-    }
-    return duration;
   };
 
   const getLocalizedWarranty = (warranty: string) => {
@@ -324,28 +430,14 @@ export function PricingClient() {
     return warranty;
   };
 
-  const getLocalizedNotes = (item: PricingItem) => {
-    if (locale === 'ar') return item.notes_ar || item.notes_tr;
-    if (locale === 'en') return item.notes_en || item.notes_tr;
-    return item.notes_tr;
-  };
-
-  const getLocalizedDeviceTitle = (item: PricingItem) => {
-    const serviceName = getLocalizedServiceName(item);
-    if (locale === 'ar') {
-      return `${serviceName} - ${item.model_name}`;
-    }
-    return `${item.model_name} ${serviceName}`;
-  };
-
   const openWhatsAppForModel = (item: PricingItem, qualityName?: string, price?: number) => {
     const serviceName = getLocalizedServiceName(item);
     const qualityText = qualityName ? ` (${qualityName} - ${price?.toLocaleString('tr-TR')} ₺)` : '';
     const message = locale === 'ar'
-      ? `مرحباً، أود الاستفسار عن خدمة ${serviceName} لجهاز ${item.model_name}${qualityText} ومعرفة إمكانية الصيانة.`
+      ? `مرحباً، أود الاستفسار عن خدمة ${serviceName} لجهاز ${item.model_name}${qualityText} ومعرفة إمكانية الصيانة وموعد الحجز.`
       : locale === 'en'
-      ? `Hello, I would like to inquire about ${serviceName} for ${item.model_name}${qualityText} and book a repair.`
-      : `Merhaba, ${item.model_name} cihazım için ${serviceName}${qualityText} fiyatı ve randevu hakkında bilgi almak istiyorum.`;
+      ? `Hello, I would like to inquire about ${serviceName} for ${item.model_name}${qualityText} and book a repair appointment.`
+      : `Merhaba, ${item.model_name} cihazım için ${serviceName}${qualityText} fiyatı ve servis randevusu almak istiyorum.`;
 
     const encoded = encodeURIComponent(message);
     window.open(`https://wa.me/${cleanWhatsapp}?text=${encoded}`, '_blank');
@@ -379,7 +471,6 @@ export function PricingClient() {
 
       toast.success(t('modal_success'));
 
-      // Optionally offer WhatsApp continuation
       if (bookingModalItem) {
         openWhatsAppForModel(bookingModalItem, bookingForm.selectedQuality);
       }
@@ -394,251 +485,247 @@ export function PricingClient() {
     }
   };
 
+  const resetAllFilters = () => {
+    setSearch('');
+    setSelectedBrand('all');
+    setSelectedService('all');
+    setSelectedQuality('all');
+    setSelectedSeries('all');
+    setPriceRange([0, maxDbPrice]);
+  };
+
+  // Fallback category banner images
+  const bannerFallbackImage = useMemo(() => {
+    if (selectedCategory === 'parts') return '/images/parts-banner.jpg';
+    if (selectedCategory === 'laptop') return '/images/laptops-banner.jpg';
+    return '/images/phones-banner.jpg';
+  }, [selectedCategory]);
+
+  // Dynamic active banner selected from admin panel
+  const activeBanner = useMemo(() => {
+    if (!apiBanners || apiBanners.length === 0) return null;
+
+    // 1. Check for specific category match in link (e.g. category=phone, category=laptop, /services/phone)
+    if (selectedCategory !== 'all') {
+      const catMatch = apiBanners.find(b => 
+        b.link?.includes(`category=${selectedCategory}`) || 
+        b.link?.toLowerCase().includes(selectedCategory)
+      );
+      if (catMatch) return catMatch;
+    }
+
+    // 2. Check for general pricing page link (/tamir-fiyatlari or /pricing)
+    const pricingMatch = apiBanners.find(b => 
+      b.link?.includes('/tamir-fiyatlari') || b.link?.includes('/pricing')
+    );
+    if (pricingMatch) return pricingMatch;
+
+    // 3. Fallback to first active banner
+    return apiBanners[0];
+  }, [apiBanners, selectedCategory]);
+
   return (
-    <div className="min-h-screen bg-background text-foreground transition-colors selection:bg-primary selection:text-primary-foreground">
-      {/* 1. HERO SECTION */}
-      <section className="relative pt-12 pb-14 md:pt-16 md:pb-20 overflow-hidden border-b border-border/40 bg-gradient-to-b from-card/80 via-background to-background">
-        {/* Glow ambient background elements */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[450px] bg-primary/10 blur-[130px] -z-10 pointer-events-none" />
-        <div className="absolute -top-24 right-10 w-80 h-80 bg-red-500/10 blur-[100px] -z-10 pointer-events-none" />
+    <div className="min-h-screen bg-[#0d0d0e] text-[#f4f4f5] selection:bg-[#E11D48] selection:text-white pb-20">
+      
+      {/* 1. TOP SUB-HEADER: CATEGORY TABS & SEARCH BAR (Image 1 Style) */}
+      <section className="bg-[#141416] border-b border-white/5 sticky top-0 z-40 backdrop-blur-md bg-opacity-95 shadow-lg">
+        {/* Search & Actions Bar */}
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            
+            {/* Live Search Input (Shown only if pricing items exist in DB) */}
+            {items.length > 0 ? (
+              <div className="relative flex-1 max-w-2xl">
+                <div className="relative flex items-center bg-[#1c1c1f] border border-white/10 rounded-md overflow-hidden focus-within:border-[#E11D48] focus-within:ring-1 focus-within:ring-[#E11D48]/50 transition-all">
+                  <input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder={locale === 'ar' ? 'ابحث عن جهاز أو قطعة (مثل iPhone 15 شاشة، Samsung بطارية)...' : locale === 'en' ? 'Search device or part (e.g. iPhone 15 screen, Samsung battery)...' : 'Ürün / model ara... (örnek: iPhone 15 ekran, Samsung batarya)'}
+                    className="w-full bg-transparent px-4 py-2.5 text-xs sm:text-sm font-semibold outline-none text-white placeholder:text-zinc-500"
+                  />
+                  {search && (
+                    <button 
+                      onClick={() => setSearch('')}
+                      className="p-2 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="bg-[#E11D48] hover:bg-[#be123c] text-white px-5 py-2.5 flex items-center justify-center transition-all cursor-pointer shrink-0 font-bold text-xs"
+                  >
+                    <Search size={16} />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <span className="text-xs sm:text-sm font-black tracking-wide text-white uppercase">
+                  {locale === 'ar' ? 'TR TECH | أسعار خدمات الصيانة وقطع الغيار' : locale === 'en' ? 'TR TECH | Repair & Parts Pricing' : 'TR TECH | Tamir ve Parça Fiyatları'}
+                </span>
+              </div>
+            )}
 
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center max-w-5xl">
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-widest mb-6 shadow-xs"
-          >
-            <Sparkles size={14} />
-            <span>{t('tag_2026')}</span>
-          </motion.div>
+            {/* Top Right Quick Actions (Destek / WhatsApp, Randevu) */}
+            <div className="flex items-center justify-end gap-2 shrink-0">
+              <a
+                href={`https://wa.me/${cleanWhatsapp}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-zinc-300 transition-all cursor-pointer"
+              >
+                <WhatsappIcon size={14} className="text-emerald-400" />
+                <span className="hidden sm:inline">{locale === 'ar' ? 'الدعم الفني' : locale === 'en' ? 'Support' : 'Destek'}</span>
+              </a>
 
-          <motion.h1 
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight uppercase mb-5 leading-tight"
-          >
-            {t('title')}
-          </motion.h1>
+              <a
+                href={`tel:${supportPhone.replace(/\s/g, '')}`}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-zinc-300 transition-all cursor-pointer"
+              >
+                <Phone size={14} className="text-[#E11D48]" />
+                <span className="hidden sm:inline">{supportPhone}</span>
+              </a>
 
-          <motion.p 
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-base sm:text-lg text-muted-foreground font-semibold max-w-3xl mx-auto leading-relaxed mb-8"
-          >
-            {t('subtitle')}
-          </motion.p>
-
-          {/* Interactive Live Search Box (Clean, tags removed, badge removed) */}
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3 }}
-            className="relative max-w-2xl mx-auto"
-          >
-            <div className="relative flex items-center bg-card border-2 border-primary/30 rounded-xl shadow-lg hover:border-primary/50 focus-within:border-primary transition-all p-1">
-              <Search className="text-primary ml-3 mr-2 shrink-0" size={20} />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={t('search_placeholder')}
-                className="w-full bg-transparent px-2 py-2.5 text-sm sm:text-base font-bold outline-none placeholder:text-muted-foreground/60"
-              />
-              {search && (
-                <button 
-                  onClick={() => setSearch('')}
-                  className="p-2 text-muted-foreground hover:text-foreground mr-1 transition-colors cursor-pointer"
-                  aria-label="Clear search"
+              {/* Mobile Filter Toggle Button */}
+              {items.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setIsMobileFilterOpen(true)}
+                  className="lg:hidden flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#E11D48] text-white text-xs font-black shadow-md cursor-pointer"
                 >
-                  <X size={18} />
+                  <SlidersHorizontal size={14} />
+                  <span>{locale === 'ar' ? 'الفلاتر' : locale === 'en' ? 'Filters' : 'Filtreler'}</span>
                 </button>
               )}
             </div>
-          </motion.div>
+          </div>
         </div>
-      </section>
 
-      {/* 2. FILTER BAR & VIEW TOGGLE */}
-      <section className="sticky top-[48px] z-30 bg-background/90 backdrop-blur-md border-b border-border/50 py-3 shadow-xs">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-            {/* Brand Pills */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 scrollbar-hide">
-              <button
-                onClick={() => setSelectedBrand('all')}
-                className={cn(
-                  "px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all cursor-pointer",
-                  selectedBrand === 'all'
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "bg-card border hover:bg-muted text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {t('all_brands')} ({items.length})
-              </button>
-
-              {brands.map(brand => {
-                const count = items.filter(i => i.brand === brand).length;
-                return (
-                  <button
-                    key={brand}
-                    onClick={() => setSelectedBrand(brand)}
-                    className={cn(
-                      "px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all cursor-pointer flex items-center gap-2",
-                      selectedBrand === brand
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "bg-card border hover:bg-muted text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    <span>{brand}</span>
-                    <span className={cn(
-                      "text-[10px] px-1.5 py-0.5 rounded-md font-bold",
-                      selectedBrand === brand ? "bg-white/20 text-white" : "bg-muted text-muted-foreground"
-                    )}>
-                      {count}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Service Filter & View Switcher */}
-            <div className="flex items-center justify-between lg:justify-end gap-3 shrink-0">
-              {/* Service Select */}
-              <div className="relative">
-                <select
-                  value={selectedService}
-                  onChange={(e) => setSelectedService(e.target.value)}
-                  className="bg-card border border-border/80 rounded-lg px-3.5 py-1.5 text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
-                >
-                  <option value="all">{t('all_services')}</option>
-                  {services.map(s => (
-                    <option key={s.slug} value={s.slug}>{s.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* View Mode Switcher */}
-              <div className="flex items-center bg-muted/60 p-1 rounded-lg border border-border/60">
-                <button
-                  type="button"
-                  onClick={() => setViewMode('cards')}
-                  className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold uppercase transition-all cursor-pointer",
-                    viewMode === 'cards'
-                      ? "bg-background text-foreground shadow-xs"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                  title={t('view_cards')}
-                >
-                  <LayoutGrid size={14} />
-                  <span className="hidden sm:inline">{t('view_cards')}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewMode('table')}
-                  className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold uppercase transition-all cursor-pointer",
-                    viewMode === 'table'
-                      ? "bg-background text-foreground shadow-xs"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                  title={t('view_table')}
-                >
-                  <TableIcon size={14} />
-                  <span className="hidden sm:inline">{t('view_table')}</span>
-                </button>
+        {/* Category Navigation Pills (Shown ONLY if there are multiple actual categories with items in DB) */}
+        {items.length > 0 && categoryTabs.length > 1 && (
+          <div className="border-t border-white/5 bg-[#101012]">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex items-center justify-between gap-1 overflow-x-auto scrollbar-hide py-2">
+                <div className="flex items-center gap-1.5">
+                  {categoryTabs.map((tab) => {
+                    const isActive = selectedCategory === tab.id;
+                    const Icon = tab.icon;
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => {
+                          setSelectedCategory(tab.id as any);
+                          setSelectedBrand('all');
+                          setSelectedSeries('all');
+                        }}
+                        className={cn(
+                          "flex items-center gap-2 px-4 py-2 rounded-md text-xs font-extrabold tracking-wide uppercase transition-all duration-200 whitespace-nowrap cursor-pointer",
+                          isActive
+                            ? "bg-[#E11D48] text-white shadow-md shadow-red-500/30 scale-[1.02]"
+                            : "text-zinc-400 hover:text-white hover:bg-white/5"
+                        )}
+                      >
+                        <Icon size={14} className={isActive ? "text-white" : "text-zinc-400"} />
+                        <span>{tab.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </section>
 
-      {/* 4. MAIN PRICING CONTENT */}
-      <section className="py-10 md:py-14">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          {loading ? (
-            <div className="py-24 text-center space-y-4">
-              <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">
-                {t('loading_prices')}
-              </p>
-            </div>
-          ) : filteredItems.length === 0 ? (
-            <div className="bg-card p-10 text-center rounded-xl border max-w-xl mx-auto space-y-4 shadow-sm">
-              <AlertCircle size={40} className="mx-auto text-primary" />
-              <h3 className="text-xl font-bold">{t('no_results')}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {t('no_results_desc')}
-              </p>
-              <div className="pt-2 flex justify-center gap-3">
-                <button
-                  onClick={() => { setSearch(''); setSelectedBrand('all'); setSelectedService('all'); }}
-                  className="px-4 py-2 rounded-lg bg-muted text-xs font-bold hover:bg-muted/80 transition-colors cursor-pointer"
-                >
-                  {t('clear_filters')}
-                </button>
-                <a
-                  href={`https://wa.me/${cleanWhatsapp}?text=${encodeURIComponent(locale === 'ar' ? 'مرحباً، أود الاستفسار عن سعر صيانة جهازي.' : 'Merhaba, cihazımın tamir fiyatını öğrenmek istiyorum.')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2 rounded-lg bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
-                >
-                  <WhatsappIcon size={15} />
-                  <span>{t('ask_custom_quote')}</span>
-                </a>
-              </div>
-            </div>
-          ) : viewMode === 'cards' ? (
-            /* --- REFINED SERIES CATALOG: COMPACT 3-COL GRID & SERIES NAVIGATION PILLS --- */
-            <div className="space-y-8">
-              {/* Series Navigation Pills Bar */}
-              {seriesList.length > 1 && (
-                <div className="p-3 rounded-xl bg-card border border-border/70 shadow-xs">
-                  <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide py-0.5">
-                    <span className="text-xs font-bold text-muted-foreground whitespace-nowrap shrink-0 flex items-center gap-1.5 pl-1 rtl:pl-0 rtl:pr-1">
-                      <Smartphone size={14} className="text-primary" />
-                      <span>{locale === 'ar' ? 'تصفية حسب الفئة:' : locale === 'en' ? 'Series Filter:' : 'Seri Filtresi:'}</span>
-                    </span>
+      {/* 2. BREADCRUMBS BAR */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-2">
+        <div className="flex items-center gap-2 text-xs font-semibold text-zinc-500">
+          <Link href="/" className="hover:text-zinc-300 transition-colors">
+            {locale === 'ar' ? 'الرئيسية' : locale === 'en' ? 'Home' : 'Ana Sayfa'}
+          </Link>
+          <ChevronRight size={13} className={cn("text-zinc-600", isRTL ? "rotate-180" : "")} />
+          <span className="text-zinc-400">
+            {locale === 'ar' ? 'أسعار الصيانة' : locale === 'en' ? 'Repair Pricing' : 'Tamir Fiyatları'}
+          </span>
+          {items.length > 0 && selectedCategory !== 'all' && (
+            <>
+              <ChevronRight size={13} className={cn("text-zinc-600", isRTL ? "rotate-180" : "")} />
+              <span className="text-[#E11D48] font-bold capitalize">
+                {categoryTabs.find(c => c.id === selectedCategory)?.label}
+              </span>
+            </>
+          )}
+          {items.length > 0 && selectedBrand !== 'all' && (
+            <>
+              <ChevronRight size={13} className={cn("text-zinc-600", isRTL ? "rotate-180" : "")} />
+              <span className="text-white font-bold">{selectedBrand}</span>
+            </>
+          )}
+        </div>
+      </div>
 
+      {/* 3. MAIN CATALOG SECTION WITH 2-COLUMN LAYOUT */}
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        <div className={cn("flex items-start gap-6", items.length === 0 && "justify-center")}>
+
+          {/* === LEFT SIDEBAR: FILTERS (DESKTOP) === */}
+          {items.length > 0 && (
+            <aside className="w-64 xl:w-72 shrink-0 hidden lg:block space-y-6">
+              
+              {/* Filter Group 1: Brands list with Logos */}
+              {brands.length > 0 && (
+                <div className="bg-[#141416] border border-white/5 rounded-lg p-4 shadow-sm">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-zinc-400 mb-3 flex items-center justify-between">
+                    <span>{t('filter_brands')}</span>
+                    <span className="text-[10px] text-zinc-600 font-bold">{brands.length}</span>
+                  </h3>
+
+                  <div className="space-y-1">
+                    {/* All Brands Option */}
                     <button
-                      type="button"
-                      onClick={() => setSelectedSeries('all')}
+                      onClick={() => setSelectedBrand('all')}
                       className={cn(
-                        "px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1.5",
-                        selectedSeries === 'all'
-                          ? "bg-primary text-primary-foreground shadow-xs"
-                          : "bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground border border-border/50"
+                        "w-full flex items-center justify-between px-3 py-2 rounded-md text-xs font-bold transition-all cursor-pointer",
+                        selectedBrand === 'all'
+                          ? "bg-[#E11D48] text-white shadow-md shadow-red-500/20"
+                          : "text-zinc-400 hover:text-white hover:bg-white/5"
                       )}
                     >
-                      <span>{locale === 'ar' ? 'جميع الفئات' : locale === 'en' ? 'All Series' : 'Tüm Seriler'}</span>
+                      <div className="flex items-center gap-2.5">
+                        <Smartphone size={15} />
+                        <span>{locale === 'ar' ? 'جميع الماركات' : locale === 'en' ? 'All Brands' : 'Tüm Markalar'}</span>
+                      </div>
                       <span className={cn(
-                        "text-[10px] px-1.5 py-0.2 rounded-md font-bold",
-                        selectedSeries === 'all' ? "bg-white/20 text-white" : "bg-muted text-muted-foreground"
+                        "text-[10px] px-1.5 py-0.5 rounded-md font-black",
+                        selectedBrand === 'all' ? "bg-white/20 text-white" : "bg-white/5 text-zinc-500"
                       )}>
-                        {filteredItems.length}
+                        {categoryFilteredItems.length}
                       </span>
                     </button>
 
-                    {seriesList.map(ser => {
-                      const count = seriesGroups[ser]?.length || 0;
-                      const isSelected = selectedSeries === ser;
+                    {/* Individual Brands */}
+                    {brands.map(brand => {
+                      const count = categoryFilteredItems.filter(i => i.brand === brand).length;
+                      const isSelected = selectedBrand === brand;
                       return (
                         <button
-                          key={ser}
-                          type="button"
-                          onClick={() => setSelectedSeries(ser)}
+                          key={brand}
+                          onClick={() => setSelectedBrand(brand)}
                           className={cn(
-                            "px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1.5",
+                            "w-full flex items-center justify-between px-3 py-2 rounded-md text-xs font-bold transition-all cursor-pointer",
                             isSelected
-                              ? "bg-primary text-primary-foreground shadow-xs"
-                              : "bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground border border-border/50"
+                              ? "bg-[#E11D48] text-white shadow-md shadow-red-500/20"
+                              : "text-zinc-400 hover:text-white hover:bg-white/5"
                           )}
                         >
-                          <span>{getLocalizedSeries(ser)}</span>
+                          <div className="flex items-center gap-2.5">
+                            <BrandIcon brand={brand} size={16} />
+                            <span>{brand}</span>
+                          </div>
                           <span className={cn(
-                            "text-[10px] px-1.5 py-0.2 rounded-md font-bold",
-                            isSelected ? "bg-white/20 text-white" : "bg-muted text-muted-foreground"
+                            "text-[10px] px-1.5 py-0.5 rounded-md font-black",
+                            isSelected ? "bg-white/20 text-white" : "bg-white/5 text-zinc-500"
                           )}>
                             {count}
                           </span>
@@ -649,610 +736,897 @@ export function PricingClient() {
                 </div>
               )}
 
-              {/* Series Groups Loop */}
-              <div className="space-y-10">
-                {Object.entries(displayedSeriesGroups).map(([seriesTitle, seriesItems]) => (
-                  <div key={seriesTitle} className="space-y-4">
-                    {/* Series Title Header */}
-                    <div className="flex items-center justify-between gap-3 pb-2.5 border-b border-border/70">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                          <Smartphone size={16} />
-                        </div>
-                        <h2 className="text-lg sm:text-xl font-black tracking-tight text-foreground">
-                          {getLocalizedSeries(seriesTitle)}
-                        </h2>
-                      </div>
-                      <span className="text-xs bg-muted text-muted-foreground font-bold px-2.5 py-1 rounded-md border border-border/60">
-                        {seriesItems.length} {t('models_count')}
-                      </span>
+              {/* Filter Group 2: Services / Part Categories */}
+              {services.length > 0 && (
+                <div className="bg-[#141416] border border-white/5 rounded-lg p-4 shadow-sm">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-zinc-400 mb-3">
+                    {t('filter_categories')}
+                  </h3>
+
+                  <div className="space-y-1 max-h-64 overflow-y-auto pr-1 scrollbar-hide">
+                    <button
+                      onClick={() => setSelectedService('all')}
+                      className={cn(
+                        "w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer text-left rtl:text-right",
+                        selectedService === 'all'
+                          ? "text-[#E11D48] bg-red-500/10"
+                          : "text-zinc-400 hover:text-white hover:bg-white/5"
+                      )}
+                    >
+                      <span>{t('all_services')}</span>
+                      {selectedService === 'all' && <Check size={14} className="text-[#E11D48]" />}
+                    </button>
+
+                    {services.map(s => {
+                      const isSelected = selectedService === s.slug;
+                      return (
+                        <button
+                          key={s.slug}
+                          onClick={() => setSelectedService(s.slug)}
+                          className={cn(
+                            "w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer text-left rtl:text-right",
+                            isSelected
+                              ? "text-[#E11D48] bg-red-500/10 font-black"
+                              : "text-zinc-400 hover:text-white hover:bg-white/5"
+                          )}
+                        >
+                          <span className="truncate pr-2 rtl:pr-0 rtl:pl-2">{s.name}</span>
+                          {isSelected && <Check size={14} className="text-[#E11D48] shrink-0" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Filter Group 3: Quality / Durum */}
+              {availableQualities.hasAny && (
+                <div className="bg-[#141416] border border-white/5 rounded-lg p-4 shadow-sm">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-zinc-400 mb-3">
+                    {t('filter_condition')}
+                  </h3>
+
+                  <div className="space-y-1.5">
+                    {[
+                      { id: 'all', label: locale === 'ar' ? 'كافة خيارات الجودة' : locale === 'en' ? 'All Qualities' : 'Tüm Kaliteler', show: true },
+                      { id: 'original', label: t('quality_original'), show: availableQualities.hasOrig },
+                      { id: 'oem', label: t('quality_oem'), show: availableQualities.hasOem },
+                      { id: 'compat', label: t('quality_compat'), show: availableQualities.hasCompat },
+                    ].filter(q => q.show).map(q => {
+                      const isSelected = selectedQuality === q.id;
+                      return (
+                        <button
+                          key={q.id}
+                          onClick={() => setSelectedQuality(q.id as any)}
+                          className={cn(
+                            "w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer text-left rtl:text-right",
+                            isSelected
+                              ? "text-[#E11D48] bg-red-500/10"
+                              : "text-zinc-400 hover:text-white hover:bg-white/5"
+                          )}
+                        >
+                          <span className="truncate">{q.label}</span>
+                          {isSelected ? <CheckSquare size={15} className="text-[#E11D48]" /> : <Square size={15} className="text-zinc-600" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Filter Group 4: Price Range Slider */}
+              {maxDbPrice > 0 && (
+                <div className="bg-[#141416] border border-white/5 rounded-lg p-4 shadow-sm space-y-3">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-zinc-400">
+                    {t('filter_price')}
+                  </h3>
+
+                  <div className="flex items-center gap-2 text-xs font-bold">
+                    <div className="flex-1 bg-[#1c1c1f] border border-white/10 rounded-lg px-2.5 py-1.5 text-center text-zinc-300">
+                      {priceRange[0].toLocaleString('tr-TR')} ₺
                     </div>
-
-                    {/* Series Grid of Models (Sleek 3-Column Compact Grid) */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
-                      {seriesItems.map(item => {
-                        const isExpanded = !!expandedCards[item.id];
-                        const hasQualities = Array.isArray(item.quality_options) && item.quality_options.length > 0;
-
-                        return (
-                          <div
-                            key={item.id}
-                            className={cn(
-                              "bg-card rounded-xl border flex flex-col justify-between transition-all duration-200 overflow-hidden shadow-xs hover:shadow-md hover:border-primary/40 group",
-                              item.is_popular ? "border-primary/40 ring-1 ring-primary/20" : "border-border/70"
-                            )}
-                          >
-                            <div className="p-4 sm:p-5 space-y-3.5 flex-1">
-                              {/* Top Badges & Image Row */}
-                              <div className="flex items-start gap-3">
-                                {item.image_url ? (
-                                  <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-lg border bg-muted/20 p-1 shrink-0 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform duration-300 shadow-xs">
-                                    <img
-                                      src={item.image_url}
-                                      alt={item.model_name}
-                                      className="w-full h-full object-contain"
-                                      loading="lazy"
-                                    />
-                                  </div>
-                                ) : (
-                                  <div className="w-12 h-12 rounded-lg border bg-muted/20 flex items-center justify-center shrink-0 text-muted-foreground/40 shadow-xs">
-                                    <Smartphone size={20} />
-                                  </div>
-                                )}
-
-                                <div className="min-w-0 flex-1 space-y-1">
-                                  <div className="flex items-center gap-1.5 flex-wrap">
-                                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-muted text-muted-foreground border border-border/60 shrink-0">
-                                      {item.brand}
-                                    </span>
-                                    {item.is_popular && (
-                                      <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shrink-0">
-                                        {t('popular_badge')}
-                                      </span>
-                                    )}
-                                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5 shrink-0">
-                                      <Check size={11} /> {t('in_stock_badge')}
-                                    </span>
-                                  </div>
-
-                                  <h3 className="text-sm sm:text-base font-black tracking-tight text-foreground leading-snug break-words">
-                                    {getLocalizedDeviceTitle(item)}
-                                  </h3>
-                                </div>
-                              </div>
-
-                              {/* Price & Service & Warranty Strip */}
-                              <div className="pt-2 border-t border-border/50 flex items-baseline justify-between gap-2">
-                                <div>
-                                  <span className="text-[10px] font-bold text-muted-foreground uppercase block">
-                                    {t('starting_from')}
-                                  </span>
-                                  <span className="text-lg sm:text-xl font-black text-primary tracking-tight">
-                                    {item.base_price.toLocaleString('tr-TR')} {item.currency}
-                                  </span>
-                                </div>
-
-                                <div className="text-right">
-                                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
-                                    <ShieldCheck size={12} className="shrink-0" />
-                                    <span>{getLocalizedWarranty(item.warranty)}</span>
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Quality Breakdown Options (Clean Collapsed-by-default Accordion) */}
-                            {hasQualities && (
-                              <div className="border-t border-border/60 bg-muted/20">
-                                <button
-                                  type="button"
-                                  onClick={() => toggleExpand(item.id)}
-                                  className="w-full px-4 py-2 flex items-center justify-between text-xs font-bold text-foreground/80 hover:text-primary transition-colors cursor-pointer"
-                                >
-                                  <span className="flex items-center gap-1.5">
-                                    <Layers size={13} className="text-primary shrink-0" />
-                                    <span>{t('select_quality_title')} ({item.quality_options.length})</span>
-                                  </span>
-                                  {isExpanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
-                                </button>
-
-                                <AnimatePresence initial={false}>
-                                  {isExpanded && (
-                                    <motion.div
-                                      initial={{ height: 0, opacity: 0 }}
-                                      animate={{ height: 'auto', opacity: 1 }}
-                                      exit={{ height: 0, opacity: 0 }}
-                                      className="overflow-hidden"
-                                    >
-                                      <div className="px-4 pb-3.5 pt-1 space-y-1.5">
-                                        {item.quality_options.map((q, qIdx) => {
-                                          const qName = getLocalizedQualityName(q);
-                                          return (
-                                            <div
-                                              key={qIdx}
-                                              className="flex items-center justify-between p-2 rounded-lg bg-background border border-border/70 text-xs shadow-xs"
-                                            >
-                                              <div className="min-w-0 pr-2 rtl:pr-0 rtl:pl-2">
-                                                <span className="font-bold text-foreground block truncate">{qName}</span>
-                                                {q.badge && (
-                                                  <span className="text-[8px] font-black px-1 py-0.2 rounded bg-primary/10 text-primary uppercase">
-                                                    {getLocalizedBadge(q.badge)}
-                                                  </span>
-                                                )}
-                                              </div>
-                                              <div className="flex items-center gap-2 shrink-0">
-                                                <span className="font-black text-foreground">{q.price.toLocaleString('tr-TR')} ₺</span>
-                                                <button
-                                                  type="button"
-                                                  onClick={() => openWhatsAppForModel(item, qName, q.price)}
-                                                  className="px-2 py-1 rounded-md bg-emerald-600/10 hover:bg-[#25D366] text-emerald-700 dark:text-emerald-400 hover:text-white text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1"
-                                                >
-                                                  <WhatsappIcon size={12} />
-                                                  <span>{t('select_action')}</span>
-                                                </button>
-                                              </div>
-                                            </div>
-                                          );
-                                        })}
-                                      </div>
-                                    </motion.div>
-                                  )}
-                                </AnimatePresence>
-                              </div>
-                            )}
-
-                            {/* Card Footer Actions */}
-                            <div className="p-3 bg-muted/30 border-t border-border/60 flex items-center justify-between gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setBookingModalItem(item);
-                                  setBookingForm(prev => ({
-                                    ...prev,
-                                    selectedQuality: hasQualities ? getLocalizedQualityName(item.quality_options[0]) : ''
-                                  }));
-                                }}
-                                className="flex-1 py-2 px-2.5 rounded-lg bg-card border hover:border-primary/40 text-foreground font-bold text-xs transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer active:scale-95"
-                              >
-                                <Wrench size={13} className="text-primary shrink-0" />
-                                <span>{t('book_appointment')}</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => openWhatsAppForModel(item)}
-                                className="flex-1 py-2 px-2.5 rounded-lg bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer active:scale-95"
-                              >
-                                <WhatsappIcon size={14} className="shrink-0 text-white" />
-                                <span>{t('whatsapp_inquiry')}</span>
-                              </button>
-
-                              <a
-                                href={`tel:${supportPhone.replace(/\s/g, '')}`}
-                                className="p-2 rounded-lg bg-muted hover:bg-primary hover:text-primary-foreground text-foreground transition-all flex items-center justify-center border border-border/50 cursor-pointer active:scale-95 shrink-0"
-                                title={t('call_us')}
-                                aria-label={t('call_us')}
-                              >
-                                <Phone size={14} className="shrink-0" />
-                              </a>
-                            </div>
-                          </div>
-                        );
-                      })}
+                    <span className="text-zinc-600">-</span>
+                    <div className="flex-1 bg-[#1c1c1f] border border-white/10 rounded-lg px-2.5 py-1.5 text-center text-zinc-300">
+                      {priceRange[1].toLocaleString('tr-TR')} ₺
                     </div>
                   </div>
-                ))}
+
+                  <input
+                    type="range"
+                    min={0}
+                    max={maxDbPrice}
+                    step={100}
+                    value={priceRange[1]}
+                    onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
+                    className="w-full accent-[#E11D48] cursor-pointer"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={resetAllFilters}
+                    className="w-full flex items-center justify-center gap-1.5 py-2 rounded-md bg-white/5 hover:bg-white/10 text-xs font-bold text-zinc-400 hover:text-white transition-all cursor-pointer border border-white/5"
+                  >
+                    <RotateCcw size={13} />
+                    <span>{t('filter_clear_btn')}</span>
+                  </button>
+                </div>
+              )}
+            </aside>
+          )}
+
+          {/* === RIGHT MAIN CATALOG AREA === */}
+          <div className="flex-1 min-w-0 space-y-6">
+
+            {/* 1. HERO PROMOTIONAL BANNER (DYNAMIC FROM ADMIN PANEL) */}
+            <div className="relative rounded-lg overflow-hidden border border-white/10 bg-gradient-to-r from-[#141416] via-[#1a1416] to-[#250d12] shadow-2xl min-h-[220px] sm:min-h-[260px] flex items-center">
+              {/* Background Product Render Image on the Right */}
+              <div className="absolute inset-y-0 right-0 w-full sm:w-1/2 md:w-3/5 pointer-events-none opacity-40 sm:opacity-90 overflow-hidden">
+                <img 
+                  src={activeBanner?.image || bannerFallbackImage} 
+                  alt={activeBanner?.title || "Banner Showcase"} 
+                  className="w-full h-full object-cover object-center mix-blend-luminosity hover:mix-blend-normal transition-all duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#141416] via-[#141416]/80 to-transparent" />
               </div>
-            </div>
-          ) : (
-            /* --- GSM İLETİŞİM STYLE: INTERACTIVE HIGH-PERFORMANCE PAGINATED PRICING TABLE --- */
-            <div className="space-y-4">
-              {/* Responsive Scroll Hint for Mobile/Tablet */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-muted-foreground px-2">
-                <span className="flex items-center gap-2 font-bold text-foreground">
-                  <TableIcon size={16} className="text-primary" />
-                  <span>{t('table_comparison_title')}</span>
-                </span>
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex sm:hidden items-center gap-1 text-[11px] font-bold text-primary bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-md">
-                    ↔ {locale === 'ar' ? 'اسحب الجدول أفقياً للمزيد' : locale === 'en' ? 'Scroll horizontally for more' : 'Tabloyu kaydırın'}
-                  </span>
-                  <span className="text-[11px] font-semibold text-muted-foreground/80 hidden sm:inline">
-                    {t('table_scroll_hint')}
+
+              {/* Banner Text Content */}
+              <div className="relative z-10 p-6 sm:p-8 md:p-10 max-w-xl space-y-3">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#E11D48]/20 border border-[#E11D48]/30 text-[#E11D48] text-[10px] font-black uppercase tracking-widest">
+                  <Sparkles size={12} />
+                  <span>
+                    {locale === 'ar' ? 'قائمة أسعار TR TECH لعام 2026' : locale === 'en' ? 'TR TECH 2026 PRICING LIST' : 'TR TECH 2026 GÜNCEL LİSTE'}
                   </span>
                 </div>
-              </div>
 
-              <div className="bg-card rounded-xl border border-border/80 shadow-md overflow-hidden">
-                <div className="overflow-x-auto scrollbar-thin">
-                  <table className="w-full min-w-[1050px] border-collapse text-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-                    <colgroup>
-                      <col className="w-[360px] sm:w-[400px]" />
-                      <col className="w-[140px]" />
-                      <col className="w-[300px]" />
-                      <col className="w-[140px]" />
-                      <col className="w-[140px]" />
-                      <col className="w-[180px]" />
-                    </colgroup>
+                <h1 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-white leading-tight">
+                  {activeBanner?.title || (
+                    items.length > 0 && selectedCategory !== 'all' && systemServices.find(s => s.slug === selectedCategory)
+                      ? (locale === 'ar' 
+                          ? (systemServices.find(s => s.slug === selectedCategory)?.title_ar || systemServices.find(s => s.slug === selectedCategory)?.title)
+                          : locale === 'en' 
+                          ? (systemServices.find(s => s.slug === selectedCategory)?.title_en || systemServices.find(s => s.slug === selectedCategory)?.title)
+                          : (systemServices.find(s => s.slug === selectedCategory)?.title_tr || systemServices.find(s => s.slug === selectedCategory)?.title))
+                      : (locale === 'ar' ? 'أسعار الصيانة وقطع الغيار' : locale === 'en' ? 'Repair & Spare Parts Pricing' : 'Tamir ve Yedek Parça Fiyatları')
+                  )}
+                </h1>
+
+                <p className="text-xs sm:text-sm font-medium text-zinc-300 leading-relaxed">
+                  {activeBanner?.description || (
+                    items.length > 0 && selectedCategory !== 'all' && systemServices.find(s => s.slug === selectedCategory)
+                      ? (locale === 'ar' 
+                          ? (systemServices.find(s => s.slug === selectedCategory)?.description_ar || systemServices.find(s => s.slug === selectedCategory)?.description_tr)
+                          : locale === 'en' 
+                          ? (systemServices.find(s => s.slug === selectedCategory)?.description_en || systemServices.find(s => s.slug === selectedCategory)?.description_tr)
+                          : systemServices.find(s => s.slug === selectedCategory)?.description_tr)
+                      : (locale === 'ar' 
+                          ? 'قائمة أسعار واضحة ومحدثة لجميع خدمات صيانة الأجهزة الإلكترونية وقطع الغيار مع ضمان معتمد.' 
+                          : locale === 'en' 
+                          ? 'Transparent and up-to-date pricing for all device repairs and spare parts with official warranty.' 
+                          : 'Tüm cihaz tamirleri ve yedek parçalar için güncel, şeffaf fiyat listesi ve resmi garanti.')
+                  )}
+                </p>
+
+                {/* Optional CTA Button from Admin Banner */}
+                {activeBanner?.cta && (
+                  <div className="pt-1">
+                    <a
+                      href={activeBanner.link || '#'}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-[#E11D48] hover:bg-[#be123c] text-white text-xs font-black uppercase tracking-wider transition-all shadow-md shadow-red-500/20"
+                    >
+                      <span>{activeBanner.cta}</span>
+                      <ExternalLink size={13} />
+                    </a>
+                  </div>
+                )}
+
+                {/* 4 Feature Badges */}
+                <div className="pt-2 flex items-center gap-3 sm:gap-4 flex-wrap">
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-zinc-300">
+                    <ShieldCheck size={14} className="text-[#E11D48]" />
+                    <span>{t('banner_guarantee')}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-zinc-300">
+                    <Truck size={14} className="text-[#E11D48]" />
+                    <span>{t('banner_fast')}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-zinc-300">
+                    <Layers size={14} className="text-[#E11D48]" />
+                    <span>{t('banner_range')}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-zinc-300">
+                    <Phone size={14} className="text-[#E11D48]" />
+                    <span>{t('banner_support')}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 2. BRAND QUICK-SELECT CHIPS ROW */}
+            {brands.length > 0 && (
+              <div className="p-3 bg-[#141416] border border-white/5 rounded-lg">
+                <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-0.5">
+                  <button
+                    onClick={() => setSelectedBrand('all')}
+                    className={cn(
+                      "flex items-center gap-2 px-4 py-2 rounded-md text-xs font-black transition-all cursor-pointer shrink-0 border",
+                      selectedBrand === 'all'
+                        ? "bg-[#E11D48] text-white border-[#E11D48] shadow-md shadow-red-500/20"
+                        : "bg-[#1a1a1d] text-zinc-300 border-white/5 hover:border-white/20 hover:text-white"
+                    )}
+                  >
+                    <Smartphone size={14} />
+                    <span>{locale === 'ar' ? 'جميع الماركات' : locale === 'en' ? 'All Brands' : 'Tüm Markalar'}</span>
+                  </button>
+
+                  {brands.map(brand => {
+                    const isSelected = selectedBrand === brand;
+                    return (
+                      <button
+                        key={brand}
+                        onClick={() => setSelectedBrand(brand)}
+                        className={cn(
+                          "flex items-center gap-2 px-3.5 py-2 rounded-md text-xs font-black transition-all cursor-pointer shrink-0 border",
+                          isSelected
+                            ? "bg-[#E11D48] text-white border-[#E11D48] shadow-md shadow-red-500/20"
+                            : "bg-[#1a1a1d] text-zinc-300 border-white/5 hover:border-white/20 hover:text-white"
+                        )}
+                      >
+                        <BrandIcon brand={brand} size={15} />
+                        <span>{brand}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* 3. MODEL SERIES QUICK-FILTER ROW */}
+            {seriesList.length > 0 && (
+              <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
+                <button
+                  onClick={() => setSelectedSeries('all')}
+                  className={cn(
+                    "px-3.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer shrink-0 border",
+                    selectedSeries === 'all'
+                      ? "bg-white text-black border-white shadow-xs font-black"
+                      : "bg-[#141416] text-zinc-400 border-white/5 hover:border-white/10 hover:text-white"
+                  )}
+                >
+                  {t('all_models_chip')}
+                </button>
+
+                {seriesList.map(series => {
+                  const isSelected = selectedSeries === series;
+                  return (
+                    <button
+                      key={series}
+                      onClick={() => setSelectedSeries(series)}
+                      className={cn(
+                        "px-3.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer shrink-0 border",
+                        isSelected
+                          ? "bg-[#E11D48] text-white border-[#E11D48] shadow-xs font-black"
+                          : "bg-[#141416] text-zinc-400 border-white/5 hover:border-white/10 hover:text-white"
+                      )}
+                    >
+                      {series}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* 4. RESULTS TOOLBAR (COUNT, SORT, VIEW TOGGLE) */}
+            {filteredItems.length > 0 && (
+              <div className="flex items-center justify-between gap-3 pt-2">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm sm:text-base font-black uppercase text-white tracking-wide">
+                    {selectedBrand !== 'all' ? selectedBrand : (locale === 'ar' ? 'قائمة الأسعار' : locale === 'en' ? 'Pricing List' : 'Ürünler')}
+                  </h2>
+                  <span className="text-xs font-bold text-zinc-500">
+                    ({filteredItems.length})
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {/* Sort Dropdown */}
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as any)}
+                    className="bg-[#141416] border border-white/10 rounded-md px-3 py-1.5 text-xs font-bold text-zinc-300 outline-none cursor-pointer focus:border-[#E11D48]"
+                  >
+                    <option value="featured">{t('sort_featured')}</option>
+                    <option value="price_asc">{t('sort_price_asc')}</option>
+                    <option value="price_desc">{t('sort_price_desc')}</option>
+                  </select>
+
+                  {/* View Mode Toggle */}
+                  <div className="flex items-center bg-[#141416] p-0.5 rounded-md border border-white/10">
+                    <button
+                      type="button"
+                      onClick={() => setViewMode('cards')}
+                      className={cn(
+                        "p-1.5 rounded-lg text-xs transition-all cursor-pointer",
+                        viewMode === 'cards'
+                          ? "bg-[#E11D48] text-white shadow-xs"
+                          : "text-zinc-400 hover:text-white"
+                      )}
+                      title={t('view_cards')}
+                    >
+                      <LayoutGrid size={15} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setViewMode('table')}
+                      className={cn(
+                        "p-1.5 rounded-lg text-xs transition-all cursor-pointer",
+                        viewMode === 'table'
+                          ? "bg-[#E11D48] text-white shadow-xs"
+                          : "text-zinc-400 hover:text-white"
+                      )}
+                      title={t('view_table')}
+                    >
+                      <TableIcon size={15} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 5. MAIN CONTENT: PRODUCT CARDS GRID OR TABLE */}
+            {loading ? (
+              <div className="py-24 text-center space-y-4">
+                <div className="w-12 h-12 border-4 border-[#E11D48] border-t-transparent rounded-full animate-spin mx-auto" />
+                <p className="text-sm font-bold text-zinc-400 uppercase tracking-widest">
+                  {t('loading_prices')}
+                </p>
+              </div>
+            ) : filteredItems.length === 0 ? (
+              <div className="bg-[#141416] p-8 sm:p-12 text-center rounded-lg border border-white/5 max-w-xl mx-auto space-y-5 shadow-xl my-4">
+                <div className="w-16 h-16 rounded-full bg-[#E11D48]/10 text-[#E11D48] border border-[#E11D48]/20 flex items-center justify-center mx-auto">
+                  <Wrench size={30} />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-xl sm:text-2xl font-black text-white">
+                    {items.length === 0
+                      ? (locale === 'ar' ? 'قائمة الأسعار قيد التحديث' : locale === 'en' ? 'Pricing Catalog Being Updated' : 'Fiyat Listesi Güncelleniyor')
+                      : t('no_results')}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed max-w-md mx-auto">
+                    {items.length === 0
+                      ? (locale === 'ar' 
+                          ? 'يتم حالياً تجهيز وتحديث قائمة أسعار وموديلات الصيانة وقطع الغيار. يمكنك التواصل معنا مباشرة للحصول على تسعيرة فورية ومخصصة لجهازك.' 
+                          : locale === 'en' 
+                          ? 'The pricing catalog is currently being updated. You can contact us directly for an instant custom quote for your device and original parts.' 
+                          : 'Fiyat listemiz şu anda güncellenmektedir. Cihazınız ve orijinal parçalar için doğrudan WhatsApp veya telefon üzerinden anında fiyat alabilirsiniz.')
+                      : t('no_results_desc')}
+                  </p>
+                </div>
+                <div className="pt-2 flex flex-col sm:flex-row justify-center gap-3">
+                  {items.length > 0 && (
+                    <button
+                      onClick={resetAllFilters}
+                      className="px-4 py-2.5 rounded-md bg-white/10 hover:bg-white/15 text-xs font-bold text-white transition-colors cursor-pointer"
+                    >
+                      {t('clear_filters')}
+                    </button>
+                  )}
+                  <a
+                    href={`https://wa.me/${cleanWhatsapp}?text=${encodeURIComponent(locale === 'ar' ? 'مرحباً، أود الاستفسار عن سعر صيانة جهازي وقطع الغيار المتوفرة.' : locale === 'en' ? 'Hello, I would like to inquire about repair pricing for my device.' : 'Merhaba, cihazım için tamir ve parça fiyatı öğrenmek istiyorum.')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-6 py-2.5 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black transition-all shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                  >
+                    <WhatsappIcon size={16} />
+                    <span>{locale === 'ar' ? 'طلب تسعيرة فورية عبر واتساب' : locale === 'en' ? 'Instant Quote via WhatsApp' : 'WhatsApp ile Anında Fiyat Al'}</span>
+                  </a>
+                  <a
+                    href={`tel:${supportPhone.replace(/\s/g, '')}`}
+                    className="px-5 py-2.5 rounded-md bg-white/5 hover:bg-white/10 text-white border border-white/10 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <Phone size={15} className="text-[#E11D48]" />
+                    <span>{supportPhone}</span>
+                  </a>
+                </div>
+              </div>
+            ) : viewMode === 'cards' ? (
+              /* --- 5-COLUMN PRODUCT CATALOG GRID (IMAGE 1 & 3 EXACT STYLE) --- */
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3.5">
+                {filteredItems.map((item) => {
+                  
+                  const serviceName = getLocalizedServiceName(item);
+                  const isExpanded = !!expandedCards[item.id];
+                  const hasQualities = item.quality_options && item.quality_options.length > 0;
+
+                  // Quality tag badge calculation
+                  const qualityTag = item.quality_options?.[0]?.badge || (item.service_slug.includes('ekran') ? 'Orijinal' : item.is_popular ? 'Popüler' : 'Cihaz');
+
+                  return (
+                    <div
+                      key={item.id}
+                      className="bg-[#141416] hover:bg-[#18181b] border border-white/5 hover:border-[#E11D48]/50 rounded-xl flex flex-col justify-between transition-all duration-300 group shadow-sm hover:shadow-xl hover:shadow-red-500/10 relative overflow-hidden"
+                    >
+                      {/* 1. Full-Bleed Top Image Area (Fills upper part of card completely) */}
+                      <div className="relative w-full h-48 sm:h-52 bg-[#0d0d0f] overflow-hidden flex items-center justify-center border-b border-white/5">
+                        {item.image_url ? (
+                          <img 
+                            src={item.image_url} 
+                            alt={item.model_name}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-[#1c1c20] to-[#101012]">
+                            <div className="w-16 h-16 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 group-hover:text-[#E11D48] transition-colors shadow-inner">
+                              {item.service_slug.includes('ekran') ? (
+                                <Smartphone size={32} strokeWidth={1.5} />
+                              ) : item.service_slug.includes('batarya') ? (
+                                <Wrench size={30} strokeWidth={1.5} />
+                              ) : (
+                                <Smartphone size={32} strokeWidth={1.5} />
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Subtle bottom gradient overlay for smooth transition */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#141416]/80 via-transparent to-transparent pointer-events-none" />
+
+                        {/* Floating Top-Start Quality Badge */}
+                        <div className="absolute top-3 start-3 z-10">
+                          <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-md bg-[#E11D48] text-white tracking-wider shadow-md shadow-red-500/30">
+                            {getLocalizedBadge(qualityTag) || qualityTag}
+                          </span>
+                        </div>
+
+                        {/* Floating Top-End Brand Badge */}
+                        <div className="absolute top-3 end-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black/60 backdrop-blur-md border border-white/10 text-white text-[11px] font-black shadow-sm">
+                          <BrandIcon brand={item.brand} size={13} />
+                          <span>{item.brand}</span>
+                        </div>
+
+                        {/* Floating Popular Badge */}
+                        {item.is_popular && (
+                          <div className="absolute bottom-2.5 end-3 z-10">
+                            <span className="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded bg-amber-500/90 text-black shadow-xs flex items-center gap-1">
+                              <Sparkles size={10} />
+                              {locale === 'ar' ? 'الأكثر طلباً' : locale === 'en' ? 'Popular' : 'Popüler'}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* 2. Card Content & Details with Proper Padding */}
+                      <div className="p-4 flex flex-col flex-1 justify-between">
+                        {/* Title & Service Details */}
+                        <div className="space-y-1 mb-3">
+                          <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
+                            {item.brand} • {item.series || item.brand}
+                          </p>
+                          <h3 className="text-xs sm:text-sm font-black text-white leading-snug break-words group-hover:text-red-400 transition-colors min-h-[2rem]">
+                            {item.model_name}
+                          </h3>
+                          <p className="text-[11px] font-semibold text-zinc-400 break-words leading-tight">
+                            {serviceName}
+                          </p>
+                          <p className="text-[10px] text-zinc-500 font-medium truncate">
+                            {hasQualities ? getLocalizedQualityName(item.quality_options[0]) : getLocalizedWarranty(item.warranty)}
+                          </p>
+                        </div>
+
+                        {/* Stock / Availability Indicator */}
+                        <div className="flex items-center gap-1.5 mb-2.5">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                          <span className="text-[10px] font-bold text-emerald-400">
+                            {t('card_ready_stock')}
+                          </span>
+                        </div>
+
+                        {/* Price & Primary Action: "Randevu Al" Button (Image 1 Style) */}
+                        <div className="space-y-2 pt-2 border-t border-white/5">
+                          <div className="flex items-baseline justify-between">
+                            <span className="text-base sm:text-lg font-black text-white tracking-tight">
+                              {item.base_price.toLocaleString('tr-TR')} {item.currency}
+                            </span>
+                            {hasQualities && item.quality_options.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => toggleExpand(item.id)}
+                                className="text-[10px] font-bold text-zinc-400 hover:text-white flex items-center gap-0.5 cursor-pointer"
+                              >
+                                <span>+{item.quality_options.length} {locale === 'ar' ? 'خيارات' : 'Seçenek'}</span>
+                                {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Collapsible Quality Options Accordion */}
+                          {hasQualities && isExpanded && (
+                            <div className="space-y-1 pt-1 pb-2">
+                              {item.quality_options.map((q, idx) => (
+                                <div
+                                  key={idx}
+                                  className="flex items-center justify-between p-1.5 rounded-lg bg-[#101012] border border-white/5 text-[10px]"
+                                >
+                                  <span className="font-bold text-zinc-300 truncate pr-1">
+                                    {getLocalizedQualityName(q)}
+                                  </span>
+                                  <span className="font-black text-white shrink-0">
+                                    {q.price.toLocaleString('tr-TR')} ₺
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Action Buttons: Red "Randevu Al" CTA & WhatsApp Icon */}
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setBookingModalItem(item);
+                                setBookingForm(prev => ({
+                                  ...prev,
+                                  selectedQuality: hasQualities ? getLocalizedQualityName(item.quality_options[0]) : ''
+                                }));
+                              }}
+                              className="flex-1 bg-[#E11D48] hover:bg-[#be123c] text-white text-xs font-black py-2.5 px-3 rounded-md flex items-center justify-center gap-1.5 shadow-md shadow-red-500/20 active:scale-[0.98] transition-all cursor-pointer"
+                            >
+                              <Calendar size={14} />
+                              <span>{t('card_book_now')}</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => openWhatsAppForModel(item)}
+                              className="p-2.5 rounded-md bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white border border-emerald-500/30 transition-all cursor-pointer shrink-0"
+                              title="WhatsApp Destek"
+                            >
+                              <WhatsappIcon size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              /* --- DETAILED TABULAR VIEW --- */
+              <div className="bg-[#141416] border border-white/5 rounded-lg overflow-hidden shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left rtl:text-right border-collapse text-xs">
                     <thead>
-                      <tr className="bg-muted/70 border-b border-border/80 text-[11px] font-black uppercase tracking-widest text-muted-foreground">
-                        <th className="py-4 px-6 text-start min-w-[320px] sm:min-w-[380px]">{t('col_model')}</th>
-                        <th className="py-4 px-5 text-start">{t('col_service')}</th>
-                        <th className="py-4 px-5 text-start">{t('col_quality')}</th>
-                        <th className="py-4 px-5 text-start">{t('col_warranty')}</th>
-                        <th className="py-4 px-5 text-start">{t('col_price')}</th>
-                        <th className="py-4 px-6 text-end">{t('col_action')}</th>
+                      <tr className="bg-[#101012] border-b border-white/5 text-zinc-400 text-[11px] font-black uppercase tracking-wider">
+                        <th className="py-3 px-4">{t('col_model')}</th>
+                        <th className="py-3 px-4">{t('col_service')}</th>
+                        <th className="py-3 px-4">{t('col_warranty')}</th>
+                        <th className="py-3 px-4">{t('col_price')}</th>
+                        <th className="py-3 px-4 text-center">{t('col_action')}</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-border/60 text-xs sm:text-sm">
-                      {paginatedTableItems.map(item => {
-                        const serviceName = getLocalizedServiceName(item);
-                        const hasQualities = Array.isArray(item.quality_options) && item.quality_options.length > 0;
-
-                        return (
-                          <tr key={item.id} className="hover:bg-muted/30 transition-colors group">
-                            {/* 1. Model & Series & Photo (Spacious & Highly Responsive) */}
-                            <td className="py-4 px-6 align-middle text-start min-w-[320px] sm:min-w-[380px]">
-                              <div className="flex items-center gap-3.5">
-                                {item.image_url ? (
-                                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl border bg-muted/20 p-1 shrink-0 flex items-center justify-center overflow-hidden shadow-xs">
-                                    <img
-                                      src={item.image_url}
-                                      alt={item.model_name}
-                                      className="w-full h-full object-contain"
-                                      loading="lazy"
-                                    />
-                                  </div>
-                                ) : (
-                                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl border bg-muted/20 flex items-center justify-center shrink-0 text-muted-foreground/40 shadow-xs">
-                                    <Smartphone size={20} />
-                                  </div>
-                                )}
-
-                                <div className="space-y-1 flex-1 min-w-0">
-                                  <div className="flex items-center gap-1.5 flex-wrap">
-                                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-muted text-muted-foreground border border-border/60 shrink-0">
-                                      {item.brand}
-                                    </span>
-                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-primary/5 text-primary border border-primary/15 shrink-0">
-                                      {getLocalizedSeries(item.series)}
-                                    </span>
-                                    {item.is_popular && (
-                                      <span className="text-[9px] bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 px-1.5 py-0.5 rounded-md font-black uppercase shrink-0">
-                                        {t('popular_badge')}
-                                      </span>
-                                    )}
-                                  </div>
-                                  <div className="font-black text-sm sm:text-base text-foreground tracking-tight leading-snug break-words">
-                                    {item.model_name}
-                                  </div>
-                                </div>
-                              </div>
-                            </td>
-
-                            {/* 2. Service Type */}
-                            <td className="py-4 px-5 align-middle text-start whitespace-nowrap">
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/5 text-primary text-xs font-bold border border-primary/15">
-                                <Wrench size={13} className="shrink-0" />
-                                <span>{serviceName}</span>
-                              </span>
-                            </td>
-
-                            {/* 3. Quality Options */}
-                            <td className="py-4 px-5 align-middle text-start">
-                              {hasQualities ? (
-                                <div className="space-y-1.5">
-                                  {item.quality_options.map((q, idx) => {
-                                    const qName = getLocalizedQualityName(q);
-                                    return (
-                                      <div 
-                                        key={idx} 
-                                        className="flex items-center justify-between gap-3 px-3 py-1.5 rounded-lg bg-muted/40 border border-border/60 hover:bg-muted/70 transition-colors"
-                                      >
-                                        <div className="flex items-center gap-2 min-w-0">
-                                          <span className="text-xs font-bold text-foreground truncate">
-                                            {qName}
-                                          </span>
-                                          {q.badge && (
-                                            <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-primary/10 text-primary uppercase shrink-0">
-                                              {getLocalizedBadge(q.badge)}
-                                            </span>
-                                          )}
-                                        </div>
-                                        <span className="text-xs font-black text-foreground shrink-0 tabular-nums">
-                                          {q.price.toLocaleString('tr-TR')} ₺
-                                        </span>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              ) : (
-                                <span className="text-xs text-muted-foreground font-semibold italic">{t('single_quality')}</span>
-                              )}
-                            </td>
-
-                            {/* 4. Warranty */}
-                            <td className="py-4 px-5 align-middle text-start whitespace-nowrap">
-                              <span className="inline-flex items-center gap-1.5 text-xs font-black text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1.5 rounded-lg border border-emerald-500/20">
-                                <ShieldCheck size={14} className="shrink-0" />
-                                <span>{getLocalizedWarranty(item.warranty)}</span>
-                              </span>
-                            </td>
-
-                            {/* 6. Starting Price */}
-                            <td className="py-3.5 px-5 align-middle text-start">
-                              <div className="font-black text-lg text-primary tracking-tight whitespace-nowrap">
-                                {item.base_price.toLocaleString('tr-TR')} {item.currency}
-                              </div>
-                              <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mt-0.5 whitespace-nowrap">
-                                {t('vat_included')}
-                              </span>
-                            </td>
-
-                            {/* 7. Action Buttons */}
-                            <td className="py-3.5 px-6 align-middle text-end">
-                              <div className="flex flex-col gap-1.5 items-stretch">
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setBookingModalItem(item);
-                                    setBookingForm(prev => ({
-                                      ...prev,
-                                      selectedQuality: hasQualities ? getLocalizedQualityName(item.quality_options[0]) : ''
-                                    }));
-                                  }}
-                                  className="w-full px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-bold uppercase tracking-wider hover:bg-primary/90 transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
-                                >
-                                  <Wrench size={13} />
-                                  <span>{t('book_appointment')}</span>
-                                </button>
-
-                                <div className="flex items-center gap-1.5">
-                                  <button
-                                    type="button"
-                                    onClick={() => openWhatsAppForModel(item)}
-                                    className="flex-1 px-3 py-1.5 rounded-lg bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
-                                    title="WhatsApp"
-                                  >
-                                    <WhatsappIcon size={14} className="shrink-0" />
-                                    <span>WhatsApp</span>
-                                  </button>
-
-                                  <a
-                                    href={`tel:${supportPhone.replace(/\s/g, '')}`}
-                                    className="p-1.5 rounded-lg bg-muted hover:bg-primary hover:text-primary-foreground text-muted-foreground transition-all flex items-center justify-center border border-border/60"
-                                    title={t('call_us')}
-                                    aria-label={t('call_us')}
-                                  >
-                                    <Phone size={14} className="shrink-0" />
-                                  </a>
-                                </div>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                    <tbody className="divide-y divide-white/5">
+                      {paginatedTableItems.map(item => (
+                        <tr key={item.id} className="hover:bg-white/[0.02] transition-colors">
+                          <td className="py-3 px-4 font-bold text-white flex items-center gap-2">
+                            <BrandIcon brand={item.brand} size={15} />
+                            <span>{item.model_name}</span>
+                          </td>
+                          <td className="py-3 px-4 text-zinc-300 font-medium">
+                            {getLocalizedServiceName(item)}
+                          </td>
+                          <td className="py-3 px-4 text-zinc-400">
+                            {getLocalizedWarranty(item.warranty)}
+                          </td>
+                          <td className="py-3 px-4 font-black text-white text-sm">
+                            {item.base_price.toLocaleString('tr-TR')} {item.currency}
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setBookingModalItem(item);
+                                setBookingForm(prev => ({
+                                  ...prev,
+                                  selectedQuality: item.quality_options?.[0] ? getLocalizedQualityName(item.quality_options[0]) : ''
+                                }));
+                              }}
+                              className="px-3 py-1.5 rounded-lg bg-[#E11D48] text-white text-[11px] font-bold hover:bg-[#be123c] transition-colors cursor-pointer"
+                            >
+                              {t('card_book_now')}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>
 
-                {/* Table View Performance Pagination Controls */}
+                {/* Table Pagination */}
                 {totalTablePages > 1 && (
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-6 py-4 border-t bg-muted/20 text-xs">
-                    <div className="text-muted-foreground font-semibold">
-                      {locale === 'ar'
-                        ? `عرض ${tableStartIndex} إلى ${tableEndIndex} من أصل ${filteredItems.length} موديل`
-                        : locale === 'en'
-                        ? `Showing ${tableStartIndex} to ${tableEndIndex} of ${filteredItems.length} models`
-                        : `${filteredItems.length} modelden ${tableStartIndex} - ${tableEndIndex} arası gösteriliyor`}
-                    </div>
-
-                    <div className="flex items-center gap-1.5">
+                  <div className="p-3 border-t border-white/5 flex items-center justify-between text-xs text-zinc-400">
+                    <span>
+                      {locale === 'ar' ? `صفحة ${tablePage} من ${totalTablePages}` : `Sayfa ${tablePage} / ${totalTablePages}`}
+                    </span>
+                    <div className="flex gap-1">
                       <button
-                        type="button"
-                        onClick={() => setTablePage(1)}
+                        onClick={() => setTablePage(p => Math.max(1, p - 1))}
                         disabled={tablePage === 1}
-                        className="p-1.5 rounded-lg border bg-background hover:bg-muted text-foreground disabled:opacity-40 disabled:pointer-events-none transition-colors"
-                        title="First Page"
+                        className="px-3 py-1 rounded bg-white/5 hover:bg-white/10 disabled:opacity-40"
                       >
-                        {locale === 'ar' ? <ChevronsRight size={15} /> : <ChevronsLeft size={15} />}
+                        {locale === 'ar' ? 'السابق' : 'Önceki'}
                       </button>
-
                       <button
-                        type="button"
-                        onClick={() => setTablePage(prev => Math.max(1, prev - 1))}
-                        disabled={tablePage === 1}
-                        className="p-1.5 rounded-lg border bg-background hover:bg-muted text-foreground disabled:opacity-40 disabled:pointer-events-none transition-colors"
-                        title={locale === 'ar' ? 'السابق' : locale === 'en' ? 'Previous' : 'Önceki'}
-                      >
-                        {locale === 'ar' ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
-                      </button>
-
-                      <div className="flex items-center gap-1 px-1">
-                        {Array.from({ length: totalTablePages }, (_, i) => i + 1)
-                          .filter(page => page === 1 || page === totalTablePages || Math.abs(page - tablePage) <= 1)
-                          .map((page, idx, arr) => {
-                            const prev = arr[idx - 1];
-                            return (
-                              <React.Fragment key={page}>
-                                {prev && page - prev > 1 && (
-                                  <span className="px-1 text-muted-foreground select-none">...</span>
-                                )}
-                                <button
-                                  type="button"
-                                  onClick={() => setTablePage(page)}
-                                  className={cn(
-                                    "w-7 h-7 rounded-lg text-xs font-bold transition-all cursor-pointer",
-                                    tablePage === page
-                                      ? "bg-primary text-primary-foreground font-black shadow-xs"
-                                      : "border bg-background hover:bg-muted text-muted-foreground hover:text-foreground"
-                                  )}
-                                >
-                                  {page}
-                                </button>
-                              </React.Fragment>
-                            );
-                          })}
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => setTablePage(prev => Math.min(totalTablePages, prev + 1))}
+                        onClick={() => setTablePage(p => Math.min(totalTablePages, p + 1))}
                         disabled={tablePage === totalTablePages}
-                        className="p-1.5 rounded-lg border bg-background hover:bg-muted text-foreground disabled:opacity-40 disabled:pointer-events-none transition-colors"
-                        title={locale === 'ar' ? 'التالي' : locale === 'en' ? 'Next' : 'Sonraki'}
+                        className="px-3 py-1 rounded bg-white/5 hover:bg-white/10 disabled:opacity-40"
                       >
-                        {locale === 'ar' ? <ChevronLeft size={15} /> : <ChevronRight size={15} />}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setTablePage(totalTablePages)}
-                        disabled={tablePage === totalTablePages}
-                        className="p-1.5 rounded-lg border bg-background hover:bg-muted text-foreground disabled:opacity-40 disabled:pointer-events-none transition-colors"
-                        title="Last Page"
-                      >
-                        {locale === 'ar' ? <ChevronsLeft size={15} /> : <ChevronsRight size={15} />}
+                        {locale === 'ar' ? 'التالي' : 'Sonraki'}
                       </button>
                     </div>
                   </div>
                 )}
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Pricing Disclaimer Note */}
-          <div className="mt-12 p-6 rounded-xl bg-card border border-border/70 text-center max-w-3xl mx-auto space-y-2">
-            <p className="text-xs sm:text-sm text-muted-foreground font-semibold leading-relaxed">
-              {t('pricing_note')}
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
-              <a 
-                href={`tel:${supportPhone.replace(/\s/g, '')}`}
-                className="text-xs font-bold text-primary hover:underline flex items-center gap-1.5"
-              >
-                <Phone size={13} className="shrink-0" /> {supportPhone}
-              </a>
-              <span className="text-muted-foreground">•</span>
-              <a 
-                href={`https://wa.me/${cleanWhatsapp}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs font-bold text-[#25D366] hover:underline flex items-center gap-1.5"
-              >
-                <WhatsappIcon size={14} className="shrink-0" />
-                <span>{t('whatsapp_live_support')}</span>
-              </a>
+            {/* 6. BOTTOM TRUST BADGES (IMAGE 2 STYLE) */}
+            <div className="pt-8 border-t border-white/5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-[#141416] border border-white/5 rounded-lg p-4 flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-md bg-red-500/10 border border-red-500/20 flex items-center justify-center text-[#E11D48] shrink-0">
+                    <ShieldCheck size={20} />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black uppercase text-white tracking-wide">{t('trust_parts_title')}</h4>
+                    <p className="text-[11px] text-zinc-400 leading-snug">{t('trust_parts_desc')}</p>
+                  </div>
+                </div>
+
+                <div className="bg-[#141416] border border-white/5 rounded-lg p-4 flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-md bg-red-500/10 border border-red-500/20 flex items-center justify-center text-[#E11D48] shrink-0">
+                    <Truck size={20} />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black uppercase text-white tracking-wide">{t('trust_shipping_title')}</h4>
+                    <p className="text-[11px] text-zinc-400 leading-snug">{t('trust_shipping_desc')}</p>
+                  </div>
+                </div>
+
+                <div className="bg-[#141416] border border-white/5 rounded-lg p-4 flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-md bg-red-500/10 border border-red-500/20 flex items-center justify-center text-[#E11D48] shrink-0">
+                    <Award size={20} />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black uppercase text-white tracking-wide">{t('trust_warranty_title')}</h4>
+                    <p className="text-[11px] text-zinc-400 leading-snug">{t('trust_warranty_desc')}</p>
+                  </div>
+                </div>
+
+                <div className="bg-[#141416] border border-white/5 rounded-lg p-4 flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-md bg-red-500/10 border border-red-500/20 flex items-center justify-center text-[#E11D48] shrink-0">
+                    <Phone size={20} />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black uppercase text-white tracking-wide">{t('trust_support_title')}</h4>
+                    <p className="text-[11px] text-zinc-400 leading-snug">{t('trust_support_desc')}</p>
+                  </div>
+                </div>
+              </div>
             </div>
+
           </div>
         </div>
-      </section>
+      </main>
 
-      {/* 5. BOOKING APPOINTMENT MODAL (Strictly translated & rounded-lg & image thumbnail support) */}
+      {/* 4. MOBILE SLIDE-OUT FILTER DRAWER */}
+      <AnimatePresence>
+        {isMobileFilterOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden flex">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileFilterOpen(false)}
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm"
+            />
+
+            {/* Slide-out Panel */}
+            <motion.div
+              initial={{ x: isRTL ? '100%' : '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: isRTL ? '100%' : '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="relative w-4/5 max-w-xs bg-[#141416] border-r border-white/10 h-full p-5 overflow-y-auto space-y-5 z-10"
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-white/5">
+                <h3 className="text-sm font-black uppercase tracking-wider text-white">
+                  {locale === 'ar' ? 'فلاتر البحث' : locale === 'en' ? 'Filters' : 'Filtreler'}
+                </h3>
+                <button
+                  onClick={() => setIsMobileFilterOpen(false)}
+                  className="p-1 rounded-lg text-zinc-400 hover:text-white"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Brands in Mobile */}
+              {brands.length > 0 && (
+                <div className="space-y-1">
+                  <span className="text-xs font-bold text-zinc-400 uppercase block mb-1">
+                    {t('filter_brands')}
+                  </span>
+                  <button
+                    onClick={() => { setSelectedBrand('all'); setIsMobileFilterOpen(false); }}
+                    className={cn(
+                      "w-full text-left rtl:text-right px-3 py-1.5 rounded-lg text-xs font-bold",
+                      selectedBrand === 'all' ? "bg-[#E11D48] text-white" : "text-zinc-300"
+                    )}
+                  >
+                    {t('filter_all_brands')}
+                  </button>
+                  {brands.map(b => (
+                    <button
+                      key={b}
+                      onClick={() => { setSelectedBrand(b); setIsMobileFilterOpen(false); }}
+                      className={cn(
+                        "w-full text-left rtl:text-right px-3 py-1.5 rounded-lg text-xs font-bold",
+                        selectedBrand === b ? "bg-[#E11D48] text-white" : "text-zinc-300"
+                      )}
+                    >
+                      {b}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Services in Mobile */}
+              {services.length > 0 && (
+                <div className="space-y-1">
+                  <span className="text-xs font-bold text-zinc-400 uppercase block mb-1">
+                    {t('filter_categories')}
+                  </span>
+                  <button
+                    onClick={() => { setSelectedService('all'); setIsMobileFilterOpen(false); }}
+                    className={cn(
+                      "w-full text-left rtl:text-right px-3 py-1.5 rounded-lg text-xs font-bold",
+                      selectedService === 'all' ? "bg-[#E11D48] text-white" : "text-zinc-300"
+                    )}
+                  >
+                    {t('all_services')}
+                  </button>
+                  {services.map(s => (
+                    <button
+                      key={s.slug}
+                      onClick={() => { setSelectedService(s.slug); setIsMobileFilterOpen(false); }}
+                      className={cn(
+                        "w-full text-left rtl:text-right px-3 py-1.5 rounded-lg text-xs font-bold truncate block",
+                        selectedService === s.slug ? "bg-[#E11D48] text-white" : "text-zinc-300"
+                      )}
+                    >
+                      {s.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Reset Filters */}
+              <button
+                onClick={() => { resetAllFilters(); setIsMobileFilterOpen(false); }}
+                className="w-full py-2.5 rounded-md bg-white/10 text-white font-bold text-xs"
+              >
+                {t('filter_clear_btn')}
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 5. APPOINTMENT BOOKING MODAL */}
       <AnimatePresence>
         {bookingModalItem && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-card w-full max-w-lg rounded-xl border shadow-2xl overflow-hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setBookingModalItem(null)}
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm"
+            />
+
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative w-full max-w-lg bg-[#141416] border border-white/10 rounded-lg p-6 sm:p-8 z-10 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto text-left rtl:text-right"
             >
-              <div className="flex items-center justify-between p-5 border-b bg-muted/20">
-                <div className="flex items-center gap-3">
-                  {bookingModalItem.image_url ? (
-                    <img 
-                      src={bookingModalItem.image_url} 
-                      alt={bookingModalItem.model_name}
-                      className="w-11 h-11 object-contain rounded-lg border bg-muted/30 p-0.5 shrink-0" 
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                      <Wrench size={18} />
-                    </div>
-                  )}
+              <div className="flex items-center justify-between pb-3 border-b border-white/5">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-md bg-[#E11D48]/20 border border-[#E11D48]/30 flex items-center justify-center text-[#E11D48]">
+                    <Calendar size={18} />
+                  </div>
                   <div>
-                    <h3 className="font-black text-lg uppercase flex items-center gap-2">
-                      <span>{t('modal_title')}</span>
-                    </h3>
-                    <p className="text-xs text-muted-foreground font-semibold">
+                    <h3 className="text-base font-black text-white">{t('modal_title')}</h3>
+                    <p className="text-xs text-zinc-400">
                       {bookingModalItem.brand} {bookingModalItem.model_name} • {getLocalizedServiceName(bookingModalItem)}
                     </p>
                   </div>
                 </div>
+
                 <button
                   onClick={() => setBookingModalItem(null)}
-                  className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                  aria-label="Close"
+                  className="p-1 rounded-lg text-zinc-400 hover:text-white"
                 >
-                  <X size={18} />
+                  <X size={20} />
                 </button>
               </div>
 
-              <form onSubmit={handleBookingSubmit} className="p-6 space-y-4">
-                {/* Quality selection dropdown if available */}
-                {Array.isArray(bookingModalItem.quality_options) && bookingModalItem.quality_options.length > 0 && (
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+              {/* Modal Booking Form */}
+              <form onSubmit={handleBookingSubmit} className="space-y-4 pt-1">
+                {/* Quality selection in modal */}
+                {bookingModalItem.quality_options && bookingModalItem.quality_options.length > 0 && (
+                  <div>
+                    <label className="text-xs font-bold text-zinc-400 uppercase block mb-1">
                       {t('modal_quality_label')}
                     </label>
                     <select
                       value={bookingForm.selectedQuality}
                       onChange={(e) => setBookingForm(prev => ({ ...prev, selectedQuality: e.target.value }))}
-                      className="w-full px-3 py-2 rounded-lg border bg-background text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20"
+                      className="w-full bg-[#1c1c1f] border border-white/10 rounded-md px-3.5 py-2.5 text-xs font-bold text-white outline-none focus:border-[#E11D48]"
                     >
                       {bookingModalItem.quality_options.map((q, idx) => (
                         <option key={idx} value={getLocalizedQualityName(q)}>
-                          {getLocalizedQualityName(q)} — {q.price.toLocaleString('tr-TR')} ₺
+                          {getLocalizedQualityName(q)} - {q.price.toLocaleString('tr-TR')} ₺
                         </option>
                       ))}
                     </select>
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
-                      {t('modal_name_label')}
-                    </label>
-                    <input
-                      required
-                      value={bookingForm.name}
-                      onChange={(e) => setBookingForm(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder={t('modal_name_placeholder')}
-                      className="w-full px-3 py-2 rounded-lg border bg-background text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
-                      {t('modal_phone_label')}
-                    </label>
-                    <input
-                      required
-                      type="tel"
-                      value={bookingForm.phone}
-                      onChange={(e) => setBookingForm(prev => ({ ...prev, phone: e.target.value }))}
-                      placeholder={t('modal_phone_placeholder')}
-                      className="w-full px-3 py-2 rounded-lg border bg-background text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20"
-                    />
-                  </div>
+                {/* Name */}
+                <div>
+                  <label className="text-xs font-bold text-zinc-400 uppercase block mb-1">
+                    {t('modal_name_label')}
+                  </label>
+                  <input
+                    required
+                    value={bookingForm.name}
+                    onChange={(e) => setBookingForm(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder={t('modal_name_placeholder')}
+                    className="w-full bg-[#1c1c1f] border border-white/10 rounded-md px-3.5 py-2.5 text-xs font-bold text-white outline-none focus:border-[#E11D48]"
+                  />
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+                {/* Phone */}
+                <div>
+                  <label className="text-xs font-bold text-zinc-400 uppercase block mb-1">
+                    {t('modal_phone_label')}
+                  </label>
+                  <input
+                    required
+                    type="tel"
+                    value={bookingForm.phone}
+                    onChange={(e) => setBookingForm(prev => ({ ...prev, phone: e.target.value }))}
+                    placeholder={t('modal_phone_placeholder')}
+                    className="w-full bg-[#1c1c1f] border border-white/10 rounded-md px-3.5 py-2.5 text-xs font-bold text-white outline-none focus:border-[#E11D48]"
+                  />
+                </div>
+
+                {/* City */}
+                <div>
+                  <label className="text-xs font-bold text-zinc-400 uppercase block mb-1">
                     {t('modal_city_label')}
                   </label>
                   <input
                     value={bookingForm.city}
                     onChange={(e) => setBookingForm(prev => ({ ...prev, city: e.target.value }))}
                     placeholder={t('modal_city_placeholder')}
-                    className="w-full px-3 py-2 rounded-lg border bg-background text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full bg-[#1c1c1f] border border-white/10 rounded-md px-3.5 py-2.5 text-xs font-bold text-white outline-none focus:border-[#E11D48]"
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+                {/* Notes */}
+                <div>
+                  <label className="text-xs font-bold text-zinc-400 uppercase block mb-1">
                     {t('modal_notes_label')}
                   </label>
                   <textarea
@@ -1260,22 +1634,23 @@ export function PricingClient() {
                     value={bookingForm.notes}
                     onChange={(e) => setBookingForm(prev => ({ ...prev, notes: e.target.value }))}
                     placeholder={t('modal_notes_placeholder')}
-                    className="w-full px-3 py-2 rounded-lg border bg-background text-xs font-medium outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full bg-[#1c1c1f] border border-white/10 rounded-md px-3.5 py-2 text-xs font-semibold text-white outline-none focus:border-[#E11D48]"
                   />
                 </div>
 
-                <div className="pt-3 flex items-center justify-end gap-3 border-t">
+                {/* Submit Actions */}
+                <div className="pt-2 flex items-center justify-end gap-2.5">
                   <button
                     type="button"
                     onClick={() => setBookingModalItem(null)}
-                    className="px-4 py-2 rounded-lg text-xs font-bold bg-muted hover:bg-muted/80 cursor-pointer"
+                    className="px-4 py-2.5 rounded-md bg-white/5 hover:bg-white/10 text-xs font-bold text-zinc-400 hover:text-white transition-colors cursor-pointer"
                   >
                     {t('modal_cancel')}
                   </button>
                   <button
                     type="submit"
                     disabled={bookingSubmitting}
-                    className="flex-1 sm:flex-none px-6 py-2 rounded-lg bg-primary text-primary-foreground font-black text-xs uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md disabled:opacity-50 cursor-pointer"
+                    className="px-6 py-2.5 rounded-md bg-[#E11D48] hover:bg-[#be123c] text-white text-xs font-black transition-all cursor-pointer shadow-md shadow-red-500/20 disabled:opacity-50"
                   >
                     {bookingSubmitting ? t('modal_submitting') : t('modal_confirm')}
                   </button>
@@ -1285,6 +1660,7 @@ export function PricingClient() {
           </div>
         )}
       </AnimatePresence>
+
     </div>
   );
 }

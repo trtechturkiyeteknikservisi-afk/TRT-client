@@ -89,6 +89,9 @@ const dict = {
     placeholder_series: "مثال: فئة iPhone 16",
     label_model: "اسم الموديل",
     placeholder_model: "مثال: iPhone 16 Pro Max",
+    label_service_type: "نوع الخدمة (من خدمات الموقع)",
+    select_service_placeholder: "-- اختر الخدمة لإكمال البيانات تلقائياً --",
+    custom_service_option: "خدمة مخصصة أخرى...",
     label_service_tr: "اسم الخدمة (تركي - TR)",
     label_service_en: "اسم الخدمة (إنجليزي - EN)",
     label_service_ar: "اسم الخدمة (عربي - AR)",
@@ -120,9 +123,15 @@ const dict = {
     add_success: "تمت إضافة تسعيرة الموديل الجديد بنجاح!",
     save_error: "حدث خطأ أثناء حفظ البيانات.",
     delete_confirm: "هل أنت متأكد من رغبتك في حذف تسعيرة هذا الموديل؟",
+    delete_confirm_title: "تأكيد حذف تسعيرة الموديل",
+    delete_confirm_desc: "هل أنت متأكد تماماً من رغبتك في حذف تسعيرة موديل ({model})؟ لا يمكن التراجع عن هذا الإجراء بعد تنفيذه.",
+    delete_confirm_btn: "نعم، احذف التسعيرة",
     delete_success: "تم حذف السجل بنجاح.",
     delete_error: "فشلت عملية الحذف.",
     seed_confirm: "هل ترغب في تحميل وتثبيت قائمة أسعار الكتالوج الافتراضية؟",
+    seed_confirm_title: "تحميل الكتالوج الافتراضي",
+    seed_confirm_desc: "هل ترغب في تحميل وتثبيت قائمة أسعار وموديلات الكتالوج الافتراضية في قاعدة البيانات؟",
+    seed_confirm_btn: "نعم، تحميل وتثبيت",
     seed_success: "تم تحميل الأسعار الافتراضية بنجاح!",
     seed_error: "حدث خطأ أثناء تحميل الأسعار الافتراضية.",
     clear_all_btn: "مسح القوالب الافتراضية",
@@ -177,6 +186,9 @@ const dict = {
     placeholder_series: "e.g. iPhone 16 Series",
     label_model: "Model Name",
     placeholder_model: "e.g. iPhone 16 Pro Max",
+    label_service_type: "Service Type (From Website Services)",
+    select_service_placeholder: "-- Select Service to Auto-fill --",
+    custom_service_option: "Other Custom Service...",
     label_service_tr: "Service Name (TR)",
     label_service_en: "Service Name (EN)",
     label_service_ar: "Service Name (AR)",
@@ -208,9 +220,15 @@ const dict = {
     add_success: "New pricing record added successfully!",
     save_error: "An error occurred while saving.",
     delete_confirm: "Are you sure you want to delete this pricing record?",
+    delete_confirm_title: "Confirm Model Pricing Deletion",
+    delete_confirm_desc: "Are you sure you want to delete the pricing record for ({model})? This action cannot be undone.",
+    delete_confirm_btn: "Yes, Delete Record",
     delete_success: "Record deleted successfully.",
     delete_error: "Failed to delete record.",
     seed_confirm: "Do you want to load the default pricing catalog?",
+    seed_confirm_title: "Load Default Catalog",
+    seed_confirm_desc: "Do you want to load and initialize the default pricing catalog models into the database?",
+    seed_confirm_btn: "Yes, Load Defaults",
     seed_success: "Default prices loaded successfully!",
     seed_error: "Error loading default prices.",
     clear_all_btn: "Clear Default Templates",
@@ -265,6 +283,9 @@ const dict = {
     placeholder_series: "Örn: iPhone 16 Serisi",
     label_model: "Model Adı",
     placeholder_model: "Örn: iPhone 16 Pro Max",
+    label_service_type: "Hizmet Türü (Web Sitesi Hizmetlerinden)",
+    select_service_placeholder: "-- Otomatik doldurmak için Hizmet Seçin --",
+    custom_service_option: "Diğer Özel Hizmet...",
     label_service_tr: "Hizmet Adı (TR)",
     label_service_en: "Service Name (EN)",
     label_service_ar: "اسم الخدمة (AR)",
@@ -296,9 +317,15 @@ const dict = {
     add_success: "Yeni fiyat kaydı başarıyla eklendi!",
     save_error: "Kayıt kaydedilirken bir hata oluştu.",
     delete_confirm: "Bu modelin fiyat kaydını silmek istediğinize emin misiniz?",
+    delete_confirm_title: "Model Fiyat Kaydını Silmeyi Onayla",
+    delete_confirm_desc: "({model}) modelinin fiyat kaydını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+    delete_confirm_btn: "Evet, Kaydı Sil",
     delete_success: "Kayıt silindi.",
     delete_error: "Silme işlemi başarısız oldu.",
     seed_confirm: "Varsayılan katalog fiyatlarını yüklemek istiyor musunuz?",
+    seed_confirm_title: "Varsayılan Kataloğu Yükle",
+    seed_confirm_desc: "Varsayılan katalog fiyatlarını ve modellerini veritabanına yüklemek istiyor musunuz?",
+    seed_confirm_btn: "Evet, Yükle",
     seed_success: "Varsayılan fiyatlar yüklendi!",
     seed_error: "Varsayılanlar yüklenirken hata oluştu.",
     clear_all_btn: "Varsayılan Şablonları Sil",
@@ -321,6 +348,7 @@ export default function AdminPricingPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [items, setItems] = useState<PricingItem[]>([]);
+  const [systemServices, setSystemServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -329,6 +357,8 @@ export default function AdminPricingPage() {
   const [selectedService, setSelectedService] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isClearAllModalOpen, setIsClearAllModalOpen] = useState(false);
+  const [isSeedModalOpen, setIsSeedModalOpen] = useState(false);
+  const [deletingItem, setDeletingItem] = useState<PricingItem | null>(null);
   const [editingItem, setEditingItem] = useState<PricingItem | null>(null);
 
   // Pagination states for high performance
@@ -338,13 +368,13 @@ export default function AdminPricingPage() {
   const [form, setForm] = useState({
     brand: 'Apple',
     device_type: 'phone',
-    series: 'iPhone 16 Serisi',
+    series: '',
     model_name: '',
-    service_slug: 'ekran-degisimi',
-    service_name_tr: 'Ekran Değişimi',
-    service_name_en: 'Screen Replacement',
-    service_name_ar: 'تبديل الشاشة',
-    base_price: 9990,
+    service_slug: '',
+    service_name_tr: '',
+    service_name_en: '',
+    service_name_ar: '',
+    base_price: 1000,
     currency: '₺',
     duration: '30 Dakika',
     warranty: '6 Ay Garanti',
@@ -355,10 +385,7 @@ export default function AdminPricingPage() {
     notes_en: '',
     notes_ar: '',
     image_url: '',
-    quality_options: [
-      { quality_tr: 'Orijinal Servis Ekran', quality_en: 'Original Service Pack Screen', quality_ar: 'شاشة وكالة سيرفس أصلية', price: 12490, badge: 'En İyi Seçim' },
-      { quality_tr: 'A+ Kalite Ekran', quality_en: 'A+ High Quality Screen', quality_ar: 'شاشة فرز أول نخب A+', price: 8990, badge: 'Ekonomik' }
-    ] as QualityOption[]
+    quality_options: [] as QualityOption[]
   });
 
   const router = useRouter();
@@ -382,8 +409,23 @@ export default function AdminPricingPage() {
     }
   };
 
+  const fetchSystemServices = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${API_BASE}/content/services/admin-all`, {
+        headers: { Authorization: `Bearer ${token}` }
+      }).catch(() => axios.get(`${API_BASE}/content/services`));
+      if (Array.isArray(res.data)) {
+        setSystemServices(res.data);
+      }
+    } catch (err) {
+      console.error('Error fetching system services:', err);
+    }
+  };
+
   useEffect(() => {
     fetchItems();
+    fetchSystemServices();
   }, []);
 
   // Reset pagination on filter change
@@ -391,21 +433,73 @@ export default function AdminPricingPage() {
     setCurrentPage(1);
   }, [search, selectedBrand, selectedService, pageSize]);
 
+  const handleServiceSelect = (selectedSlug: string) => {
+    if (selectedSlug === 'custom') {
+      setForm(prev => ({
+        ...prev,
+        service_slug: 'custom-service',
+        service_name_ar: '',
+        service_name_tr: '',
+        service_name_en: ''
+      }));
+      return;
+    }
+
+    // Dynamic services from database
+    const sys = systemServices.find(s => s.slug === selectedSlug);
+    if (sys) {
+      const arName = sys.title_ar || sys.title || '';
+      const trName = sys.title_tr || sys.title || '';
+      const enName = sys.title_en || sys.title || '';
+      let devType = sys.slug;
+      if (sys.slug.includes('phone') || sys.slug.includes('telefon')) devType = 'phone';
+      else if (sys.slug.includes('laptop') || sys.slug.includes('macbook')) devType = 'laptop';
+      else if (sys.slug.includes('robot')) devType = 'robot';
+      else if (sys.slug.includes('watch') || sys.slug.includes('saat')) devType = 'watch';
+      else if (sys.slug.includes('tablet') || sys.slug.includes('ipad')) devType = 'tablet';
+      else if (sys.slug.includes('kulaklik') || sys.slug.includes('headphone')) devType = 'headphones';
+      else if (sys.slug.includes('parca') || sys.slug.includes('part')) devType = 'parts';
+
+      setForm(prev => ({
+        ...prev,
+        service_slug: sys.slug,
+        service_name_ar: arName,
+        service_name_tr: trName,
+        service_name_en: enName,
+        device_type: devType
+      }));
+    }
+  };
+
   const handleOpenAdd = () => {
     setEditingItem(null);
+    const firstService = systemServices[0];
+    const initialSlug = firstService?.slug || 'phone';
+    const initialAr = firstService?.title_ar || firstService?.title || 'صيانة الهواتف';
+    const initialTr = firstService?.title_tr || firstService?.title || 'Telefon Tamiri';
+    const initialEn = firstService?.title_en || firstService?.title || 'Phone Repair';
+    let devType = initialSlug;
+    if (initialSlug.includes('phone') || initialSlug.includes('telefon')) devType = 'phone';
+    else if (initialSlug.includes('laptop') || initialSlug.includes('macbook')) devType = 'laptop';
+    else if (initialSlug.includes('robot')) devType = 'robot';
+    else if (initialSlug.includes('watch') || initialSlug.includes('saat')) devType = 'watch';
+    else if (initialSlug.includes('tablet') || initialSlug.includes('ipad')) devType = 'tablet';
+    else if (initialSlug.includes('kulaklik') || initialSlug.includes('headphone')) devType = 'headphones';
+    else if (initialSlug.includes('parca') || initialSlug.includes('part')) devType = 'parts';
+
     setForm({
       brand: 'Apple',
-      device_type: 'phone',
-      series: 'iPhone 16 Serisi',
+      device_type: devType,
+      series: '',
       model_name: '',
-      service_slug: 'ekran-degisimi',
-      service_name_tr: 'Ekran Değişimi',
-      service_name_en: 'Screen Replacement',
-      service_name_ar: 'تبديل الشاشة',
-      base_price: 9990,
+      service_slug: initialSlug,
+      service_name_tr: initialTr,
+      service_name_en: initialEn,
+      service_name_ar: initialAr,
+      base_price: 1000,
       currency: '₺',
-      duration: '30 Dakika',
-      warranty: '6 Ay Garanti',
+      duration: locale === 'ar' ? '30 دقيقة' : locale === 'en' ? '30 Minutes' : '30 Dakika',
+      warranty: locale === 'ar' ? 'ضمان 6 أشهر' : locale === 'en' ? '6 Months Warranty' : '6 Ay Garanti',
       is_popular: false,
       in_stock: true,
       sort_order: (items.length + 1),
@@ -413,10 +507,7 @@ export default function AdminPricingPage() {
       notes_en: '',
       notes_ar: '',
       image_url: '',
-      quality_options: [
-        { quality_tr: 'Orijinal Servis Ekran', quality_en: 'Original Service Pack Screen', quality_ar: 'شاشة وكالة سيرفس أصلية', price: 12490, badge: 'En İyi Seçim' },
-        { quality_tr: 'A+ Kalite Ekran', quality_en: 'A+ High Quality Screen', quality_ar: 'شاشة فرز أول نخب A+', price: 8990, badge: 'Ekonomik' }
-      ]
+      quality_options: []
     });
     setIsModalOpen(true);
   };
@@ -517,15 +608,16 @@ export default function AdminPricingPage() {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm(d.delete_confirm)) return;
+  const handleConfirmDelete = async () => {
+    if (!deletingItem) return;
     const token = localStorage.getItem('token');
     setActionLoading(true);
     try {
-      await axios.delete(`${API_BASE}/pricing/${id}`, {
+      await axios.delete(`${API_BASE}/pricing/${deletingItem.id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success(d.delete_success);
+      setDeletingItem(null);
       fetchItems();
     } catch (err) {
       console.error('Error deleting pricing:', err);
@@ -536,7 +628,6 @@ export default function AdminPricingPage() {
   };
 
   const handleSeedDefaults = async () => {
-    if (!confirm(d.seed_confirm)) return;
     const token = localStorage.getItem('token');
     setActionLoading(true);
     try {
@@ -544,6 +635,7 @@ export default function AdminPricingPage() {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success((res.data as any)?.message || d.seed_success);
+      setIsSeedModalOpen(false);
       fetchItems();
     } catch (err) {
       console.error('Error seeding defaults:', err);
@@ -646,12 +738,21 @@ export default function AdminPricingPage() {
   const brands = useMemo(() => Array.from(new Set(items.map(i => i.brand))).filter(Boolean), [items]);
   const services = useMemo(() => {
     const map = new Map<string, string>();
+    // 1. Add dynamic systemServices from backend
+    systemServices.forEach(s => {
+      const name = locale === 'ar' ? (s.title_ar || s.title) : locale === 'en' ? (s.title_en || s.title) : (s.title_tr || s.title);
+      if (s.slug && name) map.set(s.slug, name);
+    });
+    // 2. Add existing items from DB
     items.forEach(i => {
+      if (!i.service_slug) return;
       const name = locale === 'ar' ? (i.service_name_ar || i.service_name_tr) : locale === 'en' ? (i.service_name_en || i.service_name_tr) : i.service_name_tr;
-      map.set(i.service_slug, name);
+      if (!map.has(i.service_slug)) {
+        map.set(i.service_slug, name);
+      }
     });
     return Array.from(map.entries()).map(([slug, name]) => ({ slug, name }));
-  }, [items, locale]);
+  }, [items, systemServices, locale]);
 
   const filteredItems = useMemo(() => {
     return items.filter(item => {
@@ -711,7 +812,7 @@ export default function AdminPricingPage() {
           )}
 
           <button
-            onClick={handleSeedDefaults}
+            onClick={() => setIsSeedModalOpen(true)}
             disabled={actionLoading}
             className="flex items-center gap-2 bg-muted/60 hover:bg-muted text-foreground px-3.5 py-2 rounded-lg text-xs font-bold uppercase tracking-wider border transition-all cursor-pointer"
             title={d.load_defaults_tooltip}
@@ -731,7 +832,7 @@ export default function AdminPricingPage() {
       </header>
 
       {/* Filter and Search Bar */}
-      <div className="bg-card p-4 rounded-xl border shadow-xs space-y-4">
+      <div className="bg-card p-4 rounded-md border shadow-xs space-y-4">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
             <Search className="absolute left-3.5 rtl:left-auto rtl:right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
@@ -792,7 +893,7 @@ export default function AdminPricingPage() {
       </div>
 
       {/* Table of Models (Paginated & High Performance) */}
-      <div className="bg-card rounded-xl border shadow-xs overflow-hidden">
+      <div className="bg-card rounded-md border shadow-xs overflow-hidden">
         <div className="overflow-x-auto scrollbar-thin">
           <table className="w-full min-w-[1000px] text-start border-collapse">
             <thead>
@@ -850,8 +951,13 @@ export default function AdminPricingPage() {
                                 </span>
                               )}
                             </div>
-                            <div className="text-[11px] text-muted-foreground font-semibold">
-                              {getLocalizedSeries(item.series)}
+                            <div className="text-[11px] text-muted-foreground font-semibold flex items-center gap-1.5 flex-wrap">
+                              <span>{getLocalizedSeries(item.series)}</span>
+                              {item.device_type && item.device_type !== 'phone' && (
+                                <span className="text-[9px] px-1.5 py-0.2 rounded bg-primary/10 text-primary uppercase font-bold">
+                                  {item.device_type}
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -915,7 +1021,7 @@ export default function AdminPricingPage() {
                             <Edit3 size={15} />
                           </button>
                           <button
-                            onClick={() => handleDelete(item.id)}
+                            onClick={() => setDeletingItem(item)}
                             className="p-1.5 hover:bg-red-500/10 rounded-md text-red-500 transition-colors cursor-pointer"
                             title={d.delete_tooltip}
                           >
@@ -1021,7 +1127,7 @@ export default function AdminPricingPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-card w-full max-w-2xl rounded-xl border shadow-2xl overflow-hidden my-8"
+              className="bg-card w-full max-w-2xl rounded-md border shadow-2xl overflow-hidden my-8"
               dir={locale === 'ar' ? 'rtl' : 'ltr'}
             >
               <div className="flex items-center justify-between px-6 py-4 border-b bg-muted/20">
@@ -1039,7 +1145,7 @@ export default function AdminPricingPage() {
 
               <form onSubmit={handleSubmit} className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
                 {/* 1. OPTIONAL DEVICE IMAGE UPLOAD SECTION */}
-                <div className="p-4 rounded-xl border bg-muted/20 space-y-3">
+                <div className="p-4 rounded-md border bg-muted/20 space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="text-xs font-black uppercase tracking-wider flex items-center gap-2">
@@ -1103,15 +1209,48 @@ export default function AdminPricingPage() {
                   </div>
                 </div>
 
-                {/* 2. Brand & Series & Model */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* 2. Service Selection (Dynamic from System Services & Repair Operations) */}
+                <div className="p-3.5 bg-primary/5 border border-primary/20 rounded-md space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-black uppercase tracking-wider text-primary flex items-center gap-1.5">
+                      <Wrench size={14} />
+                      <span>{d.label_service_type}</span>
+                    </label>
+                    <span className="text-[10px] font-semibold text-muted-foreground">
+                      {locale === 'ar' ? 'يتم ملء وتحديث الأسماء تلقائياً عند الاختيار' : 'Seçildiğinde alanlar otomatik güncellenir'}
+                    </span>
+                  </div>
+
+                  <select
+                    value={form.service_slug}
+                    onChange={(e) => handleServiceSelect(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-md border bg-background text-xs font-black text-foreground outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer shadow-xs"
+                  >
+                    <option value="" disabled>{d.select_service_placeholder}</option>
+                    
+                    {/* Dynamic Services from Website System */}
+                    {systemServices.map(s => {
+                      const label = locale === 'ar' ? (s.title_ar || s.title) : locale === 'en' ? (s.title_en || s.title) : (s.title_tr || s.title);
+                      return (
+                        <option key={s.slug} value={s.slug}>
+                          {label} ({s.slug})
+                        </option>
+                      );
+                    })}
+
+                    <option value="custom">{d.custom_service_option}</option>
+                  </select>
+                </div>
+
+                {/* 3. Brand & Series & Model & Category */}
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                   <div className="space-y-1">
                     <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{d.label_brand}</label>
                     <input
                       value={form.brand}
                       onChange={(e) => setForm(prev => ({ ...prev, brand: e.target.value }))}
                       placeholder={d.placeholder_brand}
-                      className="w-full px-3 py-2 rounded-lg border bg-background text-xs font-bold"
+                      className="w-full px-3 py-2 rounded-md border bg-background text-xs font-bold"
                       required
                     />
                   </div>
@@ -1121,17 +1260,17 @@ export default function AdminPricingPage() {
                       value={form.series}
                       onChange={(e) => setForm(prev => ({ ...prev, series: e.target.value }))}
                       placeholder={d.placeholder_series}
-                      className="w-full px-3 py-2 rounded-lg border bg-background text-xs font-bold"
+                      className="w-full px-3 py-2 rounded-md border bg-background text-xs font-bold"
                       required
                     />
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-1 sm:col-span-2">
                     <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{d.label_model}</label>
                     <input
                       value={form.model_name}
                       onChange={(e) => setForm(prev => ({ ...prev, model_name: e.target.value }))}
                       placeholder={d.placeholder_model}
-                      className="w-full px-3 py-2 rounded-lg border bg-background text-xs font-bold"
+                      className="w-full px-3 py-2 rounded-md border bg-background text-xs font-bold"
                       required
                     />
                   </div>
@@ -1194,7 +1333,7 @@ export default function AdminPricingPage() {
                 </div>
 
                 {/* 5. Quality Options Section with Arabic, Turkish, and English fields */}
-                <div className="space-y-3 p-4 bg-muted/20 rounded-xl border">
+                <div className="space-y-3 p-4 bg-muted/20 rounded-md border">
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="text-xs font-black uppercase tracking-wider">{d.quality_section_title}</h4>
@@ -1343,7 +1482,7 @@ export default function AdminPricingPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-md bg-card rounded-2xl border p-6 shadow-2xl text-center z-10"
+              className="relative w-full max-w-md bg-card rounded-lg border p-6 shadow-2xl text-center z-10"
             >
               <div className="w-14 h-14 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center mx-auto mb-4 border border-red-500/20">
                 <Trash2 size={26} />
@@ -1370,6 +1509,106 @@ export default function AdminPricingPage() {
                 >
                   {actionLoading ? <RefreshCw size={14} className="animate-spin" /> : <Trash2 size={14} />}
                   <span>{d.clear_all_confirm_btn}</span>
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Single Item Confirmation Modal */}
+      <AnimatePresence>
+        {deletingItem && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !actionLoading && setDeletingItem(null)}
+              className="absolute inset-0 bg-background/80 backdrop-blur-xs cursor-pointer"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative w-full max-w-md bg-card rounded-xl border p-6 shadow-2xl text-center z-10"
+            >
+              <div className="w-14 h-14 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center mx-auto mb-4 border border-red-500/20 shadow-xs">
+                <Trash2 size={26} />
+              </div>
+              <h3 className="text-lg font-black text-foreground mb-2">
+                {d.delete_confirm_title}
+              </h3>
+              <p className="text-xs text-muted-foreground mb-6 leading-relaxed">
+                {d.delete_confirm_desc.replace('{model}', `${deletingItem.brand} ${deletingItem.model_name}`)}
+              </p>
+              <div className="flex items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setDeletingItem(null)}
+                  disabled={actionLoading}
+                  className="px-5 py-2.5 rounded-lg border text-xs font-black uppercase hover:bg-muted transition-colors cursor-pointer"
+                >
+                  {d.cancel_btn}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmDelete}
+                  disabled={actionLoading}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-black uppercase transition-all shadow-md disabled:opacity-50 cursor-pointer active:scale-95"
+                >
+                  {actionLoading ? <RefreshCw size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                  <span>{d.delete_confirm_btn}</span>
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Seed Defaults Confirmation Modal */}
+      <AnimatePresence>
+        {isSeedModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !actionLoading && setIsSeedModalOpen(false)}
+              className="absolute inset-0 bg-background/80 backdrop-blur-xs cursor-pointer"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative w-full max-w-md bg-card rounded-xl border p-6 shadow-2xl text-center z-10"
+            >
+              <div className="w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4 border border-primary/20 shadow-xs">
+                <RefreshCw size={26} />
+              </div>
+              <h3 className="text-lg font-black text-foreground mb-2">
+                {d.seed_confirm_title}
+              </h3>
+              <p className="text-xs text-muted-foreground mb-6 leading-relaxed">
+                {d.seed_confirm_desc}
+              </p>
+              <div className="flex items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsSeedModalOpen(false)}
+                  disabled={actionLoading}
+                  className="px-5 py-2.5 rounded-lg border text-xs font-black uppercase hover:bg-muted transition-colors cursor-pointer"
+                >
+                  {d.cancel_btn}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSeedDefaults}
+                  disabled={actionLoading}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-black uppercase transition-all shadow-md disabled:opacity-50 cursor-pointer active:scale-95"
+                >
+                  {actionLoading ? <RefreshCw size={14} className="animate-spin" /> : <Check size={14} />}
+                  <span>{d.seed_confirm_btn}</span>
                 </button>
               </div>
             </motion.div>
