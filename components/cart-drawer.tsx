@@ -129,16 +129,6 @@ export function CartDrawer() {
                 </button>
               </div>
 
-              {/* Free Shipping Alert Banner */}
-              <div className="px-4 py-2.5 bg-emerald-500/10 border-b border-emerald-500/20 text-emerald-400 text-xs font-bold flex items-center gap-2">
-                <Truck size={15} className="shrink-0" />
-                <span>
-                  {locale === 'ar'
-                    ? '🎉 شحن مجاني وسريع لكافة مدن تركيا!'
-                    : '🎉 Tüm Türkiye’ye Hızlı ve Ücretsiz Kargo!'}
-                </span>
-              </div>
-
               {/* Items List */}
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {cart.length === 0 ? (
