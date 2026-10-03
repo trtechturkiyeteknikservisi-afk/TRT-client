@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Calendar, User, Clock, ArrowLeft } from 'lucide-react';
+import { Calendar, User, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from '@/i18n/routing';
 import { useTranslations, useFormatter } from 'next-intl';
@@ -263,11 +263,6 @@ export default function BlogPostClient({
             <div className="flex items-center gap-2">
               <User size={18} className="text-primary" />
               <span>{author}</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Clock size={18} className="text-primary" />
-              <span>5 Min Read</span>
             </div>
           </motion.div>
         </div>

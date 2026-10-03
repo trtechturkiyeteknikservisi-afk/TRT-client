@@ -4,11 +4,12 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import axios from 'axios';
 import { useTheme } from 'next-themes';
-import { Sun, Moon, X, Menu, ChevronDown, Smartphone, Laptop, Watch, TabletIcon as Tablet, Gavel, Lock, ShieldCheck, FileText, Truck, Wrench, Layers } from 'lucide-react';
+import { Sun, Moon, X, Menu, ChevronDown, Smartphone, Laptop, Watch, TabletIcon as Tablet, Gavel, Lock, ShieldCheck, FileText, Truck, Wrench, Layers, ShoppingBag } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
 import { AppleHeadphonesIcon, RobotVacuumIcon } from './social-icons';
+import { useStore } from './store-context';
 
 export function Header() {
   const t = useTranslations('Header');
@@ -81,6 +82,8 @@ export function Header() {
     return () => { isMounted = false; };
   }, [locale, t]);
 
+  const { cartCount, setIsCartOpen } = useStore();
+
   const legalPolicies = [
     { name: tFooter('kvkk'), href: '/policies/kvkk', icon: Gavel },
     { name: tFooter('privacy_policy'), href: '/policies/privacy', icon: Lock },
@@ -90,7 +93,15 @@ export function Header() {
     { name: tFooter('official_doc'), href: '/policies/custom', icon: ShieldCheck },
   ];
 
-  const navigation = [
+  interface NavItem {
+    name: string;
+    href: string;
+    isDropdown?: boolean;
+    subItems?: any[];
+    soon?: boolean;
+  }
+
+  const navigation: NavItem[] = [
     { name: t('home'), href: '/' },
     { name: t('about_us'), href: '/about-us' },
     { 
@@ -99,7 +110,7 @@ export function Header() {
       isDropdown: true,
       subItems: services
     },
-    { name: t('pricing'), href: '/tamir-fiyatlari' },
+    { name: t('pricing'), href: '/urunler' },
     { name: t('works'), href: '/our-works' },
     { name: t('blog'), href: '/blog' },
     { name: t('merchants'), href: '#', soon: true },
@@ -110,7 +121,6 @@ export function Header() {
       isDropdown: true,
       subItems: legalPolicies
     },
-    
   ];
 
   const handleLanguageChange = (newLocale: string) => {
@@ -132,52 +142,52 @@ export function Header() {
 
   return (
     <header className="w-full border-b bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
-      <div className="w-full mx-auto px-4 lg:max-w-5xl xl:max-w-7xl 2xl:max-w-[1536px]">
-        <div className="flex min-h-[4rem] items-center justify-between gap-1 sm:gap-2 py-2 md:py-0">
+      <div className="w-full mx-auto px-4 lg:max-w-5xl xl:max-w-7xl 2xl:max-w-[1440px]">
+        <div className="flex min-h-[4rem] items-center justify-between gap-1 sm:gap-2 py-1.5 md:py-0">
           <div className="flex items-center shrink-0">
-            <Link href="/" className="flex flex-col items-center group mb-2">
+            <Link href="/" className="flex flex-col items-center group py-0.5">
               <Image 
                 src="/day-logo.png" 
                 alt={t('company_name')}
                 width={120}
                 height={40}
                 priority
-                className="h-8 md:h-10 w-auto min-w-[90px] xl:min-w-[105px] 2xl:min-w-[120px] object-contain transition-all group-hover:scale-105 dark:hidden block"
+                className="h-8 md:h-9 2xl:h-10 w-auto min-w-[85px] xl:min-w-[95px] 2xl:min-w-[110px] object-contain transition-all group-hover:scale-105 dark:hidden block"
               />
               <Image 
                 src="/night-logo.png" 
                 alt={t('company_name')}
                 width={120}
                 height={40}
-                className="h-8 md:h-10 w-auto min-w-[90px] xl:min-w-[105px] 2xl:min-w-[120px] object-contain transition-all group-hover:scale-105 hidden dark:block"
+                className="h-8 md:h-9 2xl:h-10 w-auto min-w-[85px] xl:min-w-[95px] 2xl:min-w-[110px] object-contain transition-all group-hover:scale-105 hidden dark:block"
               />
-              <span className="block text-[7.5px] md:text-[9px] font-black uppercase tracking-[0.22em] text-primary bg-primary/10 border border-primary/30 px-2 py-0.5 -mt-0.5 rounded shadow-sm shadow-primary/10 transition-all duration-300 group-hover:scale-105 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-transparent whitespace-nowrap">
+              <span className="block text-[7px] md:text-[7.5px] 2xl:text-[8px] font-black uppercase tracking-[0.06em] 2xl:tracking-[0.1em] text-primary bg-primary/10 border border-primary/30 px-1.5 py-0.5 -mt-0.5 rounded shadow-sm shadow-primary/10 transition-all duration-300 group-hover:scale-105 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-transparent whitespace-nowrap">
                 {t('cargo_service')}
               </span>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden xl:flex items-center justify-center gap-x-2 2xl:gap-x-3 py-1 flex-1 min-w-0 mx-1 2xl:mx-4">
+          <nav className="hidden xl:flex items-center justify-center gap-x-1.5 xl:gap-x-2 2xl:gap-x-2.5 py-1 flex-1 min-w-0 mx-1 2xl:mx-3">
             {navigation.map((item) => (
               item.isDropdown ? (
                 <div 
-                   key={item.name} 
-                  className="relative group"
+                  key={item.name} 
+                  className="relative group shrink-0"
                   onMouseEnter={() => setActiveDropdown(item.name)}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
                   <Link
                     href={item.href}
                     className={cn(
-                      "flex items-center gap-1.5 text-[9px] xl:text-[9.5px] 2xl:text-[11px] font-extrabold uppercase tracking-wide 2xl:tracking-wider transition-all active:scale-95 whitespace-nowrap relative pb-1",
+                      "flex items-center gap-1 text-[9px] xl:text-[9.5px] 2xl:text-[10.5px] font-extrabold uppercase tracking-tight 2xl:tracking-normal transition-all active:scale-95 whitespace-nowrap relative pb-1",
                       isLinkActive(item) 
                         ? "text-primary dark:text-white" 
                         : "text-muted-foreground hover:text-primary dark:hover:text-white"
                     )}
                   >
                     <span>{item.name}</span>
-                    <ChevronDown size={14} className={cn("transition-transform duration-200", activeDropdown === item.name && "rotate-180")} />
+                    <ChevronDown size={12} className={cn("transition-transform duration-200 shrink-0", activeDropdown === item.name && "rotate-180")} />
                     <span 
                       className={cn(
                         "absolute bottom-0 left-0 h-0.5 transition-all group-hover:w-full",
@@ -221,15 +231,15 @@ export function Header() {
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    "items-center gap-1.5 text-[9px] xl:text-[9.5px] 2xl:text-[11px] font-extrabold uppercase tracking-wide 2xl:tracking-wider transition-all relative group whitespace-nowrap pb-1 flex",
+                    "items-center gap-1 text-[9px] xl:text-[9.5px] 2xl:text-[10.5px] font-extrabold uppercase tracking-tight 2xl:tracking-normal transition-all relative group whitespace-nowrap pb-1 flex shrink-0",
                     isLinkActive(item) 
                       ? "text-primary dark:text-white" 
                       : "text-muted-foreground hover:text-primary dark:hover:text-white"
                   )}
                 >
-                  {item.name}
+                  <span>{item.name}</span>
                   {item.soon && (
-                    <span className="inline-block text-[7.5px] bg-primary/10 text-primary px-1 py-0.25 rounded-sm font-black uppercase tracking-tighter animate-pulse border border-primary/20">
+                    <span className="inline-flex items-center text-[7px] 2xl:text-[7.5px] bg-[#E11D48]/15 text-[#E11D48] px-1 py-0.2 rounded-[3px] font-black uppercase tracking-tight animate-pulse border border-[#E11D48]/35 shrink-0 leading-none">
                       {t('coming_soon')}
                     </span>
                   )}
@@ -247,12 +257,12 @@ export function Header() {
           </nav>
 
 
-          <div className="flex items-center gap-0 sm:gap-1 shrink-0">
-            {/* Bize Ulaşın Button */}
+          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+            {/* Bize Ulaşın / Contact Button (Restored to match original header) */}
             <Link
               href="/contact"
               className={cn(
-                "hidden lg:flex items-center justify-center gap-1 px-1.5 py-1 xl:px-1.5 xl:py-1 2xl:px-2.5 2xl:py-2 border border-border rounded-lg bg-card hover:bg-muted text-foreground transition-all duration-300 active:scale-95 text-[9px] xl:text-[9px] 2xl:text-[11px] font-black uppercase tracking-wide 2xl:tracking-wider cursor-pointer mr-0.5 ml-1 xl:ml-1 2xl:ml-2",
+                "hidden lg:flex items-center justify-center gap-1.5 px-2 py-1 xl:px-2.5 xl:py-1.5 2xl:px-3 2xl:py-2 border border-border rounded-lg bg-card hover:bg-muted text-foreground transition-all duration-300 active:scale-95 text-[9px] xl:text-[9.5px] 2xl:text-[10.5px] font-black uppercase tracking-normal cursor-pointer whitespace-nowrap shrink-0",
                 pathname === '/contact' && "border-primary text-primary"
               )}
             >
@@ -262,6 +272,20 @@ export function Header() {
               </span>
               <span className="leading-none">{t('bize_ulasin')}</span>
             </Link>
+
+            {/* Sepetim / Shopping Cart */}
+            <button
+              onClick={() => setIsCartOpen(true)}
+              title={t('sepetim') || "Sepetim"}
+              className="relative p-1.5 sm:p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-all active:scale-95 cursor-pointer flex-shrink-0"
+            >
+              <ShoppingBag size={18} />
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-[#E11D48] text-white text-[9px] font-black flex items-center justify-center shadow-xs">
+                  {cartCount}
+                </span>
+              )}
+            </button>
 
             {/* Theme Toggle */}
             <button
@@ -326,7 +350,23 @@ export function Header() {
       {/* Mobile Menu */}
       {isMenuOpen && (
           <div className="xl:hidden border-t bg-background max-h-[calc(100vh-4rem)] overflow-y-auto animate-in fade-in slide-in-from-top-1 duration-150">
-            <div className="space-y-1 px-4 pb-6 pt-4">
+            <div className="space-y-3 px-4 pb-6 pt-4">
+              {/* Mobile Cart Button if has items */}
+              {cartCount > 0 && (
+                <div className="pb-2 border-b border-border/50">
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      setIsCartOpen(true);
+                    }}
+                    className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl bg-[#E11D48]/10 border border-[#E11D48]/20 text-[#E11D48] text-xs font-black cursor-pointer"
+                  >
+                    <ShoppingBag size={15} />
+                    <span>{t('sepetim')} ({cartCount})</span>
+                  </button>
+                </div>
+              )}
+
               {navigation.map((item) => (
                 <div key={item.name}>
                   {item.isDropdown ? (
@@ -375,7 +415,7 @@ export function Header() {
                     >
                       <span>{item.name}</span>
                       {item.soon && (
-                        <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-lg font-black uppercase tracking-tighter border border-primary/20">
+                        <span className="text-[10px] bg-[#E11D48]/20 text-[#E11D48] px-2 py-0.5 rounded-lg font-black uppercase tracking-tighter border border-[#E11D48]/40">
                           {t('coming_soon')}
                         </span>
                       )}

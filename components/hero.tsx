@@ -35,7 +35,7 @@ function optimizeHeroImage(src: string, width = 1600) {
       const url = new URL(src);
       url.searchParams.set('auto', 'format');
       url.searchParams.set('fit', 'crop');
-      url.searchParams.set('q', '60');
+      url.searchParams.set('q', '80');
       url.searchParams.set('w', String(width));
       return url.toString();
     } catch {
@@ -130,24 +130,26 @@ export function Hero({ initialBanners }: HeroProps) {
               <div className="absolute inset-0 transition-transform duration-[20s] scale-105 group-hover:scale-100">
                 {index === current && (
                   <Image 
-                    src={optimizeHeroImage(banner.image, index === 0 ? 1400 : 1200)}
+                    src={optimizeHeroImage(banner.image, index === 0 ? 1600 : 1200)}
                     alt={banner.title || t('badge')}
                     fill
                     priority={index === 0}
                     fetchPriority={index === 0 ? "high" : "auto"}
                     className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 100vw"
-                    quality={index === 0 ? 70 : 60}
+                    sizes="100vw"
+                    quality={index === 0 ? 85 : 75}
                   />
                 )}
-                {/* Multi-layered gradient for depth */}
+                {/* Multi-layered gradient for depth and text legibility without obscuring the banner */}
                 <div className={cn(
-                  "absolute inset-0 bg-gradient-to-t from-background via-background/5 dark:via-background/20 to-transparent",
+                  "absolute inset-0",
                   isRTL 
-                    ? "bg-gradient-to-l from-background via-background/10 dark:via-background/80 to-transparent" 
-                    : "bg-gradient-to-r from-background via-background/10 dark:via-background/80 to-transparent"
+                    ? "bg-gradient-to-l from-background/90 via-background/40 dark:from-background/75 dark:via-background/25 to-transparent" 
+                    : "bg-gradient-to-r from-background/90 via-background/40 dark:from-background/75 dark:via-background/25 to-transparent"
                 )} />
-                <div className="absolute inset-0 bg-black/5 dark:bg-black/20" />
+                {/* Subtle bottom fade into the next section */}
+                <div className="absolute bottom-0 inset-x-0 h-28 bg-gradient-to-t from-background to-transparent" />
+                <div className="absolute inset-0 bg-black/5 dark:bg-black/10" />
               </div>
             </div>
           ))}

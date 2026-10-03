@@ -12,6 +12,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useRouter } from '@/i18n/routing';
 import toast from 'react-hot-toast';
+import { STORE_CATEGORIES } from '@/lib/store-data';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -31,6 +32,11 @@ interface PricingItem {
   category_name_tr?: string;
   category_name_en?: string;
   category_name_ar?: string;
+  item_type?: 'cihaz' | 'yedek_parca' | 'aksesuar' | 'servis';
+  part_type?: string;
+  specs_tr?: string;
+  specs_en?: string;
+  specs_ar?: string;
   series: string;
   model_name: string;
   service_slug: string;
@@ -406,13 +412,61 @@ export default function AdminPricingPage() {
     en: ''
   });
 
+  // Spare part type customization state
+  const [isCustomPartType, setIsCustomPartType] = useState(false);
+
+  // Main Category Cards Customization States (Phones, Laptops, etc.)
+  const [mainTab, setMainTab] = useState<'pricing' | 'categories'>('pricing');
+  const [categoryCards, setCategoryCards] = useState<any[]>(STORE_CATEGORIES);
+  const [savingCategoryCards, setSavingCategoryCards] = useState(false);
+  const [uploadingCatId, setUploadingCatId] = useState<string | null>(null);
+  const [uploadingCatBannerId, setUploadingCatBannerId] = useState<string | null>(null);
+  const [isNewCatModalOpen, setIsNewCatModalOpen] = useState(false);
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+  const [uploadingNewCatImage, setUploadingNewCatImage] = useState(false);
+  const [uploadingNewCatBanner, setUploadingNewCatBanner] = useState(false);
+  const newCatFileInputRef = useRef<HTMLInputElement>(null);
+  const newCatBannerFileInputRef = useRef<HTMLInputElement>(null);
+  const editCatFileInputRef = useRef<HTMLInputElement>(null);
+  const editCatBannerFileInputRef = useRef<HTMLInputElement>(null);
+  const [editingCat, setEditingCat] = useState<any | null>(null);
+  const [isEditCatModalOpen, setIsEditCatModalOpen] = useState(false);
+  const [uploadingEditCatImage, setUploadingEditCatImage] = useState(false);
+  const [uploadingEditCatBanner, setUploadingEditCatBanner] = useState(false);
+  const [newCat, setNewCat] = useState({
+    id: '',
+    title_ar: '',
+    title_tr: '',
+    title_en: '',
+    desc_ar: '',
+    desc_tr: '',
+    desc_en: '',
+    image: '',
+    banner_image: '',
+    banner_title_ar: '',
+    banner_title_tr: '',
+    banner_title_en: '',
+    banner_desc_ar: '',
+    banner_desc_tr: '',
+    banner_desc_en: '',
+    banner_cta_ar: '',
+    banner_cta_tr: '',
+    banner_cta_en: ''
+  });
+
   // Pagination states for high performance
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
+  const [selectedTypeFilter, setSelectedTypeFilter] = useState('all');
 
   const [form, setForm] = useState({
     brand: 'Apple',
     device_type: 'phone',
+    item_type: 'yedek_parca' as 'cihaz' | 'yedek_parca' | 'aksesuar' | 'servis',
+    part_type: 'ekran',
+    specs_tr: '',
+    specs_en: '',
+    specs_ar: '',
     category_name_tr: '',
     category_name_en: '',
     category_name_ar: '',
@@ -471,98 +525,120 @@ export default function AdminPricingPage() {
     }
   };
 
-  // Available Branches (Categories)
+  // Available Categories (Derived directly from dynamic categoryCards - 100% dynamic single source of truth!)
   const availableBranches = useMemo(() => {
-    const list: { slug: string; name_ar: string; name_tr: string; name_en: string; icon?: string }[] = [];
-    const seen = new Set<string>();
+    return categoryCards.map(c => ({
+      slug: c.id,
+      name_ar: c.title_ar || c.title_tr || c.id,
+      name_tr: c.title_tr || c.title_ar || c.id,
+      name_en: c.title_en || c.title_tr || c.id,
+      image: c.image || '',
+      desc_ar: c.desc_ar || '',
+      desc_tr: c.desc_tr || '',
+      desc_en: c.desc_en || '',
+    }));
+  }, [categoryCards]);
 
-    // 1. From system services
-    systemServices.forEach(s => {
-      const slug = (s.slug || '').toLowerCase().trim();
-      if (slug && !seen.has(slug)) {
-        seen.add(slug);
-        list.push({
-          slug,
-          name_ar: s.title_ar || s.title || s.title_tr,
-          name_tr: s.title_tr || s.title,
-          name_en: s.title_en || s.title,
-          icon: s.icon
-        });
-      }
-    });
-
-    // 2. From items (in case of previously saved custom branches)
+  const categoryProductCounts = useMemo(() => {
+    const map = new Map<string, number>();
     items.forEach(item => {
-      const slug = (item.device_type || '').toLowerCase().trim();
-      if (slug && !seen.has(slug)) {
-        seen.add(slug);
-        list.push({
-          slug,
-          name_ar: item.category_name_ar || item.category_name_tr || slug,
-          name_tr: item.category_name_tr || item.category_name_ar || slug,
-          name_en: item.category_name_en || item.category_name_tr || slug,
-        });
-      }
+      const slug = (item.device_type === 'phone' ? 'telefon' : (item.device_type || '')).toLowerCase();
+      map.set(slug, (map.get(slug) || 0) + 1);
     });
-
-    // 3. Fallback standard list
-    const defaults = [
-      { slug: 'phone', name_ar: 'صيانة الهواتف', name_tr: 'Telefon Tamiri', name_en: 'Phone Repair', icon: 'Smartphone' },
-      { slug: 'laptop', name_ar: 'اللابتوب والكمبيوتر', name_tr: 'Laptop Tamiri', name_en: 'Laptop & PC Repair', icon: 'Laptop' },
-      { slug: 'robot', name_ar: 'المكانس الروبوتية', name_tr: 'Robot Süpürge', name_en: 'Robot Vacuum', icon: 'Robot' },
-      { slug: 'watch', name_ar: 'الساعات الفاخرة', name_tr: 'Akıllı Saat', name_en: 'Smart Watch', icon: 'Watch' },
-      { slug: 'tablet', name_ar: 'التابلت والآيباد', name_tr: 'Tablet Tamiri', name_en: 'Tablet & iPad', icon: 'Tablet' },
-      { slug: 'kulaklik', name_ar: 'السماعات', name_tr: 'Kulaklık', name_en: 'Headphones', icon: 'Headphones' },
-    ];
-    defaults.forEach(d => {
-      if (!seen.has(d.slug)) {
-        seen.add(d.slug);
-        list.push(d);
-      }
-    });
-
-    return list;
-  }, [systemServices, items]);
+    return map;
+  }, [items]);
 
   const getLocalizedBranchName = (item: PricingItem) => {
     const slug = (item.device_type || '').toLowerCase().trim();
-    if (locale === 'ar') {
-      if (item.category_name_ar) return item.category_name_ar;
-      const found = availableBranches.find(b => b.slug === slug);
-      if (found?.name_ar) return found.name_ar;
-    } else if (locale === 'en') {
-      if (item.category_name_en) return item.category_name_en;
-      const found = availableBranches.find(b => b.slug === slug);
-      if (found?.name_en) return found.name_en;
-    } else {
-      if (item.category_name_tr) return item.category_name_tr;
-      const found = availableBranches.find(b => b.slug === slug);
-      if (found?.name_tr) return found.name_tr;
+    if (slug === 'phone') {
+      const tel = availableBranches.find(b => b.slug === 'telefon' || b.slug === 'phone');
+      if (tel) return locale === 'ar' ? tel.name_ar : locale === 'en' ? tel.name_en : tel.name_tr;
     }
-    const found = availableBranches.find(b => b.slug === slug);
-    return found ? (locale === 'ar' ? found.name_ar : locale === 'en' ? found.name_en : found.name_tr) : slug;
+    const found = availableBranches.find(b => b.slug.toLowerCase() === slug);
+    if (found) {
+      return locale === 'ar' ? found.name_ar : locale === 'en' ? found.name_en : found.name_tr;
+    }
+    if (locale === 'ar') return item.category_name_ar || item.category_name_tr || slug;
+    if (locale === 'en') return item.category_name_en || item.category_name_tr || slug;
+    return item.category_name_tr || item.category_name_ar || slug;
   };
+
+  const defaultPartTypes = [
+    { slug: 'ekran', label_ar: 'شاشات (Ekran)', label_tr: 'Ekran', label_en: 'Screen' },
+    { slug: 'batarya', label_ar: 'بطاريات (Batarya)', label_tr: 'Batarya', label_en: 'Battery' },
+    { slug: 'sarj_soketi', label_ar: 'منفذ شحن (Şarj Soketi)', label_tr: 'Şarj Soketi', label_en: 'Charging Port' },
+    { slug: 'arka_kapak', label_ar: 'غطاء خلفي (Arka Kapak)', label_tr: 'Arka Kapak', label_en: 'Back Cover' },
+    { slug: 'kamera', label_ar: 'كاميرات (Kamera)', label_tr: 'Kamera', label_en: 'Camera' },
+    { slug: 'hoparlor', label_ar: 'سبيكر ومكبر صوت (Hoparlör)', label_tr: 'Hoparlör', label_en: 'Speaker' },
+    { slug: 'mikrofon', label_ar: 'ميكروفون (Mikrofon)', label_tr: 'Mikrofon', label_en: 'Microphone' },
+    { slug: 'yan_tuslar', label_ar: 'أزرار جانبية (Yan Tuşlar)', label_tr: 'Yan Tuşlar', label_en: 'Side Buttons' },
+    { slug: 'flex', label_ar: 'كابلات فليكس (Flex Kablolar)', label_tr: 'Flex Kablolar', label_en: 'Flex Cable' },
+    { slug: 'anakart', label_ar: 'قطع مذربورد (Anakart)', label_tr: 'Anakart Parçaları', label_en: 'Motherboard' },
+    { slug: 'diger', label_ar: 'قطع أخرى (Diğer)', label_tr: 'Diğer Parçalar', label_en: 'Other' },
+  ];
+
+  const availablePartTypes = useMemo(() => {
+    const map = new Map<string, { slug: string; label: string }>();
+    defaultPartTypes.forEach(p => {
+      const label = locale === 'ar' ? p.label_ar : locale === 'en' ? p.label_en : p.label_tr;
+      map.set(p.slug.toLowerCase(), { slug: p.slug, label });
+    });
+
+    items.forEach(item => {
+      if (item.part_type && item.part_type.trim()) {
+        const slug = item.part_type.trim();
+        const slugLower = slug.toLowerCase();
+        if (!map.has(slugLower)) {
+          map.set(slugLower, { slug, label: slug });
+        }
+      }
+    });
+
+    return Array.from(map.values());
+  }, [items, locale]);
 
   useEffect(() => {
     fetchItems();
     fetchSystemServices();
+    
+    // Fetch dynamic category cards from settings
+    const fetchCategoryCards = async () => {
+      try {
+        const res: any = await axios.get(`${API_BASE}/settings`);
+        if (res.data?.shop_categories) {
+          const parsed = typeof res.data.shop_categories === 'string'
+            ? JSON.parse(res.data.shop_categories)
+            : res.data.shop_categories;
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setCategoryCards(parsed);
+          }
+        }
+      } catch (e) {}
+    };
+    fetchCategoryCards();
   }, []);
 
   // Reset pagination on filter change
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, selectedBrand, selectedBranch, selectedService, pageSize]);
+  }, [search, selectedBrand, selectedBranch, selectedService, selectedTypeFilter, pageSize]);
 
   const handleOpenAdd = () => {
     setEditingItem(null);
     setIsCustomBranch(false);
     setCustomBranch({ ar: '', tr: '', en: '' });
+    setIsCustomPartType(false);
 
     const firstBranch = availableBranches[0] || { slug: 'phone', name_ar: 'صيانة الهواتف', name_tr: 'Telefon Tamiri', name_en: 'Phone Repair' };
 
     setForm({
       brand: 'Apple',
       device_type: firstBranch.slug,
+      item_type: 'yedek_parca',
+      part_type: 'ekran',
+      specs_tr: '',
+      specs_en: '',
+      specs_ar: '',
       category_name_tr: firstBranch.name_tr,
       category_name_en: firstBranch.name_en,
       category_name_ar: firstBranch.name_ar,
@@ -608,9 +684,18 @@ export default function AdminPricingPage() {
       });
     }
 
+    const partType = (item.part_type || '').trim();
+    const isStandardPart = defaultPartTypes.some(p => p.slug.toLowerCase() === partType.toLowerCase());
+    setIsCustomPartType(!isStandardPart && Boolean(partType));
+
     setForm({
       brand: item.brand,
       device_type: item.device_type || 'phone',
+      item_type: item.item_type || 'yedek_parca',
+      part_type: item.part_type || 'ekran',
+      specs_tr: item.specs_tr || '',
+      specs_en: item.specs_en || '',
+      specs_ar: item.specs_ar || '',
       category_name_tr: item.category_name_tr || '',
       category_name_en: item.category_name_en || '',
       category_name_ar: item.category_name_ar || '',
@@ -677,79 +762,60 @@ export default function AdminPricingPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.model_name.trim()) {
-      toast.error(d.model_name_required);
+      toast.error(locale === 'ar' ? 'يرجى كتابة اسم المنتج أو الموديل' : d.model_name_required);
       return;
     }
 
-    const trName = (form.service_name_tr || '').trim();
-    const arName = (form.service_name_ar || '').trim();
-    const enName = (form.service_name_en || '').trim();
+    const modelName = form.model_name.trim();
+    const brandName = form.brand.trim() || 'General';
 
-    if (!trName && !arName && !enName) {
-      toast.error(
-        locale === 'ar' 
-          ? 'يرجى كتابة اسم الخدمة أو نوع القطعة / المنتج' 
-          : locale === 'en' 
-          ? 'Please enter the service or product name' 
-          : 'Lütfen hizmet veya ürün adını giriniz'
-      );
-      return;
+    // Auto-fill multilingual names if left empty
+    const arName = (form.service_name_ar || '').trim() || modelName;
+    const trName = (form.service_name_tr || '').trim() || modelName;
+    const enName = (form.service_name_en || '').trim() || modelName;
+
+    // Series auto-fallback
+    const seriesName = (form.series || '').trim() || `${brandName} ${modelName}`;
+
+    // Category resolution from availableBranches (categoryCards)
+    let branchSlug = form.device_type || 'telefon';
+    let branchNameAr = form.category_name_ar || '';
+    let branchNameTr = form.category_name_tr || '';
+    let branchNameEn = form.category_name_en || '';
+
+    const matchedBranch = availableBranches.find(b => b.slug === branchSlug);
+    if (matchedBranch) {
+      branchNameAr = matchedBranch.name_ar;
+      branchNameTr = matchedBranch.name_tr;
+      branchNameEn = matchedBranch.name_en;
+    } else if (!branchNameAr) {
+      branchNameAr = branchSlug;
+      branchNameTr = branchSlug;
+      branchNameEn = branchSlug;
     }
 
-    // Branch resolution
-    let branchSlug = form.device_type;
-    let branchNameAr = form.category_name_ar;
-    let branchNameTr = form.category_name_tr;
-    let branchNameEn = form.category_name_en;
-
-    if (isCustomBranch) {
-      const cAr = customBranch.ar.trim();
-      const cTr = customBranch.tr.trim();
-      const cEn = customBranch.en.trim();
-
-      if (!cAr && !cTr && !cEn) {
-        toast.error(d.branch_name_required);
-        return;
-      }
-
-      branchNameAr = cAr || cTr || cEn;
-      branchNameTr = cTr || cAr || cEn;
-      branchNameEn = cEn || cTr || cAr;
-
-      const baseForBranchSlug = cEn || cTr || cAr;
-      branchSlug = baseForBranchSlug
-        .toLowerCase()
-        .replace(/[^a-z0-9\u0600-\u06FF]+/g, '-')
-        .replace(/^-+|-+$/g, '') || 'branch';
-    } else {
-      const foundBranch = availableBranches.find(b => b.slug === branchSlug);
-      if (foundBranch) {
-        branchNameAr = foundBranch.name_ar;
-        branchNameTr = foundBranch.name_tr;
-        branchNameEn = foundBranch.name_en;
-      }
-    }
-
-    // Auto-generate slug from whichever name is provided
+    // Auto-generate slug from English or Turkish or Model
     let slug = (form.service_slug || '').trim();
     if (!slug) {
-      const baseForSlug = enName || trName || arName || 'service';
-      slug = baseForSlug
+      slug = (enName || trName || modelName)
         .toLowerCase()
-        .replace(/[^a-z0-9\u0600-\u06FF]+/g, '-')
-        .replace(/^-+|-+$/g, '') || 'service';
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '') || `item-${Date.now()}`;
     }
 
     const payload = {
       ...form,
+      brand: brandName,
+      series: seriesName,
+      model_name: modelName,
       device_type: branchSlug,
       category_name_ar: branchNameAr,
       category_name_tr: branchNameTr,
       category_name_en: branchNameEn,
       service_slug: slug,
-      service_name_tr: trName || arName || enName || 'Ürün / Hizmet',
-      service_name_en: enName || trName || arName || 'Product / Service',
-      service_name_ar: arName || trName || enName || 'منتج / خدمة',
+      service_name_tr: trName,
+      service_name_en: enName,
+      service_name_ar: arName,
     };
 
     const token = localStorage.getItem('token');
@@ -924,6 +990,328 @@ export default function AdminPricingPage() {
     return war;
   };
 
+  // Category Card Handlers
+  const handleCategoryCardImageUpload = async (catId: string, file: File) => {
+    setUploadingCatId(catId);
+    const token = localStorage.getItem('token');
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const res = await axios.post<{ url: string }>(`${API_BASE}/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (res.data?.url) {
+        setCategoryCards(prev => prev.map(c => c.id === catId ? { ...c, image: res.data.url } : c));
+        toast.success(locale === 'ar' ? 'تم رفع صورة كرت القسم بنجاح! لا تنسَ الضغط على زر حفظ التعديلات.' : 'Kategori görseli yüklendi! Kaydet butonuna basmayı unutmayın.');
+      }
+    } catch (err) {
+      toast.error(locale === 'ar' ? 'فشل رفع الصورة' : 'Resim yükleme başarısız');
+    } finally {
+      setUploadingCatId(null);
+    }
+  };
+
+  const handleCategoryBannerUpload = async (catId: string, file: File) => {
+    setUploadingCatBannerId(catId);
+    const token = localStorage.getItem('token');
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const res = await axios.post<{ url: string }>(`${API_BASE}/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (res.data?.url) {
+        setCategoryCards(prev => prev.map(c => c.id === catId ? { ...c, banner_image: res.data.url } : c));
+        toast.success(locale === 'ar' ? 'تم رفع صورة بانر القسم بنجاح! لا تنسَ الضغط على زر حفظ التعديلات.' : 'Kategori bannerı yüklendi! Kaydet butonuna basmayı unutmayın.');
+      }
+    } catch (err) {
+      toast.error(locale === 'ar' ? 'فشل رفع صورة البانر' : 'Banner yükleme başarısız');
+    } finally {
+      setUploadingCatBannerId(null);
+    }
+  };
+
+  const handleSaveCategoryCards = async () => {
+    setSavingCategoryCards(true);
+    const token = localStorage.getItem('token');
+    try {
+      await axios.put(`${API_BASE}/settings`, {
+        shop_categories: JSON.stringify(categoryCards)
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success(locale === 'ar' ? 'تم حفظ صور وبنرات وبيانات أقسام المتجر بنجاح!' : 'Kategori kartları ve bannerları kaydedildi!');
+    } catch (err) {
+      toast.error(locale === 'ar' ? 'فشل حفظ التعديلات' : 'Kaydetme hatası');
+    } finally {
+      setSavingCategoryCards(false);
+    }
+  };
+
+  const handleNewCatImageUpload = async (file: File) => {
+    setUploadingNewCatImage(true);
+    const token = localStorage.getItem('token');
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const res = await axios.post<{ url: string }>(`${API_BASE}/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (res.data?.url) {
+        setNewCat(prev => ({ ...prev, image: res.data.url }));
+        toast.success(locale === 'ar' ? 'تم رفع صورة كرت القسم بنجاح!' : 'Kategori görseli yüklendi!');
+      }
+    } catch (err) {
+      toast.error(locale === 'ar' ? 'فشل رفع الصورة' : 'Resim yükleme başarısız');
+    } finally {
+      setUploadingNewCatImage(false);
+    }
+  };
+
+  const handleNewCatBannerImageUpload = async (file: File) => {
+    setUploadingNewCatBanner(true);
+    const token = localStorage.getItem('token');
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const res = await axios.post<{ url: string }>(`${API_BASE}/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (res.data?.url) {
+        setNewCat(prev => ({ ...prev, banner_image: res.data.url }));
+        toast.success(locale === 'ar' ? 'تم رفع صورة بانر القسم بنجاح!' : 'Kategori banner görseli yüklendi!');
+      }
+    } catch (err) {
+      toast.error(locale === 'ar' ? 'فشل رفع صورة البانر' : 'Banner yükleme başarısız');
+    } finally {
+      setUploadingNewCatBanner(false);
+    }
+  };
+
+  const handleAddNewCategory = async () => {
+    const arTitle = newCat.title_ar.trim();
+    if (!arTitle) {
+      toast.error(locale === 'ar' ? 'يرجى كتابة اسم القسم' : 'Lütfen kategori adını giriniz');
+      return;
+    }
+    let idClean = newCat.id.trim().toLowerCase().replace(/[^a-z0-9_]+/g, '_');
+    if (!idClean) {
+      const base = (newCat.title_en || newCat.title_tr || '').trim().toLowerCase().replace(/[^a-z0-9_]+/g, '_');
+      idClean = base || `cat_${Date.now()}`;
+    }
+    const catImage = newCat.image || '/images/phones-category.jpg';
+    const catBanner = newCat.banner_image || catImage || '/images/phones-banner.jpg';
+
+    const newItem = {
+      id: idClean,
+      title_ar: arTitle,
+      title_tr: newCat.title_tr.trim() || arTitle,
+      title_en: newCat.title_en.trim() || arTitle,
+      desc_ar: newCat.desc_ar.trim() || '',
+      desc_tr: newCat.desc_tr.trim() || '',
+      desc_en: newCat.desc_en.trim() || '',
+      image: catImage,
+      banner_image: catBanner,
+      banner_title_ar: newCat.banner_title_ar.trim() || arTitle,
+      banner_title_tr: newCat.banner_title_tr.trim() || newCat.title_tr.trim() || arTitle,
+      banner_title_en: newCat.banner_title_en.trim() || newCat.title_en.trim() || arTitle,
+      banner_desc_ar: newCat.banner_desc_ar.trim() || newCat.desc_ar.trim() || '',
+      banner_desc_tr: newCat.banner_desc_tr.trim() || newCat.desc_tr.trim() || '',
+      banner_desc_en: newCat.banner_desc_en.trim() || newCat.desc_en.trim() || '',
+      banner_cta_ar: newCat.banner_cta_ar.trim() || 'استعراض منتجات القسم',
+      banner_cta_tr: newCat.banner_cta_tr.trim() || 'Ürünleri İncele',
+      banner_cta_en: newCat.banner_cta_en.trim() || 'Explore Products',
+    };
+
+    const updatedList = [...categoryCards, newItem];
+    setCategoryCards(updatedList);
+
+    // Auto-save to backend settings immediately
+    const token = localStorage.getItem('token');
+    try {
+      await axios.put(`${API_BASE}/settings`, {
+        shop_categories: JSON.stringify(updatedList)
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    } catch (e) {
+      console.error('Error auto-saving category to settings:', e);
+    }
+
+    // Auto-select in form
+    setForm(prev => ({
+      ...prev,
+      device_type: idClean,
+      category_name_ar: newItem.title_ar,
+      category_name_tr: newItem.title_tr,
+      category_name_en: newItem.title_en
+    }));
+
+    setIsNewCatModalOpen(false);
+    setNewCat({
+      id: '',
+      title_ar: '',
+      title_tr: '',
+      title_en: '',
+      desc_ar: '',
+      desc_tr: '',
+      desc_en: '',
+      image: '',
+      banner_image: '',
+      banner_title_ar: '',
+      banner_title_tr: '',
+      banner_title_en: '',
+      banner_desc_ar: '',
+      banner_desc_tr: '',
+      banner_desc_en: '',
+      banner_cta_ar: '',
+      banner_cta_tr: '',
+      banner_cta_en: ''
+    });
+    toast.success(locale === 'ar' ? 'تمت إضافة وتثبيت القسم والبانر بنجاح في المتجر!' : 'Kategori ve banner başarıyla eklendi ve kaydedildi!');
+  };
+
+  const handleDeleteCategory = async (id: string) => {
+    const updated = categoryCards.filter(c => c.id !== id);
+    setCategoryCards(updated);
+    const token = localStorage.getItem('token');
+    try {
+      await axios.put(`${API_BASE}/settings`, {
+        shop_categories: JSON.stringify(updated)
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success(locale === 'ar' ? 'تم حذف القسم وتحديث المتجر بنجاح!' : 'Kategori silindi!');
+    } catch (e) {
+      toast.error(locale === 'ar' ? 'فشل حفظ الحذف' : 'Silme hatası');
+    }
+  };
+
+  const handleOpenEditCat = (cat: any) => {
+    setEditingCat({
+      ...cat,
+      title_ar: cat.title_ar || '',
+      title_tr: cat.title_tr || '',
+      title_en: cat.title_en || '',
+      desc_ar: cat.desc_ar || '',
+      desc_tr: cat.desc_tr || '',
+      desc_en: cat.desc_en || '',
+      image: cat.image || '',
+      banner_image: cat.banner_image || cat.image || '',
+      banner_title_ar: cat.banner_title_ar || '',
+      banner_title_tr: cat.banner_title_tr || '',
+      banner_title_en: cat.banner_title_en || '',
+      banner_desc_ar: cat.banner_desc_ar || '',
+      banner_desc_tr: cat.banner_desc_tr || '',
+      banner_desc_en: cat.banner_desc_en || '',
+      banner_cta_ar: cat.banner_cta_ar || 'استعراض منتجات القسم',
+      banner_cta_tr: cat.banner_cta_tr || 'Ürünleri İncele',
+      banner_cta_en: cat.banner_cta_en || 'Explore Products',
+    });
+    setIsEditCatModalOpen(true);
+  };
+
+  const handleEditCatImageUpload = async (file: File) => {
+    setUploadingEditCatImage(true);
+    const token = localStorage.getItem('token');
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const res = await axios.post<{ url: string }>(`${API_BASE}/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (res.data?.url) {
+        setEditingCat((prev: any) => ({ ...prev, image: res.data.url }));
+        toast.success(locale === 'ar' ? 'تم رفع صورة كرت القسم بنجاح!' : 'Kategori görseli yüklendi!');
+      }
+    } catch (err) {
+      toast.error(locale === 'ar' ? 'فشل رفع الصورة' : 'Resim yükleme başarısız');
+    } finally {
+      setUploadingEditCatImage(false);
+    }
+  };
+
+  const handleEditCatBannerUpload = async (file: File) => {
+    setUploadingEditCatBanner(true);
+    const token = localStorage.getItem('token');
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const res = await axios.post<{ url: string }>(`${API_BASE}/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (res.data?.url) {
+        setEditingCat((prev: any) => ({ ...prev, banner_image: res.data.url }));
+        toast.success(locale === 'ar' ? 'تم رفع صورة بانر القسم بنجاح!' : 'Kategori banner görseli yüklendi!');
+      }
+    } catch (err) {
+      toast.error(locale === 'ar' ? 'فشل رفع صورة البانر' : 'Banner yükleme başarısız');
+    } finally {
+      setUploadingEditCatBanner(false);
+    }
+  };
+
+  const handleSaveEditedCategory = async () => {
+    if (!editingCat) return;
+    const arTitle = (editingCat.title_ar || '').trim();
+    if (!arTitle) {
+      toast.error(locale === 'ar' ? 'يرجى كتابة اسم القسم' : 'Lütfen kategori adını giriniz');
+      return;
+    }
+
+    const updatedList = categoryCards.map(c => c.id === editingCat.id ? { ...c, ...editingCat } : c);
+    setCategoryCards(updatedList);
+
+    const token = localStorage.getItem('token');
+    try {
+      await axios.put(`${API_BASE}/settings`, {
+        shop_categories: JSON.stringify(updatedList)
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success(locale === 'ar' ? 'تم حفظ وتحديث بيانات وبانر القسم بنجاح!' : 'Kategori ve banner güncellendi!');
+      setIsEditCatModalOpen(false);
+      setEditingCat(null);
+    } catch (e) {
+      toast.error(locale === 'ar' ? 'فشل حفظ التعديلات' : 'Kaydetme hatası');
+    }
+  };
+
+  const handleQuickSaveSingleCat = async (cat: any) => {
+    setSavingCategoryCards(true);
+    const token = localStorage.getItem('token');
+    try {
+      await axios.put(`${API_BASE}/settings`, {
+        shop_categories: JSON.stringify(categoryCards)
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success(locale === 'ar' ? `تم حفظ تعديلات قسم (${cat.title_ar || cat.id}) بنجاح!` : 'Kategori kaydedildi!');
+    } catch (err) {
+      toast.error(locale === 'ar' ? 'فشل حفظ التعديلات' : 'Kaydetme hatası');
+    } finally {
+      setSavingCategoryCards(false);
+    }
+  };
+
   // Filtering
   const brands = useMemo(() => Array.from(new Set(items.map(i => i.brand))).filter(Boolean), [items]);
   const services = useMemo(() => {
@@ -944,8 +1332,28 @@ export default function AdminPricingPage() {
     return Array.from(map.entries()).map(([slug, name]) => ({ slug, name }));
   }, [items, systemServices, locale]);
 
+  const countsByType = useMemo(() => {
+    let all = items.length;
+    let yedek_parca = 0;
+    let cihaz = 0;
+    let aksesuar = 0;
+    let servis = 0;
+    items.forEach(item => {
+      const t = item.item_type || (item.category_name_tr?.includes('Yedek') || item.service_slug?.includes('ekran') || item.service_slug?.includes('batarya') ? 'yedek_parca' : 'cihaz');
+      if (t === 'yedek_parca') yedek_parca++;
+      else if (t === 'cihaz') cihaz++;
+      else if (t === 'aksesuar') aksesuar++;
+      else if (t === 'servis') servis++;
+    });
+    return { all, yedek_parca, cihaz, aksesuar, servis };
+  }, [items]);
+
   const filteredItems = useMemo(() => {
     return items.filter(item => {
+      if (selectedTypeFilter !== 'all') {
+        const itemType = item.item_type || (item.category_name_tr?.includes('Yedek') || item.service_slug?.includes('ekran') || item.service_slug?.includes('batarya') ? 'yedek_parca' : 'cihaz');
+        if (itemType !== selectedTypeFilter) return false;
+      }
       if (selectedBranch !== 'all' && item.device_type !== selectedBranch) return false;
       if (selectedBrand !== 'all' && item.brand !== selectedBrand) return false;
       if (selectedService !== 'all' && item.service_slug !== selectedService) return false;
@@ -962,7 +1370,7 @@ export default function AdminPricingPage() {
       }
       return true;
     });
-  }, [items, selectedBranch, selectedBrand, selectedService, search, locale, availableBranches]);
+  }, [items, selectedTypeFilter, selectedBranch, selectedBrand, selectedService, search, locale, availableBranches]);
 
   // High performance pagination calculations
   const totalPages = Math.max(1, Math.ceil(filteredItems.length / pageSize));
@@ -992,40 +1400,438 @@ export default function AdminPricingPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {items.length > 0 && (
-            <button
-              onClick={() => setIsClearAllModalOpen(true)}
-              disabled={actionLoading}
-              className="flex items-center gap-2 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white px-3.5 py-2 rounded-lg text-xs font-bold uppercase tracking-wider border border-red-500/20 hover:border-red-500 transition-all cursor-pointer shadow-xs active:scale-95"
-              title={d.clear_all_tooltip}
-            >
-              <Trash2 size={14} />
-              <span>{d.clear_all_btn}</span>
-            </button>
-          )}
+          {mainTab === 'categories' ? (
+            <>
+              <button
+                type="button"
+                onClick={() => setIsNewCatModalOpen(true)}
+                className="flex items-center gap-2 bg-muted/60 hover:bg-muted text-foreground px-3.5 py-2 rounded-md text-xs font-bold uppercase tracking-wider border transition-all cursor-pointer"
+              >
+                <Plus size={14} />
+                <span>{locale === 'ar' ? 'إضافة قسم رئيسي جديد +' : 'Yeni Kategori Ekle +'}</span>
+              </button>
 
-          <button
-            onClick={() => setIsSeedModalOpen(true)}
-            disabled={actionLoading}
-            className="flex items-center gap-2 bg-muted/60 hover:bg-muted text-foreground px-3.5 py-2 rounded-lg text-xs font-bold uppercase tracking-wider border transition-all cursor-pointer"
-            title={d.load_defaults_tooltip}
-          >
-            <RefreshCw size={14} className={cn(actionLoading && "animate-spin")} />
-            <span>{d.load_defaults}</span>
-          </button>
-          
-          <button
-            onClick={handleOpenAdd}
-            className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md active:scale-95 cursor-pointer"
-          >
-            <Plus size={16} />
-            <span>{d.add_new_model}</span>
-          </button>
+              <button
+                type="button"
+                onClick={handleSaveCategoryCards}
+                disabled={savingCategoryCards}
+                className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md text-xs font-black uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
+              >
+                <Check size={16} />
+                <span>{savingCategoryCards ? (locale === 'ar' ? 'جاري الحفظ...' : 'Kaydediliyor...') : (locale === 'ar' ? 'حفظ تعديلات الأقسام' : 'Değişiklikleri Kaydet')}</span>
+              </button>
+            </>
+          ) : (
+            <>
+              {items.length > 0 && (
+                <button
+                  onClick={() => setIsClearAllModalOpen(true)}
+                  disabled={actionLoading}
+                  className="flex items-center gap-2 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white px-3.5 py-2 rounded-md text-xs font-bold uppercase tracking-wider border border-red-500/20 hover:border-red-500 transition-all cursor-pointer shadow-xs active:scale-95"
+                  title={d.clear_all_tooltip}
+                >
+                  <Trash2 size={14} />
+                  <span>{d.clear_all_btn}</span>
+                </button>
+              )}
+
+              <button
+                onClick={() => setIsSeedModalOpen(true)}
+                disabled={actionLoading}
+                className="flex items-center gap-2 bg-muted/60 hover:bg-muted text-foreground px-3.5 py-2 rounded-md text-xs font-bold uppercase tracking-wider border transition-all cursor-pointer"
+                title={d.load_defaults_tooltip}
+              >
+                <RefreshCw size={14} className={cn(actionLoading && "animate-spin")} />
+                <span>{d.load_defaults}</span>
+              </button>
+              
+              <button
+                onClick={handleOpenAdd}
+                className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md text-xs font-black uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md active:scale-95 cursor-pointer"
+              >
+                <Plus size={16} />
+                <span>{d.add_new_model}</span>
+              </button>
+            </>
+          )}
         </div>
       </header>
 
+      {/* Main View Switcher Tabs */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-border/80 pb-3">
+        <button
+          type="button"
+          onClick={() => setMainTab('pricing')}
+          className={cn(
+            "px-4 py-2.5 rounded-md text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer",
+            mainTab === 'pricing'
+              ? "bg-primary text-primary-foreground shadow-md"
+              : "bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <span>{locale === 'ar' ? 'قائمة المنتجات والأسعار' : 'Ürünler & Fiyat Listesi'}</span>
+          <span className="text-[10px] bg-black/20 px-2 py-0.5 rounded-full font-bold">
+            {items.length}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setMainTab('categories')}
+          className={cn(
+            "px-4 py-2.5 rounded-md text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer",
+            mainTab === 'categories'
+              ? "bg-primary text-primary-foreground shadow-md"
+              : "bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <span>{locale === 'ar' ? 'إدارة أقسام المتجر' : 'Mağaza Kategorileri'}</span>
+          <span className="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">
+            {categoryCards.length}
+          </span>
+        </button>
+      </div>
+
+      {mainTab === 'categories' ? (
+        /* Category Cards Management Section */
+        <div className="space-y-6">
+          {/* Top Categories Toolbar */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-md border bg-card shadow-xs">
+            <div>
+              <h3 className="text-sm font-black text-foreground uppercase tracking-wide flex items-center gap-2">
+                <ImageIcon size={16} className="text-primary" />
+                <span>{locale === 'ar' ? 'أقسام المتجر الديناميكية والبنرات الترويجية' : 'Dinamik Mağaza Kategorileri & Bannerlar'}</span>
+              </h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {locale === 'ar' 
+                  ? 'يمكنك هنا تخصيص صورة الكرت وصورة البانر العريض لكل قسم يظهر في أعلى صفحة المتجر.' 
+                  : 'Her kategori için kart görseli ve sayfa üstünde gösterilecek geniş bannerı yönetebilirsiniz.'}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsNewCatModalOpen(true)}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-black uppercase transition-all shadow-xs cursor-pointer active:scale-95"
+              >
+                <Plus size={14} />
+                <span>{locale === 'ar' ? 'إضافة قسم وبانر جديد' : 'Yeni Kategori & Banner Ekle'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSaveCategoryCards}
+                disabled={savingCategoryCards}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black uppercase transition-all shadow-xs cursor-pointer disabled:opacity-50 active:scale-95"
+              >
+                <Check size={14} className={cn(savingCategoryCards && "animate-spin")} />
+                <span>{savingCategoryCards ? (locale === 'ar' ? 'جاري الحفظ...' : 'Kaydediliyor...') : (locale === 'ar' ? 'حفظ كافة التعديلات' : 'Değişiklikleri Kaydet')}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Grid of Category Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-5">
+            {categoryCards.map((cat, idx) => (
+              <div 
+                key={cat.id || idx}
+                className="rounded-md border bg-card p-4 space-y-4 hover:border-primary/50 transition-all shadow-xs flex flex-col justify-between"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-border">
+                    <span className="text-xs font-black text-foreground flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-primary" />
+                      <span>{cat.title_ar || cat.title_tr || cat.id}</span>
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                        {categoryProductCounts.get(cat.id.toLowerCase()) || (cat.id === 'telefon' ? categoryProductCounts.get('phone') || 0 : 0)} {locale === 'ar' ? 'منتج' : 'ürün'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEditCat(cat)}
+                        className="text-muted-foreground hover:text-primary p-1 transition-colors cursor-pointer"
+                        title={locale === 'ar' ? 'تعديل هذا القسم' : 'Kategoriyi Düzenle'}
+                      >
+                        <Edit3 size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteCategory(cat.id)}
+                        className="text-muted-foreground hover:text-red-500 p-1 transition-colors cursor-pointer"
+                        title={locale === 'ar' ? 'حذف هذا القسم' : 'Kategoriyi Sil'}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 1. Category Card Thumbnail */}
+                  <div className="space-y-1.5 p-2.5 rounded-md border bg-muted/20">
+                    <span className="text-[10px] font-black uppercase text-foreground block">
+                      {locale === 'ar' ? 'صورة كرت القسم (Thumbnail)' : 'Kart Görseli'}
+                    </span>
+
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-16 h-16 rounded-md bg-black/40 border border-border overflow-hidden shrink-0">
+                        <img
+                          src={cat.image}
+                          alt={cat.title_tr || cat.id}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+
+                      <div className="flex-1 space-y-1.5">
+                        <label className="block">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleCategoryCardImageUpload(cat.id, file);
+                            }}
+                          />
+                          <span className="w-full px-2.5 py-1.5 rounded-md bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer transition-all">
+                            <Upload size={12} className={cn(uploadingCatId === cat.id && "animate-spin")} />
+                            <span>{uploadingCatId === cat.id ? (locale === 'ar' ? 'جاري الرفع...' : 'Yükleniyor...') : (locale === 'ar' ? 'رفع صورة الكرت' : 'Kart Görseli Yükle')}</span>
+                          </span>
+                        </label>
+                        <input
+                          type="text"
+                          value={cat.image || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setCategoryCards(prev => prev.map(c => c.id === cat.id ? { ...c, image: val } : c));
+                          }}
+                          className="w-full text-[10px] font-mono px-2 py-1 rounded bg-background border border-border text-foreground"
+                          placeholder="https://..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 2. Category Hero Banner */}
+                  <div className="space-y-2 p-2.5 rounded-md border border-primary/30 bg-primary/5">
+                    <span className="text-[10px] font-black uppercase text-primary flex items-center gap-1">
+                      <Layers size={11} />
+                      <span>{locale === 'ar' ? 'بانر القسم العريض (Hero Banner)' : 'Kategori Geniş Bannerı'}</span>
+                    </span>
+
+                    <div className="w-full h-24 rounded-md bg-black/50 border border-border overflow-hidden relative flex items-center justify-center">
+                      <img
+                        src={cat.banner_image || cat.image || '/images/phones-banner.jpg'}
+                        alt={`${cat.title_tr || cat.id} banner`}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
+                      <span className="absolute bottom-1.5 start-2 text-[10px] text-white font-bold drop-shadow truncate max-w-[90%]">
+                        {cat.banner_title_ar || cat.title_ar || cat.title_tr}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <label className="flex-1">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleCategoryBannerUpload(cat.id, file);
+                          }}
+                        />
+                        <span className="w-full px-2.5 py-1.5 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-[11px] font-black flex items-center justify-center gap-1 cursor-pointer transition-all shadow-xs">
+                          <Upload size={12} className={cn(uploadingCatBannerId === cat.id && "animate-spin")} />
+                          <span>{uploadingCatBannerId === cat.id ? (locale === 'ar' ? 'جاري الرفع...' : 'Yükleniyor...') : (locale === 'ar' ? 'رفع بانر للقسم' : 'Banner Yükle')}</span>
+                        </span>
+                      </label>
+                    </div>
+
+                    <div className="space-y-1">
+                      <input
+                        type="text"
+                        value={cat.banner_image || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setCategoryCards(prev => prev.map(c => c.id === cat.id ? { ...c, banner_image: val } : c));
+                        }}
+                        className="w-full text-[10px] font-mono px-2 py-1 rounded bg-background border border-border text-foreground"
+                        placeholder={locale === 'ar' ? 'رابط مباشر للبانر (URL)...' : 'Banner Resim URL'}
+                      />
+                    </div>
+
+                    {/* Banner Custom Titles */}
+                    <div className="space-y-1.5 pt-1 border-t border-primary/20">
+                      <div>
+                        <label className="text-[9px] font-bold text-muted-foreground block mb-0.5">
+                          {locale === 'ar' ? 'عنوان البانر بالعربي' : 'Banner Başlığı (AR)'}
+                        </label>
+                        <input
+                          type="text"
+                          value={cat.banner_title_ar || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setCategoryCards(prev => prev.map(c => c.id === cat.id ? { ...c, banner_title_ar: val } : c));
+                          }}
+                          placeholder={cat.title_ar || "عنوان البانر"}
+                          className="w-full text-xs px-2 py-1 rounded bg-background border border-border text-foreground"
+                          dir="rtl"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-[9px] font-bold text-muted-foreground block mb-0.5">
+                          {locale === 'ar' ? 'وصف البانر بالعربي' : 'Banner Açıklaması (AR)'}
+                        </label>
+                        <input
+                          type="text"
+                          value={cat.banner_desc_ar || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setCategoryCards(prev => prev.map(c => c.id === cat.id ? { ...c, banner_desc_ar: val } : c));
+                          }}
+                          placeholder={cat.desc_ar || "شرح جذاب يظهر داخل البانر"}
+                          className="w-full text-xs px-2 py-1 rounded bg-background border border-border text-foreground"
+                          dir="rtl"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Multilingual Titles */}
+                  <div className="space-y-2 pt-2 border-t border-border/60">
+                    <div>
+                      <label className="text-[10px] font-bold text-muted-foreground block mb-1">
+                        {locale === 'ar' ? 'اسم القسم بالعربي' : 'Arapça Başlık'}
+                      </label>
+                      <input
+                        type="text"
+                        value={cat.title_ar || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setCategoryCards(prev => prev.map(c => c.id === cat.id ? { ...c, title_ar: val } : c));
+                        }}
+                        className="w-full text-xs px-2.5 py-1.5 rounded-md bg-background border border-border font-bold text-foreground outline-hidden focus:border-primary"
+                        dir="rtl"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[9px] font-bold text-muted-foreground block mb-0.5">
+                          {locale === 'ar' ? 'تركي' : 'Türkçe'}
+                        </label>
+                        <input
+                          type="text"
+                          value={cat.title_tr || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setCategoryCards(prev => prev.map(c => c.id === cat.id ? { ...c, title_tr: val } : c));
+                          }}
+                          className="w-full text-xs px-2 py-1 rounded-md bg-background border border-border font-medium text-foreground outline-hidden focus:border-primary"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[9px] font-bold text-muted-foreground block mb-0.5">
+                          {locale === 'ar' ? 'إنجليزي' : 'İngilizce'}
+                        </label>
+                        <input
+                          type="text"
+                          value={cat.title_en || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setCategoryCards(prev => prev.map(c => c.id === cat.id ? { ...c, title_en: val } : c));
+                          }}
+                          className="w-full text-xs px-2 py-1 rounded-md bg-background border border-border font-medium text-foreground outline-hidden focus:border-primary"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="pt-1">
+                      <label className="text-[9px] font-bold text-muted-foreground block mb-0.5">
+                        {locale === 'ar' ? 'وصف كرت القسم بالعربي (يظهر أسفل الاسم في المتجر)' : 'Kart Açıklaması (AR)'}
+                      </label>
+                      <input
+                        type="text"
+                        value={cat.desc_ar || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setCategoryCards(prev => prev.map(c => c.id === cat.id ? { ...c, desc_ar: val } : c));
+                        }}
+                        placeholder={locale === 'ar' ? 'مثال: آيفون، سامسونج، شاومي والمزيد' : 'Örn: iPhone, Samsung ve Dahası'}
+                        className="w-full text-xs px-2.5 py-1.5 rounded-md bg-background border border-border font-medium text-foreground outline-hidden focus:border-primary"
+                        dir="rtl"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom Actions for each Category Card */}
+                <div className="pt-3 border-t border-border flex items-center justify-between gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleOpenEditCat(cat)}
+                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition-all cursor-pointer border border-primary/20"
+                  >
+                    <Edit3 size={13} />
+                    <span>{locale === 'ar' ? 'تعديل بالنافذة' : 'Pencerede Düzenle'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleQuickSaveSingleCat(cat)}
+                    disabled={savingCategoryCards}
+                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                  >
+                    <Check size={13} />
+                    <span>{locale === 'ar' ? 'حفظ القسم' : 'Kaydet'}</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        /* Normal Pricing Table View */
+        <div className="space-y-6">
+
       {/* Filter and Search Bar */}
       <div className="bg-card p-4 rounded-md border shadow-xs space-y-4">
+        {/* Quick Type Filter Tabs */}
+        <div className="flex flex-wrap items-center gap-2 pb-1 border-b border-border/60">
+          {[
+            { id: 'all', label: locale === 'ar' ? 'الكل' : locale === 'en' ? 'All Items' : 'Tümü', count: countsByType.all },
+            { id: 'yedek_parca', label: locale === 'ar' ? 'قطع الغيار' : locale === 'en' ? 'Spare Parts' : 'Yedek Parça', count: countsByType.yedek_parca },
+            { id: 'cihaz', label: locale === 'ar' ? 'الأجهزة (بيع)' : locale === 'en' ? 'Devices' : 'Cihaz Satışı', count: countsByType.cihaz },
+            { id: 'aksesuar', label: locale === 'ar' ? 'الإكسسوارات' : locale === 'en' ? 'Accessories' : 'Aksesuar', count: countsByType.aksesuar },
+            { id: 'servis', label: locale === 'ar' ? 'خدمات الصيانة' : locale === 'en' ? 'Repair Services' : 'Tamir / Servis', count: countsByType.servis },
+          ].map((tab) => {
+            const isActive = selectedTypeFilter === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setSelectedTypeFilter(tab.id)}
+                className={cn(
+                  "px-3.5 py-1.5 rounded-md text-xs font-black border transition-all cursor-pointer flex items-center gap-2",
+                  isActive 
+                    ? "bg-primary text-primary-foreground border-primary shadow-xs" 
+                    : "bg-muted/40 hover:bg-muted text-muted-foreground border-border/80 hover:text-foreground"
+                )}
+              >
+                <span>{tab.label}</span>
+                <span className={cn(
+                  "text-[10px] font-bold px-1.5 py-0.5 rounded-full",
+                  isActive ? "bg-white/20 text-white" : "bg-muted text-muted-foreground"
+                )}>
+                  {tab.count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
             <Search className="absolute left-3.5 rtl:left-auto rtl:right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
@@ -1033,7 +1839,7 @@ export default function AdminPricingPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={d.search_placeholder}
-              className="w-full pl-10 pr-4 rtl:pl-4 rtl:pr-10 py-2 rounded-lg border bg-background text-sm font-bold outline-none focus:ring-2 focus:ring-primary/20"
+              className="w-full pl-10 pr-4 rtl:pl-4 rtl:pr-10 py-2 rounded-md border bg-background text-sm font-bold outline-none focus:ring-2 focus:ring-primary/20"
             />
             {search && (
               <button 
@@ -1050,7 +1856,7 @@ export default function AdminPricingPage() {
             <select
               value={selectedBranch}
               onChange={(e) => setSelectedBranch(e.target.value)}
-              className="px-3 py-2 rounded-lg border bg-background text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+              className="px-3 py-2 rounded-md border bg-background text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
             >
               <option value="all">{d.all_branches} ({availableBranches.length})</option>
               {availableBranches.map(b => (
@@ -1063,7 +1869,7 @@ export default function AdminPricingPage() {
             <select
               value={selectedBrand}
               onChange={(e) => setSelectedBrand(e.target.value)}
-              className="px-3 py-2 rounded-lg border bg-background text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+              className="px-3 py-2 rounded-md border bg-background text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
             >
               <option value="all">{d.all_brands} ({brands.length})</option>
               {brands.map(b => (
@@ -1074,7 +1880,7 @@ export default function AdminPricingPage() {
             <select
               value={selectedService}
               onChange={(e) => setSelectedService(e.target.value)}
-              className="px-3 py-2 rounded-lg border bg-background text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+              className="px-3 py-2 rounded-md border bg-background text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
             >
               <option value="all">{d.all_services}</option>
               {services.map(s => (
@@ -1086,7 +1892,7 @@ export default function AdminPricingPage() {
             <select
               value={pageSize}
               onChange={(e) => setPageSize(Number(e.target.value))}
-              className="px-3 py-2 rounded-lg border bg-background text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+              className="px-3 py-2 rounded-md border bg-background text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
               title={d.pagination_per_page}
             >
               <option value={10}>10 {d.pagination_per_page}</option>
@@ -1143,10 +1949,10 @@ export default function AdminPricingPage() {
                             <img 
                               src={item.image_url} 
                               alt={item.model_name} 
-                              className="w-12 h-12 object-contain rounded-lg border bg-muted/40 p-0.5 shrink-0" 
+                              className="w-12 h-12 object-contain rounded-md border bg-muted/40 p-0.5 shrink-0" 
                             />
                           ) : (
-                            <div className="w-11 h-11 rounded-lg border bg-muted/30 flex items-center justify-center shrink-0 text-muted-foreground/60">
+                            <div className="w-11 h-11 rounded-md border bg-muted/30 flex items-center justify-center shrink-0 text-muted-foreground/60">
                               <Smartphone size={18} />
                             </div>
                           )}
@@ -1161,6 +1967,30 @@ export default function AdminPricingPage() {
                             </div>
                             <div className="text-[11px] text-muted-foreground font-semibold flex items-center gap-1.5 flex-wrap">
                               <span>{getLocalizedSeries(item.series)}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                              {item.item_type === 'yedek_parca' ? (
+                                <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-red-500/10 text-red-500 border border-red-500/20 inline-flex items-center gap-1">
+                                  <Wrench size={10} />
+                                  <span>{locale === 'ar' ? 'قطعة غيار' : locale === 'en' ? 'Spare Part' : 'Yedek Parça'}</span>
+                                  {item.part_type && <span className="opacity-80">({item.part_type})</span>}
+                                </span>
+                              ) : item.item_type === 'cihaz' ? (
+                                <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-500 border border-blue-500/20 inline-flex items-center gap-1">
+                                  <Smartphone size={10} />
+                                  <span>{locale === 'ar' ? 'جهاز إلكتروني' : locale === 'en' ? 'Device' : 'Cihaz Satışı'}</span>
+                                </span>
+                              ) : item.item_type === 'aksesuar' ? (
+                                <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-500 border border-purple-500/20 inline-flex items-center gap-1">
+                                  <Shield size={10} />
+                                  <span>{locale === 'ar' ? 'إكسسوار' : locale === 'en' ? 'Accessory' : 'Aksesuar'}</span>
+                                </span>
+                              ) : (
+                                <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-500 border border-amber-500/20 inline-flex items-center gap-1">
+                                  <Wrench size={10} />
+                                  <span>{locale === 'ar' ? 'خدمة صيانة' : locale === 'en' ? 'Repair' : 'Servis'}</span>
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -1205,7 +2035,7 @@ export default function AdminPricingPage() {
                         )}
                       </td>
                       <td className="py-3 px-4 whitespace-nowrap">
-                        <span className="inline-flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
+                        <span className="inline-flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-1 rounded-md border border-emerald-500/20">
                           <ShieldCheck size={14} className="shrink-0" />
                           <span>{getLocalizedWarranty(item.warranty)}</span>
                         </span>
@@ -1261,7 +2091,7 @@ export default function AdminPricingPage() {
                 type="button"
                 onClick={() => setCurrentPage(1)}
                 disabled={currentPage === 1}
-                className="p-1.5 rounded-lg border bg-background hover:bg-muted text-foreground disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                className="p-1.5 rounded-md border bg-background hover:bg-muted text-foreground disabled:opacity-40 disabled:pointer-events-none transition-colors"
                 title="First Page"
               >
                 {locale === 'ar' ? <ChevronsRight size={15} /> : <ChevronsLeft size={15} />}
@@ -1271,7 +2101,7 @@ export default function AdminPricingPage() {
                 type="button"
                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
-                className="p-1.5 rounded-lg border bg-background hover:bg-muted text-foreground disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                className="p-1.5 rounded-md border bg-background hover:bg-muted text-foreground disabled:opacity-40 disabled:pointer-events-none transition-colors"
                 title={d.prev_page}
               >
                 {locale === 'ar' ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
@@ -1291,7 +2121,7 @@ export default function AdminPricingPage() {
                           type="button"
                           onClick={() => setCurrentPage(page)}
                           className={cn(
-                            "w-7 h-7 rounded-lg text-xs font-bold transition-all cursor-pointer",
+                            "w-7 h-7 rounded-md text-xs font-bold transition-all cursor-pointer",
                             currentPage === page
                               ? "bg-primary text-primary-foreground font-black shadow-xs"
                               : "border bg-background hover:bg-muted text-muted-foreground hover:text-foreground"
@@ -1308,7 +2138,7 @@ export default function AdminPricingPage() {
                 type="button"
                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
-                className="p-1.5 rounded-lg border bg-background hover:bg-muted text-foreground disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                className="p-1.5 rounded-md border bg-background hover:bg-muted text-foreground disabled:opacity-40 disabled:pointer-events-none transition-colors"
                 title={d.next_page}
               >
                 {locale === 'ar' ? <ChevronLeft size={15} /> : <ChevronRight size={15} />}
@@ -1318,7 +2148,7 @@ export default function AdminPricingPage() {
                 type="button"
                 onClick={() => setCurrentPage(totalPages)}
                 disabled={currentPage === totalPages}
-                className="p-1.5 rounded-lg border bg-background hover:bg-muted text-foreground disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                className="p-1.5 rounded-md border bg-background hover:bg-muted text-foreground disabled:opacity-40 disabled:pointer-events-none transition-colors"
                 title="Last Page"
               >
                 {locale === 'ar' ? <ChevronsLeft size={15} /> : <ChevronsRight size={15} />}
@@ -1327,6 +2157,8 @@ export default function AdminPricingPage() {
           </div>
         )}
       </div>
+    </div>
+  )}
 
       {/* Modal for Add / Edit */}
       <AnimatePresence>
@@ -1353,15 +2185,17 @@ export default function AdminPricingPage() {
               </div>
 
               <form onSubmit={handleSubmit} className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
-                {/* 1. OPTIONAL DEVICE IMAGE UPLOAD SECTION */}
+                {/* 1. PRODUCT IMAGE UPLOAD SECTION */}
                 <div className="p-4 rounded-md border bg-muted/20 space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="text-xs font-black uppercase tracking-wider flex items-center gap-2">
                         <ImageIcon size={15} className="text-primary" />
-                        <span>{d.image_section_title}</span>
+                        <span>{locale === 'ar' ? 'صورة المنتج' : d.image_section_title}</span>
                       </h4>
-                      <p className="text-[10px] text-muted-foreground">{d.image_section_sub}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {locale === 'ar' ? 'ارفع صورة المنتج مباشرة من جهازك أو الصق رابط الصورة' : d.image_section_sub}
+                      </p>
                     </div>
 
                     <input 
@@ -1376,19 +2210,19 @@ export default function AdminPricingPage() {
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={uploadingImage}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition-all cursor-pointer border border-primary/20"
+                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition-all cursor-pointer border border-primary/20"
                     >
                       <Upload size={14} className={cn(uploadingImage && "animate-spin")} />
-                      <span>{uploadingImage ? d.uploading_image : d.upload_image_btn}</span>
+                      <span>{uploadingImage ? d.uploading_image : (locale === 'ar' ? 'رفع صورة من جهازك' : d.upload_image_btn)}</span>
                     </button>
                   </div>
 
                   <div className="flex items-center gap-3">
                     {form.image_url ? (
-                      <div className="relative w-16 h-16 rounded-lg border bg-background p-1 shrink-0 flex items-center justify-center group shadow-xs">
+                      <div className="relative w-16 h-16 rounded-md border bg-background p-1 shrink-0 flex items-center justify-center group shadow-xs">
                         <img 
                           src={form.image_url} 
-                          alt="Device preview" 
+                          alt="Product preview" 
                           className="w-full h-full object-contain"
                         />
                         <button
@@ -1401,9 +2235,9 @@ export default function AdminPricingPage() {
                         </button>
                       </div>
                     ) : (
-                      <div className="w-16 h-16 rounded-lg border border-dashed border-border/80 bg-background/50 flex flex-col items-center justify-center text-muted-foreground/60 shrink-0">
+                      <div className="w-16 h-16 rounded-md border border-dashed border-border/80 bg-background/50 flex flex-col items-center justify-center text-muted-foreground/60 shrink-0">
                         <Smartphone size={20} />
-                        <span className="text-[8px] uppercase mt-1">Logo / Resim</span>
+                        <span className="text-[8px] uppercase mt-1">لا توجد صورة</span>
                       </div>
                     )}
 
@@ -1411,362 +2245,469 @@ export default function AdminPricingPage() {
                       <input
                         value={form.image_url}
                         onChange={(e) => setForm(prev => ({ ...prev, image_url: e.target.value }))}
-                        placeholder={d.image_url_placeholder}
-                        className="w-full px-3 py-2 rounded-lg border bg-background text-xs font-medium"
+                        placeholder={locale === 'ar' ? 'أو الصق رابط صورة المنتج مباشرة هنا (URL)...' : d.image_url_placeholder}
+                        className="w-full px-3 py-2 rounded-md border bg-background text-xs font-medium"
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* 1. Main Branch / Department (الفرع الرئيسي / القسم العام) */}
-                <div className="p-3.5 bg-muted/20 border rounded-md space-y-3">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-black uppercase tracking-wider text-primary flex items-center gap-1.5">
-                      <Layers size={14} />
-                      <span>{d.label_main_branch}</span>
+                {/* 2. ESSENTIAL PRODUCT DETAILS (CHILD-FRIENDLY & INTUITIVE) */}
+                <div className="space-y-4">
+                  {/* Product Name (Field 1 - Top Priority) */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-black uppercase text-foreground flex items-center justify-between">
+                      <span>{locale === 'ar' ? 'اسم المنتج أو الموديل *' : d.label_model}</span>
+                      <span className="text-[10px] text-muted-foreground font-semibold">
+                        {locale === 'ar' ? 'اكتب الاسم بوضوح كما تريد أن يظهر للزبون' : ''}
+                      </span>
                     </label>
-                    <span className="text-[10px] font-semibold text-muted-foreground">
-                      {locale === 'ar' ? 'حدد الفرع الرئيسي الذي تتبع له هذه الخدمة أو أنشئ فرعاً جديداً' : locale === 'en' ? 'Select main branch or add new' : 'Ana branşı seçin veya yeni ekleyin'}
-                    </span>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                      <select
-                        value={isCustomBranch ? 'custom_new' : form.device_type}
-                        onChange={(e) => {
-                          if (e.target.value === 'custom_new') {
-                            setIsCustomBranch(true);
-                          } else {
-                            setIsCustomBranch(false);
-                            const branch = availableBranches.find(b => b.slug === e.target.value);
-                            if (branch) {
-                              setForm(prev => ({
-                                ...prev,
-                                device_type: branch.slug,
-                                category_name_ar: branch.name_ar,
-                                category_name_tr: branch.name_tr,
-                                category_name_en: branch.name_en,
-                              }));
-                            }
-                          }
-                        }}
-                        className="flex-1 px-3 py-2 rounded-md border bg-background text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
-                      >
-                        <optgroup label={locale === 'ar' ? 'الفروع والأقسام المتاحة' : locale === 'en' ? 'Available Branches' : 'Mevcut Branşlar'}>
-                          {availableBranches.map((b) => {
-                            const bName = locale === 'ar' ? b.name_ar : locale === 'en' ? b.name_en : b.name_tr;
-                            return (
-                              <option key={b.slug} value={b.slug}>
-                                {bName}
-                              </option>
-                            );
-                          })}
-                        </optgroup>
-                        <option value="custom_new" className="font-black text-primary">
-                          {d.new_branch_option}
-                        </option>
-                      </select>
-
-                      <button
-                        type="button"
-                        onClick={() => setIsCustomBranch(!isCustomBranch)}
-                        className={cn(
-                          "px-3 py-2 rounded-md text-xs font-bold border transition-all cursor-pointer whitespace-nowrap flex items-center justify-center gap-1.5",
-                          isCustomBranch 
-                            ? "bg-primary text-primary-foreground border-primary" 
-                            : "bg-background hover:bg-muted text-muted-foreground hover:text-foreground"
-                        )}
-                      >
-                        <Plus size={14} />
-                        <span>{locale === 'ar' ? 'فرع جديد' : locale === 'en' ? 'New Branch' : 'Yeni Branş'}</span>
-                      </button>
-                    </div>
-
-                    {/* New Branch Custom Inputs */}
-                    {isCustomBranch && (
-                      <div className="p-3 bg-background border border-primary/30 rounded-md space-y-2.5 animate-in fade-in duration-200">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-black text-primary flex items-center gap-1.5">
-                            <Layers size={13} />
-                            <span>{d.custom_branch_box_title}</span>
-                          </span>
-                          <span className="text-[10px] text-muted-foreground">
-                            {locale === 'ar' ? 'سيتم حفظ هذا الفرع تلقائياً' : locale === 'en' ? 'Will be saved automatically' : 'Otomatik kaydedilecek'}
-                          </span>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                          <div className="space-y-1">
-                            <label className="text-[10px] font-black uppercase text-muted-foreground">{d.label_branch_ar}</label>
-                            <input
-                              value={customBranch.ar}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                setCustomBranch(prev => ({
-                                  ...prev,
-                                  ar: val,
-                                  tr: prev.tr || val,
-                                  en: prev.en || val
-                                }));
-                              }}
-                              placeholder={d.placeholder_branch_ar}
-                              className="w-full px-2.5 py-1.5 rounded-md border bg-muted/20 text-xs font-bold"
-                              dir="rtl"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-[10px] font-black uppercase text-muted-foreground">{d.label_branch_tr}</label>
-                            <input
-                              value={customBranch.tr}
-                              onChange={(e) => setCustomBranch(prev => ({ ...prev, tr: e.target.value }))}
-                              placeholder={d.placeholder_branch_tr}
-                              className="w-full px-2.5 py-1.5 rounded-md border bg-muted/20 text-xs font-bold"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-[10px] font-black uppercase text-muted-foreground">{d.label_branch_en}</label>
-                            <input
-                              value={customBranch.en}
-                              onChange={(e) => setCustomBranch(prev => ({ ...prev, en: e.target.value }))}
-                              placeholder={d.placeholder_branch_en}
-                              className="w-full px-2.5 py-1.5 rounded-md border bg-muted/20 text-xs font-bold"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* 2. Service / Operation Name Inputs (Free text - no select dropdown) */}
-                <div className="p-3.5 bg-muted/20 border rounded-md space-y-3">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-black uppercase tracking-wider text-primary flex items-center gap-1.5">
-                      <Wrench size={14} />
-                      <span>{d.label_service_type}</span>
-                    </label>
-                    <span className="text-[10px] font-semibold text-muted-foreground">
-                      {locale === 'ar' ? 'اكتب اسم الخدمة أو نوع العطل/القطعة بحرية' : locale === 'en' ? 'Type service or operation name freely' : 'Hizmet veya işlem adını serbestçe yazın'}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{d.label_service_ar}</label>
-                      <input
-                        value={form.service_name_ar}
-                        onChange={(e) => setForm(prev => ({ ...prev, service_name_ar: e.target.value }))}
-                        placeholder="مثال: تبديل الشاشة، تغيير بطارية..."
-                        className="w-full px-3 py-2 rounded-md border bg-background text-xs font-bold"
-                        dir="rtl"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{d.label_service_tr}</label>
-                      <input
-                        value={form.service_name_tr}
-                        onChange={(e) => setForm(prev => ({ ...prev, service_name_tr: e.target.value }))}
-                        placeholder="Örn: Ekran Değişimi, Batarya Değişimi..."
-                        className="w-full px-3 py-2 rounded-md border bg-background text-xs font-bold"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{d.label_service_en}</label>
-                      <input
-                        value={form.service_name_en}
-                        onChange={(e) => setForm(prev => ({ ...prev, service_name_en: e.target.value }))}
-                        placeholder="e.g. Screen Replacement, Battery..."
-                        className="w-full px-3 py-2 rounded-md border bg-background text-xs font-bold"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* 3. Brand & Series & Model */}
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{d.label_brand}</label>
-                    <input
-                      value={form.brand}
-                      onChange={(e) => setForm(prev => ({ ...prev, brand: e.target.value }))}
-                      placeholder={d.placeholder_brand}
-                      className="w-full px-3 py-2 rounded-md border bg-background text-xs font-bold"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{d.label_series}</label>
-                    <input
-                      value={form.series}
-                      onChange={(e) => setForm(prev => ({ ...prev, series: e.target.value }))}
-                      placeholder={d.placeholder_series}
-                      className="w-full px-3 py-2 rounded-md border bg-background text-xs font-bold"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-1 sm:col-span-2">
-                    <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{d.label_model}</label>
                     <input
                       value={form.model_name}
                       onChange={(e) => setForm(prev => ({ ...prev, model_name: e.target.value }))}
-                      placeholder={d.placeholder_model}
-                      className="w-full px-3 py-2 rounded-md border bg-background text-xs font-bold"
+                      placeholder={locale === 'ar' ? 'مثال: iPhone 16 Pro Max 256GB أو شاشة سامسونج S24 أصلية' : d.placeholder_model}
+                      className="w-full px-3.5 py-2.5 rounded-md border bg-background text-sm font-black focus:border-primary outline-hidden shadow-xs"
                       required
                     />
                   </div>
-                </div>
 
-                {/* 4. Base Price & Warranty */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{d.label_base_price}</label>
-                    <input
-                      type="number"
-                      value={form.base_price}
-                      onChange={(e) => setForm(prev => ({ ...prev, base_price: parseFloat(e.target.value) || 0 }))}
-                      className="w-full px-3 py-2 rounded-lg border bg-background text-xs font-bold text-primary"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{d.label_warranty}</label>
-                    <input
-                      value={form.warranty}
-                      onChange={(e) => setForm(prev => ({ ...prev, warranty: e.target.value }))}
-                      placeholder={d.placeholder_warranty}
-                      className="w-full px-3 py-2 rounded-lg border bg-background text-xs font-bold"
-                    />
-                  </div>
-                </div>
-
-                {/* 5. Quality Options Section with Arabic, Turkish, and English fields */}
-                <div className="space-y-3 p-4 bg-muted/20 rounded-md border">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-xs font-black uppercase tracking-wider">{d.quality_section_title}</h4>
-                      <p className="text-[10px] text-muted-foreground">{d.quality_section_sub}</p>
+                  {/* Category & Brand in One Row */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* Category Dropdown with [+ قسم جديد] */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-black uppercase text-foreground flex items-center gap-1.5">
+                          <Layers size={13} className="text-primary" />
+                          <span>{locale === 'ar' ? 'قسم المتجر' : d.label_main_branch}</span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setIsNewCatModalOpen(true)}
+                          className="text-[10px] text-primary hover:underline font-bold flex items-center gap-0.5 cursor-pointer"
+                        >
+                          <Plus size={11} />
+                          <span>{locale === 'ar' ? 'قسم جديد +' : 'Yeni Kategori +'}</span>
+                        </button>
+                      </div>
+                      <select
+                        value={form.device_type}
+                        onChange={(e) => {
+                          const branch = availableBranches.find(b => b.slug === e.target.value);
+                          if (branch) {
+                            setForm(prev => ({
+                              ...prev,
+                              device_type: branch.slug,
+                              category_name_ar: branch.name_ar,
+                              category_name_tr: branch.name_tr,
+                              category_name_en: branch.name_en,
+                            }));
+                          }
+                        }}
+                        className="w-full px-3 py-2 rounded-md border bg-background text-xs font-bold outline-hidden focus:border-primary cursor-pointer shadow-xs"
+                      >
+                        {availableBranches.map((b) => (
+                          <option key={b.slug} value={b.slug}>
+                            {locale === 'ar' ? b.name_ar : locale === 'en' ? b.name_en : b.name_tr}
+                          </option>
+                        ))}
+                      </select>
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleAddQuality}
-                      className="flex items-center gap-1 text-[10px] font-black uppercase bg-primary/10 text-primary px-3 py-1.5 rounded-lg hover:bg-primary/20 border border-primary/20 cursor-pointer"
-                    >
-                      <Plus size={12} />
-                      <span>{d.add_quality_btn}</span>
-                    </button>
+
+                    {/* Brand with Quick Suggestions */}
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-black uppercase text-foreground">
+                        {locale === 'ar' ? 'الماركة / الشركة' : d.label_brand}
+                      </label>
+                      <input
+                        value={form.brand}
+                        onChange={(e) => setForm(prev => ({ ...prev, brand: e.target.value }))}
+                        placeholder={locale === 'ar' ? 'مثال: Apple, Samsung, Xiaomi' : d.placeholder_brand}
+                        className="w-full px-3 py-2 rounded-md border bg-background text-xs font-bold outline-hidden focus:border-primary shadow-xs"
+                        required
+                      />
+                      {/* Quick Click Brand Pills */}
+                      <div className="flex flex-wrap gap-1 pt-0.5">
+                        {['Apple', 'Samsung', 'Xiaomi', 'Dyson', 'Roborock', 'Huawei', 'Asus', 'HP', 'Dell', 'Sony'].map(b => (
+                          <button
+                            key={b}
+                            type="button"
+                            onClick={() => setForm(prev => ({ ...prev, brand: b }))}
+                            className={cn(
+                              "text-[9px] font-bold px-2 py-0.5 rounded-md border transition-all cursor-pointer",
+                              form.brand.toLowerCase() === b.toLowerCase()
+                                ? "bg-primary text-primary-foreground border-primary"
+                                : "bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground"
+                            )}
+                          >
+                            {b}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="space-y-2.5">
-                    {form.quality_options.map((q, idx) => (
-                      <div key={idx} className="p-3 bg-background rounded-lg border space-y-2 shadow-xs">
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                          <div>
-                            <label className="text-[9px] font-bold text-muted-foreground block mb-0.5">{d.label_quality_name_ar}</label>
+                  {/* Item Type (4 Simple Buttons) */}
+                  <div className="p-3.5 bg-muted/20 border rounded-md space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-black uppercase text-foreground">
+                        {locale === 'ar' ? 'نوع المعروض والنشاط' : 'Ürün / İşlem Türü'}
+                      </label>
+                      <span className="text-[10px] text-muted-foreground font-semibold">
+                        {locale === 'ar' ? 'اختر نوع المعروض لتصنيفه في المتجر' : ''}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {[
+                        { id: 'cihaz', label: locale === 'ar' ? 'جهاز للبيع' : 'Cihaz (Satış)' },
+                        { id: 'yedek_parca', label: locale === 'ar' ? 'قطعة غيار' : 'Yedek Parça' },
+                        { id: 'aksesuar', label: locale === 'ar' ? 'إكسسوار' : 'Aksesuar' },
+                        { id: 'servis', label: locale === 'ar' ? 'خدمة صيانة' : 'Tamir Servisi' },
+                      ].map((t) => (
+                        <button
+                          key={t.id}
+                          type="button"
+                          onClick={() => setForm(prev => ({ ...prev, item_type: t.id as any }))}
+                          className={cn(
+                            "py-2.5 px-2 rounded-md text-xs font-black border transition-all cursor-pointer text-center",
+                            form.item_type === t.id
+                              ? "bg-primary text-primary-foreground border-primary shadow-xs"
+                              : "bg-background hover:bg-muted text-muted-foreground border-border"
+                          )}
+                        >
+                          {t.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* If Yedek Parça is chosen: dynamic select or custom new part type */}
+                    {form.item_type === 'yedek_parca' && (
+                      <div className="pt-2 border-t border-border/50 space-y-2 animate-in fade-in duration-150">
+                        <label className="text-[10px] font-black uppercase text-muted-foreground block">
+                          {locale === 'ar' ? 'نوع قطعة الغيار (شاشة، بطارية، كاميرا...)' : 'Yedek Parça Türü'}
+                        </label>
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                          {!isCustomPartType ? (
+                            <select
+                              value={form.part_type || 'ekran'}
+                              onChange={(e) => {
+                                if (e.target.value === 'custom_new') {
+                                  setIsCustomPartType(true);
+                                  setForm(prev => ({ ...prev, part_type: '' }));
+                                } else {
+                                  setForm(prev => ({ ...prev, part_type: e.target.value }));
+                                }
+                              }}
+                              className="flex-1 px-3 py-2 rounded-md border bg-background text-xs font-bold outline-hidden cursor-pointer"
+                            >
+                              <optgroup label={locale === 'ar' ? 'الأنواع الشائعة' : 'Yaygın Parça Türleri'}>
+                                {availablePartTypes.map(p => (
+                                  <option key={p.slug} value={p.slug}>{p.label}</option>
+                                ))}
+                              </optgroup>
+                              <option value="custom_new" className="font-black text-primary">
+                                {locale === 'ar' ? '+ كتابة نوع مخصص جديد...' : '+ Yeni Parça Türü Yaz...'}
+                              </option>
+                            </select>
+                          ) : (
                             <input
-                              value={q.quality_ar || ''}
-                              onChange={(e) => handleUpdateQuality(idx, 'quality_ar', e.target.value)}
-                              placeholder={d.placeholder_quality_ar}
-                              className="w-full px-2.5 py-1.5 rounded-lg border bg-background text-xs font-bold"
+                              value={form.part_type}
+                              onChange={(e) => setForm(prev => ({ ...prev, part_type: e.target.value }))}
+                              placeholder={locale === 'ar' ? 'اكتب اسم نوع القطعة (مثال: حساس بصمة، مروحة تبريد...)' : 'Parça türü adını yazın...'}
+                              className="flex-1 px-3 py-2 rounded-md border bg-background text-xs font-bold outline-hidden focus:border-primary"
+                              autoFocus
+                            />
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const next = !isCustomPartType;
+                              setIsCustomPartType(next);
+                              if (next && !form.part_type) {
+                                setForm(prev => ({ ...prev, part_type: '' }));
+                              } else if (!next && !form.part_type) {
+                                setForm(prev => ({ ...prev, part_type: 'ekran' }));
+                              }
+                            }}
+                            className={cn(
+                              "px-3 py-2 rounded-md text-xs font-bold border transition-all cursor-pointer whitespace-nowrap flex items-center justify-center gap-1",
+                              isCustomPartType 
+                                ? "bg-primary text-primary-foreground border-primary" 
+                                : "bg-background hover:bg-muted text-muted-foreground"
+                            )}
+                          >
+                            <Plus size={13} />
+                            <span>{isCustomPartType ? (locale === 'ar' ? 'القائمة الجاهزة' : 'Listeye Dön') : (locale === 'ar' ? 'نوع مخصص' : 'Özel Tür')}</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Price & Warranty & Duration */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-black uppercase text-foreground">
+                        {locale === 'ar' ? 'السعر الأساسي (₺) *' : d.label_base_price}
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          value={form.base_price}
+                          onChange={(e) => setForm(prev => ({ ...prev, base_price: parseFloat(e.target.value) || 0 }))}
+                          className="w-full px-3 py-2 rounded-md border bg-background text-sm font-black text-primary outline-hidden focus:border-primary shadow-xs"
+                          required
+                        />
+                        <span className="absolute left-3 rtl:left-auto rtl:right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">
+                          ₺
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-black uppercase text-foreground">
+                        {locale === 'ar' ? 'مدة الضمان' : d.label_warranty}
+                      </label>
+                      <input
+                        value={form.warranty}
+                        onChange={(e) => setForm(prev => ({ ...prev, warranty: e.target.value }))}
+                        placeholder={locale === 'ar' ? 'مثال: ضمان 6 أشهر' : d.placeholder_warranty}
+                        className="w-full px-3 py-2 rounded-md border bg-background text-xs font-bold outline-hidden focus:border-primary shadow-xs"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-black uppercase text-foreground">
+                        {locale === 'ar' ? 'مدة التركيب / الصيانة' : d.label_duration}
+                      </label>
+                      <input
+                        value={form.duration}
+                        onChange={(e) => setForm(prev => ({ ...prev, duration: e.target.value }))}
+                        placeholder={locale === 'ar' ? 'مثال: 30 دقيقة' : d.placeholder_duration}
+                        className="w-full px-3 py-2 rounded-md border bg-background text-xs font-bold outline-hidden focus:border-primary shadow-xs"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Stock and Popularity Toggles */}
+                  <div className="flex flex-wrap items-center gap-4 p-3 bg-muted/20 border rounded-md">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={form.in_stock}
+                        onChange={(e) => setForm(prev => ({ ...prev, in_stock: e.target.checked }))}
+                        className="w-4 h-4 rounded text-primary focus:ring-primary/20 accent-primary"
+                      />
+                      <span className="text-xs font-black text-foreground">
+                        {locale === 'ar' ? 'متوفر في المخزون حالياً' : d.in_stock_checkbox}
+                      </span>
+                    </label>
+
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={form.is_popular}
+                        onChange={(e) => setForm(prev => ({ ...prev, is_popular: e.target.checked }))}
+                        className="w-4 h-4 rounded text-primary focus:ring-primary/20 accent-primary"
+                      />
+                      <span className="text-xs font-black text-foreground">
+                        {locale === 'ar' ? 'موديل مميز / الأكثر طلباً' : d.popular_checkbox}
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* 3. OPTIONAL ADVANCED OPTIONS (COLLAPSED ACCORDION) */}
+                <div className="border rounded-md overflow-hidden bg-background">
+                  <button
+                    type="button"
+                    onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+                    className="w-full px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors flex items-center justify-between text-xs font-black uppercase tracking-wider text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Wrench size={14} className="text-primary" />
+                      <span>{locale === 'ar' ? 'خيارات متقدمة إضافية (ترجمات، مواصفات، خيارات جودة متعددة)' : 'Gelişmiş Seçenekler (Çeviriler, Kalite Seçenekleri)'}</span>
+                    </span>
+                    <span className="text-xs font-mono font-bold text-primary">
+                      {showAdvancedOptions ? '▲ إخفاء' : '▼ عرض التفاصيل'}
+                    </span>
+                  </button>
+
+                  {showAdvancedOptions && (
+                    <div className="p-4 space-y-4 border-t animate-in fade-in duration-200">
+                      {/* Multilingual Name Translations */}
+                      <div className="space-y-2">
+                        <label className="text-[11px] font-black uppercase text-foreground block">
+                          {locale === 'ar' ? 'الترجمات المخصصة لاسم المنتج (اختياري - سيتم استخدام الاسم الرئيسي تلقائياً إذا تركت فارغة)' : 'Çok Dilli Başlıklar'}
+                        </label>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                          <div>
+                            <span className="text-[9px] font-bold text-muted-foreground block mb-0.5">عربي (AR)</span>
+                            <input
+                              value={form.service_name_ar}
+                              onChange={(e) => setForm(prev => ({ ...prev, service_name_ar: e.target.value }))}
+                              placeholder={form.model_name || "اسم المنتج بالعربي"}
+                              className="w-full px-2.5 py-1.5 rounded-md border bg-background text-xs font-bold"
                               dir="rtl"
                             />
                           </div>
                           <div>
-                            <label className="text-[9px] font-bold text-muted-foreground block mb-0.5">{d.label_quality_name_tr}</label>
+                            <span className="text-[9px] font-bold text-muted-foreground block mb-0.5">تركي (TR)</span>
                             <input
-                              value={q.quality_tr || ''}
-                              onChange={(e) => handleUpdateQuality(idx, 'quality_tr', e.target.value)}
-                              placeholder={d.placeholder_quality_tr}
-                              className="w-full px-2.5 py-1.5 rounded-lg border bg-background text-xs font-bold"
+                              value={form.service_name_tr}
+                              onChange={(e) => setForm(prev => ({ ...prev, service_name_tr: e.target.value }))}
+                              placeholder={form.model_name || "Türkçe ürün adı"}
+                              className="w-full px-2.5 py-1.5 rounded-md border bg-background text-xs font-bold"
                             />
                           </div>
                           <div>
-                            <label className="text-[9px] font-bold text-muted-foreground block mb-0.5">{d.label_quality_name_en}</label>
+                            <span className="text-[9px] font-bold text-muted-foreground block mb-0.5">إنجليزي (EN)</span>
                             <input
-                              value={q.quality_en || ''}
-                              onChange={(e) => handleUpdateQuality(idx, 'quality_en', e.target.value)}
-                              placeholder={d.placeholder_quality_en}
-                              className="w-full px-2.5 py-1.5 rounded-lg border bg-background text-xs font-bold"
+                              value={form.service_name_en}
+                              onChange={(e) => setForm(prev => ({ ...prev, service_name_en: e.target.value }))}
+                              placeholder={form.model_name || "English product name"}
+                              className="w-full px-2.5 py-1.5 rounded-md border bg-background text-xs font-bold"
                             />
                           </div>
                         </div>
+                      </div>
 
-                        <div className="flex items-center gap-2 pt-1 border-t border-border/40">
-                          <div className="w-32">
-                            <input
-                              type="number"
-                              value={q.price}
-                              onChange={(e) => handleUpdateQuality(idx, 'price', parseFloat(e.target.value) || 0)}
-                              placeholder={d.placeholder_price}
-                              className="w-full px-2.5 py-1.5 rounded-lg border bg-background text-xs font-black text-primary"
-                            />
-                          </div>
-                          <div className="flex-1">
-                            <input
-                              value={q.badge || ''}
-                              onChange={(e) => handleUpdateQuality(idx, 'badge', e.target.value)}
-                              placeholder={d.placeholder_badge}
-                              className="w-full px-2.5 py-1.5 rounded-lg border bg-background text-xs font-bold"
-                            />
+                      {/* Series & Specs */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-border/50">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black uppercase text-muted-foreground">
+                            {locale === 'ar' ? 'اسم الفئة (اختياري)' : d.label_series}
+                          </label>
+                          <input
+                            value={form.series}
+                            onChange={(e) => setForm(prev => ({ ...prev, series: e.target.value }))}
+                            placeholder={locale === 'ar' ? 'مثال: سلسلة iPhone 16' : d.placeholder_series}
+                            className="w-full px-3 py-2 rounded-md border bg-background text-xs font-bold"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black uppercase text-muted-foreground">
+                            {locale === 'ar' ? 'المواصفات المختصرة للكارت (اختياري)' : 'Kısa Özellikler'}
+                          </label>
+                          <input
+                            value={form.specs_ar}
+                            onChange={(e) => setForm(prev => ({ ...prev, specs_ar: e.target.value }))}
+                            placeholder={locale === 'ar' ? 'مثال: جديد - 256 جيجا أو نخب أول A+' : 'Örn: Sıfır - 256 GB'}
+                            className="w-full px-3 py-2 rounded-md border bg-background text-xs font-bold"
+                            dir="rtl"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Quality Options Section */}
+                      <div className="space-y-3 pt-2 border-t border-border/50">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h5 className="text-xs font-black uppercase tracking-wider">{d.quality_section_title}</h5>
+                            <p className="text-[10px] text-muted-foreground">{d.quality_section_sub}</p>
                           </div>
                           <button
                             type="button"
-                            onClick={() => handleRemoveQuality(idx)}
-                            className="p-1.5 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer"
-                            title={d.remove_quality}
+                            onClick={handleAddQuality}
+                            className="flex items-center gap-1 text-[10px] font-black uppercase bg-primary/10 text-primary px-3 py-1.5 rounded-md hover:bg-primary/20 border border-primary/20 cursor-pointer"
                           >
-                            <Trash2 size={16} />
+                            <Plus size={12} />
+                            <span>{d.add_quality_btn}</span>
                           </button>
                         </div>
+
+                        <div className="space-y-2">
+                          {form.quality_options.map((q, idx) => (
+                            <div key={idx} className="p-3 bg-muted/20 rounded-md border space-y-2 shadow-xs">
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                <div>
+                                  <label className="text-[9px] font-bold text-muted-foreground block mb-0.5">{d.label_quality_name_ar}</label>
+                                  <input
+                                    value={q.quality_ar || ''}
+                                    onChange={(e) => handleUpdateQuality(idx, 'quality_ar', e.target.value)}
+                                    placeholder={d.placeholder_quality_ar}
+                                    className="w-full px-2.5 py-1.5 rounded-md border bg-background text-xs font-bold"
+                                    dir="rtl"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-[9px] font-bold text-muted-foreground block mb-0.5">{d.label_quality_name_tr}</label>
+                                  <input
+                                    value={q.quality_tr || ''}
+                                    onChange={(e) => handleUpdateQuality(idx, 'quality_tr', e.target.value)}
+                                    placeholder={d.placeholder_quality_tr}
+                                    className="w-full px-2.5 py-1.5 rounded-md border bg-background text-xs font-bold"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-[9px] font-bold text-muted-foreground block mb-0.5">{d.label_quality_name_en}</label>
+                                  <input
+                                    value={q.quality_en || ''}
+                                    onChange={(e) => handleUpdateQuality(idx, 'quality_en', e.target.value)}
+                                    placeholder={d.placeholder_quality_en}
+                                    className="w-full px-2.5 py-1.5 rounded-md border bg-background text-xs font-bold"
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2 pt-1 border-t border-border/40">
+                                <div className="w-32">
+                                  <input
+                                    type="number"
+                                    value={q.price}
+                                    onChange={(e) => handleUpdateQuality(idx, 'price', parseFloat(e.target.value) || 0)}
+                                    placeholder={d.placeholder_price}
+                                    className="w-full px-2.5 py-1.5 rounded-md border bg-background text-xs font-black text-primary"
+                                  />
+                                </div>
+                                <div className="flex-1">
+                                  <input
+                                    value={q.badge || ''}
+                                    onChange={(e) => handleUpdateQuality(idx, 'badge', e.target.value)}
+                                    placeholder={d.placeholder_badge}
+                                    className="w-full px-2.5 py-1.5 rounded-md border bg-background text-xs font-bold"
+                                  />
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveQuality(idx)}
+                                  className="p-1.5 text-red-500 hover:bg-red-500/10 rounded-md transition-colors cursor-pointer"
+                                  title={d.remove_quality}
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                          {form.quality_options.length === 0 && (
+                            <p className="text-center text-xs text-muted-foreground italic py-1">
+                              {d.empty_qualities}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    ))}
-                    {form.quality_options.length === 0 && (
-                      <p className="text-center text-xs text-muted-foreground italic py-2">
-                        {d.empty_qualities}
-                      </p>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
 
-                {/* 6. Popular & In Stock Switches */}
-                <div className="flex flex-wrap items-center gap-6 pt-1">
-                  <label className="flex items-center gap-2 cursor-pointer text-xs font-bold">
-                    <input
-                      type="checkbox"
-                      checked={form.is_popular}
-                      onChange={(e) => setForm(prev => ({ ...prev, is_popular: e.target.checked }))}
-                      className="w-4 h-4 rounded text-primary focus:ring-primary"
-                    />
-                    <span>{d.popular_checkbox}</span>
-                  </label>
-
-                  <label className="flex items-center gap-2 cursor-pointer text-xs font-bold">
-                    <input
-                      type="checkbox"
-                      checked={form.in_stock}
-                      onChange={(e) => setForm(prev => ({ ...prev, in_stock: e.target.checked }))}
-                      className="w-4 h-4 rounded text-primary focus:ring-primary"
-                    />
-                    <span>{d.in_stock_checkbox}</span>
-                  </label>
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center justify-end gap-3 pt-3 border-t">
+                {/* Modal Actions */}
+                <div className="flex items-center justify-end gap-2 pt-3 border-t">
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
-                    className="px-4 py-2 rounded-lg text-xs font-bold bg-muted hover:bg-muted/80 cursor-pointer"
+                    className="px-4 py-2.5 rounded-md border bg-background hover:bg-muted text-xs font-bold transition-colors cursor-pointer"
                   >
                     {d.cancel_btn}
                   </button>
                   <button
                     type="submit"
                     disabled={actionLoading}
-                    className="flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2 rounded-lg text-xs font-black uppercase tracking-wider hover:bg-primary/90 disabled:opacity-50 cursor-pointer shadow-sm"
+                    className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2.5 rounded-md text-xs font-black uppercase tracking-wider transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
                   >
                     <Check size={16} />
-                    <span>{editingItem ? d.save_edit_btn : d.save_add_btn}</span>
+                    <span>{actionLoading ? (locale === 'ar' ? 'جاري الحفظ...' : 'Kaydediliyor...') : (editingItem ? d.save_edit_btn : d.save_add_btn)}</span>
                   </button>
                 </div>
               </form>
@@ -1790,7 +2731,7 @@ export default function AdminPricingPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-md bg-card rounded-lg border p-6 shadow-2xl text-center z-10"
+              className="relative w-full max-w-md bg-card rounded-md border p-6 shadow-2xl text-center z-10"
             >
               <div className="w-14 h-14 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center mx-auto mb-4 border border-red-500/20">
                 <Trash2 size={26} />
@@ -1805,7 +2746,7 @@ export default function AdminPricingPage() {
                 <button
                   type="button"
                   onClick={() => setIsClearAllModalOpen(false)}
-                  className="px-5 py-2.5 rounded-lg border text-xs font-black uppercase hover:bg-muted transition-colors cursor-pointer"
+                  className="px-5 py-2.5 rounded-md border text-xs font-black uppercase hover:bg-muted transition-colors cursor-pointer"
                 >
                   {d.cancel_btn}
                 </button>
@@ -1813,7 +2754,7 @@ export default function AdminPricingPage() {
                   type="button"
                   onClick={handleClearAll}
                   disabled={actionLoading}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-black uppercase transition-all shadow-md disabled:opacity-50 cursor-pointer active:scale-95"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-md bg-red-600 hover:bg-red-700 text-white text-xs font-black uppercase transition-all shadow-md disabled:opacity-50 cursor-pointer active:scale-95"
                 >
                   {actionLoading ? <RefreshCw size={14} className="animate-spin" /> : <Trash2 size={14} />}
                   <span>{d.clear_all_confirm_btn}</span>
@@ -1839,7 +2780,7 @@ export default function AdminPricingPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-md bg-card rounded-xl border p-6 shadow-2xl text-center z-10"
+              className="relative w-full max-w-md bg-card rounded-md border p-6 shadow-2xl text-center z-10"
             >
               <div className="w-14 h-14 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center mx-auto mb-4 border border-red-500/20 shadow-xs">
                 <Trash2 size={26} />
@@ -1855,7 +2796,7 @@ export default function AdminPricingPage() {
                   type="button"
                   onClick={() => setDeletingItem(null)}
                   disabled={actionLoading}
-                  className="px-5 py-2.5 rounded-lg border text-xs font-black uppercase hover:bg-muted transition-colors cursor-pointer"
+                  className="px-5 py-2.5 rounded-md border text-xs font-black uppercase hover:bg-muted transition-colors cursor-pointer"
                 >
                   {d.cancel_btn}
                 </button>
@@ -1863,7 +2804,7 @@ export default function AdminPricingPage() {
                   type="button"
                   onClick={handleConfirmDelete}
                   disabled={actionLoading}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-black uppercase transition-all shadow-md disabled:opacity-50 cursor-pointer active:scale-95"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-md bg-red-600 hover:bg-red-700 text-white text-xs font-black uppercase transition-all shadow-md disabled:opacity-50 cursor-pointer active:scale-95"
                 >
                   {actionLoading ? <RefreshCw size={14} className="animate-spin" /> : <Trash2 size={14} />}
                   <span>{d.delete_confirm_btn}</span>
@@ -1889,7 +2830,7 @@ export default function AdminPricingPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-md bg-card rounded-xl border p-6 shadow-2xl text-center z-10"
+              className="relative w-full max-w-md bg-card rounded-md border p-6 shadow-2xl text-center z-10"
             >
               <div className="w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4 border border-primary/20 shadow-xs">
                 <RefreshCw size={26} />
@@ -1905,7 +2846,7 @@ export default function AdminPricingPage() {
                   type="button"
                   onClick={() => setIsSeedModalOpen(false)}
                   disabled={actionLoading}
-                  className="px-5 py-2.5 rounded-lg border text-xs font-black uppercase hover:bg-muted transition-colors cursor-pointer"
+                  className="px-5 py-2.5 rounded-md border text-xs font-black uppercase hover:bg-muted transition-colors cursor-pointer"
                 >
                   {d.cancel_btn}
                 </button>
@@ -1913,7 +2854,7 @@ export default function AdminPricingPage() {
                   type="button"
                   onClick={handleSeedDefaults}
                   disabled={actionLoading}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-black uppercase transition-all shadow-md disabled:opacity-50 cursor-pointer active:scale-95"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-black uppercase transition-all shadow-md disabled:opacity-50 cursor-pointer active:scale-95"
                 >
                   {actionLoading ? <RefreshCw size={14} className="animate-spin" /> : <Check size={14} />}
                   <span>{d.seed_confirm_btn}</span>
@@ -1923,6 +2864,602 @@ export default function AdminPricingPage() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Modal for Adding New Main Category Card */}
+      <AnimatePresence>
+        {isNewCatModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-card w-full max-w-lg rounded-md border shadow-2xl overflow-hidden my-8"
+              dir={locale === 'ar' ? 'rtl' : 'ltr'}
+            >
+              <div className="flex items-center justify-between px-6 py-4 border-b bg-muted/20">
+                <h3 className="font-black text-base uppercase flex items-center gap-2">
+                  <Plus size={18} className="text-primary" />
+                  <span>{locale === 'ar' ? 'إضافة قسم رئيسي جديد للمتجر' : 'Yeni Ana Kategori Ekle'}</span>
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setIsNewCatModalOpen(false)}
+                  className="p-1.5 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-4">
+                {/* Image Upload for New Category */}
+                <div className="p-3.5 rounded-md border bg-muted/20 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-black uppercase text-foreground flex items-center gap-1.5">
+                        <ImageIcon size={14} className="text-primary" />
+                        <span>{locale === 'ar' ? 'صورة غلاف القسم' : 'Kategori Görseli'}</span>
+                      </span>
+                      <span className="text-[10px] text-muted-foreground block">
+                        {locale === 'ar' ? 'ارفع صورة الغلاف للقسم مباشرة من جهازك' : 'Cihazınızdan görsel yükleyin'}
+                      </span>
+                    </div>
+
+                    <input 
+                      type="file"
+                      ref={newCatFileInputRef}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleNewCatImageUpload(file);
+                      }}
+                      accept="image/*"
+                      className="hidden"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => newCatFileInputRef.current?.click()}
+                      disabled={uploadingNewCatImage}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition-all cursor-pointer border border-primary/20"
+                    >
+                      <Upload size={13} className={cn(uploadingNewCatImage && "animate-spin")} />
+                      <span>{uploadingNewCatImage ? (locale === 'ar' ? 'جاري الرفع...' : 'Yükleniyor...') : (locale === 'ar' ? 'رفع صورة من جهازك' : 'Görsel Yükle')}</span>
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    {newCat.image ? (
+                      <div className="relative w-16 h-16 rounded-md border bg-black/40 overflow-hidden shrink-0">
+                        <img 
+                          src={newCat.image} 
+                          alt="Category preview" 
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setNewCat(prev => ({ ...prev, image: '' }))}
+                          className="absolute -top-1.5 -right-1.5 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                        >
+                          <X size={10} />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-16 h-16 rounded-md border border-dashed border-border/80 bg-background/50 flex flex-col items-center justify-center text-muted-foreground/60 shrink-0">
+                        <ImageIcon size={18} />
+                        <span className="text-[8px] uppercase mt-1">صورة الغلاف</span>
+                      </div>
+                    )}
+
+                    <div className="flex-1">
+                      <input
+                        type="text"
+                        value={newCat.image}
+                        onChange={(e) => setNewCat(prev => ({ ...prev, image: e.target.value }))}
+                        placeholder={locale === 'ar' ? 'أو ضع رابط صورة مباشر (URL)...' : 'https://...'}
+                        className="w-full text-xs px-3 py-2 rounded-md bg-background border border-border text-foreground font-mono"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Category Names */}
+                <div>
+                  <label className="text-xs font-black text-foreground block mb-1">
+                    {locale === 'ar' ? 'اسم القسم بالعربي *' : 'Kategori Adı (Arapça) *'}
+                  </label>
+                  <input
+                    type="text"
+                    value={newCat.title_ar}
+                    onChange={(e) => setNewCat(prev => ({ ...prev, title_ar: e.target.value }))}
+                    placeholder={locale === 'ar' ? 'مثال: أجهزة الألعاب أو شاشات التلفزيون' : 'Örn: Oyun Konsolları'}
+                    className="w-full text-xs font-bold px-3 py-2.5 rounded-md bg-background border border-border text-foreground focus:border-primary outline-hidden"
+                    dir="rtl"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] font-bold text-muted-foreground block mb-1">
+                      {locale === 'ar' ? 'الاسم بالتركي (اختياري)' : 'Türkçe Başlık'}
+                    </label>
+                    <input
+                      type="text"
+                      value={newCat.title_tr}
+                      onChange={(e) => setNewCat(prev => ({ ...prev, title_tr: e.target.value }))}
+                      placeholder={newCat.title_ar || "Örn: Tabletler"}
+                      className="w-full text-xs px-3 py-2 rounded-md bg-background border border-border text-foreground"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-muted-foreground block mb-1">
+                      {locale === 'ar' ? 'الاسم بالإنجليزي (اختياري)' : 'İngilizce Başlık'}
+                    </label>
+                    <input
+                      type="text"
+                      value={newCat.title_en}
+                      onChange={(e) => setNewCat(prev => ({ ...prev, title_en: e.target.value }))}
+                      placeholder={newCat.title_ar || "e.g. Tablets"}
+                      className="w-full text-xs px-3 py-2 rounded-md bg-background border border-border text-foreground"
+                    />
+                  </div>
+                </div>
+
+                {/* Banner Section for New Category */}
+                <div className="p-3.5 rounded-md border border-primary/30 bg-primary/5 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-black uppercase text-foreground flex items-center gap-1.5">
+                        <ImageIcon size={14} className="text-primary" />
+                        <span>{locale === 'ar' ? 'بانر القسم العريض (Hero Banner)' : 'Kategori Geniş Bannerı'}</span>
+                      </span>
+                      <span className="text-[10px] text-muted-foreground block">
+                        {locale === 'ar' ? 'البانر الذي سيظهر في أعلى صفحة المتجر عند فتح هذا القسم' : 'Bu kategori açıldığında mağaza üstünde görünecek banner'}
+                      </span>
+                    </div>
+
+                    <input 
+                      type="file"
+                      ref={newCatBannerFileInputRef}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleNewCatBannerImageUpload(file);
+                      }}
+                      accept="image/*"
+                      className="hidden"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => newCatBannerFileInputRef.current?.click()}
+                      disabled={uploadingNewCatBanner}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold transition-all cursor-pointer shadow-xs"
+                    >
+                      <Upload size={13} className={cn(uploadingNewCatBanner && "animate-spin")} />
+                      <span>{uploadingNewCatBanner ? (locale === 'ar' ? 'جاري الرفع...' : 'Yükleniyor...') : (locale === 'ar' ? 'رفع بانر للقسم' : 'Banner Yükle')}</span>
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    {newCat.banner_image ? (
+                      <div className="relative w-28 h-16 rounded-md border bg-black/40 p-1 shrink-0 flex items-center justify-center overflow-hidden">
+                        <img 
+                          src={newCat.banner_image} 
+                          alt="Category banner preview" 
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setNewCat(prev => ({ ...prev, banner_image: '' }))}
+                          className="absolute -top-1.5 -right-1.5 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                        >
+                          <X size={10} />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-28 h-16 rounded-md border border-dashed border-primary/40 bg-background/50 flex flex-col items-center justify-center text-muted-foreground/60 shrink-0">
+                        <ImageIcon size={18} className="text-primary/60" />
+                        <span className="text-[8px] uppercase mt-1">بانر القسم</span>
+                      </div>
+                    )}
+
+                    <div className="flex-1 space-y-1">
+                      <input
+                        type="text"
+                        value={newCat.banner_image}
+                        onChange={(e) => setNewCat(prev => ({ ...prev, banner_image: e.target.value }))}
+                        placeholder={locale === 'ar' ? 'أو ضع رابط صورة البانر (URL)...' : 'Banner Resim URL'}
+                        className="w-full text-xs px-3 py-1.5 rounded-md bg-background border border-border text-foreground font-mono"
+                      />
+                      <span className="text-[9px] text-muted-foreground block">
+                        {locale === 'ar' ? 'إذا ترك فارغاً سيتم استخدام صورة غلاف القسم كبانر تلقائياً' : 'Boş bırakılırsa kapak görseli banner olarak kullanılır'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Banner Title & Description */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-primary/20">
+                    <div>
+                      <label className="text-[9px] font-bold text-muted-foreground block mb-0.5">
+                        {locale === 'ar' ? 'عنوان البانر الترويجي (اختياري)' : 'Banner Başlığı (İsteğe Bağlı)'}
+                      </label>
+                      <input
+                        type="text"
+                        value={newCat.banner_title_ar}
+                        onChange={(e) => setNewCat(prev => ({ ...prev, banner_title_ar: e.target.value }))}
+                        placeholder={newCat.title_ar || "عنوان جذاب يظهر في البانر"}
+                        className="w-full text-xs px-2.5 py-1.5 rounded-md bg-background border border-border text-foreground"
+                        dir="rtl"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-bold text-muted-foreground block mb-0.5">
+                        {locale === 'ar' ? 'نص زر البانر CTA (اختياري)' : 'Banner Buton Metni'}
+                      </label>
+                      <input
+                        type="text"
+                        value={newCat.banner_cta_ar}
+                        onChange={(e) => setNewCat(prev => ({ ...prev, banner_cta_ar: e.target.value }))}
+                        placeholder={locale === 'ar' ? 'استعراض منتجات القسم' : 'Ürünleri İncele'}
+                        className="w-full text-xs px-2.5 py-1.5 rounded-md bg-background border border-border text-foreground"
+                        dir="rtl"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-muted-foreground block mb-1">
+                    {locale === 'ar' ? 'معرّف القسم الإنجليزي (ID - اختياري، يُنشأ تلقائياً إذا تركته فارغاً)' : 'Kategori ID (İsteğe Bağlı)'}
+                  </label>
+                  <input
+                    type="text"
+                    value={newCat.id}
+                    onChange={(e) => setNewCat(prev => ({ ...prev, id: e.target.value }))}
+                    placeholder="e.g. gaming, monitor, tv"
+                    className="w-full text-xs px-3 py-2 rounded-md bg-background border border-border text-foreground font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-muted-foreground block mb-1">
+                    {locale === 'ar' ? 'وصف مختصر للقسم (اختياري)' : 'Kısa Açıklama (İsteğe Bağlı)'}
+                  </label>
+                  <input
+                    type="text"
+                    value={newCat.desc_ar}
+                    onChange={(e) => setNewCat(prev => ({ ...prev, desc_ar: e.target.value }))}
+                    placeholder={locale === 'ar' ? 'مثال: أحدث الأجهزة وقطع الغيار المضمونة' : 'Örn: Tüm modeller ve parçalar'}
+                    className="w-full text-xs px-3 py-2 rounded-md bg-background border border-border text-foreground"
+                    dir="rtl"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
+                  <button
+                    type="button"
+                    onClick={() => setIsNewCatModalOpen(false)}
+                    className="px-4 py-2 rounded-md border text-xs font-bold hover:bg-muted cursor-pointer"
+                  >
+                    {d.cancel_btn}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAddNewCategory}
+                    className="px-5 py-2 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-black uppercase tracking-wider cursor-pointer shadow-md"
+                  >
+                    {locale === 'ar' ? 'إضافة وتثبيت القسم' : 'Kategoriyi Kaydet'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Edit Category Modal */}
+      <AnimatePresence>
+        {isEditCatModalOpen && editingCat && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-card w-full max-w-xl rounded-md border shadow-2xl overflow-hidden my-8"
+              dir={locale === 'ar' ? 'rtl' : 'ltr'}
+            >
+              <div className="flex items-center justify-between px-6 py-4 border-b bg-muted/20">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                    <Edit3 size={16} />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-sm uppercase text-foreground">
+                      {locale === 'ar' ? `تعديل بيانات وبانر قسم (${editingCat.title_ar || editingCat.id})` : `Kategori Düzenle: ${editingCat.title_tr || editingCat.id}`}
+                    </h3>
+                    <p className="text-[10px] text-muted-foreground">
+                      {locale === 'ar' ? 'قم بتحديث الاسم والوصف وصور الغلاف والبانر الترويجي لهذا القسم' : 'Kategori başlığı, kart görseli ve bannerını güncelleyin'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsEditCatModalOpen(false);
+                    setEditingCat(null);
+                  }}
+                  className="p-1.5 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+                {/* 1. Category Card Thumbnail (Cover Image) */}
+                <div className="p-3.5 rounded-md border bg-muted/20 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-black uppercase text-foreground flex items-center gap-1.5">
+                        <ImageIcon size={14} className="text-primary" />
+                        <span>{locale === 'ar' ? 'صورة كرت القسم (Thumbnail)' : 'Kart Görseli'}</span>
+                      </span>
+                      <span className="text-[10px] text-muted-foreground block">
+                        {locale === 'ar' ? 'تظهر داخل بطاقة القسم في المتجر (تملأ البوكس بنسبة 100%)' : 'Mağazada kategori kartında görünen görsel'}
+                      </span>
+                    </div>
+
+                    <input 
+                      type="file"
+                      ref={editCatFileInputRef}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleEditCatImageUpload(file);
+                      }}
+                      accept="image/*"
+                      className="hidden"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => editCatFileInputRef.current?.click()}
+                      disabled={uploadingEditCatImage}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition-all cursor-pointer border border-primary/20"
+                    >
+                      <Upload size={13} className={cn(uploadingEditCatImage && "animate-spin")} />
+                      <span>{uploadingEditCatImage ? (locale === 'ar' ? 'جاري الرفع...' : 'Yükleniyor...') : (locale === 'ar' ? 'رفع صورة من جهازك' : 'Görsel Yükle')}</span>
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    {editingCat.image ? (
+                      <div className="relative w-20 h-20 rounded-md border bg-black/40 overflow-hidden shrink-0">
+                        <img 
+                          src={editingCat.image} 
+                          alt="Category preview" 
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setEditingCat((prev: any) => ({ ...prev, image: '' }))}
+                          className="absolute -top-1.5 -right-1.5 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                        >
+                          <X size={10} />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-20 h-20 rounded-md border border-dashed border-border/80 bg-background/50 flex flex-col items-center justify-center text-muted-foreground/60 shrink-0">
+                        <ImageIcon size={20} />
+                        <span className="text-[8px] uppercase mt-1">لا توجد صورة</span>
+                      </div>
+                    )}
+
+                    <div className="flex-1">
+                      <input
+                        type="text"
+                        value={editingCat.image || ''}
+                        onChange={(e) => setEditingCat((prev: any) => ({ ...prev, image: e.target.value }))}
+                        placeholder={locale === 'ar' ? 'أو ضع رابط صورة مباشر (URL)...' : 'https://...'}
+                        className="w-full text-xs px-3 py-2 rounded-md bg-background border border-border text-foreground font-mono"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Category Names in 3 Languages */}
+                <div>
+                  <label className="text-xs font-black text-foreground block mb-1">
+                    {locale === 'ar' ? 'اسم القسم بالعربي *' : 'Kategori Adı (Arapça) *'}
+                  </label>
+                  <input
+                    type="text"
+                    value={editingCat.title_ar || ''}
+                    onChange={(e) => setEditingCat((prev: any) => ({ ...prev, title_ar: e.target.value }))}
+                    className="w-full text-xs font-bold px-3 py-2.5 rounded-md bg-background border border-border text-foreground focus:border-primary outline-hidden"
+                    dir="rtl"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] font-bold text-muted-foreground block mb-1">
+                      {locale === 'ar' ? 'الاسم بالتركي' : 'Türkçe Başlık'}
+                    </label>
+                    <input
+                      type="text"
+                      value={editingCat.title_tr || ''}
+                      onChange={(e) => setEditingCat((prev: any) => ({ ...prev, title_tr: e.target.value }))}
+                      className="w-full text-xs px-3 py-2 rounded-md bg-background border border-border text-foreground"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-muted-foreground block mb-1">
+                      {locale === 'ar' ? 'الاسم بالإنجليزي' : 'İngilizce Başlık'}
+                    </label>
+                    <input
+                      type="text"
+                      value={editingCat.title_en || ''}
+                      onChange={(e) => setEditingCat((prev: any) => ({ ...prev, title_en: e.target.value }))}
+                      className="w-full text-xs px-3 py-2 rounded-md bg-background border border-border text-foreground"
+                    />
+                  </div>
+                </div>
+
+                {/* 3. Category Description for the Card (Subtitle) */}
+                <div>
+                  <label className="text-[10px] font-bold text-muted-foreground block mb-1">
+                    {locale === 'ar' ? 'وصف كرت القسم بالعربي (يظهر أسفل الاسم في البطاقة)' : 'Kart Açıklaması (Arapça)'}
+                  </label>
+                  <input
+                    type="text"
+                    value={editingCat.desc_ar || ''}
+                    onChange={(e) => setEditingCat((prev: any) => ({ ...prev, desc_ar: e.target.value }))}
+                    placeholder={locale === 'ar' ? 'مثال: آيفون، سامسونج، شاومي والمزيد' : 'Örn: iPhone, Samsung ve Dahası'}
+                    className="w-full text-xs px-3 py-2 rounded-md bg-background border border-border text-foreground"
+                    dir="rtl"
+                  />
+                </div>
+
+                {/* 4. Category Hero Banner Section */}
+                <div className="p-3.5 rounded-md border border-primary/30 bg-primary/5 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-black uppercase text-foreground flex items-center gap-1.5">
+                        <ImageIcon size={14} className="text-primary" />
+                        <span>{locale === 'ar' ? 'بانر القسم العريض (Hero Banner)' : 'Kategori Geniş Bannerı'}</span>
+                      </span>
+                      <span className="text-[10px] text-muted-foreground block">
+                        {locale === 'ar' ? 'البانر العريض في أعلى صفحة المتجر عند اختيار هذا القسم' : 'Kategori açıldığında mağaza üstünde görünen banner'}
+                      </span>
+                    </div>
+
+                    <input 
+                      type="file"
+                      ref={editCatBannerFileInputRef}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleEditCatBannerUpload(file);
+                      }}
+                      accept="image/*"
+                      className="hidden"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => editCatBannerFileInputRef.current?.click()}
+                      disabled={uploadingEditCatBanner}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold transition-all cursor-pointer shadow-xs"
+                    >
+                      <Upload size={13} className={cn(uploadingEditCatBanner && "animate-spin")} />
+                      <span>{uploadingEditCatBanner ? (locale === 'ar' ? 'جاري الرفع...' : 'Yükleniyor...') : (locale === 'ar' ? 'رفع بانر للقسم' : 'Banner Yükle')}</span>
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    {editingCat.banner_image ? (
+                      <div className="relative w-28 h-16 rounded-md border bg-black/40 p-1 shrink-0 flex items-center justify-center overflow-hidden">
+                        <img 
+                          src={editingCat.banner_image} 
+                          alt="Category banner preview" 
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setEditingCat((prev: any) => ({ ...prev, banner_image: '' }))}
+                          className="absolute -top-1.5 -right-1.5 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                        >
+                          <X size={10} />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-28 h-16 rounded-md border border-dashed border-primary/40 bg-background/50 flex flex-col items-center justify-center text-muted-foreground/60 shrink-0">
+                        <ImageIcon size={18} className="text-primary/60" />
+                        <span className="text-[8px] uppercase mt-1">بانر القسم</span>
+                      </div>
+                    )}
+
+                    <div className="flex-1 space-y-1">
+                      <input
+                        type="text"
+                        value={editingCat.banner_image || ''}
+                        onChange={(e) => setEditingCat((prev: any) => ({ ...prev, banner_image: e.target.value }))}
+                        placeholder={locale === 'ar' ? 'أو ضع رابط صورة البانر (URL)...' : 'Banner Resim URL'}
+                        className="w-full text-xs px-3 py-1.5 rounded-md bg-background border border-border text-foreground font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Banner Title & CTA */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-primary/20">
+                    <div>
+                      <label className="text-[9px] font-bold text-muted-foreground block mb-0.5">
+                        {locale === 'ar' ? 'عنوان البانر الترويجي' : 'Banner Başlığı'}
+                      </label>
+                      <input
+                        type="text"
+                        value={editingCat.banner_title_ar || ''}
+                        onChange={(e) => setEditingCat((prev: any) => ({ ...prev, banner_title_ar: e.target.value }))}
+                        placeholder={editingCat.title_ar || "عنوان يظهر في البانر"}
+                        className="w-full text-xs px-2.5 py-1.5 rounded-md bg-background border border-border text-foreground"
+                        dir="rtl"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-bold text-muted-foreground block mb-0.5">
+                        {locale === 'ar' ? 'نص زر البانر CTA' : 'Banner Buton Metni'}
+                      </label>
+                      <input
+                        type="text"
+                        value={editingCat.banner_cta_ar || ''}
+                        onChange={(e) => setEditingCat((prev: any) => ({ ...prev, banner_cta_ar: e.target.value }))}
+                        placeholder={locale === 'ar' ? 'استعراض منتجات القسم' : 'Ürünleri İncele'}
+                        className="w-full text-xs px-2.5 py-1.5 rounded-md bg-background border border-border text-foreground"
+                        dir="rtl"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[9px] font-bold text-muted-foreground block mb-0.5">
+                      {locale === 'ar' ? 'شرح ووصف البانر بالعربي' : 'Banner Açıklaması'}
+                    </label>
+                    <input
+                      type="text"
+                      value={editingCat.banner_desc_ar || ''}
+                      onChange={(e) => setEditingCat((prev: any) => ({ ...prev, banner_desc_ar: e.target.value }))}
+                      placeholder={locale === 'ar' ? 'شرح جذاب يظهر داخل البانر' : 'Açıklama'}
+                      className="w-full text-xs px-2.5 py-1.5 rounded-md bg-background border border-border text-foreground"
+                      dir="rtl"
+                    />
+                  </div>
+                </div>
+
+                {/* Footer Buttons */}
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsEditCatModalOpen(false);
+                      setEditingCat(null);
+                    }}
+                    className="px-4 py-2 rounded-md border text-xs font-bold hover:bg-muted cursor-pointer"
+                  >
+                    {d.cancel_btn}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveEditedCategory}
+                    className="flex items-center gap-1.5 px-6 py-2 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-black uppercase tracking-wider cursor-pointer shadow-md"
+                  >
+                    <Check size={14} />
+                    <span>{locale === 'ar' ? 'حفظ كافة التعديلات' : 'Değişiklikleri Kaydet'}</span>
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+

@@ -58,16 +58,54 @@ export const RoborockBrandIcon = ({ size = 20, ...props }: BrandIconProps) => (
   </svg>
 );
 
+export const AsusBrandIcon = ({ size = 20, ...props }: BrandIconProps) => (
+  <svg width={size} height={size} viewBox="0 0 32 16" fill="currentColor" {...props}>
+    <text x="16" y="12" textAnchor="middle" fontSize="9" fontWeight="900" fontFamily="sans-serif" letterSpacing="0.8px" fill="#00539B">ASUS</text>
+  </svg>
+);
+
+export const LenovoBrandIcon = ({ size = 20, ...props }: BrandIconProps) => (
+  <svg width={size} height={size} viewBox="0 0 36 14" fill="currentColor" {...props}>
+    <rect x="1" y="1" width="34" height="12" rx="2" fill="#E2231A"/>
+    <text x="18" y="10" textAnchor="middle" fontSize="7.5" fontWeight="900" fontFamily="sans-serif" fill="#FFF" letterSpacing="0.3px">Lenovo</text>
+  </svg>
+);
+
+export const HpBrandIcon = ({ size = 20, ...props }: BrandIconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" {...props}>
+    <circle cx="12" cy="12" r="10" fill="#0096D6"/>
+    <text x="12" y="15" textAnchor="middle" fontSize="9" fontWeight="900" fontStyle="italic" fontFamily="sans-serif" fill="#FFF">hp</text>
+  </svg>
+);
+
+export const DellBrandIcon = ({ size = 20, ...props }: BrandIconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" {...props}>
+    <circle cx="12" cy="12" r="10" fill="#007DB8"/>
+    <text x="12" y="15" textAnchor="middle" fontSize="7.5" fontWeight="900" fontFamily="sans-serif" fill="#FFF" letterSpacing="-0.5px">DELL</text>
+  </svg>
+);
+
+export const HonorBrandIcon = ({ size = 20, ...props }: BrandIconProps) => (
+  <svg width={size} height={size} viewBox="0 0 30 14" fill="currentColor" {...props}>
+    <text x="15" y="10.5" textAnchor="middle" fontSize="7.5" fontWeight="900" fontFamily="sans-serif" letterSpacing="0.5px">HONOR</text>
+  </svg>
+);
+
 export const BrandIcon = ({ brand, size = 18 }: { brand: string; size?: number | string }) => {
   const b = brand.toLowerCase().trim();
   if (b.includes('apple') || b.includes('iphone')) return <AppleBrandIcon size={size} />;
   if (b.includes('samsung')) return <SamsungBrandIcon size={size} />;
   if (b.includes('xiaomi') || b.includes('redmi') || b.includes('poco')) return <XiaomiBrandIcon size={size} />;
   if (b.includes('oppo')) return <OppoBrandIcon size={size} />;
-  if (b.includes('huawei') || b.includes('honor')) return <HuaweiBrandIcon size={size} />;
+  if (b.includes('huawei')) return <HuaweiBrandIcon size={size} />;
+  if (b.includes('honor')) return <HonorBrandIcon size={size} />;
   if (b.includes('oneplus')) return <OnePlusBrandIcon size={size} />;
   if (b.includes('realme')) return <RealmeBrandIcon size={size} />;
   if (b.includes('roborock')) return <RoborockBrandIcon size={size} />;
+  if (b.includes('asus')) return <AsusBrandIcon size={size} />;
+  if (b.includes('lenovo')) return <LenovoBrandIcon size={size} />;
+  if (b.includes('hp')) return <HpBrandIcon size={size} />;
+  if (b.includes('dell')) return <DellBrandIcon size={size} />;
   return (
     <div 
       style={{ width: size, height: size }} 

@@ -81,6 +81,7 @@ export function Footer() {
     {
       title: t('company'),
       links: [
+        { name: locale === 'ar' ? 'المنتجات والأسعار' : locale === 'en' ? 'Products & Pricing' : 'Ürünler ve Fiyatlar', href: '/urunler' },
         { name: t('about_us'), href: '/about-us' },
         { name: t('works'), href: '/our-works' },
         { name: t('blog'), href: '/blog' },

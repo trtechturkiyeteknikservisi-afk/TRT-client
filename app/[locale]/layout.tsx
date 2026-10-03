@@ -12,6 +12,8 @@ import { ScrollToTop } from "@/components/scroll-to-top";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { SettingsProvider } from "@/components/settings-provider";
+import { StoreProvider } from "@/components/store-context";
+import { CartDrawer } from "@/components/cart-drawer";
 import { DeferredAnalytics } from "@/components/deferred-analytics";
 
 const SITE_URL = "https://www.trtservis.com";
@@ -103,27 +105,30 @@ export default async function RootLayout(props: {
         />
         <NextIntlClientProvider messages={messages}>
           <SettingsProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <div className="sticky top-0 z-[100] w-full bg-background">
+            <StoreProvider>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+              >
+                <div className="sticky top-0 z-[100] w-full bg-background">
+                  <HideOnAdmin>
+                    <TopTrustBar />
+                    <Header />
+                  </HideOnAdmin>
+                </div>
+                <main className="w-full">
+                  {children}
+                </main>
                 <HideOnAdmin>
-                  <TopTrustBar />
-                  <Header />
+                  <Footer />
+                  <ScrollToTop />
+                  <StickyContact />
+                  <CartDrawer />
                 </HideOnAdmin>
-              </div>
-              <main className="w-full">
-                {children}
-              </main>
-              <HideOnAdmin>
-                <Footer />
-                <ScrollToTop />
-                <StickyContact />
-              </HideOnAdmin>
-            </ThemeProvider>
+              </ThemeProvider>
+            </StoreProvider>
           </SettingsProvider>
         </NextIntlClientProvider>
       </body>

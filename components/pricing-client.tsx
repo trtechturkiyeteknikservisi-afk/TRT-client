@@ -8,7 +8,7 @@ import {
   Phone, Truck, Database, Award, X, SlidersHorizontal,
   LayoutGrid, Table as TableIcon, AlertCircle, Check, Smartphone, Laptop,
   Watch, Tablet, Headphones, Layers, ChevronRight, Calendar, ArrowRight,
-  Filter, RotateCcw, CheckSquare, Square, ExternalLink
+  Filter, RotateCcw, CheckSquare, Square, ExternalLink, ShoppingBag
 } from 'lucide-react';
 import axios from 'axios';
 import { cn } from '@/lib/utils';
@@ -101,6 +101,7 @@ export function PricingClient() {
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [expandedCards, setExpandedCards] = useState<Record<number, boolean>>({});
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [isServicesExpanded, setIsServicesExpanded] = useState(false);
 
   // Table View Pagination
   const [tablePage, setTablePage] = useState(1);
@@ -446,10 +447,10 @@ export function PricingClient() {
     const serviceName = getLocalizedServiceName(item);
     const qualityText = qualityName ? ` (${qualityName} - ${price?.toLocaleString('tr-TR')} ₺)` : '';
     const message = locale === 'ar'
-      ? `مرحباً، أود الاستفسار عن خدمة ${serviceName} لجهاز ${item.model_name}${qualityText} ومعرفة إمكانية الصيانة وموعد الحجز.`
+      ? `مرحباً، أود الاستفسار وطلب ${serviceName} لجهاز ${item.model_name}${qualityText} ومعرفة التوافر والشحن.`
       : locale === 'en'
-      ? `Hello, I would like to inquire about ${serviceName} for ${item.model_name}${qualityText} and book a repair appointment.`
-      : `Merhaba, ${item.model_name} cihazım için ${serviceName}${qualityText} fiyatı ve servis randevusu almak istiyorum.`;
+      ? `Hello, I would like to inquire about and order ${serviceName} for ${item.model_name}${qualityText} and check availability.`
+      : `Merhaba, ${item.model_name} için ${serviceName}${qualityText} siparişi vermek ve stok/uyumluluk bilgisi almak istiyorum.`;
 
     const encoded = encodeURIComponent(message);
     window.open(`https://wa.me/${cleanWhatsapp}?text=${encoded}`, '_blank');
@@ -466,9 +467,9 @@ export function PricingClient() {
     try {
       const serviceName = bookingModalItem ? getLocalizedServiceName(bookingModalItem) : '';
       const modelName = bookingModalItem ? bookingModalItem.model_name : '';
-      const messageContent = `[TAMİR RANDEVU TALEBİ / REPAIR REQUEST]\n` +
+      const messageContent = `[ÜRÜN SİPARİŞ / TALEP FORMU - ORDER REQUEST]\n` +
         `Cihaz / Device: ${bookingModalItem?.brand} ${modelName}\n` +
-        `Hizmet / Service: ${serviceName}\n` +
+        `Ürün / Model: ${serviceName}\n` +
         `Seçilen Kalite: ${bookingForm.selectedQuality || 'Belirtilmedi'}\n` +
         `Şehir / İlçe: ${bookingForm.city || 'Belirtilmedi'}\n` +
         `Müşteri Notu: ${bookingForm.notes || 'Yok'}`;
@@ -537,10 +538,10 @@ export function PricingClient() {
   }, [apiBanners, selectedCategory]);
 
   return (
-    <div className="min-h-screen bg-[#0d0d0e] text-[#f4f4f5] selection:bg-[#E11D48] selection:text-white pb-20">
+    <div className="min-h-screen bg-background text-foreground selection:bg-[#E11D48] selection:text-white pb-20 transition-colors">
       
       {/* 1. TOP SUB-HEADER: CATEGORY TABS & SEARCH BAR (Image 1 Style) */}
-      <section className="bg-[#141416] border-b border-white/5 sticky top-0 z-40 backdrop-blur-md bg-opacity-95 shadow-lg">
+      <section className="bg-card/95 border-b border-border sticky top-0 z-40 backdrop-blur-md shadow-xs transition-colors">
         {/* Search & Actions Bar */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -548,17 +549,17 @@ export function PricingClient() {
             {/* Live Search Input (Shown only if pricing items exist in DB) */}
             {items.length > 0 ? (
               <div className="relative flex-1 max-w-2xl">
-                <div className="relative flex items-center bg-[#1c1c1f] border border-white/10 rounded-md overflow-hidden focus-within:border-[#E11D48] focus-within:ring-1 focus-within:ring-[#E11D48]/50 transition-all">
+                <div className="relative flex items-center bg-background border border-border rounded-md overflow-hidden focus-within:border-[#E11D48] focus-within:ring-1 focus-within:ring-[#E11D48]/50 transition-all">
                   <input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder={locale === 'ar' ? 'ابحث عن جهاز أو قطعة (مثل iPhone 15 شاشة، Samsung بطارية)...' : locale === 'en' ? 'Search device or part (e.g. iPhone 15 screen, Samsung battery)...' : 'Ürün / model ara... (örnek: iPhone 15 ekran, Samsung batarya)'}
-                    className="w-full bg-transparent px-4 py-2.5 text-xs sm:text-sm font-semibold outline-none text-white placeholder:text-zinc-500"
+                    className="w-full bg-transparent px-4 py-2.5 text-xs sm:text-sm font-semibold outline-none text-foreground placeholder:text-muted-foreground"
                   />
                   {search && (
                     <button 
                       onClick={() => setSearch('')}
-                      className="p-2 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                      className="p-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                     >
                       <X size={16} />
                     </button>
@@ -573,7 +574,7 @@ export function PricingClient() {
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <span className="text-xs sm:text-sm font-black tracking-wide text-white uppercase">
+                <span className="text-xs sm:text-sm font-black tracking-wide text-foreground uppercase">
                   {locale === 'ar' ? 'TR TECH | المنتجات والأسعار' : locale === 'en' ? 'TR TECH | Products & Pricing' : 'TR TECH | Ürünler ve Fiyatlar'}
                 </span>
               </div>
@@ -585,15 +586,15 @@ export function PricingClient() {
                 href={`https://wa.me/${cleanWhatsapp}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-zinc-300 transition-all cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/60 hover:bg-muted border border-border text-xs font-bold text-foreground transition-all cursor-pointer"
               >
-                <WhatsappIcon size={14} className="text-emerald-400" />
+                <WhatsappIcon size={14} className="text-emerald-500" />
                 <span className="hidden sm:inline">{locale === 'ar' ? 'الدعم الفني' : locale === 'en' ? 'Support' : 'Destek'}</span>
               </a>
 
               <a
                 href={`tel:${supportPhone.replace(/\s/g, '')}`}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-zinc-300 transition-all cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/60 hover:bg-muted border border-border text-xs font-bold text-foreground transition-all cursor-pointer"
               >
                 <Phone size={14} className="text-[#E11D48]" />
                 <span className="hidden sm:inline">{supportPhone}</span>
@@ -616,9 +617,9 @@ export function PricingClient() {
 
         {/* Category Navigation Pills (Shown ONLY if there are multiple actual categories with items in DB) */}
         {items.length > 0 && categoryTabs.length > 1 && (
-          <div className="border-t border-white/5 bg-[#101012]">
+          <div className="border-t border-border bg-card/60">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex items-center justify-between gap-1 overflow-x-auto scrollbar-hide py-2">
+              <div className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar py-2">
                 <div className="flex items-center gap-1.5">
                   {categoryTabs.map((tab) => {
                     const isActive = selectedCategory === tab.id;
@@ -635,10 +636,10 @@ export function PricingClient() {
                           "flex items-center gap-2 px-4 py-2 rounded-md text-xs font-extrabold tracking-wide uppercase transition-all duration-200 whitespace-nowrap cursor-pointer",
                           isActive
                             ? "bg-[#E11D48] text-white shadow-md shadow-red-500/30 scale-[1.02]"
-                            : "text-zinc-400 hover:text-white hover:bg-white/5"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
                         )}
                       >
-                        <Icon size={14} className={isActive ? "text-white" : "text-zinc-400"} />
+                        <Icon size={14} className={isActive ? "text-white" : "text-muted-foreground"} />
                         <span>{tab.label}</span>
                       </button>
                     );
@@ -652,17 +653,17 @@ export function PricingClient() {
 
       {/* 2. BREADCRUMBS BAR */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-2">
-        <div className="flex items-center gap-2 text-xs font-semibold text-zinc-500">
-          <Link href="/" className="hover:text-zinc-300 transition-colors">
+        <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+          <Link href="/" className="hover:text-foreground transition-colors">
             {locale === 'ar' ? 'الرئيسية' : locale === 'en' ? 'Home' : 'Ana Sayfa'}
           </Link>
-          <ChevronRight size={13} className={cn("text-zinc-600", isRTL ? "rotate-180" : "")} />
-          <span className="text-zinc-400">
+          <ChevronRight size={13} className={cn("text-muted-foreground/60", isRTL ? "rotate-180" : "")} />
+          <span className="text-muted-foreground">
             {locale === 'ar' ? 'المنتجات والأسعار' : locale === 'en' ? 'Products & Pricing' : 'Ürünler ve Fiyatlar'}
           </span>
           {items.length > 0 && selectedCategory !== 'all' && (
             <>
-              <ChevronRight size={13} className={cn("text-zinc-600", isRTL ? "rotate-180" : "")} />
+              <ChevronRight size={13} className={cn("text-muted-foreground/60", isRTL ? "rotate-180" : "")} />
               <span className="text-[#E11D48] font-bold capitalize">
                 {categoryTabs.find(c => c.id === selectedCategory)?.label}
               </span>
@@ -670,8 +671,8 @@ export function PricingClient() {
           )}
           {items.length > 0 && selectedBrand !== 'all' && (
             <>
-              <ChevronRight size={13} className={cn("text-zinc-600", isRTL ? "rotate-180" : "")} />
-              <span className="text-white font-bold">{selectedBrand}</span>
+              <ChevronRight size={13} className={cn("text-muted-foreground/60", isRTL ? "rotate-180" : "")} />
+              <span className="text-foreground font-bold">{selectedBrand}</span>
             </>
           )}
         </div>
@@ -687,10 +688,10 @@ export function PricingClient() {
               
               {/* Filter Group 1: Brands list with Logos */}
               {brands.length > 0 && (
-                <div className="bg-[#141416] border border-white/5 rounded-lg p-4 shadow-sm">
-                  <h3 className="text-xs font-black uppercase tracking-wider text-zinc-400 mb-3 flex items-center justify-between">
+                <div className="bg-card border border-border rounded-lg p-4 shadow-xs">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-muted-foreground mb-3 flex items-center justify-between">
                     <span>{t('filter_brands')}</span>
-                    <span className="text-[10px] text-zinc-600 font-bold">{brands.length}</span>
+                    <span className="text-[10px] text-muted-foreground/80 font-bold">{brands.length}</span>
                   </h3>
 
                   <div className="space-y-1">
@@ -701,7 +702,7 @@ export function PricingClient() {
                         "w-full flex items-center justify-between px-3 py-2 rounded-md text-xs font-bold transition-all cursor-pointer",
                         selectedBrand === 'all'
                           ? "bg-[#E11D48] text-white shadow-md shadow-red-500/20"
-                          : "text-zinc-400 hover:text-white hover:bg-white/5"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
                       )}
                     >
                       <div className="flex items-center gap-2.5">
@@ -710,7 +711,7 @@ export function PricingClient() {
                       </div>
                       <span className={cn(
                         "text-[10px] px-1.5 py-0.5 rounded-md font-black",
-                        selectedBrand === 'all' ? "bg-white/20 text-white" : "bg-white/5 text-zinc-500"
+                        selectedBrand === 'all' ? "bg-white/20 text-white" : "bg-muted text-muted-foreground"
                       )}>
                         {categoryFilteredItems.length}
                       </span>
@@ -728,7 +729,7 @@ export function PricingClient() {
                             "w-full flex items-center justify-between px-3 py-2 rounded-md text-xs font-bold transition-all cursor-pointer",
                             isSelected
                               ? "bg-[#E11D48] text-white shadow-md shadow-red-500/20"
-                              : "text-zinc-400 hover:text-white hover:bg-white/5"
+                              : "text-muted-foreground hover:text-foreground hover:bg-muted"
                           )}
                         >
                           <div className="flex items-center gap-2.5">
@@ -737,7 +738,7 @@ export function PricingClient() {
                           </div>
                           <span className={cn(
                             "text-[10px] px-1.5 py-0.5 rounded-md font-black",
-                            isSelected ? "bg-white/20 text-white" : "bg-white/5 text-zinc-500"
+                            isSelected ? "bg-white/20 text-white" : "bg-muted text-muted-foreground"
                           )}>
                             {count}
                           </span>
@@ -750,26 +751,26 @@ export function PricingClient() {
 
               {/* Filter Group 2: Services / Part Categories */}
               {services.length > 0 && (
-                <div className="bg-[#141416] border border-white/5 rounded-lg p-4 shadow-sm">
-                  <h3 className="text-xs font-black uppercase tracking-wider text-zinc-400 mb-3">
+                <div className="bg-card border border-border rounded-lg p-4 shadow-xs">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-muted-foreground mb-3">
                     {t('filter_categories')}
                   </h3>
 
-                  <div className="space-y-1 max-h-64 overflow-y-auto pr-1 scrollbar-hide">
+                  <div className="space-y-1">
                     <button
                       onClick={() => setSelectedService('all')}
                       className={cn(
                         "w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer text-left rtl:text-right",
                         selectedService === 'all'
                           ? "text-[#E11D48] bg-red-500/10"
-                          : "text-zinc-400 hover:text-white hover:bg-white/5"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
                       )}
                     >
                       <span>{t('all_services')}</span>
                       {selectedService === 'all' && <Check size={14} className="text-[#E11D48]" />}
                     </button>
 
-                    {services.map(s => {
+                    {(isServicesExpanded ? services : services.slice(0, 6)).map(s => {
                       const isSelected = selectedService === s.slug;
                       return (
                         <button
@@ -779,7 +780,7 @@ export function PricingClient() {
                             "w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer text-left rtl:text-right",
                             isSelected
                               ? "text-[#E11D48] bg-red-500/10 font-black"
-                              : "text-zinc-400 hover:text-white hover:bg-white/5"
+                              : "text-muted-foreground hover:text-foreground hover:bg-muted"
                           )}
                         >
                           <span className="truncate pr-2 rtl:pr-0 rtl:pl-2">{s.name}</span>
@@ -788,13 +789,24 @@ export function PricingClient() {
                       );
                     })}
                   </div>
+
+                  {services.length > 6 && (
+                    <button
+                      type="button"
+                      onClick={() => setIsServicesExpanded(!isServicesExpanded)}
+                      className="w-full mt-2 pt-2 border-t border-border flex items-center justify-center gap-1.5 text-xs font-black text-muted-foreground hover:text-[#E11D48] transition-colors cursor-pointer"
+                    >
+                      <span>{isServicesExpanded ? (locale === 'ar' ? 'عرض أقل' : 'Daha Az Göster') : (locale === 'ar' ? `عرض المزيد (+${services.length - 6})` : `Daha Fazla Göster (+${services.length - 6})`)}</span>
+                      <ChevronDown size={14} className={cn("transition-transform duration-200", isServicesExpanded && "rotate-180")} />
+                    </button>
+                  )}
                 </div>
               )}
 
               {/* Filter Group 3: Quality / Durum */}
               {availableQualities.hasAny && (
-                <div className="bg-[#141416] border border-white/5 rounded-lg p-4 shadow-sm">
-                  <h3 className="text-xs font-black uppercase tracking-wider text-zinc-400 mb-3">
+                <div className="bg-card border border-border rounded-lg p-4 shadow-xs">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-muted-foreground mb-3">
                     {t('filter_condition')}
                   </h3>
 
@@ -814,11 +826,11 @@ export function PricingClient() {
                             "w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer text-left rtl:text-right",
                             isSelected
                               ? "text-[#E11D48] bg-red-500/10"
-                              : "text-zinc-400 hover:text-white hover:bg-white/5"
+                              : "text-muted-foreground hover:text-foreground hover:bg-muted"
                           )}
                         >
                           <span className="truncate">{q.label}</span>
-                          {isSelected ? <CheckSquare size={15} className="text-[#E11D48]" /> : <Square size={15} className="text-zinc-600" />}
+                          {isSelected ? <CheckSquare size={15} className="text-[#E11D48]" /> : <Square size={15} className="text-muted-foreground" />}
                         </button>
                       );
                     })}
@@ -828,17 +840,17 @@ export function PricingClient() {
 
               {/* Filter Group 4: Price Range Slider */}
               {maxDbPrice > 0 && (
-                <div className="bg-[#141416] border border-white/5 rounded-lg p-4 shadow-sm space-y-3">
-                  <h3 className="text-xs font-black uppercase tracking-wider text-zinc-400">
+                <div className="bg-card border border-border rounded-lg p-4 shadow-xs space-y-3">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-muted-foreground">
                     {t('filter_price')}
                   </h3>
 
                   <div className="flex items-center gap-2 text-xs font-bold">
-                    <div className="flex-1 bg-[#1c1c1f] border border-white/10 rounded-lg px-2.5 py-1.5 text-center text-zinc-300">
+                    <div className="flex-1 bg-background border border-border rounded-lg px-2.5 py-1.5 text-center text-foreground">
                       {priceRange[0].toLocaleString('tr-TR')} ₺
                     </div>
-                    <span className="text-zinc-600">-</span>
-                    <div className="flex-1 bg-[#1c1c1f] border border-white/10 rounded-lg px-2.5 py-1.5 text-center text-zinc-300">
+                    <span className="text-muted-foreground">-</span>
+                    <div className="flex-1 bg-background border border-border rounded-lg px-2.5 py-1.5 text-center text-foreground">
                       {priceRange[1].toLocaleString('tr-TR')} ₺
                     </div>
                   </div>
@@ -913,10 +925,10 @@ export function PricingClient() {
                           ? (systemServices.find(s => s.slug === selectedCategory)?.description_en || systemServices.find(s => s.slug === selectedCategory)?.description_tr)
                           : systemServices.find(s => s.slug === selectedCategory)?.description_tr)
                       : (locale === 'ar' 
-                          ? 'قائمة واضحة ومحدثة لجميع المنتجات وقطع الغيار وخدمات الصيانة مع ضمان معتمد.' 
+                          ? 'قائمة واضحة ومحدثة لجميع المنتجات وقطع الغيار مع ضمان المنتج وشحن وتوصيل سريع.' 
                           : locale === 'en' 
-                          ? 'Transparent and up-to-date pricing for all products, spare parts, and services with official warranty.' 
-                          : 'Tüm ürünler, yedek parçalar ve servis hizmetleri için güncel, şeffaf fiyat listesi ve resmi garanti.')
+                          ? 'Transparent and up-to-date catalog for all devices, products, and spare parts with product warranty.' 
+                          : 'Tüm teknoloji ürünleri ve yedek parçalar için güncel, şeffaf fiyat listesi ve resmi ürün garantisi.')
                   )}
                 </p>
 
@@ -957,15 +969,15 @@ export function PricingClient() {
 
             {/* 2. BRAND QUICK-SELECT CHIPS ROW */}
             {brands.length > 0 && (
-              <div className="p-3 bg-[#141416] border border-white/5 rounded-lg">
-                <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-0.5">
+              <div className="p-3 bg-card border border-border rounded-lg shadow-xs">
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-0.5">
                   <button
                     onClick={() => setSelectedBrand('all')}
                     className={cn(
                       "flex items-center gap-2 px-4 py-2 rounded-md text-xs font-black transition-all cursor-pointer shrink-0 border",
                       selectedBrand === 'all'
                         ? "bg-[#E11D48] text-white border-[#E11D48] shadow-md shadow-red-500/20"
-                        : "bg-[#1a1a1d] text-zinc-300 border-white/5 hover:border-white/20 hover:text-white"
+                        : "bg-muted/50 text-foreground border-border hover:bg-muted"
                     )}
                   >
                     <Smartphone size={14} />
@@ -982,7 +994,7 @@ export function PricingClient() {
                           "flex items-center gap-2 px-3.5 py-2 rounded-md text-xs font-black transition-all cursor-pointer shrink-0 border",
                           isSelected
                             ? "bg-[#E11D48] text-white border-[#E11D48] shadow-md shadow-red-500/20"
-                            : "bg-[#1a1a1d] text-zinc-300 border-white/5 hover:border-white/20 hover:text-white"
+                            : "bg-muted/50 text-foreground border-border hover:bg-muted"
                         )}
                       >
                         <BrandIcon brand={brand} size={15} />
@@ -996,14 +1008,14 @@ export function PricingClient() {
 
             {/* 3. MODEL SERIES QUICK-FILTER ROW */}
             {seriesList.length > 0 && (
-              <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
                 <button
                   onClick={() => setSelectedSeries('all')}
                   className={cn(
                     "px-3.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer shrink-0 border",
                     selectedSeries === 'all'
-                      ? "bg-white text-black border-white shadow-xs font-black"
-                      : "bg-[#141416] text-zinc-400 border-white/5 hover:border-white/10 hover:text-white"
+                      ? "bg-primary text-white border-primary shadow-xs font-black"
+                      : "bg-card text-muted-foreground border-border hover:text-foreground hover:bg-muted"
                   )}
                 >
                   {t('all_models_chip')}
@@ -1019,7 +1031,7 @@ export function PricingClient() {
                         "px-3.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer shrink-0 border",
                         isSelected
                           ? "bg-[#E11D48] text-white border-[#E11D48] shadow-xs font-black"
-                          : "bg-[#141416] text-zinc-400 border-white/5 hover:border-white/10 hover:text-white"
+                          : "bg-card text-muted-foreground border-border hover:text-foreground hover:bg-muted"
                       )}
                     >
                       {series}
@@ -1033,10 +1045,10 @@ export function PricingClient() {
             {filteredItems.length > 0 && (
               <div className="flex items-center justify-between gap-3 pt-2">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-sm sm:text-base font-black uppercase text-white tracking-wide">
+                  <h2 className="text-sm sm:text-base font-black uppercase text-foreground tracking-wide">
                     {selectedBrand !== 'all' ? selectedBrand : (locale === 'ar' ? 'المنتجات والأسعار' : locale === 'en' ? 'Products & Pricing' : 'Ürünler ve Fiyatlar')}
                   </h2>
-                  <span className="text-xs font-bold text-zinc-500">
+                  <span className="text-xs font-bold text-muted-foreground">
                     ({filteredItems.length})
                   </span>
                 </div>
@@ -1046,7 +1058,7 @@ export function PricingClient() {
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as any)}
-                    className="bg-[#141416] border border-white/10 rounded-md px-3 py-1.5 text-xs font-bold text-zinc-300 outline-none cursor-pointer focus:border-[#E11D48]"
+                    className="bg-card border border-border rounded-md px-3 py-1.5 text-xs font-bold text-foreground outline-none cursor-pointer focus:border-[#E11D48]"
                   >
                     <option value="featured">{t('sort_featured')}</option>
                     <option value="price_asc">{t('sort_price_asc')}</option>
@@ -1054,7 +1066,7 @@ export function PricingClient() {
                   </select>
 
                   {/* View Mode Toggle */}
-                  <div className="flex items-center bg-[#141416] p-0.5 rounded-md border border-white/10">
+                  <div className="flex items-center bg-card p-0.5 rounded-md border border-border">
                     <button
                       type="button"
                       onClick={() => setViewMode('cards')}
@@ -1062,7 +1074,7 @@ export function PricingClient() {
                         "p-1.5 rounded-lg text-xs transition-all cursor-pointer",
                         viewMode === 'cards'
                           ? "bg-[#E11D48] text-white shadow-xs"
-                          : "text-zinc-400 hover:text-white"
+                          : "text-muted-foreground hover:text-foreground"
                       )}
                       title={t('view_cards')}
                     >
@@ -1075,7 +1087,7 @@ export function PricingClient() {
                         "p-1.5 rounded-lg text-xs transition-all cursor-pointer",
                         viewMode === 'table'
                           ? "bg-[#E11D48] text-white shadow-xs"
-                          : "text-zinc-400 hover:text-white"
+                          : "text-muted-foreground hover:text-foreground"
                       )}
                       title={t('view_table')}
                     >
@@ -1157,10 +1169,10 @@ export function PricingClient() {
                   return (
                     <div
                       key={item.id}
-                      className="bg-[#141416] hover:bg-[#18181b] border border-white/5 hover:border-[#E11D48]/50 rounded-xl flex flex-col justify-between transition-all duration-300 group shadow-sm hover:shadow-xl hover:shadow-red-500/10 relative overflow-hidden"
+                      className="bg-card hover:bg-card/90 border border-border hover:border-[#E11D48]/50 rounded-xl flex flex-col justify-between transition-all duration-300 group shadow-xs hover:shadow-lg relative overflow-hidden"
                     >
                       {/* 1. Full-Bleed Top Image Area (Fills upper part of card completely) */}
-                      <div className="relative w-full h-48 sm:h-52 bg-[#0d0d0f] overflow-hidden flex items-center justify-center border-b border-white/5">
+                      <div className="relative w-full h-48 sm:h-52 bg-muted/40 overflow-hidden flex items-center justify-center border-b border-border">
                         {item.image_url ? (
                           <img 
                             src={item.image_url} 
@@ -1168,8 +1180,8 @@ export function PricingClient() {
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-[#1c1c20] to-[#101012]">
-                            <div className="w-16 h-16 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 group-hover:text-[#E11D48] transition-colors shadow-inner">
+                          <div className="w-full h-full flex items-center justify-center bg-muted/30">
+                            <div className="w-16 h-16 rounded-xl bg-card border border-border flex items-center justify-center text-muted-foreground group-hover:text-[#E11D48] transition-colors shadow-inner">
                               {item.service_slug.includes('ekran') ? (
                                 <Smartphone size={32} strokeWidth={1.5} />
                               ) : item.service_slug.includes('batarya') ? (
@@ -1182,7 +1194,7 @@ export function PricingClient() {
                         )}
 
                         {/* Subtle bottom gradient overlay for smooth transition */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#141416]/80 via-transparent to-transparent pointer-events-none" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent pointer-events-none" />
 
                         {/* Floating Top-Start Quality Badge */}
                         <div className="absolute top-3 start-3 z-10">
@@ -1212,16 +1224,16 @@ export function PricingClient() {
                       <div className="p-4 flex flex-col flex-1 justify-between">
                         {/* Title & Service Details */}
                         <div className="space-y-1 mb-3">
-                          <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
+                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                             {item.brand} • {item.series || item.brand}
                           </p>
-                          <h3 className="text-xs sm:text-sm font-black text-white leading-snug break-words group-hover:text-red-400 transition-colors min-h-[2rem]">
+                          <h3 className="text-xs sm:text-sm font-black text-foreground leading-snug break-words group-hover:text-[#E11D48] transition-colors min-h-[2rem]">
                             {item.model_name}
                           </h3>
-                          <p className="text-[11px] font-semibold text-zinc-400 break-words leading-tight">
+                          <p className="text-[11px] font-semibold text-muted-foreground break-words leading-tight">
                             {serviceName}
                           </p>
-                          <p className="text-[10px] text-zinc-500 font-medium truncate">
+                          <p className="text-[10px] text-muted-foreground font-medium truncate">
                             {hasQualities ? getLocalizedQualityName(item.quality_options[0]) : getLocalizedWarranty(item.warranty)}
                           </p>
                         </div>
@@ -1229,22 +1241,22 @@ export function PricingClient() {
                         {/* Stock / Availability Indicator */}
                         <div className="flex items-center gap-1.5 mb-2.5">
                           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                          <span className="text-[10px] font-bold text-emerald-400">
+                          <span className="text-[10px] font-bold text-emerald-500 dark:text-emerald-400">
                             {t('card_ready_stock')}
                           </span>
                         </div>
 
                         {/* Price & Primary Action: "Randevu Al" Button (Image 1 Style) */}
-                        <div className="space-y-2 pt-2 border-t border-white/5">
+                        <div className="space-y-2 pt-2 border-t border-border">
                           <div className="flex items-baseline justify-between">
-                            <span className="text-base sm:text-lg font-black text-white tracking-tight">
+                            <span className="text-base sm:text-lg font-black text-foreground tracking-tight">
                               {item.base_price.toLocaleString('tr-TR')} {item.currency}
                             </span>
                             {hasQualities && item.quality_options.length > 1 && (
                               <button
                                 type="button"
                                 onClick={() => toggleExpand(item.id)}
-                                className="text-[10px] font-bold text-zinc-400 hover:text-white flex items-center gap-0.5 cursor-pointer"
+                                className="text-[10px] font-bold text-muted-foreground hover:text-foreground flex items-center gap-0.5 cursor-pointer"
                               >
                                 <span>+{item.quality_options.length} {locale === 'ar' ? 'خيارات' : 'Seçenek'}</span>
                                 {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
@@ -1258,12 +1270,12 @@ export function PricingClient() {
                               {item.quality_options.map((q, idx) => (
                                 <div
                                   key={idx}
-                                  className="flex items-center justify-between p-1.5 rounded-lg bg-[#101012] border border-white/5 text-[10px]"
+                                  className="flex items-center justify-between p-1.5 rounded-lg bg-muted/50 border border-border text-[10px]"
                                 >
-                                  <span className="font-bold text-zinc-300 truncate pr-1">
+                                  <span className="font-bold text-foreground truncate pr-1">
                                     {getLocalizedQualityName(q)}
                                   </span>
-                                  <span className="font-black text-white shrink-0">
+                                  <span className="font-black text-foreground shrink-0">
                                     {q.price.toLocaleString('tr-TR')} ₺
                                   </span>
                                 </div>
@@ -1271,7 +1283,7 @@ export function PricingClient() {
                             </div>
                           )}
 
-                          {/* Action Buttons: Red "Randevu Al" CTA & WhatsApp Icon */}
+                          {/* Action Buttons: Primary Order CTA & WhatsApp Icon */}
                           <div className="flex items-center gap-1.5">
                             <button
                               type="button"
@@ -1284,7 +1296,7 @@ export function PricingClient() {
                               }}
                               className="flex-1 bg-[#E11D48] hover:bg-[#be123c] text-white text-xs font-black py-2.5 px-3 rounded-md flex items-center justify-center gap-1.5 shadow-md shadow-red-500/20 active:scale-[0.98] transition-all cursor-pointer"
                             >
-                              <Calendar size={14} />
+                              <ShoppingBag size={14} />
                               <span>{t('card_book_now')}</span>
                             </button>
 
@@ -1305,11 +1317,11 @@ export function PricingClient() {
               </div>
             ) : (
               /* --- DETAILED TABULAR VIEW --- */
-              <div className="bg-[#141416] border border-white/5 rounded-lg overflow-hidden shadow-sm">
+              <div className="bg-card border border-border rounded-lg overflow-hidden shadow-xs">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left rtl:text-right border-collapse text-xs">
                     <thead>
-                      <tr className="bg-[#101012] border-b border-white/5 text-zinc-400 text-[11px] font-black uppercase tracking-wider">
+                      <tr className="bg-muted/50 border-b border-border text-muted-foreground text-[11px] font-black uppercase tracking-wider">
                         <th className="py-3 px-4">{t('col_model')}</th>
                         <th className="py-3 px-4">{t('col_service')}</th>
                         <th className="py-3 px-4">{t('col_warranty')}</th>
@@ -1317,20 +1329,20 @@ export function PricingClient() {
                         <th className="py-3 px-4 text-center">{t('col_action')}</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5">
+                    <tbody className="divide-y divide-border">
                       {paginatedTableItems.map(item => (
-                        <tr key={item.id} className="hover:bg-white/[0.02] transition-colors">
-                          <td className="py-3 px-4 font-bold text-white flex items-center gap-2">
+                        <tr key={item.id} className="hover:bg-muted/30 transition-colors">
+                          <td className="py-3 px-4 font-bold text-foreground flex items-center gap-2">
                             <BrandIcon brand={item.brand} size={15} />
                             <span>{item.model_name}</span>
                           </td>
-                          <td className="py-3 px-4 text-zinc-300 font-medium">
+                          <td className="py-3 px-4 text-foreground/90 font-medium">
                             {getLocalizedServiceName(item)}
                           </td>
-                          <td className="py-3 px-4 text-zinc-400">
+                          <td className="py-3 px-4 text-muted-foreground">
                             {getLocalizedWarranty(item.warranty)}
                           </td>
-                          <td className="py-3 px-4 font-black text-white text-sm">
+                          <td className="py-3 px-4 font-black text-foreground text-sm">
                             {item.base_price.toLocaleString('tr-TR')} {item.currency}
                           </td>
                           <td className="py-3 px-4 text-center">
@@ -1356,7 +1368,7 @@ export function PricingClient() {
 
                 {/* Table Pagination */}
                 {totalTablePages > 1 && (
-                  <div className="p-3 border-t border-white/5 flex items-center justify-between text-xs text-zinc-400">
+                  <div className="p-3 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
                     <span>
                       {locale === 'ar' ? `صفحة ${tablePage} من ${totalTablePages}` : `Sayfa ${tablePage} / ${totalTablePages}`}
                     </span>
@@ -1364,14 +1376,14 @@ export function PricingClient() {
                       <button
                         onClick={() => setTablePage(p => Math.max(1, p - 1))}
                         disabled={tablePage === 1}
-                        className="px-3 py-1 rounded bg-white/5 hover:bg-white/10 disabled:opacity-40"
+                        className="px-3 py-1 rounded bg-muted/60 hover:bg-muted disabled:opacity-40"
                       >
                         {locale === 'ar' ? 'السابق' : 'Önceki'}
                       </button>
                       <button
                         onClick={() => setTablePage(p => Math.min(totalTablePages, p + 1))}
                         disabled={tablePage === totalTablePages}
-                        className="px-3 py-1 rounded bg-white/5 hover:bg-white/10 disabled:opacity-40"
+                        className="px-3 py-1 rounded bg-muted/60 hover:bg-muted disabled:opacity-40"
                       >
                         {locale === 'ar' ? 'التالي' : 'Sonraki'}
                       </button>
@@ -1382,45 +1394,45 @@ export function PricingClient() {
             )}
 
             {/* 6. BOTTOM TRUST BADGES (IMAGE 2 STYLE) */}
-            <div className="pt-8 border-t border-white/5">
+            <div className="pt-8 border-t border-border">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-[#141416] border border-white/5 rounded-lg p-4 flex items-center gap-3.5">
+                <div className="bg-card border border-border rounded-lg p-4 flex items-center gap-3.5 shadow-xs">
                   <div className="w-10 h-10 rounded-md bg-red-500/10 border border-red-500/20 flex items-center justify-center text-[#E11D48] shrink-0">
                     <ShieldCheck size={20} />
                   </div>
                   <div>
-                    <h4 className="text-xs font-black uppercase text-white tracking-wide">{t('trust_parts_title')}</h4>
-                    <p className="text-[11px] text-zinc-400 leading-snug">{t('trust_parts_desc')}</p>
+                    <h4 className="text-xs font-black uppercase text-foreground tracking-wide">{t('trust_parts_title')}</h4>
+                    <p className="text-[11px] text-muted-foreground leading-snug">{t('trust_parts_desc')}</p>
                   </div>
                 </div>
 
-                <div className="bg-[#141416] border border-white/5 rounded-lg p-4 flex items-center gap-3.5">
+                <div className="bg-card border border-border rounded-lg p-4 flex items-center gap-3.5 shadow-xs">
                   <div className="w-10 h-10 rounded-md bg-red-500/10 border border-red-500/20 flex items-center justify-center text-[#E11D48] shrink-0">
                     <Truck size={20} />
                   </div>
                   <div>
-                    <h4 className="text-xs font-black uppercase text-white tracking-wide">{t('trust_shipping_title')}</h4>
-                    <p className="text-[11px] text-zinc-400 leading-snug">{t('trust_shipping_desc')}</p>
+                    <h4 className="text-xs font-black uppercase text-foreground tracking-wide">{t('trust_shipping_title')}</h4>
+                    <p className="text-[11px] text-muted-foreground leading-snug">{t('trust_shipping_desc')}</p>
                   </div>
                 </div>
 
-                <div className="bg-[#141416] border border-white/5 rounded-lg p-4 flex items-center gap-3.5">
+                <div className="bg-card border border-border rounded-lg p-4 flex items-center gap-3.5 shadow-xs">
                   <div className="w-10 h-10 rounded-md bg-red-500/10 border border-red-500/20 flex items-center justify-center text-[#E11D48] shrink-0">
                     <Award size={20} />
                   </div>
                   <div>
-                    <h4 className="text-xs font-black uppercase text-white tracking-wide">{t('trust_warranty_title')}</h4>
-                    <p className="text-[11px] text-zinc-400 leading-snug">{t('trust_warranty_desc')}</p>
+                    <h4 className="text-xs font-black uppercase text-foreground tracking-wide">{t('trust_warranty_title')}</h4>
+                    <p className="text-[11px] text-muted-foreground leading-snug">{t('trust_warranty_desc')}</p>
                   </div>
                 </div>
 
-                <div className="bg-[#141416] border border-white/5 rounded-lg p-4 flex items-center gap-3.5">
+                <div className="bg-card border border-border rounded-lg p-4 flex items-center gap-3.5 shadow-xs">
                   <div className="w-10 h-10 rounded-md bg-red-500/10 border border-red-500/20 flex items-center justify-center text-[#E11D48] shrink-0">
                     <Phone size={20} />
                   </div>
                   <div>
-                    <h4 className="text-xs font-black uppercase text-white tracking-wide">{t('trust_support_title')}</h4>
-                    <p className="text-[11px] text-zinc-400 leading-snug">{t('trust_support_desc')}</p>
+                    <h4 className="text-xs font-black uppercase text-foreground tracking-wide">{t('trust_support_title')}</h4>
+                    <p className="text-[11px] text-muted-foreground leading-snug">{t('trust_support_desc')}</p>
                   </div>
                 </div>
               </div>
@@ -1449,15 +1461,15 @@ export function PricingClient() {
               animate={{ x: 0 }}
               exit={{ x: isRTL ? '100%' : '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="relative w-4/5 max-w-xs bg-[#141416] border-r border-white/10 h-full p-5 overflow-y-auto space-y-5 z-10"
+              className="relative w-4/5 max-w-xs bg-card border-r border-border h-full p-5 overflow-y-auto space-y-5 z-10 shadow-2xl"
             >
-              <div className="flex items-center justify-between pb-3 border-b border-white/5">
-                <h3 className="text-sm font-black uppercase tracking-wider text-white">
+              <div className="flex items-center justify-between pb-3 border-b border-border">
+                <h3 className="text-sm font-black uppercase tracking-wider text-foreground">
                   {locale === 'ar' ? 'فلاتر البحث' : locale === 'en' ? 'Filters' : 'Filtreler'}
                 </h3>
                 <button
                   onClick={() => setIsMobileFilterOpen(false)}
-                  className="p-1 rounded-lg text-zinc-400 hover:text-white"
+                  className="p-1 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer"
                 >
                   <X size={20} />
                 </button>
@@ -1466,14 +1478,14 @@ export function PricingClient() {
               {/* Brands in Mobile */}
               {brands.length > 0 && (
                 <div className="space-y-1">
-                  <span className="text-xs font-bold text-zinc-400 uppercase block mb-1">
+                  <span className="text-xs font-bold text-muted-foreground uppercase block mb-1">
                     {t('filter_brands')}
                   </span>
                   <button
                     onClick={() => { setSelectedBrand('all'); setIsMobileFilterOpen(false); }}
                     className={cn(
-                      "w-full text-left rtl:text-right px-3 py-1.5 rounded-lg text-xs font-bold",
-                      selectedBrand === 'all' ? "bg-[#E11D48] text-white" : "text-zinc-300"
+                      "w-full text-left rtl:text-right px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-colors",
+                      selectedBrand === 'all' ? "bg-[#E11D48] text-white" : "text-foreground hover:bg-muted"
                     )}
                   >
                     {t('filter_all_brands')}
@@ -1483,8 +1495,8 @@ export function PricingClient() {
                       key={b}
                       onClick={() => { setSelectedBrand(b); setIsMobileFilterOpen(false); }}
                       className={cn(
-                        "w-full text-left rtl:text-right px-3 py-1.5 rounded-lg text-xs font-bold",
-                        selectedBrand === b ? "bg-[#E11D48] text-white" : "text-zinc-300"
+                        "w-full text-left rtl:text-right px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-colors",
+                        selectedBrand === b ? "bg-[#E11D48] text-white" : "text-foreground hover:bg-muted"
                       )}
                     >
                       {b}
@@ -1496,14 +1508,14 @@ export function PricingClient() {
               {/* Services in Mobile */}
               {services.length > 0 && (
                 <div className="space-y-1">
-                  <span className="text-xs font-bold text-zinc-400 uppercase block mb-1">
+                  <span className="text-xs font-bold text-muted-foreground uppercase block mb-1">
                     {t('filter_categories')}
                   </span>
                   <button
                     onClick={() => { setSelectedService('all'); setIsMobileFilterOpen(false); }}
                     className={cn(
-                      "w-full text-left rtl:text-right px-3 py-1.5 rounded-lg text-xs font-bold",
-                      selectedService === 'all' ? "bg-[#E11D48] text-white" : "text-zinc-300"
+                      "w-full text-left rtl:text-right px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-colors",
+                      selectedService === 'all' ? "bg-[#E11D48] text-white" : "text-foreground hover:bg-muted"
                     )}
                   >
                     {t('all_services')}
@@ -1513,8 +1525,8 @@ export function PricingClient() {
                       key={s.slug}
                       onClick={() => { setSelectedService(s.slug); setIsMobileFilterOpen(false); }}
                       className={cn(
-                        "w-full text-left rtl:text-right px-3 py-1.5 rounded-lg text-xs font-bold truncate block",
-                        selectedService === s.slug ? "bg-[#E11D48] text-white" : "text-zinc-300"
+                        "w-full text-left rtl:text-right px-3 py-1.5 rounded-lg text-xs font-bold truncate block cursor-pointer transition-colors",
+                        selectedService === s.slug ? "bg-[#E11D48] text-white" : "text-foreground hover:bg-muted"
                       )}
                     >
                       {s.name}
@@ -1526,7 +1538,7 @@ export function PricingClient() {
               {/* Reset Filters */}
               <button
                 onClick={() => { resetAllFilters(); setIsMobileFilterOpen(false); }}
-                className="w-full py-2.5 rounded-md bg-white/10 text-white font-bold text-xs"
+                className="w-full py-2.5 rounded-md bg-muted hover:bg-muted/80 text-foreground font-bold text-xs cursor-pointer transition-colors"
               >
                 {t('filter_clear_btn')}
               </button>
@@ -1551,16 +1563,16 @@ export function PricingClient() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="relative w-full max-w-lg bg-[#141416] border border-white/10 rounded-lg p-6 sm:p-8 z-10 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto text-left rtl:text-right"
+              className="relative w-full max-w-lg bg-card border border-border rounded-lg p-6 sm:p-8 z-10 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto text-left rtl:text-right"
             >
-              <div className="flex items-center justify-between pb-3 border-b border-white/5">
+              <div className="flex items-center justify-between pb-3 border-b border-border">
                 <div className="flex items-center gap-2.5">
                   <div className="w-9 h-9 rounded-md bg-[#E11D48]/20 border border-[#E11D48]/30 flex items-center justify-center text-[#E11D48]">
-                    <Calendar size={18} />
+                    <ShoppingBag size={18} />
                   </div>
                   <div>
-                    <h3 className="text-base font-black text-white">{t('modal_title')}</h3>
-                    <p className="text-xs text-zinc-400">
+                    <h3 className="text-base font-black text-foreground">{t('modal_title')}</h3>
+                    <p className="text-xs text-muted-foreground">
                       {bookingModalItem.brand} {bookingModalItem.model_name} • {getLocalizedServiceName(bookingModalItem)}
                     </p>
                   </div>
@@ -1568,7 +1580,7 @@ export function PricingClient() {
 
                 <button
                   onClick={() => setBookingModalItem(null)}
-                  className="p-1 rounded-lg text-zinc-400 hover:text-white"
+                  className="p-1 rounded-lg text-muted-foreground hover:text-foreground"
                 >
                   <X size={20} />
                 </button>
@@ -1579,13 +1591,13 @@ export function PricingClient() {
                 {/* Quality selection in modal */}
                 {bookingModalItem.quality_options && bookingModalItem.quality_options.length > 0 && (
                   <div>
-                    <label className="text-xs font-bold text-zinc-400 uppercase block mb-1">
+                    <label className="text-xs font-bold text-muted-foreground uppercase block mb-1">
                       {t('modal_quality_label')}
                     </label>
                     <select
                       value={bookingForm.selectedQuality}
                       onChange={(e) => setBookingForm(prev => ({ ...prev, selectedQuality: e.target.value }))}
-                      className="w-full bg-[#1c1c1f] border border-white/10 rounded-md px-3.5 py-2.5 text-xs font-bold text-white outline-none focus:border-[#E11D48]"
+                      className="w-full bg-background border border-border rounded-md px-3.5 py-2.5 text-xs font-bold text-foreground outline-none focus:border-[#E11D48]"
                     >
                       {bookingModalItem.quality_options.map((q, idx) => (
                         <option key={idx} value={getLocalizedQualityName(q)}>
@@ -1598,7 +1610,7 @@ export function PricingClient() {
 
                 {/* Name */}
                 <div>
-                  <label className="text-xs font-bold text-zinc-400 uppercase block mb-1">
+                  <label className="text-xs font-bold text-muted-foreground uppercase block mb-1">
                     {t('modal_name_label')}
                   </label>
                   <input
@@ -1606,13 +1618,13 @@ export function PricingClient() {
                     value={bookingForm.name}
                     onChange={(e) => setBookingForm(prev => ({ ...prev, name: e.target.value }))}
                     placeholder={t('modal_name_placeholder')}
-                    className="w-full bg-[#1c1c1f] border border-white/10 rounded-md px-3.5 py-2.5 text-xs font-bold text-white outline-none focus:border-[#E11D48]"
+                    className="w-full bg-background border border-border rounded-md px-3.5 py-2.5 text-xs font-bold text-foreground outline-none focus:border-[#E11D48]"
                   />
                 </div>
 
                 {/* Phone */}
                 <div>
-                  <label className="text-xs font-bold text-zinc-400 uppercase block mb-1">
+                  <label className="text-xs font-bold text-muted-foreground uppercase block mb-1">
                     {t('modal_phone_label')}
                   </label>
                   <input
@@ -1621,26 +1633,26 @@ export function PricingClient() {
                     value={bookingForm.phone}
                     onChange={(e) => setBookingForm(prev => ({ ...prev, phone: e.target.value }))}
                     placeholder={t('modal_phone_placeholder')}
-                    className="w-full bg-[#1c1c1f] border border-white/10 rounded-md px-3.5 py-2.5 text-xs font-bold text-white outline-none focus:border-[#E11D48]"
+                    className="w-full bg-background border border-border rounded-md px-3.5 py-2.5 text-xs font-bold text-foreground outline-none focus:border-[#E11D48]"
                   />
                 </div>
 
                 {/* City */}
                 <div>
-                  <label className="text-xs font-bold text-zinc-400 uppercase block mb-1">
+                  <label className="text-xs font-bold text-muted-foreground uppercase block mb-1">
                     {t('modal_city_label')}
                   </label>
                   <input
                     value={bookingForm.city}
                     onChange={(e) => setBookingForm(prev => ({ ...prev, city: e.target.value }))}
                     placeholder={t('modal_city_placeholder')}
-                    className="w-full bg-[#1c1c1f] border border-white/10 rounded-md px-3.5 py-2.5 text-xs font-bold text-white outline-none focus:border-[#E11D48]"
+                    className="w-full bg-background border border-border rounded-md px-3.5 py-2.5 text-xs font-bold text-foreground outline-none focus:border-[#E11D48]"
                   />
                 </div>
 
                 {/* Notes */}
                 <div>
-                  <label className="text-xs font-bold text-zinc-400 uppercase block mb-1">
+                  <label className="text-xs font-bold text-muted-foreground uppercase block mb-1">
                     {t('modal_notes_label')}
                   </label>
                   <textarea
@@ -1648,7 +1660,7 @@ export function PricingClient() {
                     value={bookingForm.notes}
                     onChange={(e) => setBookingForm(prev => ({ ...prev, notes: e.target.value }))}
                     placeholder={t('modal_notes_placeholder')}
-                    className="w-full bg-[#1c1c1f] border border-white/10 rounded-md px-3.5 py-2 text-xs font-semibold text-white outline-none focus:border-[#E11D48]"
+                    className="w-full bg-background border border-border rounded-md px-3.5 py-2 text-xs font-semibold text-foreground outline-none focus:border-[#E11D48]"
                   />
                 </div>
 
@@ -1657,7 +1669,7 @@ export function PricingClient() {
                   <button
                     type="button"
                     onClick={() => setBookingModalItem(null)}
-                    className="px-4 py-2.5 rounded-md bg-white/5 hover:bg-white/10 text-xs font-bold text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                    className="px-4 py-2.5 rounded-md bg-muted hover:bg-muted/80 text-xs font-bold text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                   >
                     {t('modal_cancel')}
                   </button>
