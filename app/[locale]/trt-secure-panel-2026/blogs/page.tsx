@@ -145,9 +145,23 @@ export default function BlogsPage() {
       cancelEdit();
       fetchData();
     } catch (err) {
-      console.error('Error saving blog', err);
-      showToast('error', editingId ? 'Failed to update blog post.' : 'Failed to publish blog post.');
-    } finally {
+  console.error('Error saving blog', err);
+
+  const fallbackMessage = editingId
+    ? 'Failed to update blog post.'
+    : 'Failed to publish blog post.';
+
+  const serverMessage = axios.isAxiosError(err)
+    ? err.response?.data?.message
+    : undefined;
+
+  showToast(
+    'error',
+    typeof serverMessage === 'string' && serverMessage.trim()
+      ? serverMessage
+      : fallbackMessage
+  );
+} finally {
       setActionLoading(false);
     }
   };
