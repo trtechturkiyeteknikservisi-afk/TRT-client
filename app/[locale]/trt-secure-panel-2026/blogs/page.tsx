@@ -144,16 +144,14 @@ export default function BlogsPage() {
       }
       cancelEdit();
       fetchData();
-    } catch (err) {
+    } catch (err: any) {
   console.error('Error saving blog', err);
 
   const fallbackMessage = editingId
     ? 'Failed to update blog post.'
     : 'Failed to publish blog post.';
 
-  const serverMessage = axios.isAxiosError(err)
-    ? err.response?.data?.message
-    : undefined;
+  const serverMessage = err?.response?.data?.message;
 
   showToast(
     'error',
