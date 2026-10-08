@@ -10,7 +10,7 @@ import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
 import { AppleHeadphonesIcon, RobotVacuumIcon } from './social-icons';
 import { useStore } from './store-context';
-import { getLocalizedUrl } from '@/lib/localized-routes';
+import { getLocalizedUrl, getLocalizedPath } from '@/lib/localized-routes';
 
 export function Header() {
   const t = useTranslations('Header');
@@ -30,13 +30,13 @@ export function Header() {
   );
 
   const defaultServices = [
-    { name: t('phone_repair'), href: '/services/phone', icon: Smartphone },
-    { name: t('laptop_repair'), href: '/services/laptop', icon: Laptop },
-    { name: t('robot_repair'), href: '/services/robot', icon: RobotVacuumIcon },
-    { name: t('watch_repair'), href: '/services/watch', icon: Watch },
-    { name: t('tablet_repair'), href: '/services/tablet', icon: Tablet },
-    { name: t('headphones_repair'), href: '/services/kulaklik', icon: AppleHeadphonesIcon },
-    { name: t('pricing'), href: '/tamir-fiyatlari', icon: Wrench },
+    { name: t('phone_repair'), href: getLocalizedPath('/services/phone', locale), internal: '/services/phone', icon: Smartphone },
+    { name: t('laptop_repair'), href: getLocalizedPath('/services/laptop', locale), internal: '/services/laptop', icon: Laptop },
+    { name: t('robot_repair'), href: getLocalizedPath('/services/robot', locale), internal: '/services/robot', icon: RobotVacuumIcon },
+    { name: t('watch_repair'), href: getLocalizedPath('/services/watch', locale), internal: '/services/watch', icon: Watch },
+    { name: t('tablet_repair'), href: getLocalizedPath('/services/tablet', locale), internal: '/services/tablet', icon: Tablet },
+    { name: t('headphones_repair'), href: getLocalizedPath('/services/kulaklik', locale), internal: '/services/kulaklik', icon: AppleHeadphonesIcon },
+    { name: t('pricing'), href: getLocalizedPath('/tamir-fiyatlari', locale), internal: '/tamir-fiyatlari', icon: Wrench },
   ];
 
   const [services, setServices] = useState<any[]>(defaultServices);
@@ -60,7 +60,8 @@ export function Header() {
 
           const activeList = res.data.map((item: any) => ({
             name: item.title,
-            href: item.link || `/services/${item.slug}`,
+            href: item.link || getLocalizedPath(`/services/${item.slug}`, locale),
+            internal: `/services/${item.slug}`,
             icon: serviceIconMap[item.icon] || Layers,
             customIcon: item.custom_icon || undefined
           }));
@@ -68,7 +69,8 @@ export function Header() {
           // Append pricing at the end of the services dropdown
           activeList.push({
             name: t('pricing'),
-            href: '/tamir-fiyatlari',
+            href: getLocalizedPath('/tamir-fiyatlari', locale),
+            internal: '/tamir-fiyatlari',
             icon: Wrench,
             customIcon: undefined
           });
@@ -86,39 +88,41 @@ export function Header() {
   const { cartCount, setIsCartOpen } = useStore();
 
   const legalPolicies = [
-    { name: tFooter('kvkk'), href: '/policies/kvkk', icon: Gavel },
-    { name: tFooter('privacy_policy'), href: '/privacy', icon: Lock },
-    { name: tFooter('service_terms'), href: '/terms', icon: FileText },
-    { name: tFooter('warranty_terms'), href: '/policies/warranty', icon: ShieldCheck },
-    { name: tFooter('shipping_terms'), href: '/policies/shipping', icon: Truck },
-    { name: tFooter('official_doc'), href: '/policies/custom', icon: ShieldCheck },
+    { name: tFooter('kvkk'), href: getLocalizedPath('/policies/kvkk', locale), internal: '/policies/kvkk', icon: Gavel },
+    { name: tFooter('privacy_policy'), href: getLocalizedPath('/privacy', locale), internal: '/privacy', icon: Lock },
+    { name: tFooter('service_terms'), href: getLocalizedPath('/terms', locale), internal: '/terms', icon: FileText },
+    { name: tFooter('warranty_terms'), href: getLocalizedPath('/policies/warranty', locale), internal: '/policies/warranty', icon: ShieldCheck },
+    { name: tFooter('shipping_terms'), href: getLocalizedPath('/policies/shipping', locale), internal: '/policies/shipping', icon: Truck },
+    { name: tFooter('official_doc'), href: getLocalizedPath('/policies/custom', locale), internal: '/policies/custom', icon: ShieldCheck },
   ];
 
   interface NavItem {
     name: string;
     href: string;
+    internal?: string;
     isDropdown?: boolean;
     subItems?: any[];
     soon?: boolean;
   }
 
   const navigation: NavItem[] = [
-    { name: t('home'), href: '/' },
-    { name: t('about_us'), href: '/about-us' },
+    { name: t('home'), href: '/', internal: '/' },
+    { name: t('about_us'), href: getLocalizedPath('/about-us', locale), internal: '/about-us' },
     { 
       name: t('services'), 
       href: '#services', 
       isDropdown: true,
       subItems: services
     },
-    { name: t('pricing'), href: '/urunler' },
-    { name: t('works'), href: '/our-works' },
-    { name: t('blog'), href: '/blog' },
+    { name: t('pricing'), href: getLocalizedPath('/urunler', locale), internal: '/urunler' },
+    { name: t('works'), href: getLocalizedPath('/our-works', locale), internal: '/our-works' },
+    { name: t('blog'), href: getLocalizedPath('/blog', locale), internal: '/blog' },
     { name: t('merchants'), href: '#', soon: true },
     { name: t('track_shipment'), href: '#', soon: true },
     { 
       name: t('policy'), 
-      href: '/policies',
+      href: getLocalizedPath('/policies', locale),
+      internal: '/policies',
       isDropdown: true,
       subItems: legalPolicies
     },
@@ -130,16 +134,29 @@ export function Header() {
   };
 
   const isLinkActive = (item: typeof navigation[0]) => {
+    let decodedPath = pathname;
+    try {
+      decodedPath = decodeURIComponent(pathname);
+    } catch (e) {}
+
     if (item.isDropdown) {
-      return item.subItems?.some(sub => pathname === sub.href || pathname.startsWith(sub.href + '/')) ?? false;
+      return item.subItems?.some(sub => {
+        const subHref = sub.href;
+        const subInternal = sub.internal;
+        return decodedPath === subHref || 
+               decodedPath.startsWith(subHref + '/') ||
+               (subInternal && (decodedPath === subInternal || decodedPath.startsWith(subInternal + '/')));
+      }) ?? false;
     }
     if (item.href === '/' || item.href === `/${locale}`) {
-      return pathname === '/' || pathname === `/${locale}`;
+      return decodedPath === '/' || decodedPath === `/${locale}`;
     }
     if (item.href.startsWith('#')) {
       return false;
     }
-    return pathname === item.href || pathname.startsWith(item.href + '/');
+    return decodedPath === item.href || 
+           decodedPath.startsWith(item.href + '/') ||
+           (item.internal ? (decodedPath === item.internal || decodedPath.startsWith(item.internal + '/')) : false);
   };
 
   return (
@@ -429,7 +446,7 @@ export function Header() {
               {/* Standalone Mobile Bize Ulaşın Button */}
               <div className="pt-4 border-t border-border mt-4">
                 <Link
-                  href="/contact"
+                  href={getLocalizedPath('/contact', locale)}
                   className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-lg border border-primary text-primary hover:bg-primary hover:text-primary-foreground font-black text-sm transition-all duration-300 cursor-pointer"
                   onClick={() => setIsMenuOpen(false)}
                 >

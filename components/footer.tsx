@@ -7,6 +7,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { useTheme } from 'next-themes';
 import axios from 'axios';
 import { cn } from '@/lib/utils';
+import { getLocalizedPath } from '@/lib/localized-routes';
 import { 
   InstagramIcon, 
   FacebookIcon, 
@@ -38,13 +39,13 @@ export function Footer() {
   const [mounted, setMounted] = useState(false);
 
   const defaultServiceLinks = [
-    { name: t('phone_repair'), href: '/services/phone' },
-    { name: t('laptop_repair'), href: '/services/laptop' },
-    { name: t('tablet_repair'), href: '/services/tablet' },
-    { name: t('robot_repair'), href: '/services/robot' },
-    { name: t('watch_repair'), href: '/services/watch' },
-    { name: t('headphones_repair'), href: '/services/kulaklik' },
-    { name: t('pricing_list') || 'Ürünler ve Fiyatlar', href: '/tamir-fiyatlari' },
+    { name: t('phone_repair'), href: getLocalizedPath('/services/phone', locale) },
+    { name: t('laptop_repair'), href: getLocalizedPath('/services/laptop', locale) },
+    { name: t('tablet_repair'), href: getLocalizedPath('/services/tablet', locale) },
+    { name: t('robot_repair'), href: getLocalizedPath('/services/robot', locale) },
+    { name: t('watch_repair'), href: getLocalizedPath('/services/watch', locale) },
+    { name: t('headphones_repair'), href: getLocalizedPath('/services/kulaklik', locale) },
+    { name: t('pricing_list') || 'Ürünler ve Fiyatlar', href: getLocalizedPath('/tamir-fiyatlari', locale) },
   ];
 
   const [serviceLinks, setServiceLinks] = useState(defaultServiceLinks);
@@ -59,11 +60,11 @@ export function Footer() {
         if (isMounted && Array.isArray(res.data)) {
           const links = res.data.map((item: any) => ({
             name: item.title,
-            href: item.link || `/services/${item.slug}`
+            href: item.link || getLocalizedPath(`/services/${item.slug}`, locale)
           }));
           links.push({
             name: t('pricing_list') || 'Ürünler ve Fiyatlar',
-            href: '/tamir-fiyatlari'
+            href: getLocalizedPath('/tamir-fiyatlari', locale)
           });
           setServiceLinks(links);
         }
@@ -81,11 +82,11 @@ export function Footer() {
     {
       title: t('company'),
       links: [
-        { name: locale === 'ar' ? 'المنتجات والأسعار' : locale === 'en' ? 'Products & Pricing' : 'Ürünler ve Fiyatlar', href: '/urunler' },
-        { name: t('about_us'), href: '/about-us' },
-        { name: t('works'), href: '/our-works' },
-        { name: t('blog'), href: '/blog' },
-        { name: t('policy'), href: '/policies' },
+        { name: locale === 'ar' ? 'المنتجات والأسعار' : locale === 'en' ? 'Products & Pricing' : 'Ürünler ve Fiyatlar', href: getLocalizedPath('/urunler', locale) },
+        { name: t('about_us'), href: getLocalizedPath('/about-us', locale) },
+        { name: t('works'), href: getLocalizedPath('/our-works', locale) },
+        { name: t('blog'), href: getLocalizedPath('/blog', locale) },
+        { name: t('policy'), href: getLocalizedPath('/policies', locale) },
         { name: t('contact'), href: '/#contact' },
       ],
     },
@@ -101,11 +102,11 @@ export function Footer() {
     {
       title: t('legal_policies'),
       links: [
-        { name: t('kvkk'), href: '/policies/kvkk' },
-        { name: t('service_terms'), href: '/terms' },
-        { name: t('warranty_terms'), href: '/policies/warranty' },
-        { name: t('privacy_policy'), href: '/privacy' },
-        { name: t('shipping_terms'), href: '/policies/shipping' },
+        { name: t('kvkk'), href: getLocalizedPath('/policies/kvkk', locale) },
+        { name: t('service_terms'), href: getLocalizedPath('/terms', locale) },
+        { name: t('warranty_terms'), href: getLocalizedPath('/policies/warranty', locale) },
+        { name: t('privacy_policy'), href: getLocalizedPath('/privacy', locale) },
+        { name: t('shipping_terms'), href: getLocalizedPath('/policies/shipping', locale) },
       ],
     },
   ];

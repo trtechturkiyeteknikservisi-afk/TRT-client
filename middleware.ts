@@ -47,7 +47,9 @@ export default function middleware(request: NextRequest) {
   if (resolved) {
     const url = request.nextUrl.clone();
     url.pathname = resolved.internalPath;
-    return NextResponse.rewrite(url);
+    const response = NextResponse.rewrite(url);
+    response.headers.set('x-next-intl-locale', resolved.locale);
+    return response;
   }
 
   // Redirect old portfolio paths to our-works for SEO and backward compatibility
