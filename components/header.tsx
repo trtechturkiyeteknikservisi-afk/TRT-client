@@ -58,13 +58,21 @@ export function Header() {
             Wrench
           };
 
-          const activeList = res.data.map((item: any) => ({
-            name: item.title,
-            href: item.link || getLocalizedPath(`/services/${item.slug}`, locale),
-            internal: `/services/${item.slug}`,
-            icon: serviceIconMap[item.icon] || Layers,
-            customIcon: item.custom_icon || undefined
-          }));
+          const activeList = res.data.map((item: any) => {
+            const rawSlug = item.slug || (item.link ? String(item.link).replace(/^\/?services\/?/, '') : '');
+            const serviceInternalRoute = `/services/${rawSlug}`;
+            const targetHref = (item.link && String(item.link).startsWith('http'))
+              ? item.link
+              : getLocalizedPath(serviceInternalRoute, locale);
+
+            return {
+              name: item.title,
+              href: targetHref,
+              internal: serviceInternalRoute,
+              icon: serviceIconMap[item.icon] || Layers,
+              customIcon: item.custom_icon || undefined
+            };
+          });
 
           // Append pricing at the end of the services dropdown
           activeList.push({

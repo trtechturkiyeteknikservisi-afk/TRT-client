@@ -2,6 +2,7 @@ import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { ShieldCheck, Scale, Gavel, FileText, Truck, ArrowRight, UserCheck, Lock, Download, ExternalLink, FileCheck } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { OfficialPolicyCard } from '@/components/official-policy-card';
+import { getLocalizedPath } from '@/lib/localized-routes';
 
 export default async function PoliciesPage(props: { params: Promise<{ locale: string }> }) {
   const { locale } = await props.params;
@@ -49,7 +50,7 @@ export default async function PoliciesPage(props: { params: Promise<{ locale: st
       desc: t('kvkk_desc'),
       icon: UserCheck,
       color: 'bg-red-500/10 text-red-500',
-      href: '/policies/kvkk'
+      href: getLocalizedPath('/policies/kvkk', locale)
     },
     {
       id: 'privacy',
@@ -57,7 +58,7 @@ export default async function PoliciesPage(props: { params: Promise<{ locale: st
       desc: t('privacy_desc'),
       icon: Lock,
       color: 'bg-red-500/10 text-red-500',
-      href: '/policies/privacy'
+      href: getLocalizedPath('/privacy', locale)
     },
     {
       id: 'terms',
@@ -65,7 +66,7 @@ export default async function PoliciesPage(props: { params: Promise<{ locale: st
       desc: t('terms_desc'),
       icon: FileText,
       color: 'bg-red-500/10 text-red-500',
-      href: '/policies/terms'
+      href: getLocalizedPath('/terms', locale)
     },
     {
       id: 'warranty',
@@ -73,7 +74,7 @@ export default async function PoliciesPage(props: { params: Promise<{ locale: st
       desc: t('warranty_desc'),
       icon: ShieldCheck,
       color: 'bg-red-500/10 text-red-500',
-      href: '/policies/warranty'
+      href: getLocalizedPath('/policies/warranty', locale)
     },
     {
       id: 'shipping',
@@ -81,7 +82,7 @@ export default async function PoliciesPage(props: { params: Promise<{ locale: st
       desc: t('shipping_desc'),
       icon: Truck,
       color: 'bg-red-500/10 text-red-500',
-      href: '/policies/shipping'
+      href: getLocalizedPath('/policies/shipping', locale)
     },
     {
       id: 'custom',
@@ -89,7 +90,7 @@ export default async function PoliciesPage(props: { params: Promise<{ locale: st
       desc: t('custom_desc'),
       icon: Gavel,
       color: 'bg-red-500/10 text-red-500',
-      href: '/policies/custom'
+      href: getLocalizedPath('/policies/custom', locale)
     }
   ];
 
@@ -115,7 +116,7 @@ export default async function PoliciesPage(props: { params: Promise<{ locale: st
                 return (
                   <OfficialPolicyCard 
                     key="official-doc"
-                    href="/policies/custom"
+                    href={getLocalizedPath('/policies/custom', locale)}
                     officialDocPath={officialDocPath}
                     title={t('official_doc')}
                     desc={t('official_doc_desc')}

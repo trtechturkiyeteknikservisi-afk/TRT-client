@@ -58,10 +58,18 @@ export function Footer() {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
         const res = await axios.get(`${API_URL}/content/services?locale=${locale}`);
         if (isMounted && Array.isArray(res.data)) {
-          const links = res.data.map((item: any) => ({
-            name: item.title,
-            href: item.link || getLocalizedPath(`/services/${item.slug}`, locale)
-          }));
+          const links = res.data.map((item: any) => {
+            const rawSlug = item.slug || (item.link ? String(item.link).replace(/^\/?services\/?/, '') : '');
+            const serviceInternalRoute = `/services/${rawSlug}`;
+            const targetHref = (item.link && String(item.link).startsWith('http'))
+              ? item.link
+              : getLocalizedPath(serviceInternalRoute, locale);
+
+            return {
+              name: item.title,
+              href: targetHref
+            };
+          });
           links.push({
             name: t('pricing_list') || 'Ürünler ve Fiyatlar',
             href: getLocalizedPath('/urunler', locale)

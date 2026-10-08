@@ -11,60 +11,132 @@ export interface RouteMapping {
 }
 
 export const ROUTE_MAPPINGS: RouteMapping[] = [
+  // Products
   {
     internal: '/urunler',
     ar: '/المنتجات',
     tr: '/urunler',
     en: '/products'
   },
+  // Repair Pricing
   {
     internal: '/tamir-fiyatlari',
     ar: '/اسعار-الصيانة',
     tr: '/tamir-fiyatlari',
     en: '/pricing'
   },
+  // About Us
   {
     internal: '/about-us',
     ar: '/من-نحن',
     tr: '/hakkimizda',
     en: '/about-us'
   },
+  // Specific Services (Must be placed before base /services for exact matching)
+  {
+    internal: '/services/phone',
+    ar: '/خدماتنا/صيانة-الهواتف',
+    tr: '/hizmetler/telefon',
+    en: '/services/phone'
+  },
+  {
+    internal: '/services/laptop',
+    ar: '/خدماتنا/صيانة-اللابتوب',
+    tr: '/hizmetler/laptop',
+    en: '/services/laptop'
+  },
+  {
+    internal: '/services/robot',
+    ar: '/خدماتنا/صيانة-المكانس',
+    tr: '/hizmetler/robot-supurge',
+    en: '/services/robot-vacuum'
+  },
+  {
+    internal: '/services/watch',
+    ar: '/خدماتنا/صيانة-الساعات',
+    tr: '/hizmetler/akilli-saat',
+    en: '/services/smartwatch'
+  },
+  {
+    internal: '/services/tablet',
+    ar: '/خدماتنا/صيانة-التابلت',
+    tr: '/hizmetler/tablet',
+    en: '/services/tablet'
+  },
+  {
+    internal: '/services/kulaklik',
+    ar: '/خدماتنا/صيانة-السماعات',
+    tr: '/hizmetler/kulaklik',
+    en: '/services/headphones'
+  },
+  // Base Services route
   {
     internal: '/services',
     ar: '/خدماتنا',
     tr: '/hizmetler',
     en: '/services'
   },
+  // Works / Portfolio
   {
     internal: '/our-works',
     ar: '/اعمالنا',
     tr: '/projelerimiz',
     en: '/our-works'
   },
+  // Blog
   {
     internal: '/blog',
     ar: '/المدونة',
     tr: '/blog',
     en: '/blog'
   },
+  // Contact
   {
     internal: '/contact',
     ar: '/اتصل-بنا',
     tr: '/iletisim',
     en: '/contact'
   },
+  // Verify
   {
     internal: '/verify',
     ar: '/التحقق',
     tr: '/dogrulama',
     en: '/verify'
   },
+  // Specific Policies (Must be placed before base /policies for exact matching)
+  {
+    internal: '/policies/kvkk',
+    ar: '/السياسات/حماية-البيانات',
+    tr: '/politikalar/kvkk',
+    en: '/policies/kvkk'
+  },
+  {
+    internal: '/policies/warranty',
+    ar: '/السياسات/شروط-الضمان',
+    tr: '/politikalar/garanti-kosullari',
+    en: '/policies/warranty-terms'
+  },
+  {
+    internal: '/policies/shipping',
+    ar: '/السياسات/الشحن-والتوصيل',
+    tr: '/politikalar/kargo-ve-teslimat',
+    en: '/policies/shipping-delivery'
+  },
+  {
+    internal: '/policies/custom',
+    ar: '/السياسات/الوثائق-الرسمية',
+    tr: '/politikalar/resmi-belgeler',
+    en: '/policies/official-documents'
+  },
+  // Base Policies route
   {
     internal: '/policies',
     ar: '/السياسات',
     tr: '/politikalar',
     en: '/policies'
   },
+  // Privacy
   {
     internal: '/privacy',
     ar: '/سياسة-الخصوصية',
@@ -72,7 +144,20 @@ export const ROUTE_MAPPINGS: RouteMapping[] = [
     en: '/privacy'
   },
   {
+    internal: '/policies/privacy',
+    ar: '/سياسة-الخصوصية',
+    tr: '/gizlilik-politikasi',
+    en: '/privacy'
+  },
+  // Terms
+  {
     internal: '/terms',
+    ar: '/الشروط-والاحكام',
+    tr: '/kullanim-kosullari',
+    en: '/terms'
+  },
+  {
+    internal: '/policies/terms',
     ar: '/الشروط-والاحكام',
     tr: '/kullanim-kosullari',
     en: '/terms'

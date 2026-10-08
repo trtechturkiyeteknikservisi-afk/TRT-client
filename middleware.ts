@@ -41,6 +41,23 @@ export default function middleware(request: NextRequest) {
     }
   }
 
+  // 1.5 Canonical Redirect: If request is under /tr or /ar and hits an internal unlocalized route
+  // (e.g. /tr/services/phone -> /tr/hizmetler/telefon, /ar/services/phone -> /ar/خدماتنا/صيانة-الهواتف)
+  const locPrefixMatch = pathname.match(/^\/(ar|tr)(\/.*)?$/);
+  if (locPrefixMatch) {
+    const loc = locPrefixMatch[1] as 'ar' | 'tr';
+    const sub = (locPrefixMatch[2] || '').replace(/\/+$/, '') || '/';
+    const foundMapping = ROUTE_MAPPINGS.find(m => m.internal === sub);
+    if (foundMapping) {
+      const targetSlug = loc === 'ar' ? foundMapping.ar : foundMapping.tr;
+      if (targetSlug && targetSlug !== foundMapping.internal) {
+        const cleanUrl = new URL(`/${loc}${targetSlug}`, request.url);
+        cleanUrl.search = request.nextUrl.search;
+        return NextResponse.redirect(cleanUrl, 301);
+      }
+    }
+  }
+
   // 2. Check if the incoming request has a localized path (e.g. /ar/المنتجات, /tr/hakkimizda, /en/products)
   // and rewrite it internally to the corresponding Next.js page
   const resolved = resolveInternalRoute(pathname);

@@ -10,6 +10,7 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useTranslations, useLocale } from 'next-intl';
 import { AppleHeadphonesIcon, RobotVacuumIcon } from './social-icons';
+import { getLocalizedPath } from '@/lib/localized-routes';
 import axios from 'axios';
 
 interface ServiceItem {
@@ -54,42 +55,42 @@ export function Services() {
       description: t('phone_desc'),
       icon: Smartphone,
       color: 'bg-blue-500/10 text-blue-600',
-      link: '/services/phone'
+      link: getLocalizedPath('/services/phone', locale)
     },
     {
       title: t('laptop'),
       description: t('laptop_desc'),
       icon: Laptop,
       color: 'bg-purple-500/10 text-purple-600',
-      link: '/services/laptop'
+      link: getLocalizedPath('/services/laptop', locale)
     },
     {
       title: t('robot'),
       description: t('robot_desc'),
       icon: RobotVacuumIcon,
       color: 'bg-yellow-500/10 text-yellow-600',
-      link: '/services/robot'
+      link: getLocalizedPath('/services/robot', locale)
     },
     {
       title: t('watch'),
       description: t('watch_desc'),
       icon: Watch,
       color: 'bg-red-500/10 text-red-600',
-      link: '/services/watch'
+      link: getLocalizedPath('/services/watch', locale)
     },
     {
       title: t('tablet'),
       description: t('tablet_desc'),
       icon: Tablet,
       color: 'bg-emerald-500/10 text-emerald-600',
-      link: '/services/tablet'
+      link: getLocalizedPath('/services/tablet', locale)
     },
     {
       title: t('headphones'),
       description: t('headphones_desc'),
       icon: AppleHeadphonesIcon,
       color: 'bg-indigo-500/10 text-indigo-600',
-      link: '/services/kulaklik'
+      link: getLocalizedPath('/services/kulaklik', locale)
     }
   ];
 
@@ -102,14 +103,22 @@ export function Services() {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
         const res = await axios.get(`${API_URL}/content/services?locale=${locale}`);
         if (mounted && Array.isArray(res.data)) {
-          const mapped: ServiceItem[] = res.data.map((item: any) => ({
-            title: item.title,
-            description: item.description,
-            icon: serviceIconMap[item.icon] || (item.icon === 'RobotVacuumIcon' ? RobotVacuumIcon : item.icon === 'AppleHeadphonesIcon' ? AppleHeadphonesIcon : Smartphone),
-            customIcon: item.custom_icon,
-            color: item.color || 'bg-primary/10 text-primary',
-            link: item.link || `/services/${item.slug}`
-          }));
+          const mapped: ServiceItem[] = res.data.map((item: any) => {
+            const rawSlug = item.slug || (item.link ? String(item.link).replace(/^\/?services\/?/, '') : '');
+            const serviceInternalRoute = `/services/${rawSlug}`;
+            const targetHref = (item.link && String(item.link).startsWith('http'))
+              ? item.link
+              : getLocalizedPath(serviceInternalRoute, locale);
+
+            return {
+              title: item.title,
+              description: item.description,
+              icon: serviceIconMap[item.icon] || (item.icon === 'RobotVacuumIcon' ? RobotVacuumIcon : item.icon === 'AppleHeadphonesIcon' ? AppleHeadphonesIcon : Smartphone),
+              customIcon: item.custom_icon,
+              color: item.color || 'bg-primary/10 text-primary',
+              link: targetHref
+            };
+          });
           setServices(mapped);
         }
       } catch (err) {
