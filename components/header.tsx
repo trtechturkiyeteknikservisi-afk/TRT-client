@@ -148,24 +148,91 @@ export function Header() {
       decodedPath = decodeURIComponent(pathname);
     } catch (e) {}
 
+    // Clean any leading locale prefix like /tr, /ar, /en
+    const cleanPath = decodedPath.replace(/^\/(tr|ar|en)(\/|$)/, '$2') || '/';
+    const normalizedClean = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`;
+
+    // 1. Identify Products & Pricing routes (including categories and filters)
+    const isProductsRoute = 
+      normalizedClean === '/urunler' || 
+      normalizedClean.startsWith('/urunler/') ||
+      normalizedClean === '/urun-satisi' || 
+      normalizedClean.startsWith('/urun-satisi/') ||
+      normalizedClean === '/المنتجات' || 
+      normalizedClean.startsWith('/المنتجات/') ||
+      normalizedClean === '/products' || 
+      normalizedClean.startsWith('/products/');
+
+    // Check if the current nav item is the Products link
+    const isProductsItem = 
+      item.internal === '/urunler' || 
+      item.href === '/urunler' ||
+      item.href.includes('/urunler') || 
+      item.href.includes('/المنتجات') || 
+      item.href.includes('/products');
+
+    if (isProductsItem) {
+      return isProductsRoute;
+    }
+
+    // 2. Dropdown handling
     if (item.isDropdown) {
+      // If user is currently on any Products page, the Services dropdown MUST NOT be active
+      if (isProductsRoute) {
+        return false;
+      }
+
       return item.subItems?.some(sub => {
+        // Exclude /urunler sub-item from ever activating the services dropdown
+        if (
+          sub.internal === '/urunler' || 
+          sub.href === '/urunler' || 
+          sub.href?.includes('/urunler') || 
+          sub.href?.includes('/المنتجات') || 
+          sub.href?.includes('/products')
+        ) {
+          return false;
+        }
+
         const subHref = sub.href;
         const subInternal = sub.internal;
-        return decodedPath === subHref || 
-               decodedPath.startsWith(subHref + '/') ||
-               (subInternal && (decodedPath === subInternal || decodedPath.startsWith(subInternal + '/')));
+        return (
+          normalizedClean === subHref || 
+          normalizedClean.startsWith(subHref + '/') ||
+          decodedPath === subHref ||
+          decodedPath.startsWith(subHref + '/') ||
+          (subInternal && (
+            normalizedClean === subInternal || 
+            normalizedClean.startsWith(subInternal + '/') ||
+            decodedPath === subInternal || 
+            decodedPath.startsWith(subInternal + '/')
+          ))
+        );
       }) ?? false;
     }
+
+    // 3. Homepage check
     if (item.href === '/' || item.href === `/${locale}`) {
-      return decodedPath === '/' || decodedPath === `/${locale}`;
+      return normalizedClean === '/' || decodedPath === '/' || decodedPath === `/${locale}`;
     }
+
     if (item.href.startsWith('#')) {
       return false;
     }
-    return decodedPath === item.href || 
-           decodedPath.startsWith(item.href + '/') ||
-           (item.internal ? (decodedPath === item.internal || decodedPath.startsWith(item.internal + '/')) : false);
+
+    // 4. Standard nav item check
+    return (
+      normalizedClean === item.href || 
+      normalizedClean.startsWith(item.href + '/') ||
+      decodedPath === item.href || 
+      decodedPath.startsWith(item.href + '/') ||
+      (item.internal ? (
+        normalizedClean === item.internal || 
+        normalizedClean.startsWith(item.internal + '/') ||
+        decodedPath === item.internal || 
+        decodedPath.startsWith(item.internal + '/')
+      ) : false)
+    );
   };
 
   return (
@@ -420,7 +487,12 @@ export function Header() {
                     <div className="my-2">
                       <button
                         onClick={() => setActiveDropdown(activeDropdown === item.name ? null : item.name)}
-                        className="flex items-center justify-between w-full px-4 py-3 text-base font-bold text-muted-foreground hover:bg-muted hover:text-primary rounded-xl transition-all cursor-pointer"
+                        className={cn(
+                          "flex items-center justify-between w-full px-4 py-3 text-base font-bold rounded-xl transition-all cursor-pointer",
+                          isLinkActive(item)
+                            ? "bg-muted text-primary"
+                            : "text-muted-foreground hover:bg-muted hover:text-primary"
+                        )}
                       >
                         <span>{item.name}</span>
                         <ChevronDown 
@@ -457,7 +529,12 @@ export function Header() {
                   ) : (
                     <Link
                       href={item.href}
-                      className="flex items-center justify-between px-4 py-3 text-base font-bold text-muted-foreground hover:bg-muted hover:text-primary rounded-xl transition-all"
+                      className={cn(
+                        "flex items-center justify-between px-4 py-3 text-base font-bold rounded-xl transition-all",
+                        isLinkActive(item)
+                          ? "bg-muted text-primary font-black"
+                          : "text-muted-foreground hover:bg-muted hover:text-primary"
+                      )}
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <span>{item.name}</span>

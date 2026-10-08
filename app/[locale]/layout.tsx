@@ -27,17 +27,41 @@ const almarai = Almarai({
   preload: false,
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: {
-    default: "TRT | Professional Repair Service in Turkey",
-    template: "%s"
-  },
-  description: "Specialized repair for smartphones, laptops, robot vacuums, and smart watches. 20+ years of experience in technical service.",
-  keywords: ["telefon tamiri", "laptop tamiri", "robot süpürge tamiri", "akıllı saat tamiri", "tablet tamiri", "phone repair", "laptop repair", "teknik servis", "Turkey", "Bursa", "iPhone tamiri", "Android tamiri"],
-  authors: [{ name: "TRT Team" }],
-  creator: "TRT",
-};
+export async function generateMetadata(props: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await props.params;
+  const isAr = locale === 'ar';
+  const isTr = locale === 'tr';
+
+  const defaultTitle = isAr
+    ? 'TR TECH | خدمة الصيانة الفنية الاحترافية في تركيا'
+    : isTr
+    ? 'TR TECH | Türkiye Profesyonel Teknik Servis'
+    : 'TR TECH | Professional Repair Service in Turkey';
+
+  const defaultDesc = isAr
+    ? 'مركز صيانة متخصص للهواتف الذكية، الحواسيب المحمولة، المكانس الروبوتية، والساعات الذكية بضمان حقيقي وخبرة أكثر من 20 عاماً في تركيا.'
+    : isTr
+    ? 'Akıllı telefonlar, dizüstü bilgisayarlar, robot süpürgeler ve akıllı saatler için profesyonel teknik servis ve orijinal yedek parçalar.'
+    : 'Specialized repair for smartphones, laptops, robot vacuums, and smart watches. 20+ years of experience in technical service.';
+
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: {
+      default: defaultTitle,
+      template: "%s"
+    },
+    description: defaultDesc,
+    keywords: [
+      "telefon tamiri", "laptop tamiri", "robot süpürge tamiri", "akıllı saat tamiri", 
+      "tablet tamiri", "phone repair", "laptop repair", "teknik servis", "Turkey", "Bursa", 
+      "iPhone tamiri", "Android tamiri", "TR TECH", "ürünler ve fiyatlar"
+    ],
+    authors: [{ name: "TR TECH Team" }],
+    creator: "TR TECH",
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: [

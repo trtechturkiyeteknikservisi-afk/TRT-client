@@ -1,4 +1,5 @@
-import React from 'react';
-import UrunSatisiPage from '../urun-satisi/page';
+import UrunSatisiPage, { generateMetadata } from '../urun-satisi/page';
 
+export { generateMetadata };
 export default UrunSatisiPage;
+
