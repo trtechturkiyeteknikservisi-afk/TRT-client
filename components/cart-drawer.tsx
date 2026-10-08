@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, Trash2, Plus, Minus, ShoppingBag, ArrowRight, ShieldCheck, 
-  Truck, CheckCircle, Phone, MapPin, User, Send, CreditCard 
+  Truck, CheckCircle, Phone, MapPin, User, Send 
 } from 'lucide-react';
 import { useStore, CartItem } from './store-context';
 import { useCurrency } from './currency-context';
@@ -242,25 +242,11 @@ export function CartDrawer() {
                   {/* WhatsApp Quick Order Button */}
                   <button
                     onClick={handleWhatsAppCheckout}
-                    className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-950/40 active:scale-[0.98] cursor-pointer"
+                    className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-950/40 active:scale-[0.98] cursor-pointer"
                   >
-                    <span>💬</span>
+                    <span className="text-sm">💬</span>
                     <span>
                       {locale === 'ar' ? 'الطلب السريع عبر واتساب' : 'WhatsApp ile Hızlı Sipariş'}
-                    </span>
-                  </button>
-
-                  {/* Standard Direct Checkout Button */}
-                  <button
-                    onClick={() => {
-                      setIsCartOpen(false);
-                      setIsOrderModalOpen(true);
-                    }}
-                    className="w-full py-2.5 px-4 rounded-xl bg-[#E11D48] hover:bg-[#be123c] text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-lg shadow-red-950/40 active:scale-[0.98] cursor-pointer"
-                  >
-                    <CreditCard size={14} />
-                    <span>
-                      {locale === 'ar' ? 'متابعة الشراء وإنهاء الطلب' : 'Siparişi Tamamla'}
                     </span>
                   </button>
                 </div>
