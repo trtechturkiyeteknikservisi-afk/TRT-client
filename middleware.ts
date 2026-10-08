@@ -8,6 +8,17 @@ const intlMiddleware = createMiddleware(routing);
 export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // 0. Detect and fix duplicated locale prefixes (e.g. /ar/ar, /ar/ar/, /ar/ar/services, /tr/tr/...)
+  // Immediately redirect 301 to the cleaned single-locale URL to prevent 404s and fix SEO
+  const duplicateLocaleMatch = pathname.match(/^\/(ar|tr|en)(?:\/(?:ar|tr|en))+(\/.*)?$/);
+  if (duplicateLocaleMatch) {
+    const locale = duplicateLocaleMatch[1];
+    const rest = duplicateLocaleMatch[2] || '';
+    const cleanUrl = new URL(`/${locale}${rest}`, request.url);
+    cleanUrl.search = request.nextUrl.search;
+    return NextResponse.redirect(cleanUrl, 301);
+  }
+
   // 1. Redirect root-level localized Arabic/Turkish/English paths to their locale prefix for perfect SEO
   let decodedPath = pathname;
   try {

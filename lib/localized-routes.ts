@@ -84,9 +84,20 @@ export const ROUTE_MAPPINGS: RouteMapping[] = [
  * Example: getLocalizedUrl('/urunler', 'ar') => '/ar/المنتجات'
  */
 export function getLocalizedUrl(route: string, locale: string = 'tr'): string {
-  if (!route || route === '/' || route.startsWith('#')) return route || '/';
+  if (!route || route.startsWith('#')) return route || `/${locale}`;
   
-  const cleanRoute = route.startsWith('/') ? route : `/${route}`;
+  let cleanRoute = route.startsWith('/') ? route : `/${route}`;
+  
+  // Strip any existing single or duplicated locale prefixes (e.g. /ar, /ar/ar, /tr/urunler)
+  cleanRoute = cleanRoute.replace(/^(\/(ar|tr|en))+(\/|$)/, '$3') || '/';
+  if (!cleanRoute.startsWith('/')) {
+    cleanRoute = `/${cleanRoute}`;
+  }
+
+  // Homepage
+  if (cleanRoute === '/') {
+    return `/${locale}`;
+  }
   
   // Exact match
   const found = ROUTE_MAPPINGS.find(m => m.internal === cleanRoute);
