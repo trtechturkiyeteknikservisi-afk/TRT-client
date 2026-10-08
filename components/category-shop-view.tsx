@@ -192,18 +192,10 @@ export function CategoryShopView({
     const nextSort = updated.sort !== undefined ? updated.sort : sortOrder;
 
     const basePath = getLocalizedUrl('/urunler', locale);
-    const currentPath = window.location.pathname;
-    const isCategorySubpath = categorySlug && categorySlug !== 'all' && currentPath.includes(`/${categorySlug}`);
-
-    let targetPath = currentPath;
-    if (isCategorySubpath && updated.category !== undefined && updated.category !== categorySlug) {
-      targetPath = basePath;
-    }
-
     const params = new URLSearchParams();
 
-    // 1. Category (only as query param if not in category subpath and not 'all')
-    if (targetPath === basePath && nextCat && nextCat !== 'all') {
+    // 1. Category (Always add to URL whenever a category is selected)
+    if (nextCat && nextCat !== 'all') {
       params.set('category', nextCat);
     }
 
@@ -243,7 +235,7 @@ export function CategoryShopView({
     }
 
     const queryString = params.toString();
-    const finalUrl = queryString ? `${targetPath}?${queryString}` : targetPath;
+    const finalUrl = queryString ? `${basePath}?${queryString}` : basePath;
 
     if (replace) {
       window.history.replaceState({
