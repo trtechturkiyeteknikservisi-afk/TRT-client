@@ -10,6 +10,7 @@ import {
 import { useLocale } from 'next-intl';
 import { Link, useRouter } from '@/i18n/routing';
 import { cn, getProductUrl } from '@/lib/utils';
+import { getLocalizedPath } from '@/lib/localized-routes';
 import { BrandIcon } from './brand-icons';
 import { useStore } from './store-context';
 import { useCurrency } from './currency-context';
@@ -233,7 +234,7 @@ export function ShopHub({ initialCategory, initialBrand, initialSearch }: ShopHu
             ))}
 
             <Link
-              href="/tamir-fiyatlari"
+              href={getLocalizedPath('/tamir-fiyatlari', locale)}
               className="text-xs font-black text-zinc-400 hover:text-white px-2.5 py-1.5 rounded-lg transition-colors whitespace-nowrap"
             >
               {locale === 'ar' ? 'قائمة الأسعار' : 'Fiyat Listesi'}

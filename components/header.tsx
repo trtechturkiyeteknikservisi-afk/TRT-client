@@ -36,7 +36,7 @@ export function Header() {
     { name: t('watch_repair'), href: getLocalizedPath('/services/watch', locale), internal: '/services/watch', icon: Watch },
     { name: t('tablet_repair'), href: getLocalizedPath('/services/tablet', locale), internal: '/services/tablet', icon: Tablet },
     { name: t('headphones_repair'), href: getLocalizedPath('/services/kulaklik', locale), internal: '/services/kulaklik', icon: AppleHeadphonesIcon },
-    { name: t('pricing'), href: getLocalizedPath('/tamir-fiyatlari', locale), internal: '/tamir-fiyatlari', icon: Wrench },
+    { name: t('pricing'), href: getLocalizedPath('/urunler', locale), internal: '/urunler', icon: Wrench },
   ];
 
   const [services, setServices] = useState<any[]>(defaultServices);
@@ -69,8 +69,8 @@ export function Header() {
           // Append pricing at the end of the services dropdown
           activeList.push({
             name: t('pricing'),
-            href: getLocalizedPath('/tamir-fiyatlari', locale),
-            internal: '/tamir-fiyatlari',
+            href: getLocalizedPath('/urunler', locale),
+            internal: '/urunler',
             icon: Wrench,
             customIcon: undefined
           });

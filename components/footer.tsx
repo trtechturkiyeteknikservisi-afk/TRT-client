@@ -45,7 +45,7 @@ export function Footer() {
     { name: t('robot_repair'), href: getLocalizedPath('/services/robot', locale) },
     { name: t('watch_repair'), href: getLocalizedPath('/services/watch', locale) },
     { name: t('headphones_repair'), href: getLocalizedPath('/services/kulaklik', locale) },
-    { name: t('pricing_list') || 'Ürünler ve Fiyatlar', href: getLocalizedPath('/tamir-fiyatlari', locale) },
+    { name: t('pricing_list') || 'Ürünler ve Fiyatlar', href: getLocalizedPath('/urunler', locale) },
   ];
 
   const [serviceLinks, setServiceLinks] = useState(defaultServiceLinks);
@@ -64,7 +64,7 @@ export function Footer() {
           }));
           links.push({
             name: t('pricing_list') || 'Ürünler ve Fiyatlar',
-            href: getLocalizedPath('/tamir-fiyatlari', locale)
+            href: getLocalizedPath('/urunler', locale)
           });
           setServiceLinks(links);
         }

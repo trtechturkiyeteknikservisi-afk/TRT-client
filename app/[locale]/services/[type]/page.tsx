@@ -11,6 +11,7 @@ import { ServiceBrands } from "@/components/service-brands";
 import axios from 'axios';
 import { useTranslations, useLocale } from 'next-intl';
 import { AppleHeadphonesIcon, RobotVacuumIcon } from '@/components/social-icons';
+import { getLocalizedPath } from '@/lib/localized-routes';
 
 const serviceAssets: Record<string, any> = {
   phone: {
@@ -205,7 +206,7 @@ export default function ServicePage() {
               </p>
             </div>
             <Link
-              href="/tamir-fiyatlari"
+              href={getLocalizedPath('/tamir-fiyatlari', locale)}
               className="shrink-0 px-6 py-3.5 rounded-xl bg-primary text-primary-foreground font-black text-xs uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md flex items-center gap-2"
             >
               <span>Fiyat Listesini Gör</span>
