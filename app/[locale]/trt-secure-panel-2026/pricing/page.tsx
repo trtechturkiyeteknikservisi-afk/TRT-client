@@ -12,7 +12,10 @@ import { useTranslations, useLocale } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useRouter } from '@/i18n/routing';
 import toast from 'react-hot-toast';
+import dynamic from 'next/dynamic';
 import { STORE_CATEGORIES } from '@/lib/store-data';
+
+const JoditEditor = dynamic(() => import('@/components/JoditEditor'), { ssr: false });
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -44,6 +47,7 @@ interface PricingItem {
   service_name_en: string;
   service_name_ar: string;
   base_price: number;
+  max_price?: number;
   currency: string;
   duration: string;
   warranty: string;
@@ -54,7 +58,15 @@ interface PricingItem {
   notes_tr?: string;
   notes_en?: string;
   notes_ar?: string;
+  description_tr?: string;
+  description_en?: string;
+  description_ar?: string;
   image_url?: string;
+  images?: string[];
+  show_badge?: boolean;
+  badge_text_tr?: string;
+  badge_text_en?: string;
+  badge_text_ar?: string;
 }
 
 const dict = {
@@ -74,7 +86,7 @@ const dict = {
     th_branch: "الفرع الرئيسي",
     th_service: "الخدمة / القطعة",
     th_base_price: "السعر الأساسي",
-    th_qualities: "خيارات الجودة والقطع",
+    th_qualities: "الصور والمواصفات",
     th_warranty: "الضمان الرسمي",
     th_status: "الحالة والمخزون",
     th_actions: "الإجراءات",
@@ -88,12 +100,16 @@ const dict = {
     no_records: "لم يتم العثور على أي سجلات مطابقة للبحث.",
     modal_edit_title: "تعديل بيانات وتسعيرة المنتج",
     modal_add_title: "إضافة منتج وتسعيرة جديدة",
-    image_section_title: "صورة المنتج (اختياري)",
-    image_section_sub: "يمكنك رفع صورة المنتج أو وضع رابط مباشر للصورة لإظهارها في قائمة المنتجات والأسعار",
-    upload_image_btn: "رفع صورة من الجهاز",
-    uploading_image: "جاري رفع الصورة...",
+    image_section_title: "صور المنتج (يمكن إضافة أكثر من صورة)",
+    image_section_sub: "ارفع صور المنتج من جهازك أو أضف روابط خارجية مباشرة. الصورة الأولى هي الغلاف الرئيسي.",
+    upload_image_btn: "رفع صور من الجهاز",
+    uploading_image: "جاري رفع الصور...",
     remove_image: "إزالة الصورة",
-    image_url_placeholder: "أو الصق رابط الصورة مباشرة (URL)...",
+    image_url_placeholder: "الصق رابط صورة مباشرة هنا (URL)...",
+    add_image_link_btn: "+ إضافة الرابط",
+    main_image_badge: "الصورة الرئيسية",
+    set_as_main_btn: "تعيين كرئيسية",
+    no_images_yet: "لم يتم رفع أي صور بعد. ستظهر صورة افتراضية للمنتج.",
     label_main_branch: "الفرع الرئيسي / القسم العام",
     select_branch_placeholder: "-- اختر الفرع الرئيسي للخدمة --",
     new_branch_option: "+ إنشاء فرع رئيسي جديد",
@@ -120,19 +136,22 @@ const dict = {
     placeholder_duration: "مثال: 30 دقيقة",
     label_warranty: "مدة الضمان",
     placeholder_warranty: "مثال: ضمان 6 أشهر",
-    quality_section_title: "خيارات جودة القطع والأسعار (شاشات أصلية، تجارية، إلخ)",
-    quality_section_sub: "يمكنك إضافة خيارات جودة متعددة مع ترجمتها والأسعار والشارات الترويجية",
-    add_quality_btn: "إضافة خيار جودة +",
-    label_quality_name_ar: "اسم الجودة (عربي)",
-    label_quality_name_tr: "اسم الجودة (تركي)",
-    label_quality_name_en: "اسم الجودة (إنجليزي)",
-    placeholder_quality_ar: "مثال: شاشة وكالة سيرفس أصلية",
-    placeholder_quality_tr: "Örn: Orijinal Servis Ekran",
-    placeholder_quality_en: "e.g. Original Service Pack Screen",
-    placeholder_price: "السعر ₺",
-    placeholder_badge: "شارة (مثال: الخيار الأفضل)",
-    remove_quality: "حذف",
-    empty_qualities: "لم تتم إضافة خيارات جودة بعد. سيتم اعتماد السعر الأساسي فقط في الموقع.",
+    specs_section_title: "المواصفات الفنية للمنتج",
+    specs_section_sub: "اكتب المواصفات الفنية للمنتج ليتم عرضها بشكل احترافي للزبون في صفحة المنتج",
+    label_specs_ar: "المواصفات (عربي)",
+    label_specs_tr: "المواصفات (تركي)",
+    label_specs_en: "المواصفات (إنجليزي)",
+    placeholder_specs_ar: "مثال: المعالج: A18 Pro | الشاشة: 6.9 بوصة Super Retina XDR OLED | الذاكرة: 256GB | الكاميرا: 48MP",
+    placeholder_specs_tr: "Örn: İşlemci: A18 Pro | Ekran: 6.9 inç OLED | Hafıza: 256 GB | Kamera: 48MP",
+    placeholder_specs_en: "e.g. Processor: A18 Pro | Display: 6.9\" OLED | Storage: 256GB | Camera: 48MP",
+    desc_section_title: "شرح وتفاصيل المنتج (الوصف الشامل)",
+    desc_section_sub: "اكتب شرحاً تفصيلياً يوضح ميزات المنتج، حالته، وفائدته للمستخدم",
+    label_desc_ar: "شرح وتفاصيل المنتج (عربي)",
+    label_desc_tr: "شرح وتفاصيل المنتج (تركي)",
+    label_desc_en: "شرح وتفاصيل المنتج (إنجليزي)",
+    placeholder_desc_ar: "اكتب تفاصيل وشرح المنتج هنا...",
+    placeholder_desc_tr: "Ürün detaylı açıklamasını buraya yazın...",
+    placeholder_desc_en: "Write detailed product description here...",
     popular_checkbox: "موديل مميز / الأكثر طلباً (Popüler)",
     in_stock_checkbox: "القطعة متوفرة بالمخزون حالياً",
     cancel_btn: "إلغاء",
@@ -182,7 +201,7 @@ const dict = {
     th_branch: "Main Branch",
     th_service: "Service / Operation",
     th_base_price: "Starting Price",
-    th_qualities: "Quality Options",
+    th_qualities: "Photos & Specs",
     th_warranty: "Official Warranty",
     th_status: "Status",
     th_actions: "Actions",
@@ -196,12 +215,16 @@ const dict = {
     no_records: "No records found matching your search.",
     modal_edit_title: "Edit Product & Pricing",
     modal_add_title: "Add New Product Pricing",
-    image_section_title: "Product Photo (Optional)",
-    image_section_sub: "Upload product photo or provide an external image URL to display on the pricing list",
-    upload_image_btn: "Upload Photo from Device",
-    uploading_image: "Uploading image...",
+    image_section_title: "Product Photos (Multiple Photos Supported)",
+    image_section_sub: "Upload product photos from your device or paste direct URLs. The first image will be the main cover.",
+    upload_image_btn: "Upload Photos from Device",
+    uploading_image: "Uploading images...",
     remove_image: "Remove Photo",
-    image_url_placeholder: "Or paste image direct URL...",
+    image_url_placeholder: "Paste direct image URL here...",
+    add_image_link_btn: "+ Add Link",
+    main_image_badge: "Main Cover",
+    set_as_main_btn: "Set as Main",
+    no_images_yet: "No images added yet. A default image will be shown on the website.",
     label_main_branch: "Main Branch / Category",
     select_branch_placeholder: "-- Select Main Branch --",
     new_branch_option: "+ Create New Main Branch",
@@ -228,19 +251,22 @@ const dict = {
     placeholder_duration: "e.g. 30 Minutes",
     label_warranty: "Warranty Period",
     placeholder_warranty: "e.g. 6 Months Warranty",
-    quality_section_title: "Part Quality & Price Options",
-    quality_section_sub: "Configure multiple quality options with multilingual names and badges",
-    add_quality_btn: "Add Quality Option +",
-    label_quality_name_ar: "Quality Name (AR)",
-    label_quality_name_tr: "Quality Name (TR)",
-    label_quality_name_en: "Quality Name (EN)",
-    placeholder_quality_ar: "e.g. شاشة وكالة سيرفس أصلية",
-    placeholder_quality_tr: "Örn: Orijinal Servis Ekran",
-    placeholder_quality_en: "e.g. Original Service Pack Screen",
-    placeholder_price: "Price ₺",
-    placeholder_badge: "Badge (e.g. Best Choice)",
-    remove_quality: "Remove",
-    empty_qualities: "No quality options added yet. Only the starting base price will be displayed on the website.",
+    specs_section_title: "Technical Specifications",
+    specs_section_sub: "Enter the technical specifications of the product to display on the product page",
+    label_specs_ar: "Specifications (AR)",
+    label_specs_tr: "Specifications (TR)",
+    label_specs_en: "Specifications (EN)",
+    placeholder_specs_ar: "e.g. Chip: A18 Pro | Display: 6.9\" OLED | Storage: 256GB | Camera: 48MP",
+    placeholder_specs_tr: "Örn: İşlemci: A18 Pro | Ekran: 6.9 inç OLED | Hafıza: 256 GB | Kamera: 48MP",
+    placeholder_specs_en: "e.g. Processor: A18 Pro | Display: 6.9\" OLED | Storage: 256GB | Camera: 48MP",
+    desc_section_title: "Product Description & Details",
+    desc_section_sub: "Write a comprehensive description explaining product features, condition, warranty and benefits",
+    label_desc_ar: "Description (AR)",
+    label_desc_tr: "Description (TR)",
+    label_desc_en: "Description (EN)",
+    placeholder_desc_ar: "Write product description here...",
+    placeholder_desc_tr: "Ürün açıklamasını buraya yazın...",
+    placeholder_desc_en: "Write detailed product description here...",
     popular_checkbox: "Popular / Featured Model",
     in_stock_checkbox: "Part In Stock",
     cancel_btn: "Cancel",
@@ -290,7 +316,7 @@ const dict = {
     th_branch: "Ana Branş",
     th_service: "Hizmet / İşlem",
     th_base_price: "Başlangıç Fiyatı",
-    th_qualities: "Kalite Seçenekleri",
+    th_qualities: "Görseller & Özellikler",
     th_warranty: "Resmi Garanti",
     th_status: "Durum",
     th_actions: "İşlem",
@@ -304,12 +330,16 @@ const dict = {
     no_records: "Aramaya uygun kayıt bulunamadı.",
     modal_edit_title: "Ürün ve Fiyat Düzenle",
     modal_add_title: "Yeni Ürün ve Fiyat Ekle",
-    image_section_title: "Cihaz Görseli (İsteğe Bağlı)",
-    image_section_sub: "Fiyat listesinde cihazın fotoğrafını göstermek için yükleyin veya URL girin",
-    upload_image_btn: "Cihazdan Resim Yükle",
-    uploading_image: "Resim yükleniyor...",
+    image_section_title: "Ürün Fotoğrafları (Çoklu Fotoğraf Desteği)",
+    image_section_sub: "Cihazınızdan ürün fotoğraflarını yükleyin veya doğrudan URL bağlantısı ekleyin. İlk görsel ana kapaktır.",
+    upload_image_btn: "Cihazdan Fotoğraf Yükle",
+    uploading_image: "Fotoğraflar yükleniyor...",
     remove_image: "Görseli Kaldır",
-    image_url_placeholder: "Veya doğrudan resim bağlantısını yapıştırın (URL)...",
+    image_url_placeholder: "Doğrudan görsel bağlantısını (URL) buraya yapıştırın...",
+    add_image_link_btn: "+ Bağlantı Ekle",
+    main_image_badge: "Ana Görsel",
+    set_as_main_btn: "Ana Görsel Yap",
+    no_images_yet: "Henüz görsel eklenmedi. Sitede varsayılan görsel gösterilecektir.",
     label_main_branch: "Ana Branş / Genel Kategori",
     select_branch_placeholder: "-- Ana Branş Seçin --",
     new_branch_option: "+ Yeni Ana Branş Oluştur",
@@ -336,19 +366,22 @@ const dict = {
     placeholder_duration: "Örn: 30 Dakika",
     label_warranty: "Garanti Süresi",
     placeholder_warranty: "Örn: 6 Ay Garanti",
-    quality_section_title: "Parça Kalitesi & Fiyat Seçenekleri",
-    quality_section_sub: "Orijinal Servis, Orijinal Uyarısız, Yan Sanayi vb. seçenekler",
-    add_quality_btn: "Kalite Ekle +",
-    label_quality_name_ar: "Kalite Adı (AR)",
-    label_quality_name_tr: "Kalite Adı (TR)",
-    label_quality_name_en: "Quality Name (EN)",
-    placeholder_quality_ar: "Örn: شاشة وكالة سيرفس أصلية",
-    placeholder_quality_tr: "Örn: Orijinal Servis Ekran",
-    placeholder_quality_en: "e.g. Original Service Pack Screen",
-    placeholder_price: "Fiyat ₺",
-    placeholder_badge: "Rozet (Örn: En Çok Satan)",
-    remove_quality: "Kaldır",
-    empty_qualities: "Henüz kalite seçeneği eklenmedi. Sadece başlangıç fiyatı gösterilecek.",
+    specs_section_title: "Teknik Özellikler",
+    specs_section_sub: "Müşteriye ürün sayfasında gösterilecek teknik özellikleri giriniz",
+    label_specs_ar: "Özellikler (AR)",
+    label_specs_tr: "Özellikler (TR)",
+    label_specs_en: "Özellikler (EN)",
+    placeholder_specs_ar: "مثال: المعالج: A18 Pro | الشاشة: 6.9 بوصة OLED | الذاكرة: 256GB | الكاميرا: 48MP",
+    placeholder_specs_tr: "Örn: İşlemci: A18 Pro | Ekran: 6.9 inç OLED | Hafıza: 256 GB | Kamera: 48MP",
+    placeholder_specs_en: "e.g. Processor: A18 Pro | Display: 6.9\" OLED | Storage: 256GB | Camera: 48MP",
+    desc_section_title: "Ürün Açıklaması ve Detayları",
+    desc_section_sub: "Ürün avantajlarını, durumunu ve garantisini anlatan kapsamlı açıklama yazın",
+    label_desc_ar: "Açıklama (AR)",
+    label_desc_tr: "Açıklama (TR)",
+    label_desc_en: "Açıklama (EN)",
+    placeholder_desc_ar: "اكتب تفاصيل وشرح المنتج هنا...",
+    placeholder_desc_tr: "Ürün detaylı açıklamasını buraya yazın...",
+    placeholder_desc_en: "Write detailed product description here...",
     popular_checkbox: "Popüler / Öne Çıkan Model",
     in_stock_checkbox: "Parça Stokta Var",
     cancel_btn: "İptal",
@@ -433,6 +466,9 @@ export default function AdminPricingPage() {
   const [isEditCatModalOpen, setIsEditCatModalOpen] = useState(false);
   const [uploadingEditCatImage, setUploadingEditCatImage] = useState(false);
   const [uploadingEditCatBanner, setUploadingEditCatBanner] = useState(false);
+  const [newCatTab, setNewCatTab] = useState<'ar' | 'tr' | 'en'>('ar');
+  const [editCatTab, setEditCatTab] = useState<'ar' | 'tr' | 'en'>('ar');
+  const [productTab, setProductTab] = useState<'ar' | 'tr' | 'en'>('ar');
   const [newCat, setNewCat] = useState({
     id: '',
     title_ar: '',
@@ -441,6 +477,9 @@ export default function AdminPricingPage() {
     desc_ar: '',
     desc_tr: '',
     desc_en: '',
+    specs_ar: '',
+    specs_tr: '',
+    specs_en: '',
     image: '',
     banner_image: '',
     banner_title_ar: '',
@@ -467,6 +506,9 @@ export default function AdminPricingPage() {
     specs_tr: '',
     specs_en: '',
     specs_ar: '',
+    description_tr: '',
+    description_en: '',
+    description_ar: '',
     category_name_tr: '',
     category_name_en: '',
     category_name_ar: '',
@@ -477,6 +519,7 @@ export default function AdminPricingPage() {
     service_name_en: '',
     service_name_ar: '',
     base_price: 1000,
+    max_price: 0,
     currency: '₺',
     duration: '30 Dakika',
     warranty: '6 Ay Garanti',
@@ -487,8 +530,14 @@ export default function AdminPricingPage() {
     notes_en: '',
     notes_ar: '',
     image_url: '',
-    quality_options: [] as QualityOption[]
+    images: [] as string[],
+    quality_options: [] as QualityOption[],
+    show_badge: true,
+    badge_text_ar: 'أصلي',
+    badge_text_tr: 'Orijinal',
+    badge_text_en: 'Original'
   });
+  const [manualImageUrl, setManualImageUrl] = useState('');
 
   const router = useRouter();
 
@@ -536,6 +585,9 @@ export default function AdminPricingPage() {
       desc_ar: c.desc_ar || '',
       desc_tr: c.desc_tr || '',
       desc_en: c.desc_en || '',
+      specs_ar: c.specs_ar || '',
+      specs_tr: c.specs_tr || '',
+      specs_en: c.specs_en || '',
     }));
   }, [categoryCards]);
 
@@ -639,6 +691,9 @@ export default function AdminPricingPage() {
       specs_tr: '',
       specs_en: '',
       specs_ar: '',
+      description_tr: '',
+      description_en: '',
+      description_ar: '',
       category_name_tr: firstBranch.name_tr,
       category_name_en: firstBranch.name_en,
       category_name_ar: firstBranch.name_ar,
@@ -649,6 +704,7 @@ export default function AdminPricingPage() {
       service_name_en: '',
       service_name_ar: '',
       base_price: 1000,
+      max_price: 0,
       currency: '₺',
       duration: locale === 'ar' ? '30 دقيقة' : locale === 'en' ? '30 Minutes' : '30 Dakika',
       warranty: locale === 'ar' ? 'ضمان 6 أشهر' : locale === 'en' ? '6 Months Warranty' : '6 Ay Garanti',
@@ -659,8 +715,14 @@ export default function AdminPricingPage() {
       notes_en: '',
       notes_ar: '',
       image_url: '',
-      quality_options: []
+      images: [],
+      quality_options: [],
+      show_badge: true,
+      badge_text_ar: 'أصلي',
+      badge_text_tr: 'Orijinal',
+      badge_text_en: 'Original'
     });
+    setManualImageUrl('');
     setIsModalOpen(true);
   };
 
@@ -688,6 +750,10 @@ export default function AdminPricingPage() {
     const isStandardPart = defaultPartTypes.some(p => p.slug.toLowerCase() === partType.toLowerCase());
     setIsCustomPartType(!isStandardPart && Boolean(partType));
 
+    const existingImages: string[] = Array.isArray(item.images) && item.images.length > 0
+      ? item.images
+      : (item.image_url ? [item.image_url] : []);
+
     setForm({
       brand: item.brand,
       device_type: item.device_type || 'phone',
@@ -696,6 +762,9 @@ export default function AdminPricingPage() {
       specs_tr: item.specs_tr || '',
       specs_en: item.specs_en || '',
       specs_ar: item.specs_ar || '',
+      description_tr: item.description_tr || item.notes_tr || '',
+      description_en: item.description_en || item.notes_en || '',
+      description_ar: item.description_ar || item.notes_ar || '',
       category_name_tr: item.category_name_tr || '',
       category_name_en: item.category_name_en || '',
       category_name_ar: item.category_name_ar || '',
@@ -706,6 +775,7 @@ export default function AdminPricingPage() {
       service_name_en: item.service_name_en,
       service_name_ar: item.service_name_ar || '',
       base_price: item.base_price,
+      max_price: item.max_price || 0,
       currency: item.currency,
       duration: item.duration,
       warranty: item.warranty,
@@ -715,48 +785,130 @@ export default function AdminPricingPage() {
       notes_tr: item.notes_tr || '',
       notes_en: item.notes_en || '',
       notes_ar: item.notes_ar || '',
-      image_url: item.image_url || '',
-      quality_options: Array.isArray(item.quality_options) && item.quality_options.length > 0 
-        ? item.quality_options.map(q => ({
-            quality_tr: q.quality_tr || '',
-            quality_en: q.quality_en || '',
-            quality_ar: q.quality_ar || '',
-            price: q.price || 0,
-            badge: q.badge || '',
-            available: q.available ?? true
-          }))
-        : []
+      image_url: existingImages[0] || item.image_url || '',
+      images: existingImages,
+      quality_options: [],
+      show_badge: item.show_badge !== false && (item as any).show_badge !== 0,
+      badge_text_ar: item.badge_text_ar ?? 'أصلي',
+      badge_text_tr: item.badge_text_tr ?? 'Orijinal',
+      badge_text_en: item.badge_text_en ?? 'Original'
     });
+    setManualImageUrl('');
     setIsModalOpen(true);
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
     const token = localStorage.getItem('token');
-    const formData = new FormData();
-    formData.append('image', file);
-
     setUploadingImage(true);
     try {
-      const res = await axios.post<{ url: string }>(`${API_BASE}/upload`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`
+      let uploadedUrls: string[] = [];
+
+      // Try batch upload endpoint if multiple
+      if (files.length > 1) {
+        try {
+          const batchData = new FormData();
+          files.forEach(f => batchData.append('images', f));
+          const res = await axios.post<{ urls: string[] }>(`${API_BASE}/upload/multiple`, batchData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              Authorization: `Bearer ${token}`
+            }
+          });
+          if (Array.isArray(res.data?.urls) && res.data.urls.length > 0) {
+            uploadedUrls = res.data.urls;
+          }
+        } catch (mErr) {
+          console.warn('Batch upload failed, falling back to individual uploads', mErr);
         }
-      });
-      if (res.data?.url) {
-        setForm(prev => ({ ...prev, image_url: res.data.url }));
-        toast.success(locale === 'ar' ? 'تم رفع صورة الجهاز بنجاح!' : locale === 'en' ? 'Device image uploaded successfully!' : 'Cihaz görseli başarıyla yüklendi!');
+      }
+
+      // Individual upload fallback
+      if (uploadedUrls.length === 0) {
+        for (const file of files) {
+          const formData = new FormData();
+          formData.append('image', file);
+          const res = await axios.post<{ url: string }>(`${API_BASE}/upload`, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              Authorization: `Bearer ${token}`
+            }
+          });
+          if (res.data?.url) {
+            uploadedUrls.push(res.data.url);
+          }
+        }
+      }
+
+      if (uploadedUrls.length > 0) {
+        setForm(prev => {
+          const updated = [...(prev.images || []), ...uploadedUrls];
+          return {
+            ...prev,
+            images: updated,
+            image_url: updated[0] || prev.image_url || ''
+          };
+        });
+        toast.success(
+          locale === 'ar' 
+            ? `تم رفع ${uploadedUrls.length} صورة بنجاح!` 
+            : locale === 'en' 
+              ? `${uploadedUrls.length} image(s) uploaded successfully!` 
+              : `${uploadedUrls.length} resim başarıyla yüklendi!`
+        );
       }
     } catch (err) {
       console.error('Upload error:', err);
-      toast.error(locale === 'ar' ? 'فشل رفع الصورة' : locale === 'en' ? 'Upload failed' : 'Resim yükleme başarısız');
+      toast.error(locale === 'ar' ? 'فشل رفع الصور' : locale === 'en' ? 'Upload failed' : 'Resim yükleme başarısız');
     } finally {
       setUploadingImage(false);
       e.target.value = '';
     }
+  };
+
+  const handleAddManualImage = () => {
+    if (!manualImageUrl.trim()) return;
+    const url = manualImageUrl.trim();
+    setForm(prev => {
+      const updated = [...(prev.images || []), url];
+      return {
+        ...prev,
+        images: updated,
+        image_url: updated[0] || url
+      };
+    });
+    setManualImageUrl('');
+    toast.success(locale === 'ar' ? 'تمت إضافة رابط الصورة بنجاح' : locale === 'en' ? 'Image link added' : 'Resim bağlantısı eklendi');
+  };
+
+  const handleRemoveImageAtIndex = (idx: number) => {
+    setForm(prev => {
+      const updated = [...(prev.images || [])];
+      updated.splice(idx, 1);
+      return {
+        ...prev,
+        images: updated,
+        image_url: updated[0] || ''
+      };
+    });
+  };
+
+  const handleSetMainCoverImage = (idx: number) => {
+    setForm(prev => {
+      const updated = [...(prev.images || [])];
+      const [chosen] = updated.splice(idx, 1);
+      if (chosen) {
+        updated.unshift(chosen);
+      }
+      return {
+        ...prev,
+        images: updated,
+        image_url: updated[0] || ''
+      };
+    });
+    toast.success(locale === 'ar' ? 'تم تعيين هذه الصورة كغلاف رئيسي' : locale === 'en' ? 'Set as main cover image' : 'Ana görsel olarak ayarlandı');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -803,8 +955,23 @@ export default function AdminPricingPage() {
         .replace(/^-+|-+$/g, '') || `item-${Date.now()}`;
     }
 
+    const determinedItemType = form.item_type || (branchSlug === 'aksesuar' ? 'aksesuar' : branchSlug === 'yedek_parca' ? 'yedek_parca' : 'cihaz');
+
     const payload = {
       ...form,
+      item_type: determinedItemType,
+      part_type: form.part_type || 'ekran',
+      max_price: form.max_price && form.max_price > 0 ? form.max_price : null,
+      specs_ar: form.specs_ar || '',
+      specs_tr: form.specs_tr || '',
+      specs_en: form.specs_en || '',
+      description_ar: form.description_ar || form.specs_ar || '',
+      description_tr: form.description_tr || form.specs_tr || '',
+      description_en: form.description_en || form.specs_en || '',
+      show_badge: form.show_badge ?? true,
+      badge_text_ar: form.badge_text_ar || '',
+      badge_text_tr: form.badge_text_tr || '',
+      badge_text_en: form.badge_text_en || '',
       brand: brandName,
       series: seriesName,
       model_name: modelName,
@@ -917,38 +1084,6 @@ export default function AdminPricingPage() {
     } finally {
       setActionLoading(false);
     }
-  };
-
-  // Quality option helpers
-  const handleAddQuality = () => {
-    setForm(prev => ({
-      ...prev,
-      quality_options: [
-        ...prev.quality_options,
-        { 
-          quality_ar: 'شاشة وكالة سيرفس أصلية', 
-          quality_tr: 'Yeni Kalite Seçeneği', 
-          quality_en: 'New Quality Option', 
-          price: prev.base_price, 
-          badge: '' 
-        }
-      ]
-    }));
-  };
-
-  const handleRemoveQuality = (idx: number) => {
-    setForm(prev => ({
-      ...prev,
-      quality_options: prev.quality_options.filter((_, i) => i !== idx)
-    }));
-  };
-
-  const handleUpdateQuality = (idx: number, field: keyof QualityOption, value: any) => {
-    setForm(prev => {
-      const updated = [...prev.quality_options];
-      updated[idx] = { ...updated[idx], [field]: value };
-      return { ...prev, quality_options: updated };
-    });
   };
 
   // Helper localization for series
@@ -1111,28 +1246,33 @@ export default function AdminPricingPage() {
       const base = (newCat.title_en || newCat.title_tr || '').trim().toLowerCase().replace(/[^a-z0-9_]+/g, '_');
       idClean = base || `cat_${Date.now()}`;
     }
-    const catImage = newCat.image || '/images/phones-category.jpg';
-    const catBanner = newCat.banner_image || catImage || '/images/phones-banner.jpg';
+    const catBanner = (newCat.banner_image || newCat.image || '').trim() || '/images/phones-banner.jpg';
+    const catDescAr = newCat.desc_ar.trim();
+    const catDescTr = newCat.desc_tr.trim() || catDescAr;
+    const catDescEn = newCat.desc_en.trim() || catDescAr;
 
     const newItem = {
       id: idClean,
       title_ar: arTitle,
       title_tr: newCat.title_tr.trim() || arTitle,
       title_en: newCat.title_en.trim() || arTitle,
-      desc_ar: newCat.desc_ar.trim() || '',
-      desc_tr: newCat.desc_tr.trim() || '',
-      desc_en: newCat.desc_en.trim() || '',
-      image: catImage,
+      desc_ar: catDescAr,
+      desc_tr: catDescTr,
+      desc_en: catDescEn,
+      specs_ar: newCat.specs_ar || '',
+      specs_tr: newCat.specs_tr || '',
+      specs_en: newCat.specs_en || '',
+      image: catBanner,
       banner_image: catBanner,
-      banner_title_ar: newCat.banner_title_ar.trim() || arTitle,
-      banner_title_tr: newCat.banner_title_tr.trim() || newCat.title_tr.trim() || arTitle,
-      banner_title_en: newCat.banner_title_en.trim() || newCat.title_en.trim() || arTitle,
-      banner_desc_ar: newCat.banner_desc_ar.trim() || newCat.desc_ar.trim() || '',
-      banner_desc_tr: newCat.banner_desc_tr.trim() || newCat.desc_tr.trim() || '',
-      banner_desc_en: newCat.banner_desc_en.trim() || newCat.desc_en.trim() || '',
-      banner_cta_ar: newCat.banner_cta_ar.trim() || 'استعراض منتجات القسم',
-      banner_cta_tr: newCat.banner_cta_tr.trim() || 'Ürünleri İncele',
-      banner_cta_en: newCat.banner_cta_en.trim() || 'Explore Products',
+      banner_title_ar: newCat.banner_title_ar || '',
+      banner_title_tr: newCat.banner_title_tr || '',
+      banner_title_en: newCat.banner_title_en || '',
+      banner_desc_ar: newCat.banner_desc_ar || '',
+      banner_desc_tr: newCat.banner_desc_tr || '',
+      banner_desc_en: newCat.banner_desc_en || '',
+      banner_cta_ar: newCat.banner_cta_ar || '',
+      banner_cta_tr: newCat.banner_cta_tr || '',
+      banner_cta_en: newCat.banner_cta_en || '',
     };
 
     const updatedList = [...categoryCards, newItem];
@@ -1168,6 +1308,9 @@ export default function AdminPricingPage() {
       desc_ar: '',
       desc_tr: '',
       desc_en: '',
+      specs_ar: '',
+      specs_tr: '',
+      specs_en: '',
       image: '',
       banner_image: '',
       banner_title_ar: '',
@@ -1208,6 +1351,9 @@ export default function AdminPricingPage() {
       desc_ar: cat.desc_ar || '',
       desc_tr: cat.desc_tr || '',
       desc_en: cat.desc_en || '',
+      specs_ar: cat.specs_ar || '',
+      specs_tr: cat.specs_tr || '',
+      specs_en: cat.specs_en || '',
       image: cat.image || '',
       banner_image: cat.banner_image || cat.image || '',
       banner_title_ar: cat.banner_title_ar || '',
@@ -1220,6 +1366,7 @@ export default function AdminPricingPage() {
       banner_cta_tr: cat.banner_cta_tr || 'Ürünleri İncele',
       banner_cta_en: cat.banner_cta_en || 'Explore Products',
     });
+    setEditCatTab('ar');
     setIsEditCatModalOpen(true);
   };
 
@@ -1277,7 +1424,36 @@ export default function AdminPricingPage() {
       return;
     }
 
-    const updatedList = categoryCards.map(c => c.id === editingCat.id ? { ...c, ...editingCat } : c);
+    const catBanner = (editingCat.banner_image || editingCat.image || '').trim() || '/images/phones-banner.jpg';
+    const catDescAr = (editingCat.desc_ar || '').trim();
+    const catDescTr = (editingCat.desc_tr || '').trim() || catDescAr;
+    const catDescEn = (editingCat.desc_en || '').trim() || catDescAr;
+
+    const updatedCat = {
+      ...editingCat,
+      title_ar: arTitle,
+      title_tr: editingCat.title_tr?.trim() || arTitle,
+      title_en: editingCat.title_en?.trim() || arTitle,
+      desc_ar: catDescAr,
+      desc_tr: catDescTr,
+      desc_en: catDescEn,
+      specs_ar: editingCat.specs_ar || '',
+      specs_tr: editingCat.specs_tr || '',
+      specs_en: editingCat.specs_en || '',
+      image: catBanner,
+      banner_image: catBanner,
+      banner_title_ar: editingCat.banner_title_ar || '',
+      banner_title_tr: editingCat.banner_title_tr || '',
+      banner_title_en: editingCat.banner_title_en || '',
+      banner_desc_ar: editingCat.banner_desc_ar || '',
+      banner_desc_tr: editingCat.banner_desc_tr || '',
+      banner_desc_en: editingCat.banner_desc_en || '',
+      banner_cta_ar: editingCat.banner_cta_ar || '',
+      banner_cta_tr: editingCat.banner_cta_tr || '',
+      banner_cta_en: editingCat.banner_cta_en || '',
+    };
+
+    const updatedList = categoryCards.map(c => c.id === editingCat.id ? updatedCat : c);
     setCategoryCards(updatedList);
 
     const token = localStorage.getItem('token');
@@ -1964,6 +2140,11 @@ export default function AdminPricingPage() {
                                   {d.popular_badge}
                                 </span>
                               )}
+                              {item.show_badge !== false && (item.badge_text_ar || item.badge_text_tr || item.badge_text_en) && (
+                                <span className="text-[9px] bg-linear-to-r from-rose-600 to-[#E11D48] text-white border border-rose-500/30 px-1.5 py-0.5 rounded font-black uppercase shrink-0 shadow-2xs flex items-center">
+                                  <span>{locale === 'ar' ? (item.badge_text_ar || item.badge_text_tr) : locale === 'en' ? (item.badge_text_en || item.badge_text_tr) : (item.badge_text_tr || item.badge_text_ar)}</span>
+                                </span>
+                              )}
                             </div>
                             <div className="text-[11px] text-muted-foreground font-semibold flex items-center gap-1.5 flex-wrap">
                               <span>{getLocalizedSeries(item.series)}</span>
@@ -2010,29 +2191,49 @@ export default function AdminPricingPage() {
                         {serviceName}
                       </td>
                       <td className="py-3 px-4">
-                        <span className="font-black text-sm text-primary">
-                          {item.base_price.toLocaleString('tr-TR')} {item.currency}
+                        <span className="font-black text-sm text-primary whitespace-nowrap">
+                          {item.max_price && item.max_price > item.base_price
+                            ? `${item.base_price.toLocaleString('tr-TR')} - ${item.max_price.toLocaleString('tr-TR')} ${item.currency}`
+                            : `${item.base_price.toLocaleString('tr-TR')} ${item.currency}`}
                         </span>
                       </td>
                       <td className="py-3 px-4">
-                        {Array.isArray(item.quality_options) && item.quality_options.length > 0 ? (
-                          <div className="flex flex-wrap gap-1 max-w-[240px]">
-                            {item.quality_options.map((q, idx) => {
-                              const qName = locale === 'ar' ? (q.quality_ar || q.quality_tr) : locale === 'en' ? (q.quality_en || q.quality_tr) : q.quality_tr;
-                              return (
-                                <span 
-                                  key={idx} 
-                                  className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-muted/60 border text-foreground/80"
-                                  title={`${qName}: ${q.price} ₺`}
-                                >
-                                  {qName}: <b className="text-primary">{q.price} ₺</b>
-                                </span>
-                              );
-                            })}
+                        <div className="space-y-1 max-w-[240px]">
+                          {/* Photo count indicator */}
+                          <div className="flex items-center gap-1.5">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20">
+                              <ImageIcon size={11} />
+                              <span>
+                                {item.images && item.images.length > 0
+                                  ? `${item.images.length} ${locale === 'ar' ? 'صور' : locale === 'en' ? 'Photos' : 'Görsel'}`
+                                  : item.image_url 
+                                    ? `1 ${locale === 'ar' ? 'صورة' : locale === 'en' ? 'Photo' : 'Görsel'}`
+                                    : (locale === 'ar' ? 'بدون صور' : 'Görselsiz')}
+                              </span>
+                            </span>
                           </div>
-                        ) : (
-                          <span className="text-muted-foreground text-[10px] italic">{d.single_price}</span>
-                        )}
+
+                          {/* Specs text preview */}
+                          {(item.specs_ar || item.specs_tr || item.specs_en) ? (
+                            <p 
+                              className="text-[10px] text-muted-foreground font-medium truncate line-clamp-1"
+                              title={locale === 'ar' ? (item.specs_ar || item.specs_tr || '') : locale === 'en' ? (item.specs_en || item.specs_tr || '') : (item.specs_tr || item.specs_ar || '')}
+                            >
+                              {locale === 'ar' ? (item.specs_ar || item.specs_tr) : locale === 'en' ? (item.specs_en || item.specs_tr) : (item.specs_tr || item.specs_ar)}
+                            </p>
+                          ) : (item.description_ar || item.description_tr || item.description_en) ? (
+                            <p 
+                              className="text-[10px] text-muted-foreground/70 italic truncate line-clamp-1"
+                              title={locale === 'ar' ? (item.description_ar || item.description_tr || '') : (item.description_tr || item.description_ar || '')}
+                            >
+                              {locale === 'ar' ? (item.description_ar || item.description_tr) : (item.description_tr || item.description_ar)}
+                            </p>
+                          ) : (
+                            <span className="text-[10px] text-muted-foreground/50 italic">
+                              {locale === 'ar' ? 'لا توجد مواصفات' : locale === 'en' ? 'No specs' : 'Özellik yok'}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="py-3 px-4 whitespace-nowrap">
                         <span className="inline-flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-1 rounded-md border border-emerald-500/20">
@@ -2161,132 +2362,75 @@ export default function AdminPricingPage() {
   )}
 
       {/* Modal for Add / Edit */}
+      {/* Modal for Add / Edit Product */}
       <AnimatePresence>
         {isModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-card w-full max-w-2xl rounded-md border shadow-2xl overflow-hidden my-8"
+              exit={{ opacity: 0, scale: 0.96 }}
+              className="bg-card w-full max-w-4xl rounded-2xl border shadow-2xl overflow-hidden my-6"
               dir={locale === 'ar' ? 'rtl' : 'ltr'}
             >
-              <div className="flex items-center justify-between px-6 py-4 border-b bg-muted/20">
-                <h3 className="font-black text-base uppercase flex items-center gap-2">
-                  <Wrench size={18} className="text-primary" />
-                  <span>{editingItem ? d.modal_edit_title : d.modal_add_title}</span>
-                </h3>
+              {/* Clean Modal Header */}
+              <div className="flex items-center justify-between px-7 py-5 border-b bg-muted/10">
+                <div>
+                  <h3 className="font-black text-lg text-foreground tracking-tight">
+                    {editingItem 
+                      ? (locale === 'ar' ? 'تعديل بيانات المنتج' : d.modal_edit_title) 
+                      : (locale === 'ar' ? 'إضافة منتج جديد' : d.modal_add_title)}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5 font-medium">
+                    {editingItem 
+                      ? (locale === 'ar' ? 'قم بتحديث أسعار ومعلومات ومواصفات المنتج' : 'Ürün fiyat ve bilgilerini güncelleyin') 
+                      : (locale === 'ar' ? 'أدخل تفاصيل ومواصفات وأسعار المنتج الجديد' : 'Yeni ürünün detaylarını ve fiyatlarını girin')}
+                  </p>
+                </div>
                 <button
+                  type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="p-1.5 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground cursor-pointer"
+                  className="p-2 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
                 >
-                  <X size={18} />
+                  <X size={20} />
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
-                {/* 1. PRODUCT IMAGE UPLOAD SECTION */}
-                <div className="p-4 rounded-md border bg-muted/20 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-xs font-black uppercase tracking-wider flex items-center gap-2">
-                        <ImageIcon size={15} className="text-primary" />
-                        <span>{locale === 'ar' ? 'صورة المنتج' : d.image_section_title}</span>
-                      </h4>
-                      <p className="text-[10px] text-muted-foreground">
-                        {locale === 'ar' ? 'ارفع صورة المنتج مباشرة من جهازك أو الصق رابط الصورة' : d.image_section_sub}
-                      </p>
-                    </div>
+              <form onSubmit={handleSubmit} className="p-7 space-y-6 max-h-[82vh] overflow-y-auto">
+                {/* 1. BASIC DETAILS & PRICING */}
+                <div className="rounded-xl border border-border/70 bg-muted/10 p-5 space-y-4">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-foreground">
+                    {locale === 'ar' ? 'البيانات الأساسية والأسعار' : 'Temel Bilgiler ve Fiyatlar'}
+                  </h4>
 
-                    <input 
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleImageUpload}
-                      accept="image/*"
-                      className="hidden"
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploadingImage}
-                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition-all cursor-pointer border border-primary/20"
-                    >
-                      <Upload size={14} className={cn(uploadingImage && "animate-spin")} />
-                      <span>{uploadingImage ? d.uploading_image : (locale === 'ar' ? 'رفع صورة من جهازك' : d.upload_image_btn)}</span>
-                    </button>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    {form.image_url ? (
-                      <div className="relative w-16 h-16 rounded-md border bg-background p-1 shrink-0 flex items-center justify-center group shadow-xs">
-                        <img 
-                          src={form.image_url} 
-                          alt="Product preview" 
-                          className="w-full h-full object-contain"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setForm(prev => ({ ...prev, image_url: '' }))}
-                          className="absolute -top-1.5 -right-1.5 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-xs"
-                          title={d.remove_image}
-                        >
-                          <X size={11} />
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="w-16 h-16 rounded-md border border-dashed border-border/80 bg-background/50 flex flex-col items-center justify-center text-muted-foreground/60 shrink-0">
-                        <Smartphone size={20} />
-                        <span className="text-[8px] uppercase mt-1">لا توجد صورة</span>
-                      </div>
-                    )}
-
-                    <div className="flex-1">
-                      <input
-                        value={form.image_url}
-                        onChange={(e) => setForm(prev => ({ ...prev, image_url: e.target.value }))}
-                        placeholder={locale === 'ar' ? 'أو الصق رابط صورة المنتج مباشرة هنا (URL)...' : d.image_url_placeholder}
-                        className="w-full px-3 py-2 rounded-md border bg-background text-xs font-medium"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* 2. ESSENTIAL PRODUCT DETAILS (CHILD-FRIENDLY & INTUITIVE) */}
-                <div className="space-y-4">
-                  {/* Product Name (Field 1 - Top Priority) */}
+                  {/* Product Name */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-black uppercase text-foreground flex items-center justify-between">
-                      <span>{locale === 'ar' ? 'اسم المنتج أو الموديل *' : d.label_model}</span>
-                      <span className="text-[10px] text-muted-foreground font-semibold">
-                        {locale === 'ar' ? 'اكتب الاسم بوضوح كما تريد أن يظهر للزبون' : ''}
-                      </span>
+                    <label className="text-xs font-black text-foreground block">
+                      {locale === 'ar' ? 'اسم المنتج أو الموديل *' : d.label_model}
                     </label>
                     <input
                       value={form.model_name}
                       onChange={(e) => setForm(prev => ({ ...prev, model_name: e.target.value }))}
                       placeholder={locale === 'ar' ? 'مثال: iPhone 16 Pro Max 256GB أو شاشة سامسونج S24 أصلية' : d.placeholder_model}
-                      className="w-full px-3.5 py-2.5 rounded-md border bg-background text-sm font-black focus:border-primary outline-hidden shadow-xs"
+                      className="w-full px-3.5 py-2.5 rounded-lg border bg-background text-sm font-bold focus:border-primary outline-hidden shadow-xs"
                       required
                     />
                   </div>
 
-                  {/* Category & Brand in One Row */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Category & Brand */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Category Dropdown with [+ قسم جديد] */}
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between">
-                        <label className="text-xs font-black uppercase text-foreground flex items-center gap-1.5">
-                          <Layers size={13} className="text-primary" />
-                          <span>{locale === 'ar' ? 'قسم المتجر' : d.label_main_branch}</span>
+                        <label className="text-xs font-black text-foreground">
+                          {locale === 'ar' ? 'قسم المتجر *' : d.label_main_branch}
                         </label>
                         <button
                           type="button"
                           onClick={() => setIsNewCatModalOpen(true)}
-                          className="text-[10px] text-primary hover:underline font-bold flex items-center gap-0.5 cursor-pointer"
+                          className="text-xs text-primary hover:underline font-bold cursor-pointer"
                         >
-                          <Plus size={11} />
-                          <span>{locale === 'ar' ? 'قسم جديد +' : 'Yeni Kategori +'}</span>
+                          {locale === 'ar' ? '+ قسم جديد' : '+ Yeni Kategori'}
                         </button>
                       </div>
                       <select
@@ -2303,7 +2447,7 @@ export default function AdminPricingPage() {
                             }));
                           }
                         }}
-                        className="w-full px-3 py-2 rounded-md border bg-background text-xs font-bold outline-hidden focus:border-primary cursor-pointer shadow-xs"
+                        className="w-full px-3.5 py-2.5 rounded-lg border bg-background text-xs font-bold outline-hidden focus:border-primary cursor-pointer shadow-xs"
                       >
                         {availableBranches.map((b) => (
                           <option key={b.slug} value={b.slug}>
@@ -2313,30 +2457,30 @@ export default function AdminPricingPage() {
                       </select>
                     </div>
 
-                    {/* Brand with Quick Suggestions */}
+                    {/* Brand Input & Quick Suggestions */}
                     <div className="space-y-1.5">
-                      <label className="text-xs font-black uppercase text-foreground">
-                        {locale === 'ar' ? 'الماركة / الشركة' : d.label_brand}
+                      <label className="text-xs font-black text-foreground block">
+                        {locale === 'ar' ? 'الماركة / الشركة *' : d.label_brand}
                       </label>
                       <input
                         value={form.brand}
                         onChange={(e) => setForm(prev => ({ ...prev, brand: e.target.value }))}
                         placeholder={locale === 'ar' ? 'مثال: Apple, Samsung, Xiaomi' : d.placeholder_brand}
-                        className="w-full px-3 py-2 rounded-md border bg-background text-xs font-bold outline-hidden focus:border-primary shadow-xs"
+                        className="w-full px-3.5 py-2.5 rounded-lg border bg-background text-xs font-bold outline-hidden focus:border-primary shadow-xs"
                         required
                       />
-                      {/* Quick Click Brand Pills */}
-                      <div className="flex flex-wrap gap-1 pt-0.5">
-                        {['Apple', 'Samsung', 'Xiaomi', 'Dyson', 'Roborock', 'Huawei', 'Asus', 'HP', 'Dell', 'Sony'].map(b => (
+                      {/* Subtle Quick Brand Chips */}
+                      <div className="flex flex-wrap gap-1 pt-1">
+                        {['Apple', 'Samsung', 'Xiaomi', 'Dyson', 'Roborock', 'Huawei', 'Asus', 'HP'].map(b => (
                           <button
                             key={b}
                             type="button"
                             onClick={() => setForm(prev => ({ ...prev, brand: b }))}
                             className={cn(
-                              "text-[9px] font-bold px-2 py-0.5 rounded-md border transition-all cursor-pointer",
+                              "text-[10px] font-bold px-2 py-0.5 rounded-md border transition-all cursor-pointer",
                               form.brand.toLowerCase() === b.toLowerCase()
                                 ? "bg-primary text-primary-foreground border-primary"
-                                : "bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground"
+                                : "bg-background hover:bg-muted text-muted-foreground hover:text-foreground"
                             )}
                           >
                             {b}
@@ -2346,117 +2490,18 @@ export default function AdminPricingPage() {
                     </div>
                   </div>
 
-                  {/* Item Type (4 Simple Buttons) */}
-                  <div className="p-3.5 bg-muted/20 border rounded-md space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-black uppercase text-foreground">
-                        {locale === 'ar' ? 'نوع المعروض والنشاط' : 'Ürün / İşlem Türü'}
-                      </label>
-                      <span className="text-[10px] text-muted-foreground font-semibold">
-                        {locale === 'ar' ? 'اختر نوع المعروض لتصنيفه في المتجر' : ''}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                      {[
-                        { id: 'cihaz', label: locale === 'ar' ? 'جهاز للبيع' : 'Cihaz (Satış)' },
-                        { id: 'yedek_parca', label: locale === 'ar' ? 'قطعة غيار' : 'Yedek Parça' },
-                        { id: 'aksesuar', label: locale === 'ar' ? 'إكسسوار' : 'Aksesuar' },
-                        { id: 'servis', label: locale === 'ar' ? 'خدمة صيانة' : 'Tamir Servisi' },
-                      ].map((t) => (
-                        <button
-                          key={t.id}
-                          type="button"
-                          onClick={() => setForm(prev => ({ ...prev, item_type: t.id as any }))}
-                          className={cn(
-                            "py-2.5 px-2 rounded-md text-xs font-black border transition-all cursor-pointer text-center",
-                            form.item_type === t.id
-                              ? "bg-primary text-primary-foreground border-primary shadow-xs"
-                              : "bg-background hover:bg-muted text-muted-foreground border-border"
-                          )}
-                        >
-                          {t.label}
-                        </button>
-                      ))}
-                    </div>
-
-                    {/* If Yedek Parça is chosen: dynamic select or custom new part type */}
-                    {form.item_type === 'yedek_parca' && (
-                      <div className="pt-2 border-t border-border/50 space-y-2 animate-in fade-in duration-150">
-                        <label className="text-[10px] font-black uppercase text-muted-foreground block">
-                          {locale === 'ar' ? 'نوع قطعة الغيار (شاشة، بطارية، كاميرا...)' : 'Yedek Parça Türü'}
-                        </label>
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                          {!isCustomPartType ? (
-                            <select
-                              value={form.part_type || 'ekran'}
-                              onChange={(e) => {
-                                if (e.target.value === 'custom_new') {
-                                  setIsCustomPartType(true);
-                                  setForm(prev => ({ ...prev, part_type: '' }));
-                                } else {
-                                  setForm(prev => ({ ...prev, part_type: e.target.value }));
-                                }
-                              }}
-                              className="flex-1 px-3 py-2 rounded-md border bg-background text-xs font-bold outline-hidden cursor-pointer"
-                            >
-                              <optgroup label={locale === 'ar' ? 'الأنواع الشائعة' : 'Yaygın Parça Türleri'}>
-                                {availablePartTypes.map(p => (
-                                  <option key={p.slug} value={p.slug}>{p.label}</option>
-                                ))}
-                              </optgroup>
-                              <option value="custom_new" className="font-black text-primary">
-                                {locale === 'ar' ? '+ كتابة نوع مخصص جديد...' : '+ Yeni Parça Türü Yaz...'}
-                              </option>
-                            </select>
-                          ) : (
-                            <input
-                              value={form.part_type}
-                              onChange={(e) => setForm(prev => ({ ...prev, part_type: e.target.value }))}
-                              placeholder={locale === 'ar' ? 'اكتب اسم نوع القطعة (مثال: حساس بصمة، مروحة تبريد...)' : 'Parça türü adını yazın...'}
-                              className="flex-1 px-3 py-2 rounded-md border bg-background text-xs font-bold outline-hidden focus:border-primary"
-                              autoFocus
-                            />
-                          )}
-
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const next = !isCustomPartType;
-                              setIsCustomPartType(next);
-                              if (next && !form.part_type) {
-                                setForm(prev => ({ ...prev, part_type: '' }));
-                              } else if (!next && !form.part_type) {
-                                setForm(prev => ({ ...prev, part_type: 'ekran' }));
-                              }
-                            }}
-                            className={cn(
-                              "px-3 py-2 rounded-md text-xs font-bold border transition-all cursor-pointer whitespace-nowrap flex items-center justify-center gap-1",
-                              isCustomPartType 
-                                ? "bg-primary text-primary-foreground border-primary" 
-                                : "bg-background hover:bg-muted text-muted-foreground"
-                            )}
-                          >
-                            <Plus size={13} />
-                            <span>{isCustomPartType ? (locale === 'ar' ? 'القائمة الجاهزة' : 'Listeye Dön') : (locale === 'ar' ? 'نوع مخصص' : 'Özel Tür')}</span>
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Price & Warranty & Duration */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {/* Pricing & Duration Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-black uppercase text-foreground">
-                        {locale === 'ar' ? 'السعر الأساسي (₺) *' : d.label_base_price}
+                      <label className="text-xs font-black text-foreground block">
+                        {locale === 'ar' ? 'السعر الأساسي (من) ₺ *' : 'Temel Fiyat ₺ *'}
                       </label>
                       <div className="relative">
                         <input
                           type="number"
                           value={form.base_price}
                           onChange={(e) => setForm(prev => ({ ...prev, base_price: parseFloat(e.target.value) || 0 }))}
-                          className="w-full px-3 py-2 rounded-md border bg-background text-sm font-black text-primary outline-hidden focus:border-primary shadow-xs"
+                          className="w-full px-3 py-2 rounded-lg border bg-background text-sm font-black text-primary outline-hidden focus:border-primary shadow-xs"
                           required
                         />
                         <span className="absolute left-3 rtl:left-auto rtl:right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">
@@ -2466,38 +2511,56 @@ export default function AdminPricingPage() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-black uppercase text-foreground">
+                      <label className="text-xs font-black text-foreground block">
+                        {locale === 'ar' ? 'السعر حتى (إلى) ₺' : 'Maksimum Fiyat ₺'}
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          value={form.max_price || ''}
+                          onChange={(e) => setForm(prev => ({ ...prev, max_price: parseFloat(e.target.value) || 0 }))}
+                          placeholder={locale === 'ar' ? 'اختياري' : 'İsteğe bağlı'}
+                          className="w-full px-3 py-2 rounded-lg border bg-background text-sm font-black text-primary outline-hidden focus:border-primary shadow-xs"
+                        />
+                        <span className="absolute left-3 rtl:left-auto rtl:right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">
+                          ₺
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-black text-foreground block">
                         {locale === 'ar' ? 'مدة الضمان' : d.label_warranty}
                       </label>
                       <input
                         value={form.warranty}
                         onChange={(e) => setForm(prev => ({ ...prev, warranty: e.target.value }))}
                         placeholder={locale === 'ar' ? 'مثال: ضمان 6 أشهر' : d.placeholder_warranty}
-                        className="w-full px-3 py-2 rounded-md border bg-background text-xs font-bold outline-hidden focus:border-primary shadow-xs"
+                        className="w-full px-3 py-2 rounded-lg border bg-background text-xs font-bold outline-hidden focus:border-primary shadow-xs"
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-black uppercase text-foreground">
-                        {locale === 'ar' ? 'مدة التركيب / الصيانة' : d.label_duration}
+                      <label className="text-xs font-black text-foreground block">
+                        {locale === 'ar' ? 'مدة التركيب / الشحن' : d.label_duration}
                       </label>
                       <input
                         value={form.duration}
                         onChange={(e) => setForm(prev => ({ ...prev, duration: e.target.value }))}
                         placeholder={locale === 'ar' ? 'مثال: 30 دقيقة' : d.placeholder_duration}
-                        className="w-full px-3 py-2 rounded-md border bg-background text-xs font-bold outline-hidden focus:border-primary shadow-xs"
+                        className="w-full px-3 py-2 rounded-lg border bg-background text-xs font-bold outline-hidden focus:border-primary shadow-xs"
                       />
                     </div>
                   </div>
 
-                  {/* Stock and Popularity Toggles */}
-                  <div className="flex flex-wrap items-center gap-4 p-3 bg-muted/20 border rounded-md">
+                  {/* Stock & Popular Toggles */}
+                  <div className="flex flex-wrap items-center gap-6 pt-2 border-t border-border/60">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={form.in_stock}
                         onChange={(e) => setForm(prev => ({ ...prev, in_stock: e.target.checked }))}
-                        className="w-4 h-4 rounded text-primary focus:ring-primary/20 accent-primary"
+                        className="w-4 h-4 rounded text-primary accent-primary cursor-pointer"
                       />
                       <span className="text-xs font-black text-foreground">
                         {locale === 'ar' ? 'متوفر في المخزون حالياً' : d.in_stock_checkbox}
@@ -2509,7 +2572,7 @@ export default function AdminPricingPage() {
                         type="checkbox"
                         checked={form.is_popular}
                         onChange={(e) => setForm(prev => ({ ...prev, is_popular: e.target.checked }))}
-                        className="w-4 h-4 rounded text-primary focus:ring-primary/20 accent-primary"
+                        className="w-4 h-4 rounded text-primary accent-primary cursor-pointer"
                       />
                       <span className="text-xs font-black text-foreground">
                         {locale === 'ar' ? 'موديل مميز / الأكثر طلباً' : d.popular_checkbox}
@@ -2518,196 +2581,390 @@ export default function AdminPricingPage() {
                   </div>
                 </div>
 
-                {/* 3. OPTIONAL ADVANCED OPTIONS (COLLAPSED ACCORDION) */}
-                <div className="border rounded-md overflow-hidden bg-background">
-                  <button
-                    type="button"
-                    onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
-                    className="w-full px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors flex items-center justify-between text-xs font-black uppercase tracking-wider text-muted-foreground hover:text-foreground cursor-pointer"
-                  >
-                    <span className="flex items-center gap-2">
-                      <Wrench size={14} className="text-primary" />
-                      <span>{locale === 'ar' ? 'خيارات متقدمة إضافية (ترجمات، مواصفات، خيارات جودة متعددة)' : 'Gelişmiş Seçenekler (Çeviriler, Kalite Seçenekleri)'}</span>
-                    </span>
-                    <span className="text-xs font-mono font-bold text-primary">
-                      {showAdvancedOptions ? '▲ إخفاء' : '▼ عرض التفاصيل'}
-                    </span>
-                  </button>
+                {/* 2. PRODUCT IMAGES UPLOAD */}
+                <div className="rounded-xl border border-border/70 bg-muted/10 p-5 space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <h4 className="text-xs font-black uppercase tracking-wider text-foreground flex items-center gap-2">
+                        <span>{locale === 'ar' ? 'صور المنتج' : d.image_section_title}</span>
+                        {form.images && form.images.length > 0 && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                            {form.images.length}
+                          </span>
+                        )}
+                      </h4>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">
+                        {locale === 'ar' ? 'الصورة الأولى ستكون الغلاف الرئيسي المعروض على الكارد' : d.image_section_sub}
+                      </p>
+                    </div>
 
-                  {showAdvancedOptions && (
-                    <div className="p-4 space-y-4 border-t animate-in fade-in duration-200">
-                      {/* Multilingual Name Translations */}
-                      <div className="space-y-2">
-                        <label className="text-[11px] font-black uppercase text-foreground block">
-                          {locale === 'ar' ? 'الترجمات المخصصة لاسم المنتج (اختياري - سيتم استخدام الاسم الرئيسي تلقائياً إذا تركت فارغة)' : 'Çok Dilli Başlıklar'}
-                        </label>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                          <div>
-                            <span className="text-[9px] font-bold text-muted-foreground block mb-0.5">عربي (AR)</span>
-                            <input
-                              value={form.service_name_ar}
-                              onChange={(e) => setForm(prev => ({ ...prev, service_name_ar: e.target.value }))}
-                              placeholder={form.model_name || "اسم المنتج بالعربي"}
-                              className="w-full px-2.5 py-1.5 rounded-md border bg-background text-xs font-bold"
-                              dir="rtl"
-                            />
-                          </div>
-                          <div>
-                            <span className="text-[9px] font-bold text-muted-foreground block mb-0.5">تركي (TR)</span>
-                            <input
-                              value={form.service_name_tr}
-                              onChange={(e) => setForm(prev => ({ ...prev, service_name_tr: e.target.value }))}
-                              placeholder={form.model_name || "Türkçe ürün adı"}
-                              className="w-full px-2.5 py-1.5 rounded-md border bg-background text-xs font-bold"
-                            />
-                          </div>
-                          <div>
-                            <span className="text-[9px] font-bold text-muted-foreground block mb-0.5">إنجليزي (EN)</span>
-                            <input
-                              value={form.service_name_en}
-                              onChange={(e) => setForm(prev => ({ ...prev, service_name_en: e.target.value }))}
-                              placeholder={form.model_name || "English product name"}
-                              className="w-full px-2.5 py-1.5 rounded-md border bg-background text-xs font-bold"
-                            />
+                    <div className="flex items-center gap-2">
+                      <input 
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleImageUpload}
+                        accept="image/*"
+                        multiple
+                        className="hidden"
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploadingImage}
+                        className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-black transition-all cursor-pointer shadow-xs hover:bg-primary/90 disabled:opacity-50"
+                      >
+                        {uploadingImage ? (locale === 'ar' ? 'جاري الرفع...' : d.uploading_image) : (locale === 'ar' ? 'رفع صور من الجهاز' : d.upload_image_btn)}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Manual URL Input */}
+                  <div className="flex items-center gap-2 pt-1">
+                    <input
+                      value={manualImageUrl}
+                      onChange={(e) => setManualImageUrl(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddManualImage();
+                        }
+                      }}
+                      placeholder={locale === 'ar' ? 'أو ألصق رابط صورة مباشر (URL)...' : d.image_url_placeholder}
+                      className="flex-1 px-3 py-2 rounded-lg border bg-background text-xs font-medium outline-hidden focus:border-primary shadow-xs"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddManualImage}
+                      disabled={!manualImageUrl.trim()}
+                      className="px-4 py-2 rounded-lg bg-background hover:bg-muted text-foreground border text-xs font-bold transition-all cursor-pointer disabled:opacity-40"
+                    >
+                      {locale === 'ar' ? 'إضافة الرابط' : d.add_image_link_btn}
+                    </button>
+                  </div>
+
+                  {/* Images Thumbnails Grid */}
+                  {form.images && form.images.length > 0 ? (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 pt-2">
+                      {form.images.map((imgUrl, idx) => (
+                        <div 
+                          key={idx} 
+                          className={cn(
+                            "relative group rounded-lg border overflow-hidden bg-background aspect-square flex items-center justify-center p-1 transition-all shadow-xs",
+                            idx === 0 ? "border-primary ring-2 ring-primary/20" : "border-border hover:border-foreground/30"
+                          )}
+                        >
+                          <img 
+                            src={imgUrl} 
+                            alt={`Product ${idx + 1}`} 
+                            className="w-full h-full object-contain"
+                          />
+
+                          {/* Cover badge */}
+                          {idx === 0 && (
+                            <span className="absolute top-1 start-1 bg-primary text-primary-foreground text-[8px] font-black uppercase px-1.5 py-0.5 rounded shadow-xs z-10">
+                              {locale === 'ar' ? 'الغلاف' : d.main_image_badge}
+                            </span>
+                          )}
+
+                          {/* Hover Controls */}
+                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-1.5">
+                            {idx !== 0 && (
+                              <button
+                                type="button"
+                                onClick={() => handleSetMainCoverImage(idx)}
+                                className="w-full text-[9px] font-black bg-primary text-primary-foreground py-1 px-1.5 rounded hover:bg-primary/90 transition-colors shadow-xs text-center cursor-pointer"
+                              >
+                                {locale === 'ar' ? 'تعيين كغلاف' : d.set_as_main_btn}
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveImageAtIndex(idx)}
+                              className="w-full text-[9px] font-black bg-red-600 text-white py-1 px-1.5 rounded hover:bg-red-700 transition-colors shadow-xs text-center cursor-pointer"
+                            >
+                              {locale === 'ar' ? 'حذف' : 'Sil'}
+                            </button>
                           </div>
                         </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-3 text-center rounded-lg border border-dashed border-border text-muted-foreground text-xs font-semibold">
+                      {locale === 'ar' ? 'لم يتم إضافة صور للمنتج بعد' : d.no_images_yet}
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. CARD BADGE (OPTIONAL - CLEAN WITHOUT STARS OR ICONS) */}
+                <div className="rounded-xl border border-border/70 bg-muted/10 p-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-xs font-black uppercase tracking-wider text-foreground">
+                        {locale === 'ar' ? 'شارة التمييز على صورة المنتج (Badge)' : 'Ürün Kartı Rozeti'}
+                      </h4>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">
+                        {locale === 'ar' ? 'شارة تظهر على زاوية صورة المنتج (مثال: أصلي، وكالة، جديد)' : 'Ürün görseli üzerindeki rozet metni'}
+                      </p>
+                    </div>
+
+                    <label className="flex items-center gap-2 cursor-pointer bg-background px-3 py-1.5 rounded-lg border text-xs font-bold shadow-xs">
+                      <input
+                        type="checkbox"
+                        checked={form.show_badge}
+                        onChange={(e) => setForm(prev => ({ ...prev, show_badge: e.target.checked }))}
+                        className="w-4 h-4 rounded text-primary accent-primary cursor-pointer"
+                      />
+                      <span>
+                        {locale === 'ar' ? 'تفعيل الشارة' : 'Rozeti Göster'}
+                      </span>
+                    </label>
+                  </div>
+
+                  {form.show_badge && (
+                    <div className="space-y-3 pt-2 border-t border-border/60">
+                      {/* Presets */}
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[10px] font-black text-muted-foreground uppercase">
+                          {locale === 'ar' ? 'نماذج جاهزة:' : 'Şablonlar:'}
+                        </span>
+                        {[
+                          { ar: 'أصلي', tr: 'Orijinal', en: 'Original' },
+                          { ar: 'وكالة', tr: 'Servis', en: 'Official' },
+                          { ar: 'جديد', tr: 'Yeni', en: 'New' },
+                          { ar: 'الأكثر طلباً', tr: 'Popüler', en: 'Popular' },
+                          { ar: 'خصم خاص', tr: 'İndirim', en: 'Sale' },
+                          { ar: 'OEM', tr: 'OEM', en: 'OEM' }
+                        ].map(preset => (
+                          <button
+                            key={preset.tr}
+                            type="button"
+                            onClick={() => setForm(prev => ({
+                              ...prev,
+                              badge_text_ar: preset.ar,
+                              badge_text_tr: preset.tr,
+                              badge_text_en: preset.en,
+                            }))}
+                            className="text-[10px] font-bold px-2 py-0.5 rounded border bg-background hover:bg-muted text-foreground transition-all cursor-pointer"
+                          >
+                            {locale === 'ar' ? preset.ar : locale === 'en' ? preset.en : preset.tr}
+                          </button>
+                        ))}
                       </div>
 
-                      {/* Series & Specs */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-border/50">
+                      {/* 3 Language Inputs */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div className="space-y-1">
-                          <label className="text-[10px] font-black uppercase text-muted-foreground">
-                            {locale === 'ar' ? 'اسم الفئة (اختياري)' : d.label_series}
+                          <label className="text-[11px] font-bold text-foreground block">
+                            {locale === 'ar' ? 'نص الشارة (عربي)' : 'Arapça Rozet'}
                           </label>
                           <input
-                            value={form.series}
-                            onChange={(e) => setForm(prev => ({ ...prev, series: e.target.value }))}
-                            placeholder={locale === 'ar' ? 'مثال: سلسلة iPhone 16' : d.placeholder_series}
-                            className="w-full px-3 py-2 rounded-md border bg-background text-xs font-bold"
-                          />
-                        </div>
-
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-black uppercase text-muted-foreground">
-                            {locale === 'ar' ? 'المواصفات المختصرة للكارت (اختياري)' : 'Kısa Özellikler'}
-                          </label>
-                          <input
-                            value={form.specs_ar}
-                            onChange={(e) => setForm(prev => ({ ...prev, specs_ar: e.target.value }))}
-                            placeholder={locale === 'ar' ? 'مثال: جديد - 256 جيجا أو نخب أول A+' : 'Örn: Sıfır - 256 GB'}
-                            className="w-full px-3 py-2 rounded-md border bg-background text-xs font-bold"
+                            value={form.badge_text_ar}
+                            onChange={(e) => setForm(prev => ({ ...prev, badge_text_ar: e.target.value }))}
+                            placeholder="مثال: أصلي، جديد..."
+                            className="w-full px-3 py-1.5 rounded-lg border bg-background text-xs font-bold outline-hidden focus:border-primary shadow-xs"
                             dir="rtl"
                           />
                         </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[11px] font-bold text-foreground block">
+                            {locale === 'ar' ? 'نص الشارة (تركي)' : 'Türkçe Rozet'}
+                          </label>
+                          <input
+                            value={form.badge_text_tr}
+                            onChange={(e) => setForm(prev => ({ ...prev, badge_text_tr: e.target.value }))}
+                            placeholder="Örn: Orijinal, Yeni..."
+                            className="w-full px-3 py-1.5 rounded-lg border bg-background text-xs font-bold outline-hidden focus:border-primary shadow-xs"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[11px] font-bold text-foreground block">
+                            {locale === 'ar' ? 'نص الشارة (إنجليزي)' : 'İngilizce Rozet'}
+                          </label>
+                          <input
+                            value={form.badge_text_en}
+                            onChange={(e) => setForm(prev => ({ ...prev, badge_text_en: e.target.value }))}
+                            placeholder="e.g. Original, New..."
+                            className="w-full px-3 py-1.5 rounded-lg border bg-background text-xs font-bold outline-hidden focus:border-primary shadow-xs"
+                          />
+                        </div>
                       </div>
 
-                      {/* Quality Options Section */}
-                      <div className="space-y-3 pt-2 border-t border-border/50">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h5 className="text-xs font-black uppercase tracking-wider">{d.quality_section_title}</h5>
-                            <p className="text-[10px] text-muted-foreground">{d.quality_section_sub}</p>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={handleAddQuality}
-                            className="flex items-center gap-1 text-[10px] font-black uppercase bg-primary/10 text-primary px-3 py-1.5 rounded-md hover:bg-primary/20 border border-primary/20 cursor-pointer"
-                          >
-                            <Plus size={12} />
-                            <span>{d.add_quality_btn}</span>
-                          </button>
-                        </div>
-
-                        <div className="space-y-2">
-                          {form.quality_options.map((q, idx) => (
-                            <div key={idx} className="p-3 bg-muted/20 rounded-md border space-y-2 shadow-xs">
-                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                <div>
-                                  <label className="text-[9px] font-bold text-muted-foreground block mb-0.5">{d.label_quality_name_ar}</label>
-                                  <input
-                                    value={q.quality_ar || ''}
-                                    onChange={(e) => handleUpdateQuality(idx, 'quality_ar', e.target.value)}
-                                    placeholder={d.placeholder_quality_ar}
-                                    className="w-full px-2.5 py-1.5 rounded-md border bg-background text-xs font-bold"
-                                    dir="rtl"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="text-[9px] font-bold text-muted-foreground block mb-0.5">{d.label_quality_name_tr}</label>
-                                  <input
-                                    value={q.quality_tr || ''}
-                                    onChange={(e) => handleUpdateQuality(idx, 'quality_tr', e.target.value)}
-                                    placeholder={d.placeholder_quality_tr}
-                                    className="w-full px-2.5 py-1.5 rounded-md border bg-background text-xs font-bold"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="text-[9px] font-bold text-muted-foreground block mb-0.5">{d.label_quality_name_en}</label>
-                                  <input
-                                    value={q.quality_en || ''}
-                                    onChange={(e) => handleUpdateQuality(idx, 'quality_en', e.target.value)}
-                                    placeholder={d.placeholder_quality_en}
-                                    className="w-full px-2.5 py-1.5 rounded-md border bg-background text-xs font-bold"
-                                  />
-                                </div>
-                              </div>
-
-                              <div className="flex items-center gap-2 pt-1 border-t border-border/40">
-                                <div className="w-32">
-                                  <input
-                                    type="number"
-                                    value={q.price}
-                                    onChange={(e) => handleUpdateQuality(idx, 'price', parseFloat(e.target.value) || 0)}
-                                    placeholder={d.placeholder_price}
-                                    className="w-full px-2.5 py-1.5 rounded-md border bg-background text-xs font-black text-primary"
-                                  />
-                                </div>
-                                <div className="flex-1">
-                                  <input
-                                    value={q.badge || ''}
-                                    onChange={(e) => handleUpdateQuality(idx, 'badge', e.target.value)}
-                                    placeholder={d.placeholder_badge}
-                                    className="w-full px-2.5 py-1.5 rounded-md border bg-background text-xs font-bold"
-                                  />
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveQuality(idx)}
-                                  className="p-1.5 text-red-500 hover:bg-red-500/10 rounded-md transition-colors cursor-pointer"
-                                  title={d.remove_quality}
-                                >
-                                  <Trash2 size={16} />
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                          {form.quality_options.length === 0 && (
-                            <p className="text-center text-xs text-muted-foreground italic py-1">
-                              {d.empty_qualities}
-                            </p>
-                          )}
-                        </div>
+                      {/* Live Badge Preview (NO STARS!) */}
+                      <div className="p-2.5 rounded-lg bg-background border flex items-center justify-between text-xs font-bold">
+                        <span className="text-muted-foreground text-[11px]">
+                          {locale === 'ar' ? 'معاينة الشارة:' : 'Önizleme:'}
+                        </span>
+                        <span className="bg-linear-to-r from-rose-600 to-[#E11D48] text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded shadow-xs border border-white/20 select-none">
+                          {(locale === 'ar' ? form.badge_text_ar : locale === 'en' ? form.badge_text_en : form.badge_text_tr) || 'Orijinal'}
+                        </span>
                       </div>
                     </div>
                   )}
                 </div>
 
-                {/* Modal Actions */}
-                <div className="flex items-center justify-end gap-2 pt-3 border-t">
+                {/* 4. DESCRIPTION & SPECIFICATIONS */}
+                <div className="rounded-xl border border-border/70 bg-muted/10 p-5 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-black uppercase tracking-wider text-foreground">
+                      {locale === 'ar' ? 'الوصف والمواصفات الفنية' : 'Açıklama ve Teknik Özellikler'}
+                    </h4>
+                  </div>
+
+                  {/* Language Tabs */}
+                  <div className="flex border-b border-border/60 pb-px gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setProductTab('ar')}
+                      className={cn(
+                        "flex items-center gap-2 px-4 py-2 border-b-2 font-black text-xs uppercase tracking-wider transition-all cursor-pointer",
+                        productTab === 'ar'
+                          ? "border-primary text-primary bg-primary/5 rounded-t-lg"
+                          : "border-transparent text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      <span className="text-sm">🇸🇦</span>
+                      <span>العربية</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setProductTab('tr')}
+                      className={cn(
+                        "flex items-center gap-2 px-4 py-2 border-b-2 font-black text-xs uppercase tracking-wider transition-all cursor-pointer",
+                        productTab === 'tr'
+                          ? "border-primary text-primary bg-primary/5 rounded-t-lg"
+                          : "border-transparent text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      <span className="text-sm">🇹🇷</span>
+                      <span>Türkçe</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setProductTab('en')}
+                      className={cn(
+                        "flex items-center gap-2 px-4 py-2 border-b-2 font-black text-xs uppercase tracking-wider transition-all cursor-pointer",
+                        productTab === 'en'
+                          ? "border-primary text-primary bg-primary/5 rounded-t-lg"
+                          : "border-transparent text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      <span className="text-sm">🇺🇸</span>
+                      <span>English</span>
+                    </button>
+                  </div>
+
+                  {/* Arabic Tab */}
+                  <div className={cn("space-y-4", productTab === 'ar' ? "block" : "hidden")} dir="rtl">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-black text-foreground block">
+                        وصف وشرح المنتج (عربي)
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={form.description_ar}
+                        onChange={(e) => setForm(prev => ({ ...prev, description_ar: e.target.value }))}
+                        placeholder="اكتب شرحاً تفصيلياً يوضح ميزات وحالة المنتج والضمان باللغة العربية..."
+                        className="w-full p-3 rounded-lg border bg-background text-xs font-medium focus:border-primary outline-hidden resize-none leading-relaxed"
+                        dir="rtl"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-black text-foreground block">
+                        المواصفات الفنية للمنتج (معالج، شاشة، ذاكرة، بطارية...)
+                      </label>
+                      <JoditEditor
+                        value={form.specs_ar}
+                        onChange={(val) => setForm(prev => ({ ...prev, specs_ar: val }))}
+                        placeholder="اكتب مواصفات وتفاصيل المنتج باللغة العربية..."
+                        direction="rtl"
+                        language="ar"
+                        height={220}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Turkish Tab */}
+                  <div className={cn("space-y-4", productTab === 'tr' ? "block" : "hidden")} dir="ltr">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-black text-foreground block">
+                        Ürün Açıklaması ve Detayları (Türkçe)
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={form.description_tr}
+                        onChange={(e) => setForm(prev => ({ ...prev, description_tr: e.target.value }))}
+                        placeholder="Ürün özelliklerini ve avantajlarını anlatan Türkçe açıklama..."
+                        className="w-full p-3 rounded-lg border bg-background text-xs font-medium focus:border-primary outline-hidden resize-none leading-relaxed"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-black text-foreground block">
+                        Teknik Özellikler (Türkçe)
+                      </label>
+                      <JoditEditor
+                        value={form.specs_tr}
+                        onChange={(val) => setForm(prev => ({ ...prev, specs_tr: val }))}
+                        placeholder="İşlemci, ekran, hafıza gibi teknik özellikleri yazın..."
+                        direction="ltr"
+                        language="tr"
+                        height={220}
+                      />
+                    </div>
+                  </div>
+
+                  {/* English Tab */}
+                  <div className={cn("space-y-4", productTab === 'en' ? "block" : "hidden")} dir="ltr">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-black text-foreground block">
+                        Product Description & Details (English)
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={form.description_en}
+                        onChange={(e) => setForm(prev => ({ ...prev, description_en: e.target.value }))}
+                        placeholder="Write comprehensive product description in English..."
+                        className="w-full p-3 rounded-lg border bg-background text-xs font-medium focus:border-primary outline-hidden resize-none leading-relaxed"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-black text-foreground block">
+                        Technical Specifications (English)
+                      </label>
+                      <JoditEditor
+                        value={form.specs_en}
+                        onChange={(val) => setForm(prev => ({ ...prev, specs_en: val }))}
+                        placeholder="Write detailed product specifications in English..."
+                        direction="ltr"
+                        language="en"
+                        height={220}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Modal Footer Actions */}
+                <div className="flex items-center justify-end gap-3 pt-4 border-t">
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
-                    className="px-4 py-2.5 rounded-md border bg-background hover:bg-muted text-xs font-bold transition-colors cursor-pointer"
+                    className="px-5 py-2.5 rounded-lg border bg-background hover:bg-muted text-xs font-bold transition-colors cursor-pointer"
                   >
-                    {d.cancel_btn}
+                    {locale === 'ar' ? 'إلغاء' : d.cancel_btn}
                   </button>
                   <button
                     type="submit"
                     disabled={actionLoading}
-                    className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2.5 rounded-md text-xs font-black uppercase tracking-wider transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground px-7 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
                   >
-                    <Check size={16} />
-                    <span>{actionLoading ? (locale === 'ar' ? 'جاري الحفظ...' : 'Kaydediliyor...') : (editingItem ? d.save_edit_btn : d.save_add_btn)}</span>
+                    {actionLoading 
+                      ? (locale === 'ar' ? 'جاري الحفظ...' : 'Kaydediliyor...') 
+                      : (editingItem ? (locale === 'ar' ? 'حفظ التعديلات' : d.save_edit_btn) : (locale === 'ar' ? 'إضافة المنتج' : d.save_add_btn))}
                   </button>
                 </div>
               </form>
@@ -2865,7 +3122,7 @@ export default function AdminPricingPage() {
         )}
       </AnimatePresence>
 
-      {/* Modal for Adding New Main Category Card */}
+      {/* Modal for Adding New Main Category */}
       <AnimatePresence>
         {isNewCatModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
@@ -2873,149 +3130,183 @@ export default function AdminPricingPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-card w-full max-w-lg rounded-md border shadow-2xl overflow-hidden my-8"
+              className="bg-card w-full max-w-2xl rounded-2xl border shadow-2xl overflow-hidden my-6"
               dir={locale === 'ar' ? 'rtl' : 'ltr'}
             >
               <div className="flex items-center justify-between px-6 py-4 border-b bg-muted/20">
-                <h3 className="font-black text-base uppercase flex items-center gap-2">
-                  <Plus size={18} className="text-primary" />
-                  <span>{locale === 'ar' ? 'إضافة قسم رئيسي جديد للمتجر' : 'Yeni Ana Kategori Ekle'}</span>
-                </h3>
+                <div>
+                  <h3 className="font-black text-base uppercase text-foreground">
+                    {locale === 'ar' ? 'إضافة قسم جديد للمتجر' : 'Yeni Kategori Ekle'}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5 font-medium">
+                    {locale === 'ar' ? 'أدخل اسم ووصف وبانر القسم الجديد' : 'Yeni kategorinin adını, açıklamasını ve görselini girin'}
+                  </p>
+                </div>
                 <button
                   type="button"
                   onClick={() => setIsNewCatModalOpen(false)}
-                  className="p-1.5 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground cursor-pointer"
+                  className="p-1.5 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
                 >
                   <X size={18} />
                 </button>
               </div>
 
-              <div className="p-6 space-y-4">
-                {/* Image Upload for New Category */}
-                <div className="p-3.5 rounded-md border bg-muted/20 space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-xs font-black uppercase text-foreground flex items-center gap-1.5">
-                        <ImageIcon size={14} className="text-primary" />
-                        <span>{locale === 'ar' ? 'صورة غلاف القسم' : 'Kategori Görseli'}</span>
-                      </span>
-                      <span className="text-[10px] text-muted-foreground block">
-                        {locale === 'ar' ? 'ارفع صورة الغلاف للقسم مباشرة من جهازك' : 'Cihazınızdan görsel yükleyin'}
-                      </span>
-                    </div>
-
-                    <input 
-                      type="file"
-                      ref={newCatFileInputRef}
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleNewCatImageUpload(file);
-                      }}
-                      accept="image/*"
-                      className="hidden"
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() => newCatFileInputRef.current?.click()}
-                      disabled={uploadingNewCatImage}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition-all cursor-pointer border border-primary/20"
-                    >
-                      <Upload size={13} className={cn(uploadingNewCatImage && "animate-spin")} />
-                      <span>{uploadingNewCatImage ? (locale === 'ar' ? 'جاري الرفع...' : 'Yükleniyor...') : (locale === 'ar' ? 'رفع صورة من جهازك' : 'Görsel Yükle')}</span>
-                    </button>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    {newCat.image ? (
-                      <div className="relative w-16 h-16 rounded-md border bg-black/40 overflow-hidden shrink-0">
-                        <img 
-                          src={newCat.image} 
-                          alt="Category preview" 
-                          className="w-full h-full object-cover"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setNewCat(prev => ({ ...prev, image: '' }))}
-                          className="absolute -top-1.5 -right-1.5 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                        >
-                          <X size={10} />
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="w-16 h-16 rounded-md border border-dashed border-border/80 bg-background/50 flex flex-col items-center justify-center text-muted-foreground/60 shrink-0">
-                        <ImageIcon size={18} />
-                        <span className="text-[8px] uppercase mt-1">صورة الغلاف</span>
-                      </div>
+              <div className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
+                {/* Language Tabs Selection */}
+                <div className="flex border-b border-border/50 pb-px gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setNewCatTab('ar')}
+                    className={cn(
+                      "flex items-center gap-2 px-5 py-2.5 border-b-2 font-black text-xs uppercase tracking-wider transition-all cursor-pointer",
+                      newCatTab === 'ar' 
+                        ? "border-primary text-primary bg-primary/5 rounded-t-md" 
+                        : "border-transparent text-muted-foreground hover:text-foreground"
                     )}
+                  >
+                    <span className="text-sm">🇸🇦</span>
+                    <span>العربية</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNewCatTab('tr')}
+                    className={cn(
+                      "flex items-center gap-2 px-5 py-2.5 border-b-2 font-black text-xs uppercase tracking-wider transition-all cursor-pointer",
+                      newCatTab === 'tr' 
+                        ? "border-primary text-primary bg-primary/5 rounded-t-md" 
+                        : "border-transparent text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    <span className="text-sm">🇹🇷</span>
+                    <span>Türkçe</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNewCatTab('en')}
+                    className={cn(
+                      "flex items-center gap-2 px-5 py-2.5 border-b-2 font-black text-xs uppercase tracking-wider transition-all cursor-pointer",
+                      newCatTab === 'en' 
+                        ? "border-primary text-primary bg-primary/5 rounded-t-md" 
+                        : "border-transparent text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    <span className="text-sm">🇺🇸</span>
+                    <span>English</span>
+                  </button>
+                </div>
 
-                    <div className="flex-1">
-                      <input
-                        type="text"
-                        value={newCat.image}
-                        onChange={(e) => setNewCat(prev => ({ ...prev, image: e.target.value }))}
-                        placeholder={locale === 'ar' ? 'أو ضع رابط صورة مباشر (URL)...' : 'https://...'}
-                        className="w-full text-xs px-3 py-2 rounded-md bg-background border border-border text-foreground font-mono"
-                      />
-                    </div>
+                {/* Arabic Tab Content */}
+                <div className={cn("space-y-4", newCatTab === 'ar' ? "block" : "hidden")} dir="rtl">
+                  <div>
+                    <label className="text-xs font-black text-foreground block mb-1.5">
+                      اسم القسم (عربي) *
+                    </label>
+                    <input
+                      type="text"
+                      value={newCat.title_ar}
+                      onChange={(e) => setNewCat(prev => ({ ...prev, title_ar: e.target.value }))}
+                      placeholder="مثال: الهواتف، اللابتوب، الشاشات..."
+                      className="w-full text-sm font-bold px-3.5 py-2 rounded-lg bg-background border border-border text-foreground focus:border-primary outline-hidden"
+                      dir="rtl"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-black text-foreground block mb-1.5">
+                      وصف القسم (عربي)
+                    </label>
+                    <textarea
+                      rows={4}
+                      value={newCat.desc_ar}
+                      onChange={(e) => setNewCat(prev => ({ ...prev, desc_ar: e.target.value }))}
+                      placeholder="اكتب وصفاً وشرحاً شاملاً لمحتويات وخدمات هذا القسم..."
+                      className="w-full text-xs font-medium px-3.5 py-2.5 rounded-lg bg-background border border-border text-foreground focus:border-primary outline-hidden resize-none leading-relaxed"
+                      dir="rtl"
+                    />
                   </div>
                 </div>
 
-                {/* Category Names */}
-                <div>
-                  <label className="text-xs font-black text-foreground block mb-1">
-                    {locale === 'ar' ? 'اسم القسم بالعربي *' : 'Kategori Adı (Arapça) *'}
-                  </label>
-                  <input
-                    type="text"
-                    value={newCat.title_ar}
-                    onChange={(e) => setNewCat(prev => ({ ...prev, title_ar: e.target.value }))}
-                    placeholder={locale === 'ar' ? 'مثال: أجهزة الألعاب أو شاشات التلفزيون' : 'Örn: Oyun Konsolları'}
-                    className="w-full text-xs font-bold px-3 py-2.5 rounded-md bg-background border border-border text-foreground focus:border-primary outline-hidden"
-                    dir="rtl"
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Turkish Tab Content */}
+                <div className={cn("space-y-4", newCatTab === 'tr' ? "block" : "hidden")} dir="ltr">
                   <div>
-                    <label className="text-[10px] font-bold text-muted-foreground block mb-1">
-                      {locale === 'ar' ? 'الاسم بالتركي (اختياري)' : 'Türkçe Başlık'}
+                    <label className="text-xs font-black text-foreground block mb-1.5">
+                      Kategori Adı (Türkçe) *
                     </label>
                     <input
                       type="text"
                       value={newCat.title_tr}
                       onChange={(e) => setNewCat(prev => ({ ...prev, title_tr: e.target.value }))}
-                      placeholder={newCat.title_ar || "Örn: Tabletler"}
-                      className="w-full text-xs px-3 py-2 rounded-md bg-background border border-border text-foreground"
+                      placeholder="Örn: Telefonlar, Laptoplar, Ekranlar..."
+                      className="w-full text-sm font-bold px-3.5 py-2 rounded-lg bg-background border border-border text-foreground focus:border-primary outline-hidden"
                     />
                   </div>
+
                   <div>
-                    <label className="text-[10px] font-bold text-muted-foreground block mb-1">
-                      {locale === 'ar' ? 'الاسم بالإنجليزي (اختياري)' : 'İngilizce Başlık'}
+                    <label className="text-xs font-black text-foreground block mb-1.5">
+                      Kategori Açıklaması (Türkçe)
+                    </label>
+                    <textarea
+                      rows={4}
+                      value={newCat.desc_tr}
+                      onChange={(e) => setNewCat(prev => ({ ...prev, desc_tr: e.target.value }))}
+                      placeholder="Kategori hakkında kapsamlı açıklama..."
+                      className="w-full text-xs font-medium px-3.5 py-2.5 rounded-lg bg-background border border-border text-foreground focus:border-primary outline-hidden resize-none leading-relaxed"
+                    />
+                  </div>
+                </div>
+
+                {/* English Tab Content */}
+                <div className={cn("space-y-4", newCatTab === 'en' ? "block" : "hidden")} dir="ltr">
+                  <div>
+                    <label className="text-xs font-black text-foreground block mb-1.5">
+                      Category Name (English) *
                     </label>
                     <input
                       type="text"
                       value={newCat.title_en}
                       onChange={(e) => setNewCat(prev => ({ ...prev, title_en: e.target.value }))}
-                      placeholder={newCat.title_ar || "e.g. Tablets"}
-                      className="w-full text-xs px-3 py-2 rounded-md bg-background border border-border text-foreground"
+                      placeholder="e.g. Phones, Laptops, Screens..."
+                      className="w-full text-sm font-bold px-3.5 py-2 rounded-lg bg-background border border-border text-foreground focus:border-primary outline-hidden"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-black text-foreground block mb-1.5">
+                      Category Description (English)
+                    </label>
+                    <textarea
+                      rows={4}
+                      value={newCat.desc_en}
+                      onChange={(e) => setNewCat(prev => ({ ...prev, desc_en: e.target.value }))}
+                      placeholder="Detailed category description in English..."
+                      className="w-full text-xs font-medium px-3.5 py-2.5 rounded-lg bg-background border border-border text-foreground focus:border-primary outline-hidden resize-none leading-relaxed"
                     />
                   </div>
                 </div>
 
-                {/* Banner Section for New Category */}
-                <div className="p-3.5 rounded-md border border-primary/30 bg-primary/5 space-y-2.5">
+                {/* Optional Category ID / Slug */}
+                <div>
+                  <label className="text-xs font-black text-foreground block mb-1">
+                    {locale === 'ar' ? 'معرّف القسم في الرابط (Slug إنجليزي اختياري)' : 'Kategori Bağlantı Kodu (Slug - İsteğe Bağlı)'}
+                  </label>
+                  <input
+                    type="text"
+                    value={newCat.id}
+                    onChange={(e) => setNewCat(prev => ({ ...prev, id: e.target.value }))}
+                    placeholder={locale === 'ar' ? 'اتركه فارغاً للتوليد التلقائي (مثال: phones, laptops)' : 'Otomatik için boş bırakın (örn: phones)'}
+                    className="w-full text-xs font-mono px-3 py-2 rounded-lg bg-background border border-border text-foreground focus:border-primary outline-hidden"
+                    dir="ltr"
+                  />
+                </div>
+
+                {/* Category Banner & Image */}
+                <div className="space-y-3 pt-2 border-t">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-xs font-black uppercase text-foreground flex items-center gap-1.5">
-                        <ImageIcon size={14} className="text-primary" />
-                        <span>{locale === 'ar' ? 'بانر القسم العريض (Hero Banner)' : 'Kategori Geniş Bannerı'}</span>
-                      </span>
-                      <span className="text-[10px] text-muted-foreground block">
-                        {locale === 'ar' ? 'البانر الذي سيظهر في أعلى صفحة المتجر عند فتح هذا القسم' : 'Bu kategori açıldığında mağaza üstünde görünecek banner'}
-                      </span>
-                    </div>
+                    <label className="text-xs font-black text-foreground flex items-center gap-1.5">
+                      <ImageIcon size={15} className="text-primary" />
+                      <span>{locale === 'ar' ? 'بانر وصورة القسم' : 'Kategori Banner ve Görseli'}</span>
+                    </label>
 
                     <input 
                       type="file"
@@ -3035,119 +3326,64 @@ export default function AdminPricingPage() {
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold transition-all cursor-pointer shadow-xs"
                     >
                       <Upload size={13} className={cn(uploadingNewCatBanner && "animate-spin")} />
-                      <span>{uploadingNewCatBanner ? (locale === 'ar' ? 'جاري الرفع...' : 'Yükleniyor...') : (locale === 'ar' ? 'رفع بانر للقسم' : 'Banner Yükle')}</span>
+                      <span>{uploadingNewCatBanner ? (locale === 'ar' ? 'جاري الرفع...' : 'Yükleniyor...') : (locale === 'ar' ? 'رفع بانر من الجهاز' : 'Banner Yükle')}</span>
                     </button>
                   </div>
 
-                  <div className="flex items-center gap-3">
-                    {newCat.banner_image ? (
-                      <div className="relative w-28 h-16 rounded-md border bg-black/40 p-1 shrink-0 flex items-center justify-center overflow-hidden">
-                        <img 
-                          src={newCat.banner_image} 
-                          alt="Category banner preview" 
-                          className="w-full h-full object-cover"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setNewCat(prev => ({ ...prev, banner_image: '' }))}
-                          className="absolute -top-1.5 -right-1.5 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                        >
-                          <X size={10} />
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="w-28 h-16 rounded-md border border-dashed border-primary/40 bg-background/50 flex flex-col items-center justify-center text-muted-foreground/60 shrink-0">
-                        <ImageIcon size={18} className="text-primary/60" />
-                        <span className="text-[8px] uppercase mt-1">بانر القسم</span>
-                      </div>
-                    )}
+                  {/* Banner Preview Area */}
+                  {newCat.banner_image || newCat.image ? (
+                    <div className="relative w-full h-36 rounded-lg border border-border bg-black/40 overflow-hidden group">
+                      <img 
+                        src={newCat.banner_image || newCat.image} 
+                        alt="Category banner preview" 
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setNewCat(prev => ({ ...prev, banner_image: '', image: '' }))}
+                        className="absolute top-2 end-2 p-1.5 bg-red-500/80 hover:bg-red-600 text-white rounded-md transition-colors cursor-pointer"
+                        title={locale === 'ar' ? 'إزالة الصورة' : 'Kaldır'}
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div 
+                      onClick={() => newCatBannerFileInputRef.current?.click()}
+                      className="w-full h-24 rounded-lg border-2 border-dashed border-border hover:border-primary/50 bg-muted/20 flex flex-col items-center justify-center text-muted-foreground transition-colors cursor-pointer"
+                    >
+                      <ImageIcon size={24} className="text-muted-foreground/60 mb-1" />
+                      <span className="text-xs font-bold">{locale === 'ar' ? 'اضغط لرفع صورة البانر' : 'Banner görseli yüklemek için tıklayın'}</span>
+                    </div>
+                  )}
 
-                    <div className="flex-1 space-y-1">
-                      <input
-                        type="text"
-                        value={newCat.banner_image}
-                        onChange={(e) => setNewCat(prev => ({ ...prev, banner_image: e.target.value }))}
-                        placeholder={locale === 'ar' ? 'أو ضع رابط صورة البانر (URL)...' : 'Banner Resim URL'}
-                        className="w-full text-xs px-3 py-1.5 rounded-md bg-background border border-border text-foreground font-mono"
-                      />
-                      <span className="text-[9px] text-muted-foreground block">
-                        {locale === 'ar' ? 'إذا ترك فارغاً سيتم استخدام صورة غلاف القسم كبانر تلقائياً' : 'Boş bırakılırsa kapak görseli banner olarak kullanılır'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Banner Title & Description */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-primary/20">
-                    <div>
-                      <label className="text-[9px] font-bold text-muted-foreground block mb-0.5">
-                        {locale === 'ar' ? 'عنوان البانر الترويجي (اختياري)' : 'Banner Başlığı (İsteğe Bağlı)'}
-                      </label>
-                      <input
-                        type="text"
-                        value={newCat.banner_title_ar}
-                        onChange={(e) => setNewCat(prev => ({ ...prev, banner_title_ar: e.target.value }))}
-                        placeholder={newCat.title_ar || "عنوان جذاب يظهر في البانر"}
-                        className="w-full text-xs px-2.5 py-1.5 rounded-md bg-background border border-border text-foreground"
-                        dir="rtl"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[9px] font-bold text-muted-foreground block mb-0.5">
-                        {locale === 'ar' ? 'نص زر البانر CTA (اختياري)' : 'Banner Buton Metni'}
-                      </label>
-                      <input
-                        type="text"
-                        value={newCat.banner_cta_ar}
-                        onChange={(e) => setNewCat(prev => ({ ...prev, banner_cta_ar: e.target.value }))}
-                        placeholder={locale === 'ar' ? 'استعراض منتجات القسم' : 'Ürünleri İncele'}
-                        className="w-full text-xs px-2.5 py-1.5 rounded-md bg-background border border-border text-foreground"
-                        dir="rtl"
-                      />
-                    </div>
+                  {/* Direct URL input */}
+                  <div>
+                    <input
+                      type="text"
+                      value={newCat.banner_image || newCat.image || ''}
+                      onChange={(e) => setNewCat(prev => ({ ...prev, banner_image: e.target.value, image: e.target.value }))}
+                      placeholder={locale === 'ar' ? 'أو ضع رابط صورة البانر مباشرة (URL)...' : 'https://...'}
+                      className="w-full text-xs font-mono px-3 py-2 rounded-lg bg-background border border-border text-foreground"
+                    />
                   </div>
                 </div>
 
-                <div>
-                  <label className="text-[10px] font-bold text-muted-foreground block mb-1">
-                    {locale === 'ar' ? 'معرّف القسم الإنجليزي (ID - اختياري، يُنشأ تلقائياً إذا تركته فارغاً)' : 'Kategori ID (İsteğe Bağlı)'}
-                  </label>
-                  <input
-                    type="text"
-                    value={newCat.id}
-                    onChange={(e) => setNewCat(prev => ({ ...prev, id: e.target.value }))}
-                    placeholder="e.g. gaming, monitor, tv"
-                    className="w-full text-xs px-3 py-2 rounded-md bg-background border border-border text-foreground font-mono"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[10px] font-bold text-muted-foreground block mb-1">
-                    {locale === 'ar' ? 'وصف مختصر للقسم (اختياري)' : 'Kısa Açıklama (İsteğe Bağlı)'}
-                  </label>
-                  <input
-                    type="text"
-                    value={newCat.desc_ar}
-                    onChange={(e) => setNewCat(prev => ({ ...prev, desc_ar: e.target.value }))}
-                    placeholder={locale === 'ar' ? 'مثال: أحدث الأجهزة وقطع الغيار المضمونة' : 'Örn: Tüm modeller ve parçalar'}
-                    className="w-full text-xs px-3 py-2 rounded-md bg-background border border-border text-foreground"
-                    dir="rtl"
-                  />
-                </div>
-
-                <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
+                {/* Footer Buttons */}
+                <div className="flex items-center justify-end gap-2 pt-4 border-t border-border">
                   <button
                     type="button"
                     onClick={() => setIsNewCatModalOpen(false)}
-                    className="px-4 py-2 rounded-md border text-xs font-bold hover:bg-muted cursor-pointer"
+                    className="px-4 py-2.5 rounded-lg border text-xs font-bold hover:bg-muted cursor-pointer transition-colors"
                   >
                     {d.cancel_btn}
                   </button>
                   <button
                     type="button"
                     onClick={handleAddNewCategory}
-                    className="px-5 py-2 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-black uppercase tracking-wider cursor-pointer shadow-md"
+                    className="px-6 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-black uppercase tracking-wider cursor-pointer shadow-md transition-all active:scale-95"
                   >
-                    {locale === 'ar' ? 'إضافة وتثبيت القسم' : 'Kategoriyi Kaydet'}
+                    {locale === 'ar' ? 'إضافة وتثبيت القسم' : 'Kategoriyi Ekle ve Kaydet'}
                   </button>
                 </div>
               </div>
@@ -3164,22 +3400,17 @@ export default function AdminPricingPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-card w-full max-w-xl rounded-md border shadow-2xl overflow-hidden my-8"
+              className="bg-card w-full max-w-2xl rounded-2xl border shadow-2xl overflow-hidden my-6"
               dir={locale === 'ar' ? 'rtl' : 'ltr'}
             >
               <div className="flex items-center justify-between px-6 py-4 border-b bg-muted/20">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                    <Edit3 size={16} />
-                  </div>
-                  <div>
-                    <h3 className="font-black text-sm uppercase text-foreground">
-                      {locale === 'ar' ? `تعديل بيانات وبانر قسم (${editingCat.title_ar || editingCat.id})` : `Kategori Düzenle: ${editingCat.title_tr || editingCat.id}`}
-                    </h3>
-                    <p className="text-[10px] text-muted-foreground">
-                      {locale === 'ar' ? 'قم بتحديث الاسم والوصف وصور الغلاف والبانر الترويجي لهذا القسم' : 'Kategori başlığı, kart görseli ve bannerını güncelleyin'}
-                    </p>
-                  </div>
+                <div>
+                  <h3 className="font-black text-base uppercase text-foreground">
+                    {locale === 'ar' ? `تعديل قسم (${editingCat.title_ar || editingCat.id})` : `Kategori Düzenle: ${editingCat.title_tr || editingCat.id}`}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5 font-medium">
+                    {locale === 'ar' ? 'تعديل اسم ووصف وصورة القسم' : 'Kategori adı, açıklaması ve görselini düzenleyin'}
+                  </p>
                 </div>
                 <button
                   type="button"
@@ -3187,150 +3418,150 @@ export default function AdminPricingPage() {
                     setIsEditCatModalOpen(false);
                     setEditingCat(null);
                   }}
-                  className="p-1.5 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground cursor-pointer"
+                  className="p-1.5 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
                 >
                   <X size={18} />
                 </button>
               </div>
 
-              <div className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
-                {/* 1. Category Card Thumbnail (Cover Image) */}
-                <div className="p-3.5 rounded-md border bg-muted/20 space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-xs font-black uppercase text-foreground flex items-center gap-1.5">
-                        <ImageIcon size={14} className="text-primary" />
-                        <span>{locale === 'ar' ? 'صورة كرت القسم (Thumbnail)' : 'Kart Görseli'}</span>
-                      </span>
-                      <span className="text-[10px] text-muted-foreground block">
-                        {locale === 'ar' ? 'تظهر داخل بطاقة القسم في المتجر (تملأ البوكس بنسبة 100%)' : 'Mağazada kategori kartında görünen görsel'}
-                      </span>
-                    </div>
-
-                    <input 
-                      type="file"
-                      ref={editCatFileInputRef}
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleEditCatImageUpload(file);
-                      }}
-                      accept="image/*"
-                      className="hidden"
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() => editCatFileInputRef.current?.click()}
-                      disabled={uploadingEditCatImage}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition-all cursor-pointer border border-primary/20"
-                    >
-                      <Upload size={13} className={cn(uploadingEditCatImage && "animate-spin")} />
-                      <span>{uploadingEditCatImage ? (locale === 'ar' ? 'جاري الرفع...' : 'Yükleniyor...') : (locale === 'ar' ? 'رفع صورة من جهازك' : 'Görsel Yükle')}</span>
-                    </button>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    {editingCat.image ? (
-                      <div className="relative w-20 h-20 rounded-md border bg-black/40 overflow-hidden shrink-0">
-                        <img 
-                          src={editingCat.image} 
-                          alt="Category preview" 
-                          className="w-full h-full object-cover"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setEditingCat((prev: any) => ({ ...prev, image: '' }))}
-                          className="absolute -top-1.5 -right-1.5 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                        >
-                          <X size={10} />
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="w-20 h-20 rounded-md border border-dashed border-border/80 bg-background/50 flex flex-col items-center justify-center text-muted-foreground/60 shrink-0">
-                        <ImageIcon size={20} />
-                        <span className="text-[8px] uppercase mt-1">لا توجد صورة</span>
-                      </div>
+              <div className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
+                {/* Language Tabs Selection */}
+                <div className="flex border-b border-border/50 pb-px gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditCatTab('ar')}
+                    className={cn(
+                      "flex items-center gap-2 px-5 py-2.5 border-b-2 font-black text-xs uppercase tracking-wider transition-all cursor-pointer",
+                      editCatTab === 'ar' 
+                        ? "border-primary text-primary bg-primary/5 rounded-t-md" 
+                        : "border-transparent text-muted-foreground hover:text-foreground"
                     )}
+                  >
+                    <span className="text-sm">🇸🇦</span>
+                    <span>العربية</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditCatTab('tr')}
+                    className={cn(
+                      "flex items-center gap-2 px-5 py-2.5 border-b-2 font-black text-xs uppercase tracking-wider transition-all cursor-pointer",
+                      editCatTab === 'tr' 
+                        ? "border-primary text-primary bg-primary/5 rounded-t-md" 
+                        : "border-transparent text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    <span className="text-sm">🇹🇷</span>
+                    <span>Türkçe</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditCatTab('en')}
+                    className={cn(
+                      "flex items-center gap-2 px-5 py-2.5 border-b-2 font-black text-xs uppercase tracking-wider transition-all cursor-pointer",
+                      editCatTab === 'en' 
+                        ? "border-primary text-primary bg-primary/5 rounded-t-md" 
+                        : "border-transparent text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    <span className="text-sm">🇺🇸</span>
+                    <span>English</span>
+                  </button>
+                </div>
 
-                    <div className="flex-1">
-                      <input
-                        type="text"
-                        value={editingCat.image || ''}
-                        onChange={(e) => setEditingCat((prev: any) => ({ ...prev, image: e.target.value }))}
-                        placeholder={locale === 'ar' ? 'أو ضع رابط صورة مباشر (URL)...' : 'https://...'}
-                        className="w-full text-xs px-3 py-2 rounded-md bg-background border border-border text-foreground font-mono"
-                      />
-                    </div>
+                {/* Arabic Tab Content */}
+                <div className={cn("space-y-4", editCatTab === 'ar' ? "block" : "hidden")} dir="rtl">
+                  <div>
+                    <label className="text-xs font-black text-foreground block mb-1.5">
+                      اسم القسم (عربي) *
+                    </label>
+                    <input
+                      type="text"
+                      value={editingCat.title_ar || ''}
+                      onChange={(e) => setEditingCat((prev: any) => ({ ...prev, title_ar: e.target.value }))}
+                      className="w-full text-sm font-bold px-3.5 py-2 rounded-lg bg-background border border-border text-foreground focus:border-primary outline-hidden"
+                      dir="rtl"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-black text-foreground block mb-1.5">
+                      وصف القسم (عربي)
+                    </label>
+                    <textarea
+                      rows={4}
+                      value={editingCat.desc_ar || ''}
+                      onChange={(e) => setEditingCat((prev: any) => ({ ...prev, desc_ar: e.target.value }))}
+                      placeholder="اكتب وصفاً وشرحاً شاملاً لمحتويات هذا القسم..."
+                      className="w-full text-xs font-medium px-3.5 py-2.5 rounded-lg bg-background border border-border text-foreground focus:border-primary outline-hidden resize-none leading-relaxed"
+                      dir="rtl"
+                    />
                   </div>
                 </div>
 
-                {/* 2. Category Names in 3 Languages */}
-                <div>
-                  <label className="text-xs font-black text-foreground block mb-1">
-                    {locale === 'ar' ? 'اسم القسم بالعربي *' : 'Kategori Adı (Arapça) *'}
-                  </label>
-                  <input
-                    type="text"
-                    value={editingCat.title_ar || ''}
-                    onChange={(e) => setEditingCat((prev: any) => ({ ...prev, title_ar: e.target.value }))}
-                    className="w-full text-xs font-bold px-3 py-2.5 rounded-md bg-background border border-border text-foreground focus:border-primary outline-hidden"
-                    dir="rtl"
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Turkish Tab Content */}
+                <div className={cn("space-y-4", editCatTab === 'tr' ? "block" : "hidden")} dir="ltr">
                   <div>
-                    <label className="text-[10px] font-bold text-muted-foreground block mb-1">
-                      {locale === 'ar' ? 'الاسم بالتركي' : 'Türkçe Başlık'}
+                    <label className="text-xs font-black text-foreground block mb-1.5">
+                      Kategori Adı (Türkçe) *
                     </label>
                     <input
                       type="text"
                       value={editingCat.title_tr || ''}
                       onChange={(e) => setEditingCat((prev: any) => ({ ...prev, title_tr: e.target.value }))}
-                      className="w-full text-xs px-3 py-2 rounded-md bg-background border border-border text-foreground"
+                      className="w-full text-sm font-bold px-3.5 py-2 rounded-lg bg-background border border-border text-foreground focus:border-primary outline-hidden"
                     />
                   </div>
+
                   <div>
-                    <label className="text-[10px] font-bold text-muted-foreground block mb-1">
-                      {locale === 'ar' ? 'الاسم بالإنجليزي' : 'İngilizce Başlık'}
+                    <label className="text-xs font-black text-foreground block mb-1.5">
+                      Kategori Açıklaması (Türkçe)
+                    </label>
+                    <textarea
+                      rows={4}
+                      value={editingCat.desc_tr || ''}
+                      onChange={(e) => setEditingCat((prev: any) => ({ ...prev, desc_tr: e.target.value }))}
+                      placeholder="Kategori hakkında detaylı açıklama..."
+                      className="w-full text-xs font-medium px-3.5 py-2.5 rounded-lg bg-background border border-border text-foreground focus:border-primary outline-hidden resize-none leading-relaxed"
+                    />
+                  </div>
+                </div>
+
+                {/* English Tab Content */}
+                <div className={cn("space-y-4", editCatTab === 'en' ? "block" : "hidden")} dir="ltr">
+                  <div>
+                    <label className="text-xs font-black text-foreground block mb-1.5">
+                      Category Name (English) *
                     </label>
                     <input
                       type="text"
                       value={editingCat.title_en || ''}
                       onChange={(e) => setEditingCat((prev: any) => ({ ...prev, title_en: e.target.value }))}
-                      className="w-full text-xs px-3 py-2 rounded-md bg-background border border-border text-foreground"
+                      className="w-full text-sm font-bold px-3.5 py-2 rounded-lg bg-background border border-border text-foreground focus:border-primary outline-hidden"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-black text-foreground block mb-1.5">
+                      Category Description (English)
+                    </label>
+                    <textarea
+                      rows={4}
+                      value={editingCat.desc_en || ''}
+                      onChange={(e) => setEditingCat((prev: any) => ({ ...prev, desc_en: e.target.value }))}
+                      placeholder="Comprehensive category description in English..."
+                      className="w-full text-xs font-medium px-3.5 py-2.5 rounded-lg bg-background border border-border text-foreground focus:border-primary outline-hidden resize-none leading-relaxed"
                     />
                   </div>
                 </div>
 
-                {/* 3. Category Description for the Card (Subtitle) */}
-                <div>
-                  <label className="text-[10px] font-bold text-muted-foreground block mb-1">
-                    {locale === 'ar' ? 'وصف كرت القسم بالعربي (يظهر أسفل الاسم في البطاقة)' : 'Kart Açıklaması (Arapça)'}
-                  </label>
-                  <input
-                    type="text"
-                    value={editingCat.desc_ar || ''}
-                    onChange={(e) => setEditingCat((prev: any) => ({ ...prev, desc_ar: e.target.value }))}
-                    placeholder={locale === 'ar' ? 'مثال: آيفون، سامسونج، شاومي والمزيد' : 'Örn: iPhone, Samsung ve Dahası'}
-                    className="w-full text-xs px-3 py-2 rounded-md bg-background border border-border text-foreground"
-                    dir="rtl"
-                  />
-                </div>
-
-                {/* 4. Category Hero Banner Section */}
-                <div className="p-3.5 rounded-md border border-primary/30 bg-primary/5 space-y-2.5">
+                {/* Banner & Image Upload */}
+                <div className="space-y-3 pt-2 border-t">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-xs font-black uppercase text-foreground flex items-center gap-1.5">
-                        <ImageIcon size={14} className="text-primary" />
-                        <span>{locale === 'ar' ? 'بانر القسم العريض (Hero Banner)' : 'Kategori Geniş Bannerı'}</span>
-                      </span>
-                      <span className="text-[10px] text-muted-foreground block">
-                        {locale === 'ar' ? 'البانر العريض في أعلى صفحة المتجر عند اختيار هذا القسم' : 'Kategori açıldığında mağaza üstünde görünen banner'}
-                      </span>
-                    </div>
+                    <label className="text-xs font-black text-foreground flex items-center gap-1.5">
+                      <ImageIcon size={15} className="text-primary" />
+                      <span>{locale === 'ar' ? 'بانر وصورة القسم' : 'Kategori Banner ve Görseli'}</span>
+                    </label>
 
                     <input 
                       type="file"
@@ -3350,108 +3581,67 @@ export default function AdminPricingPage() {
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold transition-all cursor-pointer shadow-xs"
                     >
                       <Upload size={13} className={cn(uploadingEditCatBanner && "animate-spin")} />
-                      <span>{uploadingEditCatBanner ? (locale === 'ar' ? 'جاري الرفع...' : 'Yükleniyor...') : (locale === 'ar' ? 'رفع بانر للقسم' : 'Banner Yükle')}</span>
+                      <span>{uploadingEditCatBanner ? (locale === 'ar' ? 'جاري الرفع...' : 'Yükleniyor...') : (locale === 'ar' ? 'رفع بانر من الجهاز' : 'Banner Yükle')}</span>
                     </button>
                   </div>
 
-                  <div className="flex items-center gap-3">
-                    {editingCat.banner_image ? (
-                      <div className="relative w-28 h-16 rounded-md border bg-black/40 p-1 shrink-0 flex items-center justify-center overflow-hidden">
-                        <img 
-                          src={editingCat.banner_image} 
-                          alt="Category banner preview" 
-                          className="w-full h-full object-cover"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setEditingCat((prev: any) => ({ ...prev, banner_image: '' }))}
-                          className="absolute -top-1.5 -right-1.5 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                        >
-                          <X size={10} />
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="w-28 h-16 rounded-md border border-dashed border-primary/40 bg-background/50 flex flex-col items-center justify-center text-muted-foreground/60 shrink-0">
-                        <ImageIcon size={18} className="text-primary/60" />
-                        <span className="text-[8px] uppercase mt-1">بانر القسم</span>
-                      </div>
-                    )}
-
-                    <div className="flex-1 space-y-1">
-                      <input
-                        type="text"
-                        value={editingCat.banner_image || ''}
-                        onChange={(e) => setEditingCat((prev: any) => ({ ...prev, banner_image: e.target.value }))}
-                        placeholder={locale === 'ar' ? 'أو ضع رابط صورة البانر (URL)...' : 'Banner Resim URL'}
-                        className="w-full text-xs px-3 py-1.5 rounded-md bg-background border border-border text-foreground font-mono"
+                  {/* Banner Preview Area */}
+                  {editingCat.banner_image || editingCat.image ? (
+                    <div className="relative w-full h-36 rounded-lg border border-border bg-black/40 overflow-hidden group">
+                      <img 
+                        src={editingCat.banner_image || editingCat.image} 
+                        alt="Category banner preview" 
+                        className="w-full h-full object-cover"
                       />
+                      <button
+                        type="button"
+                        onClick={() => setEditingCat((prev: any) => ({ ...prev, banner_image: '', image: '' }))}
+                        className="absolute top-2 end-2 p-1.5 bg-red-500/80 hover:bg-red-600 text-white rounded-md transition-colors cursor-pointer"
+                        title={locale === 'ar' ? 'إزالة الصورة' : 'Kaldır'}
+                      >
+                        <Trash2 size={13} />
+                      </button>
                     </div>
-                  </div>
+                  ) : (
+                    <div 
+                      onClick={() => editCatBannerFileInputRef.current?.click()}
+                      className="w-full h-24 rounded-lg border-2 border-dashed border-border hover:border-primary/50 bg-muted/20 flex flex-col items-center justify-center text-muted-foreground transition-colors cursor-pointer"
+                    >
+                      <ImageIcon size={24} className="text-muted-foreground/60 mb-1" />
+                      <span className="text-xs font-bold">{locale === 'ar' ? 'اضغط لرفع صورة البانر' : 'Banner görseli yüklemek için tıklayın'}</span>
+                    </div>
+                  )}
 
-                  {/* Banner Title & CTA */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-primary/20">
-                    <div>
-                      <label className="text-[9px] font-bold text-muted-foreground block mb-0.5">
-                        {locale === 'ar' ? 'عنوان البانر الترويجي' : 'Banner Başlığı'}
-                      </label>
-                      <input
-                        type="text"
-                        value={editingCat.banner_title_ar || ''}
-                        onChange={(e) => setEditingCat((prev: any) => ({ ...prev, banner_title_ar: e.target.value }))}
-                        placeholder={editingCat.title_ar || "عنوان يظهر في البانر"}
-                        className="w-full text-xs px-2.5 py-1.5 rounded-md bg-background border border-border text-foreground"
-                        dir="rtl"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[9px] font-bold text-muted-foreground block mb-0.5">
-                        {locale === 'ar' ? 'نص زر البانر CTA' : 'Banner Buton Metni'}
-                      </label>
-                      <input
-                        type="text"
-                        value={editingCat.banner_cta_ar || ''}
-                        onChange={(e) => setEditingCat((prev: any) => ({ ...prev, banner_cta_ar: e.target.value }))}
-                        placeholder={locale === 'ar' ? 'استعراض منتجات القسم' : 'Ürünleri İncele'}
-                        className="w-full text-xs px-2.5 py-1.5 rounded-md bg-background border border-border text-foreground"
-                        dir="rtl"
-                      />
-                    </div>
-                  </div>
-
+                  {/* Direct URL input */}
                   <div>
-                    <label className="text-[9px] font-bold text-muted-foreground block mb-0.5">
-                      {locale === 'ar' ? 'شرح ووصف البانر بالعربي' : 'Banner Açıklaması'}
-                    </label>
                     <input
                       type="text"
-                      value={editingCat.banner_desc_ar || ''}
-                      onChange={(e) => setEditingCat((prev: any) => ({ ...prev, banner_desc_ar: e.target.value }))}
-                      placeholder={locale === 'ar' ? 'شرح جذاب يظهر داخل البانر' : 'Açıklama'}
-                      className="w-full text-xs px-2.5 py-1.5 rounded-md bg-background border border-border text-foreground"
-                      dir="rtl"
+                      value={editingCat.banner_image || editingCat.image || ''}
+                      onChange={(e) => setEditingCat((prev: any) => ({ ...prev, banner_image: e.target.value, image: e.target.value }))}
+                      placeholder={locale === 'ar' ? 'أو ضع رابط صورة البانر مباشرة (URL)...' : 'https://...'}
+                      className="w-full text-xs font-mono px-3 py-2 rounded-lg bg-background border border-border text-foreground"
                     />
                   </div>
                 </div>
 
                 {/* Footer Buttons */}
-                <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
+                <div className="flex items-center justify-end gap-2 pt-4 border-t border-border">
                   <button
                     type="button"
                     onClick={() => {
                       setIsEditCatModalOpen(false);
                       setEditingCat(null);
                     }}
-                    className="px-4 py-2 rounded-md border text-xs font-bold hover:bg-muted cursor-pointer"
+                    className="px-4 py-2.5 rounded-lg border text-xs font-bold hover:bg-muted cursor-pointer transition-colors"
                   >
                     {d.cancel_btn}
                   </button>
                   <button
                     type="button"
                     onClick={handleSaveEditedCategory}
-                    className="flex items-center gap-1.5 px-6 py-2 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-black uppercase tracking-wider cursor-pointer shadow-md"
+                    className="px-6 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-black uppercase tracking-wider cursor-pointer shadow-md transition-all active:scale-95"
                   >
-                    <Check size={14} />
-                    <span>{locale === 'ar' ? 'حفظ كافة التعديلات' : 'Değişiklikleri Kaydet'}</span>
+                    {locale === 'ar' ? 'حفظ التعديلات' : 'Değişiklikleri Kaydet'}
                   </button>
                 </div>
               </div>

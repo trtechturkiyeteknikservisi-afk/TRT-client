@@ -8,6 +8,7 @@ import {
   Truck, CheckCircle, Phone, MapPin, User, Send, CreditCard 
 } from 'lucide-react';
 import { useStore, CartItem } from './store-context';
+import { useCurrency } from './currency-context';
 import { useLocale } from 'next-intl';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
@@ -27,6 +28,7 @@ export function CartDrawer() {
   } = useStore();
 
   const locale = useLocale();
+  const { formatPrice, currencySymbol } = useCurrency();
 
   const [checkoutForm, setCheckoutForm] = useState({
     fullName: '',
@@ -37,10 +39,6 @@ export function CartDrawer() {
     notes: ''
   });
   const [submitting, setSubmitting] = useState(false);
-
-  const formatPrice = (val: number) => {
-    return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(val) + ' TL';
-  };
 
   const handleWhatsAppCheckout = () => {
     if (cart.length === 0) return;
@@ -121,12 +119,14 @@ export function CartDrawer() {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => setIsCartOpen(false)}
-                  className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer"
-                >
-                  <X size={18} />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setIsCartOpen(false)}
+                    className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
               </div>
 
               {/* Items List */}

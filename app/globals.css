@@ -526,4 +526,141 @@
   scrollbar-width: none !important;
 }
 
+/* =========================================================================
+   Rich HTML specifications rendering (Faithful Jodit Editor Output)
+   Preserves any custom layout, tables, lists, text formatting, and styling 
+   created by the user in Jodit without imposing rigid fixed divisions.
+   ========================================================================= */
+.specs-html-content {
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+  line-height: 1.7;
+  word-break: break-word;
+}
+
+.specs-html-content > *:first-child {
+  margin-top: 0 !important;
+}
+
+.specs-html-content > *:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* Table styling: faithful rendering of Jodit tables with responsive borders & padding */
+.specs-html-content table {
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--card));
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.specs-html-content th,
+.specs-html-content td {
+  border: 1px solid hsl(var(--border));
+  padding: 0.625rem 0.875rem;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  vertical-align: top;
+  text-align: inherit;
+}
+
+.specs-html-content th {
+  background-color: hsl(var(--muted) / 0.5);
+  color: hsl(var(--foreground));
+  font-weight: 800;
+}
+
+.specs-html-content td {
+  color: hsl(var(--foreground));
+}
+
+.specs-html-content tr:hover td {
+  background-color: hsl(var(--muted) / 0.2);
+}
+
+/* Lists styling */
+.specs-html-content ul {
+  list-style-type: disc;
+  margin: 0.75rem 0;
+  padding-inline-start: 1.5rem;
+}
+
+.specs-html-content ol {
+  list-style-type: decimal;
+  margin: 0.75rem 0;
+  padding-inline-start: 1.5rem;
+}
+
+.specs-html-content li {
+  margin: 0.35rem 0;
+  line-height: 1.6;
+}
+
+.specs-html-content li > ul,
+.specs-html-content li > ol {
+  margin: 0.25rem 0;
+}
+
+/* Headings */
+.specs-html-content h1,
+.specs-html-content h2,
+.specs-html-content h3,
+.specs-html-content h4,
+.specs-html-content h5,
+.specs-html-content h6 {
+  font-weight: 800;
+  color: hsl(var(--foreground));
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+.specs-html-content h1 { font-size: 1.25rem; }
+.specs-html-content h2 { font-size: 1.125rem; }
+.specs-html-content h3 { font-size: 1rem; }
+.specs-html-content h4 { font-size: 0.875rem; }
+
+/* Paragraphs & formatting */
+.specs-html-content p {
+  margin: 0.5rem 0;
+  line-height: 1.7;
+}
+
+.specs-html-content strong,
+.specs-html-content b {
+  font-weight: 800;
+}
+
+.specs-html-content blockquote {
+  border-inline-start: 3px solid #E11D48;
+  padding-inline-start: 1rem;
+  margin: 1rem 0;
+  font-style: italic;
+  color: hsl(var(--muted-foreground));
+}
+
+.specs-html-content hr {
+  border: 0;
+  border-top: 1px solid hsl(var(--border));
+  margin: 1.5rem 0;
+}
+
+.specs-html-content a {
+  color: #E11D48;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.specs-html-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  margin: 0.75rem 0;
+}
+
+
 

@@ -11,12 +11,13 @@ import {
   Filter, RotateCcw, CheckSquare, Square, ExternalLink, ShoppingBag
 } from 'lucide-react';
 import axios from 'axios';
-import { cn } from '@/lib/utils';
+import { cn, getProductUrl } from '@/lib/utils';
 import { useSettings } from './settings-provider';
 import toast from 'react-hot-toast';
 import { WhatsappIcon, RobotVacuumIcon, AppleHeadphonesIcon } from './social-icons';
 import { BrandIcon } from './brand-icons';
 import { Link } from '@/i18n/routing';
+import { useCurrency } from './currency-context';
 
 interface DynamicBanner {
   id: number;
@@ -51,6 +52,7 @@ interface PricingItem {
   service_name_en: string;
   service_name_ar: string;
   base_price: number;
+  max_price?: number;
   currency: string;
   duration: string;
   warranty: string;
@@ -62,6 +64,10 @@ interface PricingItem {
   notes_en?: string;
   notes_ar?: string;
   image_url?: string;
+  show_badge?: boolean;
+  badge_text_tr?: string;
+  badge_text_en?: string;
+  badge_text_ar?: string;
 }
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
@@ -84,6 +90,7 @@ export function PricingClient() {
   const locale = useLocale() as 'ar' | 'en' | 'tr';
   const isRTL = locale === 'ar';
   const { settings } = useSettings();
+  const { formatPrice, currentCurrency, currencySymbol } = useCurrency();
 
   const [items, setItems] = useState<PricingItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -445,7 +452,7 @@ export function PricingClient() {
 
   const openWhatsAppForModel = (item: PricingItem, qualityName?: string, price?: number) => {
     const serviceName = getLocalizedServiceName(item);
-    const qualityText = qualityName ? ` (${qualityName} - ${price?.toLocaleString('tr-TR')} ₺)` : '';
+    const qualityText = qualityName ? ` (${qualityName} - ${formatPrice(price || 0)})` : '';
     const message = locale === 'ar'
       ? `مرحباً، أود الاستفسار وطلب ${serviceName} لجهاز ${item.model_name}${qualityText} ومعرفة التوافر والشحن.`
       : locale === 'en'
@@ -1162,9 +1169,12 @@ export function PricingClient() {
                   const serviceName = getLocalizedServiceName(item);
                   const isExpanded = !!expandedCards[item.id];
                   const hasQualities = item.quality_options && item.quality_options.length > 0;
-
-                  // Quality tag badge calculation
-                  const qualityTag = item.quality_options?.[0]?.badge || (item.service_slug.includes('ekran') ? 'Orijinal' : item.is_popular ? 'Popüler' : 'Cihaz');
+                  const showCustomBadge = item.show_badge !== false && (item.show_badge as any) !== 0;
+                  const customBadgeLabel = locale === 'ar' 
+                    ? (item.badge_text_ar || item.quality_options?.[0]?.badge || (item.service_slug.includes('ekran') ? 'أصلي' : item.is_popular ? 'الأكثر طلباً' : 'جهاز')) 
+                    : locale === 'en' 
+                      ? (item.badge_text_en || item.quality_options?.[0]?.badge || (item.service_slug.includes('ekran') ? 'Original' : item.is_popular ? 'Popular' : 'Device')) 
+                      : (item.badge_text_tr || item.quality_options?.[0]?.badge || (item.service_slug.includes('ekran') ? 'Orijinal' : item.is_popular ? 'Popüler' : 'Cihaz'));
 
                   return (
                     <div
@@ -1172,7 +1182,17 @@ export function PricingClient() {
                       className="bg-card hover:bg-card/90 border border-border hover:border-[#E11D48]/50 rounded-xl flex flex-col justify-between transition-all duration-300 group shadow-xs hover:shadow-lg relative overflow-hidden"
                     >
                       {/* 1. Full-Bleed Top Image Area (Fills upper part of card completely) */}
-                      <div className="relative w-full h-48 sm:h-52 bg-muted/40 overflow-hidden flex items-center justify-center border-b border-border">
+                      <Link
+                        href={getProductUrl(item)}
+                        className="relative w-full h-48 sm:h-52 bg-muted/40 overflow-hidden flex items-center justify-center border-b border-border block cursor-pointer"
+                      >
+                        {/* Floating Dynamic Custom Badge */}
+                        {showCustomBadge && customBadgeLabel && (
+                          <div className="absolute top-3 start-3 z-10 flex items-center px-2.5 py-1 rounded-md bg-linear-to-r from-rose-600 to-[#E11D48] text-white text-[10px] sm:text-[11px] font-black uppercase tracking-wider shadow-md backdrop-blur-xs border border-white/20 select-none">
+                            <span className="truncate max-w-[120px]">{customBadgeLabel}</span>
+                          </div>
+                        )}
+
                         {item.image_url ? (
                           <img 
                             src={item.image_url} 
@@ -1196,29 +1216,12 @@ export function PricingClient() {
                         {/* Subtle bottom gradient overlay for smooth transition */}
                         <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent pointer-events-none" />
 
-                        {/* Floating Top-Start Quality Badge */}
-                        <div className="absolute top-3 start-3 z-10">
-                          <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-md bg-[#E11D48] text-white tracking-wider shadow-md shadow-red-500/30">
-                            {getLocalizedBadge(qualityTag) || qualityTag}
-                          </span>
-                        </div>
-
                         {/* Floating Top-End Brand Badge */}
                         <div className="absolute top-3 end-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black/60 backdrop-blur-md border border-white/10 text-white text-[11px] font-black shadow-sm">
                           <BrandIcon brand={item.brand} size={13} />
                           <span>{item.brand}</span>
                         </div>
-
-                        {/* Floating Popular Badge */}
-                        {item.is_popular && (
-                          <div className="absolute bottom-2.5 end-3 z-10">
-                            <span className="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded bg-amber-500/90 text-black shadow-xs flex items-center gap-1">
-                              <Award size={10} />
-                              {locale === 'ar' ? 'الأكثر طلباً' : locale === 'en' ? 'Popular' : 'Popüler'}
-                            </span>
-                          </div>
-                        )}
-                      </div>
+                      </Link>
 
                       {/* 2. Card Content & Details with Proper Padding */}
                       <div className="p-4 flex flex-col flex-1 justify-between">
@@ -1227,9 +1230,11 @@ export function PricingClient() {
                           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                             {item.brand} • {item.series || item.brand}
                           </p>
-                          <h3 className="text-xs sm:text-sm font-black text-foreground leading-snug break-words group-hover:text-[#E11D48] transition-colors min-h-[2rem]">
-                            {item.model_name}
-                          </h3>
+                          <Link href={getProductUrl(item)}>
+                            <h3 className="text-xs sm:text-sm font-black text-foreground leading-snug break-words group-hover:text-[#E11D48] transition-colors min-h-[2rem] cursor-pointer">
+                              {item.model_name}
+                            </h3>
+                          </Link>
                           <p className="text-[11px] font-semibold text-muted-foreground break-words leading-tight">
                             {serviceName}
                           </p>
@@ -1250,7 +1255,7 @@ export function PricingClient() {
                         <div className="space-y-2 pt-2 border-t border-border">
                           <div className="flex items-baseline justify-between">
                             <span className="text-base sm:text-lg font-black text-foreground tracking-tight">
-                              {item.base_price.toLocaleString('tr-TR')} {item.currency}
+                              {formatPrice(item.base_price, item.max_price)}
                             </span>
                             {hasQualities && item.quality_options.length > 1 && (
                               <button
@@ -1276,14 +1281,14 @@ export function PricingClient() {
                                     {getLocalizedQualityName(q)}
                                   </span>
                                   <span className="font-black text-foreground shrink-0">
-                                    {q.price.toLocaleString('tr-TR')} ₺
+                                    {formatPrice(q.price)}
                                   </span>
                                 </div>
                               ))}
                             </div>
                           )}
 
-                          {/* Action Buttons: Primary Order CTA & WhatsApp Icon */}
+                          {/* Action Buttons: Primary Order CTA, Detail Link & WhatsApp Icon */}
                           <div className="flex items-center gap-1.5">
                             <button
                               type="button"
@@ -1299,6 +1304,14 @@ export function PricingClient() {
                               <ShoppingBag size={14} />
                               <span>{t('card_book_now')}</span>
                             </button>
+
+                            <Link
+                              href={getProductUrl(item)}
+                              className="px-2.5 py-2.5 rounded-md bg-muted hover:bg-muted/80 text-foreground border border-border text-xs font-bold transition-all flex items-center justify-center shrink-0"
+                              title={locale === 'ar' ? 'عرض تفاصيل ومواصفات المنتج' : 'Ürün detaylarını görüntüle'}
+                            >
+                              {locale === 'ar' ? 'التفاصيل' : 'İncele'}
+                            </Link>
 
                             <button
                               type="button"
@@ -1332,9 +1345,11 @@ export function PricingClient() {
                     <tbody className="divide-y divide-border">
                       {paginatedTableItems.map(item => (
                         <tr key={item.id} className="hover:bg-muted/30 transition-colors">
-                          <td className="py-3 px-4 font-bold text-foreground flex items-center gap-2">
-                            <BrandIcon brand={item.brand} size={15} />
-                            <span>{item.model_name}</span>
+                          <td className="py-3 px-4 font-bold text-foreground">
+                            <Link href={getProductUrl(item)} className="flex items-center gap-2 hover:text-[#E11D48] transition-colors cursor-pointer">
+                              <BrandIcon brand={item.brand} size={15} />
+                              <span>{item.model_name}</span>
+                            </Link>
                           </td>
                           <td className="py-3 px-4 text-foreground/90 font-medium">
                             {getLocalizedServiceName(item)}
@@ -1342,23 +1357,31 @@ export function PricingClient() {
                           <td className="py-3 px-4 text-muted-foreground">
                             {getLocalizedWarranty(item.warranty)}
                           </td>
-                          <td className="py-3 px-4 font-black text-foreground text-sm">
-                            {item.base_price.toLocaleString('tr-TR')} {item.currency}
+                          <td className="py-3 px-4 font-black text-foreground text-sm whitespace-nowrap">
+                            {formatPrice(item.base_price, item.max_price)}
                           </td>
                           <td className="py-3 px-4 text-center">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setBookingModalItem(item);
-                                setBookingForm(prev => ({
-                                  ...prev,
-                                  selectedQuality: item.quality_options?.[0] ? getLocalizedQualityName(item.quality_options[0]) : ''
-                                }));
-                              }}
-                              className="px-3 py-1.5 rounded-lg bg-[#E11D48] text-white text-[11px] font-bold hover:bg-[#be123c] transition-colors cursor-pointer"
-                            >
-                              {t('card_book_now')}
-                            </button>
+                            <div className="flex items-center justify-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setBookingModalItem(item);
+                                  setBookingForm(prev => ({
+                                    ...prev,
+                                    selectedQuality: item.quality_options?.[0] ? getLocalizedQualityName(item.quality_options[0]) : ''
+                                  }));
+                                }}
+                                className="px-3 py-1.5 rounded-lg bg-[#E11D48] text-white text-[11px] font-bold hover:bg-[#be123c] transition-colors cursor-pointer"
+                              >
+                                {t('card_book_now')}
+                              </button>
+                              <Link
+                                href={getProductUrl(item)}
+                                className="px-2.5 py-1.5 rounded-lg bg-muted text-foreground border border-border text-[11px] font-bold hover:bg-muted/80 transition-colors"
+                              >
+                                {locale === 'ar' ? 'التفاصيل' : 'İncele'}
+                              </Link>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -1601,7 +1624,7 @@ export function PricingClient() {
                     >
                       {bookingModalItem.quality_options.map((q, idx) => (
                         <option key={idx} value={getLocalizedQualityName(q)}>
-                          {getLocalizedQualityName(q)} - {q.price.toLocaleString('tr-TR')} ₺
+                          {getLocalizedQualityName(q)} - {formatPrice(q.price)}
                         </option>
                       ))}
                     </select>

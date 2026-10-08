@@ -12,6 +12,7 @@ import { ScrollToTop } from "@/components/scroll-to-top";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { SettingsProvider } from "@/components/settings-provider";
+import { CurrencyProvider } from "@/components/currency-context";
 import { StoreProvider } from "@/components/store-context";
 import { CartDrawer } from "@/components/cart-drawer";
 import { DeferredAnalytics } from "@/components/deferred-analytics";
@@ -105,30 +106,32 @@ export default async function RootLayout(props: {
         />
         <NextIntlClientProvider messages={messages}>
           <SettingsProvider>
-            <StoreProvider>
-              <ThemeProvider
-                attribute="class"
-                defaultTheme="system"
-                enableSystem
-                disableTransitionOnChange
-              >
-                <div className="sticky top-0 z-[100] w-full bg-background">
+            <CurrencyProvider>
+              <StoreProvider>
+                <ThemeProvider
+                  attribute="class"
+                  defaultTheme="system"
+                  enableSystem
+                  disableTransitionOnChange
+                >
+                  <div className="sticky top-0 z-[100] w-full bg-background">
+                    <HideOnAdmin>
+                      <TopTrustBar />
+                      <Header />
+                    </HideOnAdmin>
+                  </div>
+                  <main className="w-full">
+                    {children}
+                  </main>
                   <HideOnAdmin>
-                    <TopTrustBar />
-                    <Header />
+                    <Footer />
+                    <ScrollToTop />
+                    <StickyContact />
+                    <CartDrawer />
                   </HideOnAdmin>
-                </div>
-                <main className="w-full">
-                  {children}
-                </main>
-                <HideOnAdmin>
-                  <Footer />
-                  <ScrollToTop />
-                  <StickyContact />
-                  <CartDrawer />
-                </HideOnAdmin>
-              </ThemeProvider>
-            </StoreProvider>
+                </ThemeProvider>
+              </StoreProvider>
+            </CurrencyProvider>
           </SettingsProvider>
         </NextIntlClientProvider>
       </body>

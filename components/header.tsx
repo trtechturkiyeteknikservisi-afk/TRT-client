@@ -10,6 +10,7 @@ import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
 import { AppleHeadphonesIcon, RobotVacuumIcon } from './social-icons';
 import { useStore } from './store-context';
+import { getLocalizedUrl } from '@/lib/localized-routes';
 
 export function Header() {
   const t = useTranslations('Header');
@@ -29,13 +30,13 @@ export function Header() {
   );
 
   const defaultServices = [
-    { name: t('phone_repair'), href: '/services/phone', icon: Smartphone },
-    { name: t('laptop_repair'), href: '/services/laptop', icon: Laptop },
-    { name: t('robot_repair'), href: '/services/robot', icon: RobotVacuumIcon },
-    { name: t('watch_repair'), href: '/services/watch', icon: Watch },
-    { name: t('tablet_repair'), href: '/services/tablet', icon: Tablet },
-    { name: t('headphones_repair'), href: '/services/kulaklik', icon: AppleHeadphonesIcon },
-    { name: t('pricing'), href: '/tamir-fiyatlari', icon: Wrench },
+    { name: t('phone_repair'), href: getLocalizedUrl('/services/phone', locale), icon: Smartphone },
+    { name: t('laptop_repair'), href: getLocalizedUrl('/services/laptop', locale), icon: Laptop },
+    { name: t('robot_repair'), href: getLocalizedUrl('/services/robot', locale), icon: RobotVacuumIcon },
+    { name: t('watch_repair'), href: getLocalizedUrl('/services/watch', locale), icon: Watch },
+    { name: t('tablet_repair'), href: getLocalizedUrl('/services/tablet', locale), icon: Tablet },
+    { name: t('headphones_repair'), href: getLocalizedUrl('/services/kulaklik', locale), icon: AppleHeadphonesIcon },
+    { name: t('pricing'), href: getLocalizedUrl('/tamir-fiyatlari', locale), icon: Wrench },
   ];
 
   const [services, setServices] = useState<any[]>(defaultServices);
@@ -59,7 +60,7 @@ export function Header() {
 
           const activeList = res.data.map((item: any) => ({
             name: item.title,
-            href: item.link || `/services/${item.slug}`,
+            href: item.link || getLocalizedUrl(`/services/${item.slug}`, locale),
             icon: serviceIconMap[item.icon] || Layers,
             customIcon: item.custom_icon || undefined
           }));
@@ -67,7 +68,7 @@ export function Header() {
           // Append pricing at the end of the services dropdown
           activeList.push({
             name: t('pricing'),
-            href: '/tamir-fiyatlari',
+            href: getLocalizedUrl('/tamir-fiyatlari', locale),
             icon: Wrench,
             customIcon: undefined
           });
@@ -85,12 +86,12 @@ export function Header() {
   const { cartCount, setIsCartOpen } = useStore();
 
   const legalPolicies = [
-    { name: tFooter('kvkk'), href: '/policies/kvkk', icon: Gavel },
-    { name: tFooter('privacy_policy'), href: '/policies/privacy', icon: Lock },
-    { name: tFooter('service_terms'), href: '/policies/terms', icon: FileText },
-    { name: tFooter('warranty_terms'), href: '/policies/warranty', icon: ShieldCheck },
-    { name: tFooter('shipping_terms'), href: '/policies/shipping', icon: Truck },
-    { name: tFooter('official_doc'), href: '/policies/custom', icon: ShieldCheck },
+    { name: tFooter('kvkk'), href: getLocalizedUrl('/policies/kvkk', locale), icon: Gavel },
+    { name: tFooter('privacy_policy'), href: getLocalizedUrl('/privacy', locale), icon: Lock },
+    { name: tFooter('service_terms'), href: getLocalizedUrl('/terms', locale), icon: FileText },
+    { name: tFooter('warranty_terms'), href: getLocalizedUrl('/policies/warranty', locale), icon: ShieldCheck },
+    { name: tFooter('shipping_terms'), href: getLocalizedUrl('/policies/shipping', locale), icon: Truck },
+    { name: tFooter('official_doc'), href: getLocalizedUrl('/policies/custom', locale), icon: ShieldCheck },
   ];
 
   interface NavItem {
@@ -102,37 +103,38 @@ export function Header() {
   }
 
   const navigation: NavItem[] = [
-    { name: t('home'), href: '/' },
-    { name: t('about_us'), href: '/about-us' },
+    { name: t('home'), href: `/${locale}` },
+    { name: t('about_us'), href: getLocalizedUrl('/about-us', locale) },
     { 
       name: t('services'), 
       href: '#services', 
       isDropdown: true,
       subItems: services
     },
-    { name: t('pricing'), href: '/urunler' },
-    { name: t('works'), href: '/our-works' },
-    { name: t('blog'), href: '/blog' },
+    { name: t('pricing'), href: getLocalizedUrl('/urunler', locale) },
+    { name: t('works'), href: getLocalizedUrl('/our-works', locale) },
+    { name: t('blog'), href: getLocalizedUrl('/blog', locale) },
     { name: t('merchants'), href: '#', soon: true },
     { name: t('track_shipment'), href: '#', soon: true },
     { 
       name: t('policy'), 
-      href: '/policies',
+      href: getLocalizedUrl('/policies', locale),
       isDropdown: true,
       subItems: legalPolicies
     },
   ];
 
   const handleLanguageChange = (newLocale: string) => {
-    router.replace(pathname, { locale: newLocale });
+    const targetUrl = getLocalizedUrl(pathname, newLocale);
+    window.location.href = targetUrl;
   };
 
   const isLinkActive = (item: typeof navigation[0]) => {
     if (item.isDropdown) {
       return item.subItems?.some(sub => pathname === sub.href || pathname.startsWith(sub.href + '/')) ?? false;
     }
-    if (item.href === '/') {
-      return pathname === '/';
+    if (item.href === `/${locale}` || item.href === '/') {
+      return pathname === '/' || pathname === `/${locale}`;
     }
     if (item.href.startsWith('#')) {
       return false;
@@ -423,7 +425,7 @@ export function Header() {
                   )}
                 </div>
               ))}
-              
+
               {/* Standalone Mobile Bize Ulaşın Button */}
               <div className="pt-4 border-t border-border mt-4">
                 <Link

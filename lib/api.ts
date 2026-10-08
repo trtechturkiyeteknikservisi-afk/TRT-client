@@ -34,7 +34,7 @@ export const apiService = {
   deleteContact: (id: number) => apiClient.delete(`/contacts/${id}`),
   
   // Blogs
-  getBlogs: () => apiClient.get('/blogs'),
+  getBlogs: (params?: { page?: number; limit?: number; locale?: string }) => apiClient.get('/blogs', { params }),
   getBlogBySlug: (slug: string) => apiClient.get(`/blogs/${slug}`),
   createBlog: (data: any) => apiClient.post('/blogs', data),
   updateBlog: (id: number, data: any) => apiClient.put(`/blogs/${id}`, data),

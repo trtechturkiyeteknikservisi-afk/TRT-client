@@ -3,12 +3,32 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  LayoutGrid, Smartphone, Laptop, Watch, Check, ArrowRight, X, Play, Briefcase 
+  LayoutGrid, Smartphone, Laptop, Watch, Check, ArrowRight, X, Play, Briefcase,
+  Gamepad2, TabletIcon as Tablet, Tv, Camera
 } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { AppleHeadphonesIcon, RobotVacuumIcon } from './social-icons';
 import Image from 'next/image';
+
+const categoryIconMap: Record<string, any> = {
+  all: LayoutGrid,
+  phone: Smartphone,
+  laptop: Laptop,
+  watch: Watch,
+  robot: RobotVacuumIcon,
+  headphones: AppleHeadphonesIcon,
+  kulaklik: AppleHeadphonesIcon,
+  playstation: Gamepad2,
+  gamepad: Gamepad2,
+  Gamepad2,
+  console: Gamepad2,
+  tablet: Tablet,
+  Tablet,
+  tv: Tv,
+  camera: Camera,
+  Briefcase
+};
 
 interface WorkItem {
   id: number | string;
@@ -198,8 +218,8 @@ export function Portfolio({ limit = 6, showTitle = true }: PortfolioProps) {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [selectedWork, setSelectedWork] = useState<WorkItem | null>(null);
 
-  // Define Category Tabs
-  const categories = [
+  // Base default categories
+  const baseCategories = [
     { id: 'all', label: t('category_all'), icon: LayoutGrid },
     { id: 'phone', label: t('category_phone'), icon: Smartphone },
     { id: 'laptop', label: t('category_laptop'), icon: Laptop },
@@ -208,19 +228,30 @@ export function Portfolio({ limit = 6, showTitle = true }: PortfolioProps) {
     { id: 'headphones', label: t('category_headphones'), icon: AppleHeadphonesIcon }
   ];
 
+  const [categories, setCategories] = useState(baseCategories);
+
   useEffect(() => {
     const fetchWorks = async () => {
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-        const response = await fetch(`${API_URL}/content/portfolio?locale=${locale}`);
-        if (!response.ok) {
-          throw new Error(`Portfolio request failed: ${response.status}`);
+        const [portfolioRes, servicesRes] = await Promise.all([
+          fetch(`${API_URL}/content/portfolio?locale=${locale}`).catch(() => null),
+          fetch(`${API_URL}/content/services?locale=${locale}`).catch(() => null)
+        ]);
+
+        let data: any[] = [];
+        if (portfolioRes && portfolioRes.ok) {
+          data = await portfolioRes.json();
         }
-        const data = await response.json();
+
+        let servicesData: any[] = [];
+        if (servicesRes && servicesRes.ok) {
+          servicesData = await servicesRes.json();
+        }
         
         // Parse and enrich database content
         const parsedWorks = data.map((item: any) => {
-          const titleLower = item.title.toLowerCase();
+          const titleLower = (item.title || '').toLowerCase();
           
           // Find matching rich item
           const matched = richPredefinedWorks.find(p => {
@@ -231,10 +262,28 @@ export function Portfolio({ limit = 6, showTitle = true }: PortfolioProps) {
                    titleLower.includes(p.title.tr.toLowerCase().replace('değişimi', '').trim());
           });
 
+          // Determine explicit or inferred category
+          let category = item.category || (matched ? matched.category : '');
+          if (!category) {
+            if (titleLower.includes('laptop') || titleLower.includes('computer') || titleLower.includes('macbook') || titleLower.includes('klavye') || titleLower.includes('bilgisayar')) {
+              category = 'laptop';
+            } else if (titleLower.includes('watch') || titleLower.includes('saat')) {
+              category = 'watch';
+            } else if (titleLower.includes('vacuum') || titleLower.includes('robot') || titleLower.includes('süpürge') || titleLower.includes('viomi') || titleLower.includes('roborock')) {
+              category = 'robot';
+            } else if (titleLower.includes('headphone') || titleLower.includes('earphone') || titleLower.includes('airpods') || titleLower.includes('kulaklık')) {
+              category = 'headphones';
+            } else if (titleLower.includes('playstation') || titleLower.includes('konsol') || titleLower.includes('ps4') || titleLower.includes('ps5') || titleLower.includes('xbox')) {
+              category = 'playstation';
+            } else {
+              category = 'phone';
+            }
+          }
+
           if (matched) {
             return {
               id: item.id,
-              category: matched.category,
+              category,
               title: item.title,
               beforeUrl: matched.beforeUrl,
               afterUrl: matched.afterUrl,
@@ -268,18 +317,6 @@ export function Portfolio({ limit = 6, showTitle = true }: PortfolioProps) {
             }
           }
 
-          // Infer category
-          let category = 'phone';
-          if (titleLower.includes('laptop') || titleLower.includes('computer') || titleLower.includes('macbook') || titleLower.includes('klavye') || titleLower.includes('bilgisayar')) {
-            category = 'laptop';
-          } else if (titleLower.includes('watch') || titleLower.includes('saat')) {
-            category = 'watch';
-          } else if (titleLower.includes('vacuum') || titleLower.includes('robot') || titleLower.includes('süpürge') || titleLower.includes('viomi') || titleLower.includes('roborock')) {
-            category = 'robot';
-          } else if (titleLower.includes('headphone') || titleLower.includes('earphone') || titleLower.includes('airpods') || titleLower.includes('kulaklık')) {
-            category = 'headphones';
-          }
-
           // Fallbacks for checklist if empty
           if (checklist.length === 0) {
             if (category === 'phone') {
@@ -306,12 +343,18 @@ export function Portfolio({ limit = 6, showTitle = true }: PortfolioProps) {
                 : locale === 'en'
                 ? ["Deep Internal Cleaning", "Motor & Sensor Repair", "Original Parts"]
                 : ["Derin İç Temizlik", "Motor & Sensör Onarımı", "Orijinal Parçalar"];
-            } else {
+            } else if (category === 'headphones') {
               checklist = locale === 'ar'
                 ? ["ضبط توازن الصوت", "قطع غيار معتمدة", "فحص البطارية والعلبة"]
                 : locale === 'en'
                 ? ["Audio Balance Control", "Certified Parts", "Battery & Case Test"]
                 : ["Ses Dengesi Kontrolü", "Garantili Hücre Değişimi", "Şarj Kutusu Testi"];
+            } else {
+              checklist = locale === 'ar'
+                ? ["قطع غيار أصلية ومضمونة", "فحص شامل ودقيق", "تسليم سريع"]
+                : locale === 'en'
+                ? ["Original Guaranteed Parts", "Comprehensive Testing", "Fast Delivery"]
+                : ["Orijinal Garantili Parça", "Detaylı Test ve Kontrol", "Hızlı Teslimat"];
             }
           }
 
@@ -329,6 +372,39 @@ export function Portfolio({ limit = 6, showTitle = true }: PortfolioProps) {
 
         // Set works directly from the database response
         setWorks(parsedWorks || []);
+
+        // Dynamically add category tabs ONLY for categories that exist in works and aren't in baseCategories
+        const dynamicCats = [...baseCategories];
+
+        parsedWorks.forEach((w: any) => {
+          if (w.category && !dynamicCats.some(c => c.id === w.category || (c.id === 'headphones' && w.category === 'kulaklik'))) {
+            const catId = w.category;
+            const matchedService = Array.isArray(servicesData) 
+              ? servicesData.find((s: any) => s.slug === catId || `service-${s.id}` === catId) 
+              : null;
+            
+            let label = matchedService?.title || '';
+            if (!label) {
+              if (catId === 'playstation') {
+                label = locale === 'ar' ? 'صيانة بلاي ستيشن' : locale === 'en' ? 'PlayStation Repairs' : 'PlayStation Onarımları';
+              } else {
+                label = catId.charAt(0).toUpperCase() + catId.slice(1);
+              }
+            }
+
+            const iconComp = (matchedService && (categoryIconMap[matchedService.icon] || matchedService.custom_icon)) 
+              || categoryIconMap[catId] 
+              || (catId === 'playstation' ? Gamepad2 : Briefcase);
+
+            dynamicCats.push({
+              id: catId,
+              label,
+              icon: iconComp
+            });
+          }
+        });
+
+        setCategories(dynamicCats);
       } catch (error) {
         console.warn('Error fetching portfolio database', error);
         setWorks([]);
@@ -365,14 +441,15 @@ export function Portfolio({ limit = 6, showTitle = true }: PortfolioProps) {
   // Filter items by category
   const filteredWorks = activeCategory === 'all' 
     ? works 
-    : works.filter(w => w.category === activeCategory);
+    : works.filter(w => w.category === activeCategory || (activeCategory === 'headphones' && w.category === 'kulaklik'));
 
   const displayedWorks = limit > 0 ? filteredWorks.slice(0, limit) : filteredWorks;
 
   // Helper to fetch the correct icon component
   const getCategoryIcon = (cat: string) => {
-    const found = categories.find(c => c.id === cat);
-    return found ? found.icon : Smartphone;
+    const found = categories.find(c => c.id === cat || (c.id === 'headphones' && cat === 'kulaklik'));
+    if (found) return found.icon;
+    return categoryIconMap[cat] || (cat === 'playstation' ? Gamepad2 : Smartphone);
   };
 
   return (
@@ -403,7 +480,7 @@ export function Portfolio({ limit = 6, showTitle = true }: PortfolioProps) {
         )}
 
         {/* Category Navigation Tabs */}
-        <div className="grid grid-cols-3 md:flex md:flex-nowrap justify-center gap-2 md:gap-4 pt-3 pb-4 mb-12 px-2 max-w-md mx-auto md:max-w-none" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="grid grid-cols-3 md:flex md:flex-wrap justify-center gap-2 md:gap-4 pt-3 pb-4 mb-12 px-2 max-w-md mx-auto md:max-w-none" dir={isRTL ? 'rtl' : 'ltr'}>
           {categories.map((cat) => {
             const Icon = cat.icon;
             const isActive = activeCategory === cat.id;
@@ -419,7 +496,11 @@ export function Portfolio({ limit = 6, showTitle = true }: PortfolioProps) {
                 }`}
               >
                 <div className={`p-1.5 md:p-2 rounded-lg md:rounded-xl mb-1.5 md:mb-2 transition-all ${isActive ? 'bg-primary/10 text-primary' : 'bg-muted dark:bg-background text-foreground/80'}`}>
-                  <Icon size="100%" className="w-4 h-4 md:w-5.5 md:h-5.5" strokeWidth={2.5} />
+                  {typeof Icon === 'string' ? (
+                    <img src={Icon} alt="" className="w-4 h-4 md:w-5.5 md:h-5.5 object-contain" />
+                  ) : (
+                    <Icon size="100%" className="w-4 h-4 md:w-5.5 md:h-5.5" strokeWidth={2.5} />
+                  )}
                 </div>
                 <span className="text-[9px] md:text-xs font-black tracking-wider uppercase">{cat.label}</span>
               </button>
@@ -490,7 +571,11 @@ export function Portfolio({ limit = 6, showTitle = true }: PortfolioProps) {
                   {/* Header Title with Category Icon */}
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                      <CategoryIcon size={18} strokeWidth={2.5} />
+                      {typeof CategoryIcon === 'string' ? (
+                        <img src={CategoryIcon} alt="" className="w-5 h-5 object-contain" />
+                      ) : (
+                        <CategoryIcon size={18} strokeWidth={2.5} />
+                      )}
                     </div>
                     <h3 className="text-base md:text-lg font-black tracking-tight text-foreground uppercase line-clamp-1">
                       {work.title}

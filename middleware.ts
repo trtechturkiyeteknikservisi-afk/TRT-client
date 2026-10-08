@@ -1,11 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
+import { resolveInternalRoute, ROUTE_MAPPINGS } from './lib/localized-routes';
 
 const intlMiddleware = createMiddleware(routing);
 
 export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // 1. Redirect root-level localized Arabic/Turkish/English paths to their locale prefix for perfect SEO
+  let decodedPath = pathname;
+  try {
+    decodedPath = decodeURIComponent(pathname);
+  } catch (e) {}
+
+  // If path doesn't start with /ar, /tr, /en, check if it matches a localized slug
+  if (!pathname.match(/^\/(ar|tr|en)(\/|$)/)) {
+    const cleanNoSlash = decodedPath.replace(/\/+$/, '') || '/';
+    for (const m of ROUTE_MAPPINGS) {
+      if (cleanNoSlash === m.ar) {
+        return NextResponse.redirect(new URL(`/ar${m.ar}`, request.url), 301);
+      }
+      if (cleanNoSlash === m.tr && m.tr !== m.internal) {
+        return NextResponse.redirect(new URL(`/tr${m.tr}`, request.url), 301);
+      }
+      if (cleanNoSlash === m.en && m.en !== m.internal) {
+        return NextResponse.redirect(new URL(`/en${m.en}`, request.url), 301);
+      }
+    }
+  }
+
+  // 2. Check if the incoming request has a localized path (e.g. /ar/المنتجات, /tr/hakkimizda, /en/products)
+  // and rewrite it internally to the corresponding Next.js page
+  const resolved = resolveInternalRoute(pathname);
+  if (resolved) {
+    const url = request.nextUrl.clone();
+    url.pathname = resolved.internalPath;
+    return NextResponse.rewrite(url);
+  }
 
   // Redirect old portfolio paths to our-works for SEO and backward compatibility
   const portfolioMatch = pathname.match(/^\/(ar|en|tr)\/portfolio\/?$/);

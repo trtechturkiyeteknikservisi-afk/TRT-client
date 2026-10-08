@@ -20,7 +20,7 @@
     "headphones_repair": "Kulaklık Tamiri",
     "cargo_service": "Kargo ile Türkiye Geneli Servis",
     "bize_ulasin": "Bize Ulaşın",
-    "pricing": "Ürünler ve Fiyatlar",
+    "pricing": "Ürünler Fiyatlar",
     "urun_satisi": "Ürün Satışı",
     "yedek_parcalar": "Yedek Parçalar",
     "servis_menu": "Hizmetler",
@@ -58,7 +58,7 @@
     "shipping_terms": "Kargo ve Teslimat Şartları",
     "official_doc": "Tüm Yasal Belgeler (PDF)",
     "copyright": "© {year} TR TECH. Tüm hakları saklıdır.",
-    "pricing_list": "Ürünler ve Fiyatlar"
+    "pricing_list": "Ürünler  Fiyatlar"
   },
   "Home": {
     "stat_customers": "Mutlu Müşteri",
@@ -217,7 +217,9 @@
   "FAQ": {
     "title": "Sıkça Sorulan Sorular",
     "desc": "Teknik servisimiz hakkında yaygın sorular.",
-    "help_center": "Yardım Merkezi"
+    "help_center": "Yardım Merkezi",
+    "show_more": "Daha Fazla Soru Göster",
+    "show_less": "Daha Az Soru Göster"
   },
   "Contact": {
     "title": "İletişime Geçin",
@@ -288,7 +290,11 @@
     "loading_more": "Daha fazla makale yükleniyor...",
     "category": "Onarım",
     "no_blogs": "Şu anda blog yazısı bulunmamaktadır.",
-    "repair_now": "Şimdi Onar"
+    "repair_now": "Şimdi Onar",
+    "prev": "Önceki",
+    "next": "Sonraki",
+    "page": "Sayfa",
+    "showing_results": "{total} makaleden {start} - {end} arası gösteriliyor"
   },
   "Policies": {
     "title": "Yasal Politikalar",
@@ -433,7 +439,7 @@
     "policy_warranty": "Garanti Koşulları",
     "policy_shipping": "Kargo ve Teslimat Şartları",
     "policy_custom": "Tüm Yasal Belgeler (PDF)",
-    "menu_pricing": "Ürünler ve Fiyatlar",
+    "menu_pricing": "Ürünler  Fiyatlar",
     "trust_bar_management": "Güven ve Şerit Çubuğu Yönetimi (Üst & Alt)",
     "trust_items_label": "Şerit Maddeleri",
     "add_trust_item": "Yeni Madde Ekle +",
@@ -731,9 +737,9 @@
       "keywords": "TR TECH politikaları, hizmet şartları, gizlilik politikası, garanti"
     },
     "Pricing": {
-      "title": "Ürünler ve Fiyatlar 2026 Güncel Liste | TR TECH",
+      "title": "Ürünler  Fiyatlar 2026 Güncel Liste | TR TECH",
       "description": "2026 güncel ürünler ve fiyat listesi. Orijinal parça garantisi, 30 dakikada hızlı tamir ve veri kaybı olmadan profesyonel servis.",
-      "keywords": "ürünler ve fiyatlar, tamir fiyat listesi, ekran değişimi fiyatları, telefon tamir fiyatları, orijinal ekran, TR TECH fiyatları"
+      "keywords": "ürünler  fiyatlar, tamir fiyat listesi, ekran değişimi fiyatları, telefon tamir fiyatları, orijinal ekran, TR TECH fiyatları"
     }
   },
   "Linktree": {
@@ -771,7 +777,7 @@
     "linkedin_desc": "Kurumsal profilimizi ve profesyonel ağımızı inceleyin."
   },
   "Pricing": {
-    "title": "Ürünler ve Fiyatlar",
+    "title": "Ürünler  Fiyatlar",
     "subtitle": "Akıllı telefon ve elektronik cihazlarınız için 2026 güncel, şeffaf servis ve orijinal ekran değişim fiyatları.",
     "search_placeholder": "Cihaz veya model ara (örn: iPhone 16 Pro, S24 Ultra, 13 Pro)...",
     "view_cards": "Seri & Kart Görünümü",

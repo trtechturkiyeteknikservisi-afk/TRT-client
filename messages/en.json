@@ -215,7 +215,9 @@
   "FAQ": {
     "title": "Frequently Asked Questions",
     "desc": "Common questions about our technical services.",
-    "help_center": "Help Center"
+    "help_center": "Help Center",
+    "show_more": "Show More Questions",
+    "show_less": "Show Less"
   },
   "Contact": {
     "title": "Get in Touch",
@@ -286,7 +288,11 @@
     "loading_more": "Loading more articles...",
     "category": "Repair",
     "no_blogs": "No blog posts available at the moment.",
-    "repair_now": "Repair Now"
+    "repair_now": "Repair Now",
+    "prev": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "showing_results": "Showing {start} - {end} of {total} articles"
   },
   "Policies": {
     "title": "Legal Policies",

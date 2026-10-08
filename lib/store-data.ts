@@ -4,23 +4,32 @@ export interface StoreProduct {
   title_en: string;
   title_ar: string;
   brand: string;
-  category: 'telefon' | 'laptop' | 'robot' | 'watch' | 'kulaklik' | 'aksesuar' | 'yedek_parca';
-  part_type?: 'ekran' | 'batarya' | 'sarj_soketi' | 'arka_kapak' | 'kamera' | 'hoparlor' | 'mikrofon' | 'yan_tuslar' | 'flex' | 'anakart' | 'diger';
-  item_type: 'cihaz' | 'yedek_parca' | 'aksesuar';
+  category: 'telefon' | 'laptop' | 'robot' | 'watch' | 'kulaklik' | 'aksesuar' | 'yedek_parca' | string;
+  part_type?: 'ekran' | 'batarya' | 'sarj_soketi' | 'arka_kapak' | 'kamera' | 'hoparlor' | 'mikrofon' | 'yan_tuslar' | 'flex' | 'anakart' | 'diger' | string;
+  item_type: 'cihaz' | 'yedek_parca' | 'aksesuar' | string;
   series?: string;
   model: string;
   specs_tr: string;
   specs_en: string;
   specs_ar: string;
   price: number;
+  max_price?: number;
   old_price?: number;
-  quality?: 'Orijinal' | 'OEM' | 'Muadil' | 'Çıkma';
+  quality?: 'Orijinal' | 'OEM' | 'Muadil' | 'Çıkma' | string;
   color?: string;
   in_stock: boolean;
   is_popular?: boolean;
   is_featured?: boolean;
   badge?: string;
+  show_badge?: boolean;
+  badge_text_tr?: string;
+  badge_text_en?: string;
+  badge_text_ar?: string;
   image: string;
+  images?: string[];
+  description_tr?: string;
+  description_en?: string;
+  description_ar?: string;
 }
 
 export const STORE_CATEGORIES = [

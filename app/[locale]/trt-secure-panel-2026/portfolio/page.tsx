@@ -13,15 +13,26 @@ import toast from 'react-hot-toast';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
+const DEFAULT_CATEGORIES = [
+  { id: 'phone', labelTr: 'Telefon Onarımları', labelAr: 'صيانة الهواتف', labelEn: 'Phone Repairs' },
+  { id: 'laptop', labelTr: 'Laptop Onarımları', labelAr: 'صيانة اللابتوب', labelEn: 'Laptop Repairs' },
+  { id: 'watch', labelTr: 'Akıllı Saat Onarımları', labelAr: 'صيانة الساعات الذكية', labelEn: 'Smart Watch Repairs' },
+  { id: 'robot', labelTr: 'Robot Süpürge Onarımları', labelAr: 'صيانة المكانس الروبوتية', labelEn: 'Robot Vacuum Repairs' },
+  { id: 'headphones', labelTr: 'Kulaklık Onarımları', labelAr: 'صيانة السماعات', labelEn: 'Headphones Repairs' },
+];
+
 export default function PortfolioPage() {
   const t = useTranslations('Admin');
   const [data, setData] = useState<any[]>([]);
+  const [services, setServices] = useState<any[]>([]);
+  const [customCategoryInput, setCustomCategoryInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   
   const [uploadForm, setUploadForm] = useState({ 
     title_en: '', title_tr: '', title_ar: '',
     description_en: '', description_tr: '', description_ar: '',
+    category: 'phone',
     type: 'image', url: '' 
   });
   
@@ -67,6 +78,7 @@ export default function PortfolioPage() {
     const en = parseDesc(item.description_en);
     const ar = parseDesc(item.description_ar);
 
+    const itemCat = item.category || 'phone';
     setUploadForm({
       title_en: item.title_en || '',
       title_tr: item.title_tr || '',
@@ -74,9 +86,13 @@ export default function PortfolioPage() {
       description_en: en.d,
       description_tr: tr.d,
       description_ar: ar.d,
+      category: itemCat,
       type: item.type || 'image',
       url: item.url || ''
     });
+
+    const isKnown = DEFAULT_CATEGORIES.some(c => c.id === itemCat) || services.some(s => (s.slug || `service-${s.id}`) === itemCat);
+    setCustomCategoryInput(isKnown ? '' : itemCat);
 
     setPoints({
       tr1: tr.p1, tr2: tr.p2, tr3: tr.p3,
@@ -94,8 +110,10 @@ export default function PortfolioPage() {
     setUploadForm({
       title_en: '', title_tr: '', title_ar: '',
       description_en: '', description_tr: '', description_ar: '',
+      category: 'phone',
       type: 'image', url: ''
     });
+    setCustomCategoryInput('');
     setPoints({
       tr1: '', tr2: '', tr3: '',
       en1: '', en2: '', en3: '',
@@ -113,6 +131,17 @@ export default function PortfolioPage() {
         headers: { Authorization: `Bearer ${token}` }
       });
       setData(response.data as any[]);
+
+      try {
+        const sRes = await axios.get(`${API_BASE}/content/services/admin-all`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }).catch(() => axios.get(`${API_BASE}/content/services`));
+        if (sRes?.data && Array.isArray(sRes.data)) {
+          setServices(sRes.data);
+        }
+      } catch (e) {
+        // ignore service fetch error
+      }
     } catch (err: any) {
       console.error('Error fetching portfolio', err);
       if (err?.response?.status === 401) {
@@ -200,6 +229,10 @@ export default function PortfolioPage() {
       const description_en = combineDesc(uploadForm.description_en, points.en1, points.en2, points.en3);
       const description_ar = combineDesc(uploadForm.description_ar, points.ar1, points.ar2, points.ar3);
 
+      const finalCategory = customCategoryInput.trim() 
+        ? customCategoryInput.trim().toLowerCase().replace(/\s+/g, '-') 
+        : (uploadForm.category || 'phone');
+
       const payload = {
         title_en: uploadForm.title_en,
         title_tr: uploadForm.title_tr,
@@ -207,6 +240,7 @@ export default function PortfolioPage() {
         description_en,
         description_tr,
         description_ar,
+        category: finalCategory,
         type: uploadForm.type,
         url: finalUrl
       };
@@ -281,7 +315,76 @@ export default function PortfolioPage() {
         </div>
         
         <form onSubmit={handleCreate} className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+               {/* Category Selection */}
+               <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1 mb-1 block">
+                      Category / الفئة / Kategori
+                    </label>
+                    <select
+                        value={
+                          customCategoryInput 
+                            ? 'custom' 
+                            : (DEFAULT_CATEGORIES.some(c => c.id === uploadForm.category) || services.some(s => (s.slug || `service-${s.id}`) === uploadForm.category) 
+                                ? uploadForm.category 
+                                : 'custom')
+                        }
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === 'custom') {
+                            const initialCustom = uploadForm.category && !DEFAULT_CATEGORIES.some(c => c.id === uploadForm.category) ? uploadForm.category : 'playstation';
+                            setCustomCategoryInput(initialCustom);
+                            setUploadForm((prev) => ({ ...prev, category: initialCustom }));
+                          } else {
+                            setUploadForm((prev) => ({ ...prev, category: val }));
+                            setCustomCategoryInput('');
+                          }
+                        }}
+                        className="w-full px-3 py-2.5 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs"
+                    >
+                        <optgroup label="Default Categories / الأقسام الأساسية">
+                          {DEFAULT_CATEGORIES.map(cat => (
+                            <option key={cat.id} value={cat.id}>
+                              {cat.labelTr} / {cat.labelAr}
+                            </option>
+                          ))}
+                        </optgroup>
+                        {services.length > 0 && (
+                          <optgroup label="Services / الخدمات المضافة">
+                            {services.map(s => {
+                              const slug = s.slug || `service-${s.id}`;
+                              if (DEFAULT_CATEGORIES.some(c => c.id === slug)) return null;
+                              return (
+                                <option key={s.id} value={slug}>
+                                  {s.title_tr || s.title_ar || s.title_en} ({slug})
+                                </option>
+                              );
+                            })}
+                          </optgroup>
+                        )}
+                        <option value="custom">+ Diğer / Özel Kategori (+ فئة مخصصة أخرى)</option>
+                    </select>
+
+                    {customCategoryInput !== '' && (
+                      <div className="pt-2">
+                        <input
+                          type="text"
+                          value={customCategoryInput}
+                          onChange={(e) => {
+                            const val = e.target.value.toLowerCase().replace(/\s+/g, '-');
+                            setCustomCategoryInput(val);
+                            setUploadForm(prev => ({ ...prev, category: val }));
+                          }}
+                          placeholder="Örn: playstation, console..."
+                          className="w-full px-3 py-2 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/20 font-mono font-bold text-xs"
+                        />
+                        <span className="text-[9px] text-muted-foreground block mt-1">
+                          اكتب رمز الفئة بالإنجليزية (مثال: playstation)
+                        </span>
+                      </div>
+                    )}
+               </div>
+
                <div className="space-y-1">
                     <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1 mb-1 block">Media Type</label>
                     <select
@@ -548,6 +651,9 @@ export default function PortfolioPage() {
                     <div className="absolute top-3 left-3 flex gap-2">
                         <span className="px-2 py-1 bg-black/50 backdrop-blur-md text-white text-[8px] font-black uppercase rounded border border-white/10">
                             {item.type}
+                        </span>
+                        <span className="px-2 py-1 bg-primary text-primary-foreground text-[8px] font-black uppercase rounded shadow-sm">
+                            {item.category || 'phone'}
                         </span>
                     </div>
                     <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all">

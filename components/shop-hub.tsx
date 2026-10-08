@@ -9,9 +9,11 @@ import {
 } from 'lucide-react';
 import { useLocale } from 'next-intl';
 import { Link, useRouter } from '@/i18n/routing';
-import { cn } from '@/lib/utils';
+import { cn, getProductUrl } from '@/lib/utils';
 import { BrandIcon } from './brand-icons';
 import { useStore } from './store-context';
+import { useCurrency } from './currency-context';
+import { ProductCard } from './product-card';
 import { 
   STORE_CATEGORIES, 
   STORE_BRANDS, 
@@ -29,6 +31,7 @@ export function ShopHub({ initialCategory, initialBrand, initialSearch }: ShopHu
   const locale = useLocale();
   const router = useRouter();
   const { addToCart, toggleFavorite, isFavorite } = useStore();
+  const { formatPrice } = useCurrency();
 
   const [activeCategory, setActiveCategory] = useState<string>(initialCategory || 'all');
   const [activeBrand, setActiveBrand] = useState<string>(initialBrand || 'all');
@@ -83,8 +86,13 @@ export function ShopHub({ initialCategory, initialBrand, initialSearch }: ShopHu
               specs_en: item.specs_en || item.notes_en || 'Original & Compatible',
               specs_ar: item.specs_ar || item.notes_ar || 'منتج مضمون وعالي الجودة',
               price: item.base_price,
+              max_price: item.max_price || 0,
               quality: (item.quality_options?.[0]?.quality_tr?.includes('OEM') ? 'OEM' : item.quality_options?.[0]?.quality_tr?.includes('Muadil') ? 'Muadil' : 'Orijinal'),
-              badge: item.item_type === 'cihaz' ? 'Cihaz' : item.item_type === 'aksesuar' ? 'Aksesuar' : item.item_type === 'servis' ? 'Servis' : 'Yedek Parça',
+              show_badge: item.show_badge !== false && item.show_badge !== 0,
+              badge_text_tr: item.badge_text_tr,
+              badge_text_en: item.badge_text_en,
+              badge_text_ar: item.badge_text_ar,
+              badge: locale === 'ar' ? (item.badge_text_ar || 'أصلي') : locale === 'en' ? (item.badge_text_en || 'Original') : (item.badge_text_tr || 'Orijinal'),
               in_stock: item.in_stock,
               is_popular: item.is_popular,
               image: item.image_url || '/images/spare-parts-screen.jpg'
@@ -105,10 +113,6 @@ export function ShopHub({ initialCategory, initialBrand, initialSearch }: ShopHu
   const allAvailableProducts = useMemo(() => {
     return liveProducts;
   }, [liveProducts]);
-
-  const formatPrice = (val: number) => {
-    return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(val) + ' TL';
-  };
 
   // Filtered products list
   const filteredProducts = useMemo(() => {
@@ -489,90 +493,12 @@ export function ShopHub({ initialCategory, initialBrand, initialSearch }: ShopHu
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
-              {paginatedProducts.map((product) => {
-                return (
-                  <div
-                    key={product.id}
-                    className="group rounded-lg bg-[#121215] border border-zinc-800 hover:border-zinc-700 flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:shadow-black/50 relative overflow-hidden"
-                  >
-                    {/* Product Image taking top of card without gaps */}
-                    <div className="w-full h-44 sm:h-48 bg-black/50 border-b border-zinc-800/80 overflow-hidden relative flex items-center justify-center shrink-0">
-                      <span className={cn(
-                        "absolute top-2.5 left-2.5 z-10 text-[9px] sm:text-[10px] font-black uppercase px-2 py-0.5 rounded shadow-md",
-                        product.badge === 'Cihaz' 
-                          ? "bg-blue-600 text-white" 
-                          : product.badge === 'Yedek Parça' || product.quality === 'Orijinal'
-                          ? "bg-[#E11D48] text-white"
-                          : product.badge === 'OEM'
-                          ? "bg-amber-600 text-white"
-                          : "bg-zinc-800 text-zinc-300"
-                      )}>
-                        {product.badge || product.quality || 'TR TECH'}
-                      </span>
-
-                      <img
-                        src={product.image}
-                        alt={product.title_tr}
-                        loading="lazy"
-                        decoding="async"
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    </div>
-
-                    {/* Product Info & Action */}
-                    <div className="p-3 sm:p-4 flex-1 flex flex-col justify-between space-y-3">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-1.5 text-[10px] font-black text-zinc-500 uppercase">
-                          <BrandIcon brand={product.brand} size={13} />
-                          <span>{product.brand}</span>
-                        </div>
-
-                        <h3 className="text-xs sm:text-sm font-black text-white group-hover:text-[#E11D48] transition-colors leading-tight line-clamp-1">
-                          {locale === 'ar' ? product.title_ar : locale === 'en' ? product.title_en : product.title_tr}
-                        </h3>
-
-                        <p className="text-[10px] text-zinc-400 font-bold line-clamp-1">
-                          {locale === 'ar' ? product.specs_ar : locale === 'en' ? product.specs_en : product.specs_tr}
-                        </p>
-                      </div>
-
-                      {/* Price & Add to Cart Action */}
-                      <div className="space-y-2 pt-2 border-t border-zinc-800/80">
-                        <div className="flex items-baseline justify-between">
-                          <span className="text-sm sm:text-base font-black text-white tracking-tight">
-                            {formatPrice(product.price)}
-                          </span>
-                          <span className="text-[10px] font-black text-emerald-400 flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                            <span>{locale === 'ar' ? 'متوفر' : 'Stokta Var'}</span>
-                          </span>
-                        </div>
-
-                        <button
-                          onClick={() =>
-                            addToCart({
-                              id: product.id,
-                              title: product.title_tr,
-                              price: product.price,
-                              image: product.image,
-                              brand: product.brand,
-                              category: product.category,
-                              quality: product.quality,
-                              specs: product.specs_tr,
-                              badge: product.badge,
-                              item_type: product.item_type
-                            })
-                          }
-                          className="w-full py-2 px-3 rounded-md bg-[#E11D48] hover:bg-[#be123c] text-white text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all shadow-md shadow-red-950/40 cursor-pointer active:scale-95"
-                        >
-                          <ShoppingBag size={13} />
-                          <span>{locale === 'ar' ? 'أضف للسلة' : 'Sepete Ekle'}</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              {paginatedProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                />
+              ))}
             </div>
           )}
 

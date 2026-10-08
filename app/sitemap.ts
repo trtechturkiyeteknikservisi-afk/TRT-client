@@ -1,4 +1,6 @@
 import type { MetadataRoute } from 'next';
+import { getLocalizedUrl } from '@/lib/localized-routes';
+import { STORE_CATEGORIES } from '@/lib/store-data';
 
 const SITE_URL = 'https://www.trtservis.com';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
@@ -11,13 +13,13 @@ const STATIC_ROUTES: Array<{
   changefreq: MetadataRoute.Sitemap[0]['changeFrequency'];
 }> = [
   { path: '', priority: 1.0, changefreq: 'daily' },
+  { path: '/urunler', priority: 0.95, changefreq: 'daily' },
+  { path: '/tamir-fiyatlari', priority: 0.95, changefreq: 'daily' },
   { path: '/about-us', priority: 0.8, changefreq: 'monthly' },
   { path: '/contact', priority: 0.9, changefreq: 'monthly' },
   { path: '/our-works', priority: 0.8, changefreq: 'weekly' },
   { path: '/blog', priority: 0.8, changefreq: 'daily' },
   { path: '/services', priority: 0.9, changefreq: 'monthly' },
-  { path: '/pricing', priority: 0.95, changefreq: 'daily' },
-  { path: '/tamir-fiyatlari', priority: 0.95, changefreq: 'daily' },
   { path: '/policies', priority: 0.5, changefreq: 'yearly' },
 ];
 
@@ -88,8 +90,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     } = {}
   ) => {
     for (const locale of LOCALES) {
+      const locPath = path === '' ? `/${locale}` : getLocalizedUrl(path, locale);
       entries.push({
-        url: `${SITE_URL}/${locale}${path}`,
+        url: `${SITE_URL}${locPath}`,
         ...(options.lastModified
           ? { lastModified: options.lastModified }
           : {}),
@@ -135,6 +138,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       lastModified: blog.updatedAt || blog.date,
     });
+  }
+
+  // Add individual category pages to sitemap
+  for (const cat of STORE_CATEGORIES) {
+    for (const locale of LOCALES) {
+      const base = getLocalizedUrl('/urunler', locale);
+      entries.push({
+        url: `${SITE_URL}${base}?category=${cat.id}`,
+        changeFrequency: 'daily',
+        priority: 0.9,
+      });
+    }
   }
 
   return entries;

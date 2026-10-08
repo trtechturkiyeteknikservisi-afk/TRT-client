@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { 
   Settings, Save, User as UserIcon, Phone, MessageCircle, Lock, CheckCircle,
   Megaphone, ShieldCheck, AlertCircle, Sparkles, Sliders, ToggleLeft, ToggleRight,
-  Plus, Trash2
+  Plus, Trash2, DollarSign
 } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { cn } from '@/lib/utils';
@@ -39,6 +39,10 @@ export default function SettingsPage() {
     trust_bar_ar: '',
     trust_bar_en: '',
     trust_bar_tr: '',
+    exchange_rate_usd_try: '38.5',
+    exchange_rate_try_syp: '390',
+    exchange_rate_usd_syp: '15000',
+    arabic_currency: 'SYP',
     username: '',
     password: '',
     confirmPassword: ''
@@ -72,6 +76,10 @@ export default function SettingsPage() {
         trust_bar_ar: data.trust_bar_ar || '',
         trust_bar_en: data.trust_bar_en || '',
         trust_bar_tr: data.trust_bar_tr || '',
+        exchange_rate_usd_try: data.exchange_rate_usd_try || '38.5',
+        exchange_rate_try_syp: data.exchange_rate_try_syp || '390',
+        exchange_rate_usd_syp: data.exchange_rate_usd_syp || '15000',
+        arabic_currency: data.arabic_currency || 'SYP',
         username: parsedUser?.username || ''
       }));
     } catch (err: any) {
@@ -104,7 +112,11 @@ export default function SettingsPage() {
         trust_bar_speed: settingsForm.trust_bar_speed,
         trust_bar_ar: settingsForm.trust_bar_ar,
         trust_bar_en: settingsForm.trust_bar_en,
-        trust_bar_tr: settingsForm.trust_bar_tr
+        trust_bar_tr: settingsForm.trust_bar_tr,
+        exchange_rate_usd_try: settingsForm.exchange_rate_usd_try,
+        exchange_rate_try_syp: settingsForm.exchange_rate_try_syp,
+        exchange_rate_usd_syp: settingsForm.exchange_rate_usd_syp,
+        arabic_currency: settingsForm.arabic_currency || 'SYP'
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -141,7 +153,7 @@ export default function SettingsPage() {
   }, []);
 
   return (
-    <div className="space-y-6 max-w-5xl pb-16">
+    <div className="space-y-6 w-full pb-16">
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2 text-primary mb-2">
@@ -205,6 +217,126 @@ export default function SettingsPage() {
                         />
                     </div>
                </div>
+          </div>
+
+          {/* CURRENCY & EXCHANGE RATES MANAGEMENT */}
+          <div className="bg-card p-6 md:p-8 rounded-xl border shadow-sm space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4">
+                  <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                      <div className="w-10 h-10 bg-emerald-500/10 text-emerald-500 rounded-md flex items-center justify-center">
+                          <DollarSign size={22} />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-black tracking-tight uppercase flex items-center gap-2">
+                          <span>{locale === 'ar' ? 'إدارة أسعار الصرف والعملات' : 'Döviz Kurları ve Para Birimleri'}</span>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                            USD / TRY / SYP
+                          </span>
+                        </h3>
+                        <p className="text-xs text-muted-foreground">
+                          {locale === 'ar' 
+                            ? 'تتغير عملة الموقع تلقائياً بناءً على اختيار لغة المتصفح: الإنجليزية ($) والتركية (₺)، وتحدد أدناه العملة المعتمدة للواجهة العربية.' 
+                            : 'Site para birimi seçilen dile göre otomatik değişir: İngilizce ($), Türkçe (₺) ve aşağıda seçilen Arapça para birimi.'}
+                        </p>
+                      </div>
+                  </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {/* 1. Arabic Active Currency Choice */}
+                  <div className="p-4 rounded-xl border bg-muted/20 space-y-2">
+                      <label className="text-xs font-black uppercase tracking-wider text-foreground block flex items-center justify-between">
+                        <span>{locale === 'ar' ? 'العملة للواجهة العربية' : 'Arapça Para Birimi'}</span>
+                        <span className="text-[10px] text-amber-600 font-bold bg-amber-500/10 px-2 py-0.5 rounded">
+                          {settingsForm.arabic_currency || 'SYP'}
+                        </span>
+                      </label>
+                      <select
+                        value={settingsForm.arabic_currency || 'SYP'}
+                        onChange={(e) => setSettingsForm(prev => ({ ...prev, arabic_currency: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-lg border bg-background text-sm font-black text-foreground outline-hidden focus:border-primary shadow-xs cursor-pointer"
+                      >
+                        <option value="SYP">{locale === 'ar' ? '🇸🇾 الليرة السورية (SYP)' : '🇸🇾 Suriye Lirası (SYP)'}</option>
+                        <option value="TRY">{locale === 'ar' ? '🇹🇷 الليرة التركية (TRY)' : '🇹🇷 Türk Lirası (TRY)'}</option>
+                        <option value="USD">{locale === 'ar' ? '🇺🇸 الدولار الأمريكي (USD)' : '🇺🇸 Dolar (USD)'}</option>
+                      </select>
+                      <p className="text-[11px] text-muted-foreground font-semibold">
+                        {locale === 'ar' ? 'العملة التي ستظهر تلقائياً لزوار اللغة العربية' : 'Arapça dili seçen müşterilere gösterilecek para birimi'}
+                      </p>
+                  </div>
+
+                  {/* 2. USD to TRY */}
+                  <div className="p-4 rounded-xl border bg-muted/20 space-y-2">
+                      <label className="text-xs font-black uppercase tracking-wider text-foreground block flex items-center justify-between">
+                        <span>{locale === 'ar' ? 'سعر الدولار مقابل التركية' : 'USD / TL Kuru'}</span>
+                        <span className="text-[10px] text-emerald-600 font-bold bg-emerald-500/10 px-2 py-0.5 rounded">1 $ = ? ₺</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={settingsForm.exchange_rate_usd_try}
+                          onChange={(e) => setSettingsForm(prev => ({ ...prev, exchange_rate_usd_try: e.target.value }))}
+                          placeholder="38.50"
+                          className="w-full px-4 py-3 rounded-lg border bg-background text-base font-black text-foreground outline-hidden focus:border-primary shadow-xs"
+                        />
+                        <span className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-xs font-black text-muted-foreground">
+                          ₺ / $
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground font-semibold">
+                        {locale === 'ar' ? 'مثال: 38.50 (1 دولار = 38.50 ₺)' : 'Örnek: 38.50 (1 Dolar = 38.50 TL)'}
+                      </p>
+                  </div>
+
+                  {/* 3. TRY to SYP */}
+                  <div className="p-4 rounded-xl border bg-muted/20 space-y-2">
+                      <label className="text-xs font-black uppercase tracking-wider text-foreground block flex items-center justify-between">
+                        <span>{locale === 'ar' ? 'سعر التركية مقابل السورية' : 'TL / SYP Kuru'}</span>
+                        <span className="text-[10px] text-blue-600 font-bold bg-blue-500/10 px-2 py-0.5 rounded">1 ₺ = ? ل.س</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          step="1"
+                          value={settingsForm.exchange_rate_try_syp}
+                          onChange={(e) => setSettingsForm(prev => ({ ...prev, exchange_rate_try_syp: e.target.value }))}
+                          placeholder="390"
+                          className="w-full px-4 py-3 rounded-lg border bg-background text-base font-black text-foreground outline-hidden focus:border-primary shadow-xs"
+                        />
+                        <span className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-xs font-black text-muted-foreground">
+                          ل.س / ₺
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground font-semibold">
+                        {locale === 'ar' ? 'مثال: 390 (1 ليرة تركية = 390 ل.س)' : 'Örnek: 390 (1 TL = 390 Suriye Lirası)'}
+                      </p>
+                  </div>
+
+                  {/* 4. USD to SYP */}
+                  <div className="p-4 rounded-xl border bg-muted/20 space-y-2">
+                      <label className="text-xs font-black uppercase tracking-wider text-foreground block flex items-center justify-between">
+                        <span>{locale === 'ar' ? 'سعر الدولار مقابل السورية' : 'USD / SYP Kuru'}</span>
+                        <span className="text-[10px] text-purple-600 font-bold bg-purple-500/10 px-2 py-0.5 rounded">1 $ = ? ل.س</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          step="10"
+                          value={settingsForm.exchange_rate_usd_syp}
+                          onChange={(e) => setSettingsForm(prev => ({ ...prev, exchange_rate_usd_syp: e.target.value }))}
+                          placeholder="15000"
+                          className="w-full px-4 py-3 rounded-lg border bg-background text-base font-black text-foreground outline-hidden focus:border-primary shadow-xs"
+                        />
+                        <span className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-xs font-black text-muted-foreground">
+                          ل.س / $
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground font-semibold">
+                        {locale === 'ar' ? 'مثال: 15000 (1 دولار = 15,000 ل.س)' : 'Örnek: 15000 (1 Dolar = 15.000 Suriye Lirası)'}
+                      </p>
+                  </div>
+              </div>
           </div>
 
           {/* BAR 1: News Bar Management */}

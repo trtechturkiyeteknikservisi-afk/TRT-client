@@ -14,6 +14,7 @@ import { Link } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
 import { BrandIcon } from './brand-icons';
 import { useStore } from './store-context';
+import { ProductCard } from './product-card';
 import { 
   SPARE_PARTS_MENU, 
   IPHONE_SERIES, 
@@ -525,93 +526,12 @@ export function SparePartsShop() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {filteredProducts.map((item) => {
-                  const fav = isFavorite(item.id);
-                  return (
-                    <div
-                      key={item.id}
-                      className="group rounded-2xl bg-[#121215] border border-zinc-800 hover:border-zinc-700 p-4 flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:shadow-black/50 relative"
-                    >
-                      {/* Top Quality Badge & Wishlist Heart */}
-                      <div className="flex items-center justify-between mb-2">
-                        <span className={cn(
-                          "text-[10px] font-black uppercase px-2.5 py-0.5 rounded-md shadow-xs",
-                          item.quality === 'Orijinal'
-                            ? "bg-[#E11D48] text-white"
-                            : item.quality === 'OEM'
-                            ? "bg-amber-600 text-white"
-                            : "bg-zinc-800 text-zinc-300"
-                        )}>
-                          {item.quality || 'Yedek Parça'}
-                        </span>
-
-                        <button
-                          onClick={() => toggleFavorite(item.id, item.title_tr)}
-                          className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer"
-                        >
-                          <Heart
-                            size={16}
-                            className={fav ? "fill-rose-500 text-rose-500" : ""}
-                          />
-                        </button>
-                      </div>
-
-                      {/* Part Image */}
-                      <div className="w-full h-44 rounded-xl bg-black/60 border border-zinc-800/80 overflow-hidden mb-3 relative flex items-center justify-center p-2">
-                        <img
-                          src={item.image}
-                          alt={item.title_tr}
-                          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
-                        />
-                      </div>
-
-                      {/* Details */}
-                      <div className="space-y-1 mb-3">
-                        <h3 className="text-xs sm:text-sm font-black text-white group-hover:text-[#E11D48] transition-colors leading-tight line-clamp-1">
-                          {locale === 'ar' ? item.title_ar : locale === 'en' ? item.title_en : item.title_tr}
-                        </h3>
-
-                        <p className="text-[11px] text-zinc-400 font-bold line-clamp-1">
-                          {locale === 'ar' ? item.specs_ar : locale === 'en' ? item.specs_en : item.specs_tr}
-                        </p>
-                      </div>
-
-                      {/* Price & Action */}
-                      <div className="space-y-2 pt-2 border-t border-zinc-800/80">
-                        <div className="flex items-baseline justify-between">
-                          <span className="text-base font-black text-white tracking-tight">
-                            {formatPrice(item.price)}
-                          </span>
-                          <span className="text-[10px] font-black text-emerald-400 flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                            <span>{locale === 'ar' ? 'متوفر بالمخزن' : 'Stokta Var'}</span>
-                          </span>
-                        </div>
-
-                        <button
-                          onClick={() =>
-                            addToCart({
-                              id: item.id,
-                              title: item.title_tr,
-                              price: item.price,
-                              image: item.image,
-                              brand: item.brand,
-                              category: item.category,
-                              quality: item.quality,
-                              specs: item.specs_tr,
-                              badge: item.quality,
-                              item_type: 'yedek_parca'
-                            })
-                          }
-                          className="w-full py-2.5 px-3 rounded-xl bg-[#E11D48] hover:bg-[#be123c] text-white text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md shadow-red-950/40 cursor-pointer active:scale-95"
-                        >
-                          <ShoppingBag size={14} />
-                          <span>{locale === 'ar' ? 'أضف للسلة' : 'Sepete Ekle'}</span>
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
+                {filteredProducts.map((item) => (
+                  <ProductCard
+                    key={item.id}
+                    product={item}
+                  />
+                ))}
               </div>
             )}
           </div>

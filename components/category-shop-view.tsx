@@ -10,13 +10,16 @@ import {
   Check, ArrowRight, Smartphone, Laptop, Watch, Battery, 
   Zap, Shield, Camera, Volume2, Mic, Settings, Cpu, 
   Wrench, RefreshCw, Award, Filter, X, ChevronDown, Layers,
-  CheckCircle2, Sparkles
+  CheckCircle2
 } from 'lucide-react';
 import { useLocale } from 'next-intl';
 import { Link, useRouter } from '@/i18n/routing';
-import { cn } from '@/lib/utils';
+import { cn, getProductUrl } from '@/lib/utils';
 import { BrandIcon } from './brand-icons';
 import { useStore } from './store-context';
+import { useCurrency } from './currency-context';
+import { ProductCard } from './product-card';
+import { getLocalizedUrl } from '@/lib/localized-routes';
 import { 
   STORE_CATEGORIES, 
   STORE_BRANDS,
@@ -40,6 +43,7 @@ export function CategoryShopView({
   const locale = useLocale();
   const router = useRouter();
   const { addToCart, toggleFavorite, isFavorite } = useStore();
+  const { formatPrice, currentCurrency, currencySymbol } = useCurrency();
 
   // Active filter states
   const [selectedCategory, setSelectedCategory] = useState<string>(categorySlug || 'all');
@@ -70,21 +74,34 @@ export function CategoryShopView({
   const categoryBanners = useMemo(() => {
     // If a specific category is selected, prioritize its custom banner
     if (selectedCategory !== 'all') {
-      const cat: any = categories.find(c => c.id === selectedCategory);
+      const sel = selectedCategory.toLowerCase();
+      const cat: any = categories.find(c => c.id.toLowerCase() === sel) 
+        || STORE_CATEGORIES.find(c => c.id.toLowerCase() === sel)
+        || categories.find(c => (c.id === 'telefon' && sel === 'phone') || (c.id === 'laptop' && sel === 'computer'))
+        || STORE_CATEGORIES.find(c => (c.id === 'telefon' && sel === 'phone'));
       if (cat) {
-        const title = (locale === 'ar' ? cat.banner_title_ar : locale === 'en' ? cat.banner_title_en : cat.banner_title_tr) || (locale === 'ar' ? (cat.title_ar || cat.name_ar) : locale === 'en' ? (cat.title_en || cat.name_en) : (cat.title_tr || cat.name_tr));
-        const desc = (locale === 'ar' ? cat.banner_desc_ar : locale === 'en' ? cat.banner_desc_en : cat.banner_desc_tr) || (locale === 'ar' ? 'قطع غيار وإكسسوارات معتمدة بأعلى معايير الجودة مع ضمان المنتج وشحن وتوصيل سريع.' : locale === 'en' ? 'Certified spare parts and accessories with product warranty and fast delivery.' : 'Orijinal ve A+ kalite parçalar. Resmi ürün garantisi ve hızlı teslimat.');
-        const cta = (locale === 'ar' ? cat.banner_cta_ar : locale === 'en' ? cat.banner_cta_en : cat.banner_cta_tr) || (locale === 'ar' ? 'استعراض المنتجات' : locale === 'en' ? 'Browse Products' : 'Ürünleri İncele');
-        const img = cat.banner_image || cat.image;
-        if (img) {
-          return [{
-            categoryId: cat.id,
-            title,
-            description: desc,
-            image: img,
-            cta
-          }];
-        }
+        const title = (locale === 'ar' ? cat.banner_title_ar : locale === 'en' ? cat.banner_title_en : cat.banner_title_tr) 
+          || (locale === 'ar' ? (cat.title_ar || cat.name_ar) : locale === 'en' ? (cat.title_en || cat.name_en) : (cat.title_tr || cat.name_tr));
+        const desc = (locale === 'ar' ? cat.banner_desc_ar : locale === 'en' ? cat.banner_desc_en : cat.banner_desc_tr) 
+          || (locale === 'ar' ? 'قطع غيار وإكسسوارات معتمدة بأعلى معايير الجودة مع ضمان المنتج وشحن وتوصيل سريع.' : locale === 'en' ? 'Certified spare parts and accessories with product warranty and fast delivery.' : 'Orijinal ve A+ kalite parçalar. Resmi ürün garantisi ve hızlı teslimat.');
+        const cta = (locale === 'ar' ? cat.banner_cta_ar : locale === 'en' ? cat.banner_cta_en : cat.banner_cta_tr) 
+          || (locale === 'ar' ? 'استعراض المنتجات' : locale === 'en' ? 'Browse Products' : 'Ürünleri İncele');
+        const img = cat.banner_image || cat.image || '/images/shop-hero.jpg';
+        return [{
+          categoryId: cat.id,
+          title,
+          description: desc,
+          image: img,
+          cta
+        }];
+      } else {
+        return [{
+          categoryId: selectedCategory,
+          title: locale === 'ar' ? `قسم ${selectedCategory}` : `${selectedCategory} Kategorisi`,
+          description: locale === 'ar' ? 'استعراض أحدث الأجهزة وقطع الغيار الأصلية المضمونة بأفضل الأسعار.' : 'Orijinal ve garantili ürünler en iyi fiyat avantajıyla.',
+          image: '/images/shop-hero.jpg',
+          cta: locale === 'ar' ? 'استعراض المنتجات' : 'Ürünleri İncele'
+        }];
       }
     }
 
@@ -150,9 +167,41 @@ export function CategoryShopView({
     sortOrder
   ]);
 
-  // Sync when categorySlug prop changes
+  // In-page category selection handler with SEO-friendly shallow URL update (Requirement 2)
+  const handleCategorySelect = (catId: string) => {
+    setSelectedCategory(catId);
+    setSelectedPart('all');
+    setCurrentPage(1);
+
+    if (typeof window !== 'undefined') {
+      const base = getLocalizedUrl('/urunler', locale);
+      const newUrl = catId === 'all' ? base : `${base}?category=${catId}`;
+      window.history.pushState({ category: catId }, '', newUrl);
+    }
+
+    productsGridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  // Sync when categorySlug prop or URL query parameter changes
   useEffect(() => {
-    if (categorySlug) {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const urlCat = params.get('category');
+      if (urlCat) {
+        setSelectedCategory(urlCat);
+      } else if (categorySlug) {
+        setSelectedCategory(categorySlug);
+      }
+
+      const handlePopState = (e: PopStateEvent) => {
+        const p = new URLSearchParams(window.location.search);
+        const popCat = p.get('category') || (categorySlug !== 'all' ? categorySlug : 'all');
+        setSelectedCategory(popCat);
+      };
+
+      window.addEventListener('popstate', handlePopState);
+      return () => window.removeEventListener('popstate', handlePopState);
+    } else if (categorySlug) {
       setSelectedCategory(categorySlug);
     }
   }, [categorySlug]);
@@ -187,6 +236,12 @@ export function CategoryShopView({
                   banner_cta_tr: cat.banner_cta_tr || fallback?.banner_cta_tr || '',
                   banner_cta_en: cat.banner_cta_en || fallback?.banner_cta_en || '',
                   banner_cta_ar: cat.banner_cta_ar || fallback?.banner_cta_ar || '',
+                  desc_ar: cat.desc_ar || fallback?.desc_ar || '',
+                  desc_tr: cat.desc_tr || fallback?.desc_tr || '',
+                  desc_en: cat.desc_en || fallback?.desc_en || '',
+                  specs_ar: cat.specs_ar || (fallback as any)?.specs_ar || '',
+                  specs_tr: cat.specs_tr || (fallback as any)?.specs_tr || '',
+                  specs_en: cat.specs_en || (fallback as any)?.specs_en || '',
                 };
               });
               setCategories(merged);
@@ -194,31 +249,45 @@ export function CategoryShopView({
           }
         } catch (e) {}
 
-        // 2. Fetch products strictly from database (Single source of truth)
         const res = await axios.get(`${API_URL}/pricing`);
         if (isMounted) {
           if (Array.isArray(res.data) && res.data.length > 0) {
-            const mapped: StoreProduct[] = res.data.map((item: any) => ({
-              id: `db-${item.id}`,
-              title_tr: item.service_name_tr || item.model_name,
-              title_en: item.service_name_en || item.model_name,
-              title_ar: item.service_name_ar || item.model_name,
-              brand: item.brand,
-              category: (item.device_type === 'phone' ? 'telefon' : (item.device_type || 'yedek_parca')) as any,
-              part_type: item.part_type || (item.service_slug?.includes('ekran') ? 'ekran' : item.service_slug?.includes('batarya') ? 'batarya' : item.service_slug?.includes('kamera') ? 'kamera' : 'diger'),
-              item_type: item.item_type || (item.category_name_tr?.includes('Yedek') || item.service_slug?.includes('ekran') || item.service_slug?.includes('batarya') ? 'yedek_parca' : 'cihaz'),
-              series: item.series,
-              model: item.model_name,
-              specs_tr: item.specs_tr || item.notes_tr || 'Orijinal ve Uyumlu Ürün',
-              specs_en: item.specs_en || item.notes_en || 'Original & Compatible',
-              specs_ar: item.specs_ar || item.notes_ar || 'أجهزة وقطع غيار أصلية',
-              price: item.base_price,
-              quality: (item.quality_options?.[0]?.quality_tr?.includes('OEM') ? 'OEM' : item.quality_options?.[0]?.quality_tr?.includes('Muadil') ? 'Muadil' : 'Orijinal'),
-              badge: (item.quality_options?.[0]?.quality_tr?.includes('OEM') ? 'OEM' : item.quality_options?.[0]?.quality_tr?.includes('Muadil') ? 'Muadil' : item.item_type === 'cihaz' ? 'Cihaz' : item.item_type === 'aksesuar' ? 'Aksesuar' : 'Orijinal'),
-              in_stock: item.in_stock ?? true,
-              is_popular: item.is_popular,
-              image: item.image_url || '/images/phones-category.jpg'
-            }));
+            const mapped: StoreProduct[] = res.data.map((item: any) => {
+              const imagesList = Array.isArray(item.images) && item.images.length > 0 
+                ? item.images 
+                : (item.image_url ? [item.image_url] : []);
+
+              return {
+                id: `db-${item.id}`,
+                title_tr: item.service_name_tr || item.model_name,
+                title_en: item.service_name_en || item.model_name,
+                title_ar: item.service_name_ar || item.model_name,
+                brand: item.brand,
+                category: (item.device_type === 'phone' ? 'telefon' : (item.device_type || 'yedek_parca')) as any,
+                part_type: item.part_type || (item.service_slug?.includes('ekran') ? 'ekran' : item.service_slug?.includes('batarya') ? 'batarya' : item.service_slug?.includes('kamera') ? 'kamera' : 'diger'),
+                item_type: item.item_type || (item.category_name_tr?.includes('Yedek') || item.service_slug?.includes('ekran') || item.service_slug?.includes('batarya') ? 'yedek_parca' : 'cihaz'),
+                series: item.series,
+                model: item.model_name,
+                specs_tr: item.specs_tr || item.notes_tr || 'Orijinal ve Uyumlu Ürün',
+                specs_en: item.specs_en || item.notes_en || 'Original & Compatible',
+                specs_ar: item.specs_ar || item.notes_ar || 'أجهزة وقطع غيار أصلية',
+                description_tr: item.description_tr || item.notes_tr || '',
+                description_en: item.description_en || item.notes_en || '',
+                description_ar: item.description_ar || item.notes_ar || '',
+                price: item.base_price,
+                max_price: item.max_price || 0,
+                quality: (item.quality_options?.[0]?.quality_tr?.includes('OEM') ? 'OEM' : item.quality_options?.[0]?.quality_tr?.includes('Muadil') ? 'Muadil' : 'Orijinal'),
+                show_badge: item.show_badge !== false && item.show_badge !== 0,
+                badge_text_tr: item.badge_text_tr ?? (item.quality_options?.[0]?.quality_tr?.includes('OEM') ? 'OEM' : item.quality_options?.[0]?.quality_tr?.includes('Muadil') ? 'Muadil' : item.item_type === 'cihaz' ? 'Cihaz' : item.item_type === 'aksesuar' ? 'Aksesuar' : 'Orijinal'),
+                badge_text_en: item.badge_text_en ?? (item.quality_options?.[0]?.quality_en?.includes('OEM') ? 'OEM' : item.quality_options?.[0]?.quality_en?.includes('Compatible') ? 'Compatible' : item.item_type === 'cihaz' ? 'Device' : item.item_type === 'aksesuar' ? 'Accessory' : 'Original'),
+                badge_text_ar: item.badge_text_ar ?? (item.quality_options?.[0]?.quality_ar?.includes('OEM') ? 'OEM' : item.quality_options?.[0]?.quality_ar?.includes('تجاري') ? 'تجاري' : item.item_type === 'cihaz' ? 'جهاز' : item.item_type === 'aksesuar' ? 'إكسسوار' : 'أصلي'),
+                badge: locale === 'ar' ? (item.badge_text_ar || 'أصلي') : locale === 'en' ? (item.badge_text_en || 'Original') : (item.badge_text_tr || 'Orijinal'),
+                in_stock: item.in_stock ?? true,
+                is_popular: item.is_popular,
+                image: imagesList[0] || item.image_url || '/images/phones-category.jpg',
+                images: imagesList
+              };
+            });
             setLiveProducts(mapped);
           } else {
             // User deleted all templates or table is empty -> show empty!
@@ -243,10 +312,6 @@ export function CategoryShopView({
     const offset = direction === 'left' ? -280 : 280;
     const adjusted = locale === 'ar' ? -offset : offset;
     seriesScrollRef.current.scrollBy({ left: adjusted, behavior: 'smooth' });
-  };
-
-  const formatPrice = (val: number) => {
-    return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(val) + ' TL';
   };
 
   // Icon mapping for parts
@@ -691,21 +756,27 @@ export function CategoryShopView({
 
         {/* 3. BREADCRUMBS */}
         <div className="flex items-center gap-2 text-[11px] font-black text-muted-foreground uppercase tracking-wider overflow-x-auto no-scrollbar py-1">
-          <Link href="/" className="hover:text-foreground whitespace-nowrap">Ana Sayfa</Link>
+          <Link href="/" className="hover:text-foreground whitespace-nowrap">
+            {locale === 'ar' ? 'الرئيسية' : locale === 'en' ? 'Home' : 'Ana Sayfa'}
+          </Link>
           <ChevronRight size={12} className="rtl:rotate-180 shrink-0" />
-          <button onClick={() => resetAllFilters()} className="hover:text-foreground whitespace-nowrap cursor-pointer">
-            {locale === 'ar' ? 'المنتجات والأسعار' : 'Ürünler ve Fiyatlar'}
-          </button>
+          <Link href="/urunler" className="hover:text-foreground whitespace-nowrap">
+            {locale === 'ar' ? 'المنتجات والأسعار' : locale === 'en' ? 'Products & Pricing' : 'Ürünler ve Fiyatlar'}
+          </Link>
           {selectedCategory !== 'all' && (
             <>
               <ChevronRight size={12} className="rtl:rotate-180 shrink-0" />
-              <span className="text-foreground whitespace-nowrap">{activeCategoryObj?.title_tr}</span>
+              <span className="text-[#E11D48] whitespace-nowrap font-black">
+                {locale === 'ar' ? (activeCategoryObj?.title_ar || activeCategoryObj?.title_tr) : locale === 'en' ? (activeCategoryObj?.title_en || activeCategoryObj?.title_tr) : activeCategoryObj?.title_tr}
+              </span>
             </>
           )}
           {selectedPart !== 'all' && (
             <>
               <ChevronRight size={12} className="rtl:rotate-180 shrink-0" />
-              <span className="text-[#E11D48] whitespace-nowrap">{activePartObj?.label_tr}</span>
+              <span className="text-foreground whitespace-nowrap">
+                {locale === 'ar' ? (activePartObj?.label_ar || activePartObj?.label_tr) : locale === 'en' ? (activePartObj?.label_en || activePartObj?.label_tr) : activePartObj?.label_tr}
+              </span>
             </>
           )}
           {selectedBrand !== 'all' && (
@@ -719,43 +790,16 @@ export function CategoryShopView({
         {/* 4. DYNAMIC CATEGORY HERO BANNER (Managed in Admin Panel with Categories) */}
         {categoryBanners.length > 0 && categoryBanners[currentBannerIdx] && (
           <div className="relative rounded-lg overflow-hidden border border-border bg-card shadow-lg">
-            <div className="relative min-h-[220px] sm:min-h-[280px] flex items-center">
-              {/* Background Category Banner Image with Gradient */}
-              <div className="absolute inset-0 z-0">
-                <img
-                  src={categoryBanners[currentBannerIdx]?.image}
-                  alt={categoryBanners[currentBannerIdx]?.title}
-                  className="w-full h-full object-cover object-center opacity-30 dark:opacity-40 transition-all duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-card via-card/90 to-transparent rtl:bg-gradient-to-l" />
-              </div>
-
-              {/* Content */}
-              <div className="relative z-10 p-6 sm:p-10 max-w-2xl space-y-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#E11D48]/15 border border-[#E11D48]/30 text-[#E11D48] text-xs font-black uppercase tracking-wider">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#E11D48] animate-pulse" />
-                  <span>TR TECH {locale === 'ar' ? 'متجر وقطع غيار أصلية' : locale === 'en' ? 'Store & Genuine Parts' : 'Orijinal Yedek Parça & Mağaza'}</span>
-                </div>
-
-                <h1 className="text-2xl sm:text-4xl font-black text-foreground leading-tight">
-                  {categoryBanners[currentBannerIdx]?.title}
-                </h1>
-
-                <p className="text-xs sm:text-sm text-muted-foreground font-bold leading-relaxed max-w-xl">
-                  {categoryBanners[currentBannerIdx]?.description}
-                </p>
-
-                <div className="pt-1">
-                  <button
-                    type="button"
-                    onClick={() => handleBannerCtaClick(categoryBanners[currentBannerIdx]?.categoryId)}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-[#E11D48] hover:bg-[#be123c] text-white text-xs font-black uppercase tracking-wider transition-all shadow-md shadow-red-500/20 cursor-pointer active:scale-95"
-                  >
-                    <span>{categoryBanners[currentBannerIdx]?.cta || (locale === 'ar' ? 'استعراض المنتجات' : 'Ürünleri İncele')}</span>
-                    <ArrowRight size={14} className="rtl:rotate-180" />
-                  </button>
-                </div>
-              </div>
+            <div 
+              onClick={() => handleBannerCtaClick(categoryBanners[currentBannerIdx]?.categoryId)}
+              className="relative w-full cursor-pointer overflow-hidden group select-none"
+            >
+              {/* Clean, Full-Opacity Category Banner Image */}
+              <img
+                src={categoryBanners[currentBannerIdx]?.image}
+                alt={categoryBanners[currentBannerIdx]?.title || 'Category Banner'}
+                className="w-full h-auto min-h-[160px] sm:min-h-[220px] max-h-[380px] object-cover object-center group-hover:scale-[1.01] transition-transform duration-500 block"
+              />
 
               {/* Banner Carousel Controls (Side Arrows + Dots) if multiple */}
               {categoryBanners.length > 1 && (
@@ -763,9 +807,12 @@ export function CategoryShopView({
                   <div className="absolute top-1/2 -translate-y-1/2 left-3 z-20">
                     <button
                       type="button"
-                      onClick={() => setCurrentBannerIdx(prev => (prev === 0 ? categoryBanners.length - 1 : prev - 1))}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentBannerIdx(prev => (prev === 0 ? categoryBanners.length - 1 : prev - 1));
+                      }}
                       aria-label="Previous banner"
-                      className="w-8 h-8 rounded-md bg-black/60 hover:bg-[#E11D48] text-white flex items-center justify-center border border-zinc-700/80 backdrop-blur-md transition-all cursor-pointer"
+                      className="w-8 h-8 rounded-md bg-black/60 hover:bg-[#E11D48] text-white flex items-center justify-center border border-zinc-700/80 backdrop-blur-md transition-all cursor-pointer shadow-md"
                     >
                       <ChevronLeft size={16} />
                     </button>
@@ -774,25 +821,31 @@ export function CategoryShopView({
                   <div className="absolute top-1/2 -translate-y-1/2 right-3 z-20">
                     <button
                       type="button"
-                      onClick={() => setCurrentBannerIdx(prev => (prev + 1) % categoryBanners.length)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentBannerIdx(prev => (prev + 1) % categoryBanners.length);
+                      }}
                       aria-label="Next banner"
-                      className="w-8 h-8 rounded-md bg-black/60 hover:bg-[#E11D48] text-white flex items-center justify-center border border-zinc-700/80 backdrop-blur-md transition-all cursor-pointer"
+                      className="w-8 h-8 rounded-md bg-black/60 hover:bg-[#E11D48] text-white flex items-center justify-center border border-zinc-700/80 backdrop-blur-md transition-all cursor-pointer shadow-md"
                     >
                       <ChevronRight size={16} />
                     </button>
                   </div>
 
-                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5">
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 bg-black/40 px-2 py-1 rounded-full backdrop-blur-xs">
                     {categoryBanners.map((_, bIdx) => (
                       <button
                         key={bIdx}
                         type="button"
-                        onClick={() => setCurrentBannerIdx(bIdx)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCurrentBannerIdx(bIdx);
+                        }}
+                        aria-label={`Go to slide ${bIdx + 1}`}
                         className={cn(
                           "h-1.5 rounded-full transition-all cursor-pointer",
-                          bIdx === currentBannerIdx ? "w-6 bg-[#E11D48]" : "w-2 bg-zinc-600 hover:bg-zinc-400"
+                          bIdx === currentBannerIdx ? "w-6 bg-[#E11D48]" : "w-1.5 bg-white/60 hover:bg-white"
                         )}
-                        aria-label={`Go to slide ${bIdx + 1}`}
                       />
                     ))}
                   </div>
@@ -802,50 +855,84 @@ export function CategoryShopView({
           </div>
         )}
 
-        {/* 5. CATEGORY CARDS (Screenshot 1: 7 Distinct Category Boxes with Images) */}
+        {/* 5. CATEGORY CARDS (ALWAYS AVAILABLE ON THE SAME PAGE WITH DEDICATED LINKS) */}
         <div className="space-y-3 pt-1">
           <div className="flex items-center justify-between">
             <h2 className="text-sm sm:text-base font-black text-foreground uppercase tracking-tight flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#E11D48]" />
-              <span>{locale === 'ar' ? 'الأقسام والمنتجات الرئيسية' : 'Kategoriler'}</span>
+              <span>{locale === 'ar' ? 'الأقسام والمنتجات الرئيسية' : locale === 'en' ? 'Main Categories' : 'Kategoriler'}</span>
             </h2>
+
             {selectedCategory !== 'all' && (
               <button
-                onClick={() => {
-                  setSelectedCategory('all');
-                  setSelectedPart('all');
-                }}
+                type="button"
+                onClick={() => handleCategorySelect('all')}
                 className="text-xs font-black text-[#E11D48] hover:underline flex items-center gap-1 cursor-pointer"
               >
-                <span>{locale === 'ar' ? 'عرض كافة الأقسام والمنتجات' : 'Tüm Ürünleri Göster'}</span>
-                <ArrowRight size={12} className="rtl:rotate-180" />
+                <span>{locale === 'ar' ? '✕ عرض كافة الأقسام' : locale === 'en' ? '✕ View All Categories' : '✕ Tüm Kategorileri Göster'}</span>
               </button>
             )}
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
+            {/* All Categories Card */}
+            <a
+              href={getLocalizedUrl('/urunler', locale)}
+              onClick={(e) => {
+                e.preventDefault();
+                handleCategorySelect('all');
+              }}
+              className={cn(
+                "group relative h-40 sm:h-44 rounded-xl border transition-all duration-300 cursor-pointer overflow-hidden flex flex-col justify-end p-3.5 shadow-xs hover:shadow-md",
+                selectedCategory === 'all'
+                  ? "border-[#E11D48] ring-2 ring-[#E11D48]/50 shadow-md shadow-red-500/20 scale-[1.02] bg-card"
+                  : "border-border hover:border-[#E11D48]/60 bg-card/60"
+              )}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-950 flex items-center justify-center">
+                <Layers size={36} className={cn("transition-transform duration-300 group-hover:scale-110", selectedCategory === 'all' ? "text-[#E11D48]" : "text-zinc-500")} />
+              </div>
+
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
+
+              {selectedCategory === 'all' && (
+                <div className="absolute top-2.5 left-2.5 rtl:left-auto rtl:right-2.5 z-10 px-2 py-0.5 rounded bg-[#E11D48] text-white text-[9px] font-black uppercase shadow-xs">
+                  {locale === 'ar' ? 'الكل' : 'Tümü'}
+                </div>
+              )}
+
+              <div className="relative z-10 space-y-0.5">
+                <h3 className={cn("text-xs sm:text-sm font-black transition-colors leading-tight", selectedCategory === 'all' ? "text-[#E11D48]" : "text-white group-hover:text-[#E11D48]")}>
+                  {locale === 'ar' ? 'كافة الأقسام' : locale === 'en' ? 'All Categories' : 'Tüm Kategoriler'}
+                </h3>
+                <p className="text-[10px] sm:text-[11px] text-zinc-300 font-bold leading-snug line-clamp-1">
+                  {allAvailableProducts.length} {locale === 'ar' ? 'منتج متاح' : 'ürün'}
+                </p>
+              </div>
+            </a>
+
+            {/* Individual Category Cards */}
             {categories.map((cat) => {
-              const isActive = selectedCategory === cat.id;
+              const isSelected = selectedCategory.toLowerCase() === cat.id.toLowerCase();
+              const base = getLocalizedUrl('/urunler', locale);
+              const catLink = `${base}?category=${cat.id}`;
+
               return (
-                <div
+                <a
                   key={cat.id}
-                  onClick={() => {
-                    if (selectedCategory === cat.id) {
-                      setSelectedCategory('all');
-                      setSelectedPart('all');
-                    } else {
-                      setSelectedCategory(cat.id);
-                      setSelectedPart('all');
-                    }
+                  href={catLink}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleCategorySelect(cat.id);
                   }}
                   className={cn(
-                    "group relative h-44 sm:h-48 rounded-xl border transition-all duration-300 cursor-pointer overflow-hidden flex flex-col justify-end p-3.5 shadow-xs",
-                    isActive
-                      ? "border-[#E11D48] ring-2 ring-[#E11D48] shadow-lg shadow-red-500/20 scale-[1.02]"
-                      : "border-border hover:border-[#E11D48]/60 hover:shadow-md hover:scale-[1.02]"
+                    "group relative h-40 sm:h-44 rounded-xl border transition-all duration-300 cursor-pointer overflow-hidden flex flex-col justify-end p-3.5 shadow-xs hover:shadow-md",
+                    isSelected
+                      ? "border-[#E11D48] ring-2 ring-[#E11D48]/50 shadow-md shadow-red-500/20 scale-[1.02]"
+                      : "border-border hover:border-[#E11D48]/60 hover:scale-[1.02]"
                   )}
                 >
-                  {/* Category Image - Fills 100% of the Box with Zero Gaps */}
+                  {/* Category Image - Fills 100% of the Box */}
                   <img
                     src={cat.image}
                     alt={cat.title_tr}
@@ -855,29 +942,106 @@ export function CategoryShopView({
                   {/* Dark Gradient Overlay for Maximum Readability */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
 
-                  {/* Circular Red Arrow in Corner */}
-                  <div className={cn(
-                    "absolute top-2.5 right-2.5 z-10 w-7 h-7 rounded-full flex items-center justify-center shadow-md transition-all",
-                    isActive
-                      ? "bg-[#E11D48] text-white scale-110 shadow-red-500/40"
-                      : "bg-black/50 backdrop-blur-xs text-white border border-white/20 group-hover:bg-[#E11D48] group-hover:border-[#E11D48] group-hover:scale-110"
-                  )}>
-                    <ArrowRight size={13} className="rtl:rotate-180" />
-                  </div>
+                  {/* Active Badge if Selected */}
+                  {isSelected ? (
+                    <div className="absolute top-2.5 left-2.5 rtl:left-auto rtl:right-2.5 z-10 px-2 py-0.5 rounded bg-[#E11D48] text-white text-[9px] font-black uppercase shadow-xs flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                      <span>{locale === 'ar' ? 'محدد' : 'Seçili'}</span>
+                    </div>
+                  ) : (
+                    <div className="absolute top-2.5 right-2.5 z-10 w-7 h-7 rounded-full flex items-center justify-center shadow-md transition-all bg-black/50 backdrop-blur-xs text-white border border-white/20 group-hover:bg-[#E11D48] group-hover:border-[#E11D48] group-hover:scale-110">
+                      <ArrowRight size={13} className="rtl:rotate-180" />
+                    </div>
+                  )}
 
                   {/* Text Info Overlay at Bottom */}
                   <div className="relative z-10 space-y-0.5">
-                    <h3 className="text-xs sm:text-sm font-black text-white group-hover:text-[#E11D48] transition-colors leading-tight drop-shadow-sm">
+                    <h3 className={cn("text-xs sm:text-sm font-black transition-colors leading-tight drop-shadow-sm", isSelected ? "text-[#E11D48]" : "text-white group-hover:text-[#E11D48]")}>
                       {locale === 'ar' ? cat.title_ar : locale === 'en' ? cat.title_en : cat.title_tr}
                     </h3>
                     <p className="text-[10px] sm:text-[11px] text-zinc-300 font-bold leading-snug line-clamp-1 drop-shadow-xs">
                       {locale === 'ar' ? cat.desc_ar : locale === 'en' ? cat.desc_en : cat.desc_tr}
                     </p>
                   </div>
-                </div>
+                </a>
               );
             })}
           </div>
+
+          {/* Active Category Status Bar if a specific category is selected */}
+          {selectedCategory !== 'all' && (
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-[#E11D48]/30 bg-card/90 shadow-xs mt-3">
+              <div className="flex items-center gap-2.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#E11D48] animate-pulse" />
+                <span className="text-xs sm:text-sm font-black text-foreground">
+                  {locale === 'ar' 
+                    ? `تصفح منتجات قسم: ${activeCategoryObj?.title_ar || activeCategoryObj?.title_tr || selectedCategory}` 
+                    : locale === 'en' 
+                      ? `Browsing category: ${activeCategoryObj?.title_en || activeCategoryObj?.title_tr || selectedCategory}` 
+                      : `Kategori Ürünleri: ${activeCategoryObj?.title_tr || selectedCategory}`}
+                </span>
+                <span className="text-[11px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                  {filteredProducts.length} {locale === 'ar' ? 'منتج' : 'ürün'}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => handleCategorySelect('all')}
+                className="text-xs font-black text-[#E11D48] hover:text-[#be123c] px-3 py-1 rounded-md bg-[#E11D48]/10 hover:bg-[#E11D48]/20 transition-all cursor-pointer flex items-center gap-1.5 self-end sm:self-auto"
+              >
+                <span>✕</span>
+                <span>{locale === 'ar' ? 'إلغاء التحديد وعرض الكل' : locale === 'en' ? 'Clear & View All' : 'Filtreyi Kaldır'}</span>
+              </button>
+            </div>
+          )}
+
+          {/* Active Category Description & Rich Specifications */}
+          {selectedCategory !== 'all' && activeCategoryObj && (() => {
+            const catDesc = locale === 'ar' 
+              ? (activeCategoryObj.desc_ar || activeCategoryObj.desc_tr) 
+              : locale === 'en' 
+                ? (activeCategoryObj.desc_en || activeCategoryObj.desc_tr) 
+                : activeCategoryObj.desc_tr;
+            const catSpecs = locale === 'ar' 
+              ? ((activeCategoryObj as any).specs_ar || (activeCategoryObj as any).specs_tr) 
+              : locale === 'en' 
+                ? ((activeCategoryObj as any).specs_en || (activeCategoryObj as any).specs_tr) 
+                : (activeCategoryObj as any).specs_tr;
+
+            if (!catDesc && !catSpecs) return null;
+
+            return (
+              <div className="p-4 sm:p-5 rounded-xl border border-border bg-card/80 shadow-xs space-y-3.5 mt-2">
+                {catDesc && (
+                  <div className="space-y-1">
+                    <h4 className="text-xs font-black uppercase text-foreground flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#E11D48]" />
+                      <span>{locale === 'ar' ? 'عن هذا القسم' : locale === 'en' ? 'About this Category' : 'Bu Kategori Hakkında'}</span>
+                    </h4>
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed font-medium">
+                      {catDesc}
+                    </p>
+                  </div>
+                )}
+
+                {catSpecs && (
+                  <div className="space-y-1.5 pt-1">
+                    <h4 className="text-xs font-black uppercase text-foreground flex items-center gap-2">
+                      <Wrench size={13} className="text-[#E11D48]" />
+                      <span>{locale === 'ar' ? 'المواصفات والمعايير الفنية للقسم' : locale === 'en' ? 'Category Specifications' : 'Kategori Teknik Özellikleri'}</span>
+                    </h4>
+                    <div className="overflow-x-auto p-4 rounded-xl bg-muted/15 border border-border/60">
+                      <div 
+                        className="specs-html-content text-xs sm:text-sm"
+                        dangerouslySetInnerHTML={{ __html: catSpecs }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </div>
 
         {/* 6. HORIZONTAL SERIES / BRAND CAROUSEL (With Side Arrows and No Scrollbar) */}
@@ -1338,99 +1502,13 @@ export function CategoryShopView({
                   ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
                   : "grid-cols-1"
               )}>
-                {paginatedProducts.map((p) => {
-                  const isStock = p.in_stock !== false;
-                  return (
-                    <div
-                      key={p.id}
-                      className={cn(
-                        "group rounded-lg bg-card border border-border hover:border-[#E11D48]/50 transition-all duration-300 hover:shadow-lg relative flex overflow-hidden",
-                        viewMode === 'grid' ? "flex-col justify-between" : "flex-row items-center gap-4"
-                      )}
-                    >
-                      {/* Product Image taking the top of the card with no gaps */}
-                      <div className={cn(
-                        "relative overflow-hidden bg-muted/40 shrink-0 flex items-center justify-center border-b border-border",
-                        viewMode === 'grid' ? "w-full h-48 sm:h-52" : "w-32 h-32 border-b-0 border-r border-border"
-                      )}>
-                        {/* Quality / Badge Chip Overlay */}
-                        <span className="absolute top-2.5 left-2.5 bg-[#E11D48] text-white text-[9px] font-black uppercase px-2 py-0.5 rounded shadow-md z-10 tracking-wider">
-                          {p.badge || (p.quality ? p.quality : 'Orijinal')}
-                        </span>
-
-                        <img
-                          src={p.image}
-                          alt={p.title_tr}
-                          loading="lazy"
-                          decoding="async"
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      </div>
-
-                      {/* Product Info & Action */}
-                      <div className={cn(
-                        "flex-1 flex flex-col justify-between",
-                        viewMode === 'grid' ? "p-3.5 sm:p-4 space-y-3" : "p-3 sm:p-4 flex-row items-center gap-4"
-                      )}>
-                        <div className="space-y-1">
-                          <h3 className="text-xs sm:text-sm font-black text-foreground group-hover:text-[#E11D48] transition-colors leading-tight line-clamp-1">
-                            {locale === 'ar' ? p.title_ar : locale === 'en' ? p.title_en : p.title_tr}
-                          </h3>
-
-                          <p className="text-[11px] text-muted-foreground font-bold line-clamp-1">
-                            {locale === 'ar' ? p.specs_ar : locale === 'en' ? p.specs_en : p.specs_tr}
-                          </p>
-
-                          {/* Stock indicator with green dot */}
-                          <div className="flex items-center gap-1.5 pt-1 text-[11px] font-black">
-                            <span className={cn(
-                              "w-2 h-2 rounded-full",
-                              isStock ? "bg-emerald-500" : "bg-muted-foreground"
-                            )} />
-                            <span className={isStock ? "text-emerald-500 dark:text-emerald-400" : "text-muted-foreground"}>
-                              {isStock 
-                                ? (locale === 'ar' ? 'متوفر في المخزون' : 'Stokta Var') 
-                                : (locale === 'ar' ? 'غير متوفر' : 'Stokta Yok')}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Price & Add to Cart Action */}
-                        <div className={cn(
-                          "space-y-2 pt-2 border-t border-border w-full",
-                          viewMode === 'list' && "border-t-0 pt-0 shrink-0 w-48"
-                        )}>
-                          <div className="flex items-baseline justify-between">
-                            <span className="text-base sm:text-lg font-black text-foreground tracking-tight">
-                              {formatPrice(p.price)}
-                            </span>
-                          </div>
-
-                          <button
-                            onClick={() =>
-                              addToCart({
-                                id: p.id,
-                                title: p.title_tr,
-                                price: p.price,
-                                image: p.image,
-                                brand: p.brand,
-                                category: p.category,
-                                quality: p.quality,
-                                specs: p.specs_tr,
-                                badge: p.badge,
-                                item_type: p.item_type
-                              })
-                            }
-                            className="w-full py-2.5 px-3 rounded-md bg-[#E11D48] hover:bg-[#be123c] text-white text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all shadow-md shadow-red-500/20 cursor-pointer active:scale-95"
-                          >
-                            <ShoppingBag size={13} />
-                            <span>{locale === 'ar' ? 'أضف للسلة' : 'Sepete Ekle'}</span>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                {paginatedProducts.map((p) => (
+                  <ProductCard
+                    key={p.id}
+                    product={p}
+                    viewMode={viewMode}
+                  />
+                ))}
               </div>
             )}
 

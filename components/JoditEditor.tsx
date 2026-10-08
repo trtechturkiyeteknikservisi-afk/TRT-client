@@ -10,9 +10,10 @@ interface JoditEditorProps {
   placeholder?: string;
   direction?: 'ltr' | 'rtl';
   language?: 'en' | 'tr' | 'ar';
+  height?: number;
 }
 
-export default function JoditEditor({ value, onChange, placeholder, direction = 'ltr', language = 'en' }: JoditEditorProps) {
+export default function JoditEditor({ value, onChange, placeholder, direction = 'ltr', language = 'en', height = 350 }: JoditEditorProps) {
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const joditRef = useRef<any>(null);
   const { theme } = useTheme();
@@ -34,7 +35,7 @@ export default function JoditEditor({ value, onChange, placeholder, direction = 
         const config = {
           readonly: false,
           placeholder: placeholder || 'Start writing...',
-          height: 450,
+          height: height || 350,
           theme: theme === 'dark' ? 'dark' : 'default',
           language: language,
           direction: direction,

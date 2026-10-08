@@ -8,7 +8,7 @@ export interface CartItem {
   title: string;
   brand?: string;
   category?: string;
-  item_type?: 'cihaz' | 'yedek_parca' | 'aksesuar';
+  item_type?: 'cihaz' | 'yedek_parca' | 'aksesuar' | string;
   price: number;
   image: string;
   quality?: string;
