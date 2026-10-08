@@ -16,6 +16,7 @@ export function Header() {
   const t = useTranslations('Header');
   const tFooter = useTranslations('Footer');
   const locale = useLocale();
+  const isArabic = locale === 'ar';
   const pathname = usePathname();
   const router = useRouter();
   
@@ -195,7 +196,12 @@ export function Header() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden xl:flex items-center justify-center gap-x-1.5 xl:gap-x-2 2xl:gap-x-2.5 py-1 flex-1 min-w-0 mx-1 2xl:mx-3">
+          <nav className={cn(
+            "hidden xl:flex items-center justify-center py-1 flex-1 min-w-0 transition-all",
+            isArabic 
+              ? "gap-x-3.5 xl:gap-x-4.5 2xl:gap-x-6 mx-2 2xl:mx-5" 
+              : "gap-x-1.5 xl:gap-x-2 2xl:gap-x-2.5 mx-1 2xl:mx-3"
+          )}>
             {navigation.map((item) => (
               item.isDropdown ? (
                 <div 
@@ -207,17 +213,20 @@ export function Header() {
                   <Link
                     href={item.href}
                     className={cn(
-                      "flex items-center gap-1 text-[9px] xl:text-[9.5px] 2xl:text-[10.5px] font-extrabold uppercase tracking-tight 2xl:tracking-normal transition-all active:scale-95 whitespace-nowrap relative pb-1",
+                      "flex items-center whitespace-nowrap relative pb-1 shrink-0 transition-all active:scale-95",
+                      isArabic
+                        ? "text-[12px] xl:text-[13px] 2xl:text-[14px] font-bold tracking-normal gap-1.5"
+                        : "text-[9px] xl:text-[9.5px] 2xl:text-[10.5px] font-extrabold uppercase tracking-tight 2xl:tracking-normal gap-1",
                       isLinkActive(item) 
                         ? "text-primary dark:text-white" 
                         : "text-muted-foreground hover:text-primary dark:hover:text-white"
                     )}
                   >
                     <span>{item.name}</span>
-                    <ChevronDown size={12} className={cn("transition-transform duration-200 shrink-0", activeDropdown === item.name && "rotate-180")} />
+                    <ChevronDown size={isArabic ? 14 : 12} className={cn("transition-transform duration-200 shrink-0", activeDropdown === item.name && "rotate-180")} />
                     <span 
                       className={cn(
-                        "absolute bottom-0 left-0 h-0.5 transition-all group-hover:w-full",
+                        "absolute bottom-0 left-0 rtl:left-auto rtl:right-0 h-0.5 transition-all group-hover:w-full",
                         isLinkActive(item) 
                           ? "w-full bg-black dark:bg-primary" 
                           : "w-0 bg-primary"
@@ -258,7 +267,10 @@ export function Header() {
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    "items-center gap-1 text-[9px] xl:text-[9.5px] 2xl:text-[10.5px] font-extrabold uppercase tracking-tight 2xl:tracking-normal transition-all relative group whitespace-nowrap pb-1 flex shrink-0",
+                    "flex items-center whitespace-nowrap relative pb-1 shrink-0 transition-all group",
+                    isArabic
+                      ? "text-[12px] xl:text-[13px] 2xl:text-[14px] font-bold tracking-normal gap-1.5"
+                      : "text-[9px] xl:text-[9.5px] 2xl:text-[10.5px] font-extrabold uppercase tracking-tight 2xl:tracking-normal gap-1",
                     isLinkActive(item) 
                       ? "text-primary dark:text-white" 
                       : "text-muted-foreground hover:text-primary dark:hover:text-white"
@@ -266,13 +278,18 @@ export function Header() {
                 >
                   <span>{item.name}</span>
                   {item.soon && (
-                    <span className="inline-flex items-center text-[7px] 2xl:text-[7.5px] bg-[#E11D48]/15 text-[#E11D48] px-1 py-0.2 rounded-[3px] font-black uppercase tracking-tight animate-pulse border border-[#E11D48]/35 shrink-0 leading-none">
+                    <span className={cn(
+                      "inline-flex items-center bg-[#E11D48]/15 text-[#E11D48] rounded-[3px] font-black uppercase animate-pulse border border-[#E11D48]/35 shrink-0 leading-none",
+                      isArabic 
+                        ? "text-[8px] 2xl:text-[9px] px-1.5 py-0.5 tracking-normal" 
+                        : "text-[7px] 2xl:text-[7.5px] px-1 py-0.2 tracking-tight"
+                    )}>
                       {t('coming_soon')}
                     </span>
                   )}
                   <span 
                     className={cn(
-                      "absolute bottom-0 left-0 h-0.5 transition-all group-hover:w-full",
+                      "absolute bottom-0 left-0 rtl:left-auto rtl:right-0 h-0.5 transition-all group-hover:w-full",
                       isLinkActive(item) 
                         ? "w-full bg-black dark:bg-primary" 
                         : "w-0 bg-primary"
@@ -289,7 +306,10 @@ export function Header() {
             <Link
               href="/contact"
               className={cn(
-                "hidden lg:flex items-center justify-center gap-1.5 px-2 py-1 xl:px-2.5 xl:py-1.5 2xl:px-3 2xl:py-2 border border-border rounded-lg bg-card hover:bg-muted text-foreground transition-all duration-300 active:scale-95 text-[9px] xl:text-[9.5px] 2xl:text-[10.5px] font-black uppercase tracking-normal cursor-pointer whitespace-nowrap shrink-0",
+                "hidden lg:flex items-center justify-center gap-1.5 border border-border rounded-lg bg-card hover:bg-muted text-foreground transition-all duration-300 active:scale-95 font-black uppercase cursor-pointer whitespace-nowrap shrink-0",
+                isArabic
+                  ? "text-xs xl:text-[12.5px] 2xl:text-[13.5px] px-2.5 py-1.5 2xl:px-3.5 2xl:py-2 tracking-normal"
+                  : "text-[9px] xl:text-[9.5px] 2xl:text-[10.5px] px-2 py-1 xl:px-2.5 xl:py-1.5 2xl:px-3 2xl:py-2 tracking-normal",
                 pathname === '/contact' && "border-primary text-primary"
               )}
             >
