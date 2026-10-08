@@ -64,6 +64,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
       categorySlug={category}
       initialBrand={sParams?.brand}
       initialSearch={sParams?.q}
+      initialPart={sParams?.part}
     />
   );
 }

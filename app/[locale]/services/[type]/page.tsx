@@ -94,18 +94,22 @@ export default function ServicePage() {
 
   // Type-safe translation access
   const validKeys = ['phone', 'laptop', 'robot', 'watch', 'tablet', 'headphones'];
+  const isBuiltIn = validKeys.includes(type) || type === 'kulaklik';
   const serviceKey = (type === 'kulaklik' ? 'headphones' : (validKeys.includes(type) ? type : 'phone')) as 'phone' | 'laptop' | 'robot' | 'watch' | 'tablet' | 'headphones';
   
   let features: string[] = [];
   try {
-    const rawFeatures = t.raw(`${serviceKey}.features`);
-    features = Array.isArray(rawFeatures) ? rawFeatures : [];
+    if (isBuiltIn) {
+      const rawFeatures = t.raw(`${serviceKey}.features`);
+      features = Array.isArray(rawFeatures) ? rawFeatures : [];
+    }
   } catch (e) {
     console.error('Failed to load features:', e);
   }
 
-  const displayTitle = dynamicService?.title || t(`${serviceKey}.title`);
-  const displayDescription = dynamicService?.description || t(`${serviceKey}.description`);
+  const formattedSlug = type ? type.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()) : '';
+  const displayTitle = dynamicService?.title || (isBuiltIn ? t(`${serviceKey}.title`) : formattedSlug);
+  const displayDescription = dynamicService?.description || (isBuiltIn ? t(`${serviceKey}.description`) : `${formattedSlug} Profesyonel Tamir ve Bakım Hizmetleri`);
   const displayFeatures = (dynamicService?.features && dynamicService.features.length > 0)
     ? dynamicService.features
     : features;
@@ -130,9 +134,9 @@ export default function ServicePage() {
             className="inline-flex p-4 bg-primary/20 rounded-xl mb-6 backdrop-blur-md border border-white/10"
           >
 
-            {assets.customIcon ? (
+            {(dynamicService?.custom_icon || assets.customIcon) ? (
               <div className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center">
-                <img src={assets.customIcon} alt="" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal transition-all scale-110" />
+                <img src={dynamicService?.custom_icon || assets.customIcon} alt="" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal transition-all scale-110" />
               </div>
             ) : (
               <assets.icon size={80} className="text-red-600" />
@@ -187,7 +191,7 @@ export default function ServicePage() {
           </motion.div>
         </div>
       </section>
-      <ServiceBrands type={serviceKey} />
+      <ServiceBrands type={type} />
       
       {/* Repair Price List CTA Banner */}
       <section className="py-8 bg-card/40 border-b border-border/50">

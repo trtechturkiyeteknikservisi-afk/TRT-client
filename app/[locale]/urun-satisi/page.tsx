@@ -17,18 +17,20 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function UrunSatisiPage({
   searchParams
 }: {
-  searchParams: Promise<{ category?: string; brand?: string; q?: string }>;
+  searchParams: Promise<{ category?: string; brand?: string; q?: string; part?: string }>;
 }) {
   const params = await searchParams;
   const category = params?.category;
   const brand = params?.brand;
   const q = params?.q;
+  const part = params?.part;
 
   return (
     <CategoryShopView
       categorySlug={category || 'all'}
       initialBrand={brand}
       initialSearch={q}
+      initialPart={part}
     />
   );
 }

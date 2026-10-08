@@ -33,12 +33,14 @@ interface CategoryShopViewProps {
   categorySlug?: string;
   initialBrand?: string;
   initialSearch?: string;
+  initialPart?: string;
 }
 
 export function CategoryShopView({ 
   categorySlug = 'all', 
   initialBrand = 'all',
-  initialSearch = '' 
+  initialSearch = '',
+  initialPart = 'all'
 }: CategoryShopViewProps) {
   const locale = useLocale();
   const router = useRouter();
@@ -47,7 +49,7 @@ export function CategoryShopView({
 
   // Active filter states
   const [selectedCategory, setSelectedCategory] = useState<string>(categorySlug || 'all');
-  const [selectedPart, setSelectedPart] = useState<string>('all');
+  const [selectedPart, setSelectedPart] = useState<string>(initialPart || 'all');
   const [selectedBrand, setSelectedBrand] = useState<string>(initialBrand || 'all');
   const [selectedSeries, setSelectedSeries] = useState<string>('Tüm Modeller');
   const [selectedTypeFilters, setSelectedTypeFilters] = useState<string[]>(['all']);
@@ -167,36 +169,170 @@ export function CategoryShopView({
     sortOrder
   ]);
 
-  // In-page category selection handler with SEO-friendly shallow URL update (Requirement 2)
+  // Comprehensive, shallow URL updater reflecting all active filters in the browser URL
+  const updateUrlWithFilters = (updated: {
+    category?: string;
+    part?: string;
+    brand?: string;
+    series?: string;
+    types?: string[];
+    quality?: string[];
+    q?: string;
+    sort?: string;
+  }, replace = false) => {
+    if (typeof window === 'undefined') return;
+
+    const nextCat = updated.category !== undefined ? updated.category : selectedCategory;
+    const nextPart = updated.part !== undefined ? updated.part : selectedPart;
+    const nextBrand = updated.brand !== undefined ? updated.brand : selectedBrand;
+    const nextSeries = updated.series !== undefined ? updated.series : selectedSeries;
+    const nextTypes = updated.types !== undefined ? updated.types : selectedTypeFilters;
+    const nextQuality = updated.quality !== undefined ? updated.quality : selectedQuality;
+    const nextQ = updated.q !== undefined ? updated.q : searchVal;
+    const nextSort = updated.sort !== undefined ? updated.sort : sortOrder;
+
+    const basePath = getLocalizedUrl('/urunler', locale);
+    const currentPath = window.location.pathname;
+    const isCategorySubpath = categorySlug && categorySlug !== 'all' && currentPath.includes(`/${categorySlug}`);
+
+    let targetPath = currentPath;
+    if (isCategorySubpath && updated.category !== undefined && updated.category !== categorySlug) {
+      targetPath = basePath;
+    }
+
+    const params = new URLSearchParams();
+
+    // 1. Category (only as query param if not in category subpath and not 'all')
+    if (targetPath === basePath && nextCat && nextCat !== 'all') {
+      params.set('category', nextCat);
+    }
+
+    // 2. Part (e.g. part=ekran, part=batarya)
+    if (nextPart && nextPart !== 'all') {
+      params.set('part', nextPart);
+    }
+
+    // 3. Brand (e.g. brand=Apple)
+    if (nextBrand && nextBrand !== 'all') {
+      params.set('brand', nextBrand);
+    }
+
+    // 4. Series (e.g. series=iPhone 15)
+    if (nextSeries && nextSeries !== 'Tüm Modeller' && nextSeries !== 'All Models' && nextSeries !== 'كافة الموديلات') {
+      params.set('series', nextSeries);
+    }
+
+    // 5. Types (e.g. type=yedek_parca)
+    if (nextTypes && nextTypes.length > 0 && !nextTypes.includes('all')) {
+      params.set('type', nextTypes.join(','));
+    }
+
+    // 6. Quality (e.g. quality=Orijinal)
+    if (nextQuality && nextQuality.length > 0) {
+      params.set('quality', nextQuality.join(','));
+    }
+
+    // 7. Search query
+    if (nextQ && nextQ.trim()) {
+      params.set('q', nextQ.trim());
+    }
+
+    // 8. Sort
+    if (nextSort && nextSort !== 'popular') {
+      params.set('sort', nextSort);
+    }
+
+    const queryString = params.toString();
+    const finalUrl = queryString ? `${targetPath}?${queryString}` : targetPath;
+
+    if (replace) {
+      window.history.replaceState({
+        category: nextCat,
+        part: nextPart,
+        brand: nextBrand,
+        series: nextSeries,
+        types: nextTypes,
+        quality: nextQuality,
+        q: nextQ,
+        sort: nextSort
+      }, '', finalUrl);
+    } else {
+      window.history.pushState({
+        category: nextCat,
+        part: nextPart,
+        brand: nextBrand,
+        series: nextSeries,
+        types: nextTypes,
+        quality: nextQuality,
+        q: nextQ,
+        sort: nextSort
+      }, '', finalUrl);
+    }
+  };
+
+  // In-page category selection handler with SEO-friendly shallow URL update
   const handleCategorySelect = (catId: string) => {
     setSelectedCategory(catId);
     setSelectedPart('all');
     setCurrentPage(1);
-
-    if (typeof window !== 'undefined') {
-      const base = getLocalizedUrl('/urunler', locale);
-      const newUrl = catId === 'all' ? base : `${base}?category=${catId}`;
-      window.history.pushState({ category: catId }, '', newUrl);
-    }
-
+    updateUrlWithFilters({ category: catId, part: 'all' });
     productsGridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  // Sync when categorySlug prop or URL query parameter changes
+  // In-page part selection handler (e.g. ekran, batarya, etc.)
+  const handlePartSelect = (partId: string) => {
+    setSelectedPart(partId);
+    setCurrentPage(1);
+    updateUrlWithFilters({ part: partId });
+  };
+
+  // In-page brand selection handler (e.g. Apple, Samsung, etc.)
+  const handleBrandSelect = (brandId: string) => {
+    setSelectedBrand(brandId);
+    setCurrentPage(1);
+    updateUrlWithFilters({ brand: brandId });
+  };
+
+  // In-page series selection handler (e.g. iPhone 15, etc.)
+  const handleSeriesSelect = (seriesName: string) => {
+    setSelectedSeries(seriesName);
+    setCurrentPage(1);
+    updateUrlWithFilters({ series: seriesName });
+  };
+
+  // Sync when URL query parameter changes (popstate or direct URL visit)
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const urlCat = params.get('category');
-      if (urlCat) {
-        setSelectedCategory(urlCat);
-      } else if (categorySlug) {
-        setSelectedCategory(categorySlug);
-      }
+      const syncFromUrl = () => {
+        const params = new URLSearchParams(window.location.search);
+        const urlCat = params.get('category');
+        const urlPart = params.get('part');
+        const urlBrand = params.get('brand');
+        const urlSeries = params.get('series');
+        const urlType = params.get('type');
+        const urlQuality = params.get('quality');
+        const urlQ = params.get('q');
+        const urlSort = params.get('sort');
 
-      const handlePopState = (e: PopStateEvent) => {
-        const p = new URLSearchParams(window.location.search);
-        const popCat = p.get('category') || (categorySlug !== 'all' ? categorySlug : 'all');
-        setSelectedCategory(popCat);
+        if (urlCat) {
+          setSelectedCategory(urlCat);
+        } else if (categorySlug) {
+          setSelectedCategory(categorySlug);
+        }
+
+        setSelectedPart(urlPart || initialPart || 'all');
+        setSelectedBrand(urlBrand || initialBrand || 'all');
+        if (urlSeries) setSelectedSeries(urlSeries);
+        if (urlType) setSelectedTypeFilters(urlType.split(',').filter(Boolean));
+        if (urlQuality) setSelectedQuality(urlQuality.split(',').filter(Boolean));
+        if (urlQ !== null) setSearchVal(urlQ);
+        if (urlSort) setSortOrder(urlSort);
+      };
+
+      syncFromUrl();
+
+      const handlePopState = () => {
+        syncFromUrl();
       };
 
       window.addEventListener('popstate', handlePopState);
@@ -204,7 +340,20 @@ export function CategoryShopView({
     } else if (categorySlug) {
       setSelectedCategory(categorySlug);
     }
-  }, [categorySlug]);
+  }, [categorySlug, initialBrand, initialPart]);
+
+  // Debounced search query sync to URL (replaces state so it doesn't pollute history)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (typeof window !== 'undefined') {
+        const currentUrlQ = new URLSearchParams(window.location.search).get('q') || '';
+        if (searchVal.trim() !== currentUrlQ.trim()) {
+          updateUrlWithFilters({ q: searchVal }, true);
+        }
+      }
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [searchVal]);
 
   // Fetch live products, dynamic categories & real service banners from backend
   useEffect(() => {
@@ -521,20 +670,25 @@ export function CategoryShopView({
 
   const toggleTypeFilter = (id: string) => {
     setSelectedTypeFilters(prev => {
+      let next: string[];
       if (prev.includes(id)) {
-        const next = prev.filter(x => x !== id);
-        return next.length === 0 ? ['all'] : next;
+        const filtered = prev.filter(x => x !== id);
+        next = filtered.length === 0 ? ['all'] : filtered;
       } else {
-        const next = prev.filter(x => x !== 'all');
-        return [...next, id];
+        const filtered = prev.filter(x => x !== 'all');
+        next = [...filtered, id];
       }
+      updateUrlWithFilters({ types: next });
+      return next;
     });
   };
 
   const toggleQuality = (id: string) => {
-    setSelectedQuality(prev => 
-      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
-    );
+    setSelectedQuality(prev => {
+      const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id];
+      updateUrlWithFilters({ quality: next });
+      return next;
+    });
   };
 
   const toggleColor = (id: string) => {
@@ -554,6 +708,17 @@ export function CategoryShopView({
     setMinPrice(minAvailablePrice);
     setPriceSlider(maxAvailablePrice);
     setSearchVal('');
+    setCurrentPage(1);
+    updateUrlWithFilters({
+      category: 'all',
+      part: 'all',
+      brand: 'all',
+      series: 'Tüm Modeller',
+      types: ['all'],
+      quality: [],
+      q: '',
+      sort: 'popular'
+    });
   };
 
   // Main filtering logic
@@ -727,6 +892,11 @@ export function CategoryShopView({
               type="text"
               value={searchVal}
               onChange={(e) => setSearchVal(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  updateUrlWithFilters({ q: searchVal });
+                }
+              }}
               placeholder={
                 locale === 'ar' 
                   ? 'ابحث عن منتج، موديل أو قطعة غيار... (مثال: شاشة آيفون 15، بطارية سامسونج S23)' 
@@ -737,7 +907,10 @@ export function CategoryShopView({
             <Search size={18} className="absolute left-4 top-3.5 text-muted-foreground" />
             {searchVal && (
               <button
-                onClick={() => setSearchVal('')}
+                onClick={() => {
+                  setSearchVal('');
+                  updateUrlWithFilters({ q: '' });
+                }}
                 className="absolute right-3.5 top-3.5 text-muted-foreground hover:text-foreground cursor-pointer"
               >
                 <X size={16} />
@@ -746,7 +919,7 @@ export function CategoryShopView({
           </div>
 
           <button
-            onClick={() => {}}
+            onClick={() => updateUrlWithFilters({ q: searchVal })}
             className="w-full sm:w-auto px-7 py-3 rounded-md bg-[#E11D48] hover:bg-[#be123c] text-white text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-red-500/20 transition-all active:scale-95"
           >
             <Search size={15} />
@@ -1065,7 +1238,7 @@ export function CategoryShopView({
                 return (
                   <button
                     key={s}
-                    onClick={() => setSelectedSeries(s)}
+                    onClick={() => handleSeriesSelect(s)}
                     className={cn(
                       "px-4 py-2.5 rounded-md text-xs font-black transition-all shrink-0 cursor-pointer border flex items-center gap-2",
                       isActive
@@ -1131,7 +1304,7 @@ export function CategoryShopView({
                     </h3>
                     {selectedPart !== 'all' && (
                       <button 
-                        onClick={() => setSelectedPart('all')}
+                        onClick={() => handlePartSelect('all')}
                         className="text-[10px] font-bold text-[#E11D48] hover:underline cursor-pointer"
                       >
                         {locale === 'ar' ? 'عرض الكل' : 'Tümü'}
@@ -1146,7 +1319,7 @@ export function CategoryShopView({
                       return (
                         <button
                           key={p.id}
-                          onClick={() => setSelectedPart(p.id)}
+                          onClick={() => handlePartSelect(p.id)}
                           className={cn(
                             "w-full px-3 py-2 rounded-md text-xs font-black flex items-center justify-between transition-all cursor-pointer",
                             isActive
@@ -1187,7 +1360,7 @@ export function CategoryShopView({
                     </h3>
                     {selectedBrand !== 'all' && (
                       <button 
-                        onClick={() => setSelectedBrand('all')}
+                        onClick={() => handleBrandSelect('all')}
                         className="text-[10px] font-bold text-[#E11D48] hover:underline cursor-pointer"
                       >
                         {locale === 'ar' ? 'الكل' : 'Tümü'}
@@ -1201,7 +1374,7 @@ export function CategoryShopView({
                       return (
                         <button
                           key={b.id}
-                          onClick={() => setSelectedBrand(b.id)}
+                          onClick={() => handleBrandSelect(b.id)}
                           className={cn(
                             "w-full px-3 py-2 rounded-md text-xs font-black flex items-center justify-between transition-all cursor-pointer",
                             isActive
@@ -1251,6 +1424,7 @@ export function CategoryShopView({
                         setSelectedTypeFilters(['all']);
                         setMinPrice(minAvailablePrice);
                         setPriceSlider(maxAvailablePrice);
+                        updateUrlWithFilters({ quality: [], types: ['all'] });
                       }}
                       className="text-[10px] font-bold text-muted-foreground hover:text-foreground flex items-center gap-1 cursor-pointer"
                     >
@@ -1429,7 +1603,11 @@ export function CategoryShopView({
                 <div className="flex items-center gap-1.5">
                   <select
                     value={sortOrder}
-                    onChange={(e) => setSortOrder(e.target.value)}
+                    onChange={(e) => {
+                      const newSort = e.target.value;
+                      setSortOrder(newSort);
+                      updateUrlWithFilters({ sort: newSort });
+                    }}
                     className="px-3 py-1.5 rounded-md bg-card border border-border text-xs font-bold text-foreground outline-hidden focus:border-[#E11D48] cursor-pointer"
                   >
                     <option value="popular">{locale === 'ar' ? 'الأكثر طلباً' : 'En Popüler'}</option>

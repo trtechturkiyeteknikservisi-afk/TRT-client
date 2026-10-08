@@ -10,7 +10,10 @@ const brandsData: Record<string, string[]> = {
   robot: ['Xiaomi', 'Roborock', 'Viomi', 'Dreame', 'Ecovacs', 'iRobot', 'Samsung', 'Lydsto', 'Proscenic', 'Roidmi'],
   watch: ['Apple', 'Samsung', 'Huawei', 'Garmin', 'Xiaomi', 'Honor', 'Oppo', 'Google Pixel', 'OnePlus', 'Amazfit', 'Fitbit', 'Suunto', 'Polar'],
   tablet: ['Apple', 'Samsung', 'Huawei', 'Lenovo', 'Microsoft', 'Xiaomi', 'Amazon', 'Google', 'Honor'],
-  headphones: ['Apple', 'Sony', 'Bose', 'JBL', 'Sennheiser', 'Beats', 'Marshall', 'Harman Kardon', 'Audio-Technica', 'Skullcandy']
+  headphones: ['Apple', 'Sony', 'Bose', 'JBL', 'Sennheiser', 'Beats', 'Marshall', 'Harman Kardon', 'Audio-Technica', 'Skullcandy'],
+  playstation: ['Sony PlayStation', 'PS5', 'PS4', 'DualSense', 'Nintendo Switch', 'Xbox Series X', 'Xbox Series S', 'Steam Deck', 'Logitech', 'Razer'],
+  gaming: ['Sony PlayStation', 'PS5', 'PS4', 'DualSense', 'Nintendo Switch', 'Xbox Series X', 'Xbox Series S', 'Steam Deck', 'Logitech', 'Razer'],
+  general: ['Apple', 'Samsung', 'Sony', 'Microsoft', 'Xiaomi', 'Asus', 'Lenovo', 'HP', 'Dell', 'Google', 'Huawei', 'Logitech']
 };
 
 interface ServiceBrandsProps {
@@ -18,7 +21,27 @@ interface ServiceBrandsProps {
 }
 
 export function ServiceBrands({ type }: ServiceBrandsProps) {
-  const brands = brandsData[type] || brandsData.phone;
+  const lower = (type || '').toLowerCase();
+  let brandsKey = 'general';
+  if (brandsData[lower]) {
+    brandsKey = lower;
+  } else if (lower.includes('playstation') || lower.includes('konsol') || lower.includes('oyun') || lower.includes('xbox') || lower.includes('nintendo') || lower.includes('ps5') || lower.includes('ps4')) {
+    brandsKey = 'playstation';
+  } else if (lower.includes('kulaklik') || lower.includes('headphone')) {
+    brandsKey = 'headphones';
+  } else if (lower.includes('saat') || lower.includes('watch')) {
+    brandsKey = 'watch';
+  } else if (lower.includes('robot') || lower.includes('supurge')) {
+    brandsKey = 'robot';
+  } else if (lower.includes('laptop') || lower.includes('bilgisayar') || lower.includes('computer')) {
+    brandsKey = 'laptop';
+  } else if (lower.includes('tablet') || lower.includes('ipad')) {
+    brandsKey = 'tablet';
+  } else if (lower.includes('telefon') || lower.includes('phone')) {
+    brandsKey = 'phone';
+  }
+
+  const brands = brandsData[brandsKey] || brandsData.general;
   // Duplicate brands to create a seamless loop
   const duplicatedBrands = [...brands, ...brands, ...brands];
 
