@@ -123,9 +123,37 @@ export default function BlogsPage() {
       content_ar: blogForm.content_ar.trim() || fallback.content,
     };
 
+    // Sanitize any residual Word artifacts before saving
+    const cleanWordContent = (str: string) => {
+      if (!str) return '';
+      return str
+        .replace(/<!--\[if gte vml 1\]>[\s\S]*?<!\[endif\]-->/gi, '')
+        .replace(/<v:[^>]*>[\s\S]*?<\/v:[^>]*>/gi, '')
+        .replace(/<o:p>[\s\S]*?<\/o:p>/gi, '')
+        .replace(/<img[^>]*src=["']file:\/\/[^"']*["'][^>]*>/gi, '')
+        .replace(/<p[^>]*class=["']?MsoNormal["']?[^>]*>\s*<\/p>/gi, '');
+    };
+
+    finalizedForm.content_en = cleanWordContent(finalizedForm.content_en);
+    finalizedForm.content_tr = cleanWordContent(finalizedForm.content_tr);
+    finalizedForm.content_ar = cleanWordContent(finalizedForm.content_ar);
+
     // If date is not specified, omit it so backend defaults to NOW (for create) or keeps old date (for update)
     if (!blogForm.date.trim()) {
       delete finalizedForm.date;
+    } else {
+      const userDate = new Date(blogForm.date);
+      const now = new Date();
+      if (
+        userDate.getFullYear() === now.getFullYear() &&
+        userDate.getMonth() === now.getMonth() &&
+        userDate.getDate() === now.getDate()
+      ) {
+        finalizedForm.date = now.toISOString();
+      } else {
+        userDate.setUTCHours(12, 0, 0, 0);
+        finalizedForm.date = userDate.toISOString();
+      }
     }
 
     const token = localStorage.getItem('token');
