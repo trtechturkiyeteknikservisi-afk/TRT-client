@@ -2,8 +2,9 @@ import createNextIntlPlugin from 'next-intl/plugin';
 
 const withNextIntl = createNextIntlPlugin();
 
-// Only the public CDN origin is needed by the client build. Never copy storage credentials here.
-const bunnyPullZone = process.env.BUNNY_PULL_ZONE_URL?.trim();
+// Keep TRT's CDN available when a hosting project omits the optional public override.
+// Never copy storage credentials here.
+const bunnyPullZone = process.env.BUNNY_PULL_ZONE_URL?.trim() || 'https://trtech-cdn.b-cdn.net';
 const bunnyRemotePatterns = [];
 if (bunnyPullZone) {
   const url = new URL(bunnyPullZone);
