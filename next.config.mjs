@@ -2,6 +2,17 @@ import createNextIntlPlugin from 'next-intl/plugin';
 
 const withNextIntl = createNextIntlPlugin();
 
+// Only the public CDN origin is needed by the client build. Never copy storage credentials here.
+const bunnyPullZone = process.env.BUNNY_PULL_ZONE_URL?.trim();
+const bunnyRemotePatterns = [];
+if (bunnyPullZone) {
+  const url = new URL(bunnyPullZone);
+  if (url.protocol !== 'https:' || url.port || url.username || url.password || url.search || url.hash || url.pathname !== '/') {
+    throw new Error('BUNNY_PULL_ZONE_URL must be an HTTPS origin without a path or query');
+  }
+  bunnyRemotePatterns.push({ protocol: 'https', hostname: url.hostname, port: '', pathname: '/**', search: '' });
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   compress: true,
@@ -9,6 +20,7 @@ const nextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
+      ...bunnyRemotePatterns,
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',

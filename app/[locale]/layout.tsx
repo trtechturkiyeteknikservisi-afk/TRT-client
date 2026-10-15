@@ -119,6 +119,7 @@ export default async function RootLayout(props: {
     <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://res.cloudinary.com" />
+        {process.env.BUNNY_PULL_ZONE_URL && <link rel="preconnect" href={new URL(process.env.BUNNY_PULL_ZONE_URL).origin} />}
         <link rel="preconnect" href="https://flagcdn.com" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
       </head>

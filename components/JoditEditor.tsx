@@ -14,7 +14,7 @@ interface JoditEditorProps {
   height?: number;
 }
 
-// Convert dataURL to Blob and upload directly to Cloudinary via backend API
+// Convert dataURL to Blob and upload through the shared backend media API.
 async function uploadBase64Image(dataUrl: string, apiBase: string, token: string | null): Promise<string | null> {
   try {
     const parts = dataUrl.split(',');
